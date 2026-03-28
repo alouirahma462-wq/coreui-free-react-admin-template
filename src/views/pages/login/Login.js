@@ -1,49 +1,79 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  const USERS = [
+    { username: "procureur", password: "1111", role: "procureur" },
+    { username: "assistant1", password: "2222", role: "assistant" },
+    { username: "greffe1", password: "3333", role: "greffe" },
+    { username: "juge1", password: "4444", role: "juge" },
+    { username: "inspection", password: "9999", role: "inspection" },
+  ];
+
   const handleLogin = () => {
     if (!username || !password) {
-      alert("الرجاء إدخال البيانات");
+      alert("الرجاء إدخال جميع البيانات");
       return;
     }
 
-    // محاكاة تسجيل الدخول
-    localStorage.setItem("token", "true");
-    localStorage.setItem("user", username);
+    const user = USERS.find(
+      (u) => u.username === username && u.password === password
+    );
 
-    if (onLogin) onLogin(username, password);
+    if (!user) {
+      alert("بيانات الدخول غير صحيحة ❌");
+      return;
+    }
 
-    // تحويل إلى الداشبورد
-    window.location.href = "/#/dashboard";
+    const session = {
+      username: user.username,
+      role: user.role,
+      time: new Date().toISOString(),
+    };
+
+    localStorage.setItem("session", JSON.stringify(session));
+
+    alert("تم الدخول بنجاح ✔");
+
+    onLogin(session);
   };
 
   return (
     <div style={styles.page}>
       <div style={styles.card}>
 
-        {/* HEADER */}
+        {/* 🇹🇳 HEADER */}
         <div style={styles.header}>
           <img
             src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Tunisia.svg"
             style={styles.flag}
           />
 
-          <div>
-            <h2 style={{ margin: 0 }}>النيابة العمومية</h2>
-            <p style={{ margin: 0, fontSize: 13 }}>
-              وزارة العدل - الجمهورية التونسية
-            </p>
-          </div>
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg"
+            style={styles.logo}
+          />
+
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Lady_Justice_%28sculpture%29.jpg"
+            style={styles.justice}
+          />
         </div>
 
-        {/* TITLE */}
-        <h3 style={styles.title}>تسجيل الدخول</h3>
+        {/* 🏛️ TITLE */}
+        <h2 style={styles.title}>الجمهورية التونسية</h2>
+        <h3 style={styles.subtitle}>وزارة العدل – النيابة العمومية</h3>
 
+        <p style={styles.sysName}>
+          نظام إدارة وتتبع القضايا القضائية
+        </p>
+
+        {/* INPUTS */}
         <input
           placeholder="اسم المستخدم"
+          value={username}
           onChange={(e) => setUsername(e.target.value)}
           style={styles.input}
         />
@@ -51,71 +81,84 @@ export default function Login({ onLogin }) {
         <input
           type="password"
           placeholder="كلمة المرور"
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
           style={styles.input}
         />
 
-        <button style={styles.button} onClick={handleLogin}>
-          دخول النظام
+        <button onClick={handleLogin} style={styles.button}>
+          دخول المنظومة
         </button>
 
-        <p style={styles.secure}>
-          🔒 نظام محمي ومراقب – الدخول للموظفين المخولين فقط
-        </p>
+        <p style={styles.footer}>🔒 نظام حكومي تجريبي آمن</p>
 
-        <div style={styles.slogan}>العدل أساس العمران</div>
-
-        <p style={styles.desc}>
-          منظومة رقمية متكاملة لإدارة وتتبع مسار القضايا العدلية
-          وفق أعلى معايير الحوكمة والأمان.
-        </p>
       </div>
     </div>
   );
 }
 
-/* 🎨 تصميم رسمي حكومي */
+/* 🎨 STYLE */
 const styles = {
   page: {
     height: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "linear-gradient(135deg, #0b1d3a, #1e3a8a)",
+    background: "linear-gradient(to bottom,rgb(179, 17, 17), #f5f5f5)",
     fontFamily: "Arial",
   },
 
   card: {
-    width: "420px",
-    background: "rgba(255,255,255,0.95)",
-    backdropFilter: "blur(10px)",
+    width: "380px",
     padding: "25px",
-    borderRadius: "16px",
-    boxShadow: "0 25px 60px rgba(0,0,0,0.3)",
+    background: "white",
+    borderRadius: "15px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
     textAlign: "center",
   },
 
   header: {
     display: "flex",
+    justifyContent: "space-between",
     alignItems: "center",
-    gap: "10px",
-    marginBottom: "15px",
+    marginBottom: "10px",
   },
 
   flag: {
+    width: "60px",
+  },
+
+  logo: {
     width: "55px",
-    borderRadius: "5px",
+  },
+
+  justice: {
+    width: "60px",
+    borderRadius: "10px",
   },
 
   title: {
-    color: "#0b1d3a",
+    margin: "10px 0 0",
+    fontSize: "18px",
+    color: "#b30000",
+    fontWeight: "bold",
+  },
+
+  subtitle: {
+    margin: "5px 0",
+    fontSize: "14px",
+  },
+
+  sysName: {
+    fontSize: "12px",
+    color: "gray",
     marginBottom: "15px",
   },
 
   input: {
     width: "100%",
-    padding: "12px",
-    margin: "8px 0",
+    padding: "10px",
+    margin: "6px 0",
     borderRadius: "8px",
     border: "1px solid #ccc",
     outline: "none",
@@ -123,32 +166,21 @@ const styles = {
 
   button: {
     width: "100%",
-    padding: "12px",
-    background: "#0b1d3a",
+    padding: "10px",
+    background: "#b30000",
     color: "white",
     border: "none",
     borderRadius: "8px",
+    marginTop: "10px",
     cursor: "pointer",
-    marginTop: "10px",
-  },
-
-  secure: {
-    fontSize: "12px",
-    color: "#555",
-    marginTop: "10px",
-  },
-
-  slogan: {
-    marginTop: "10px",
     fontWeight: "bold",
-    color: "#1e3a8a",
   },
 
-  desc: {
-    fontSize: "11px",
+  footer: {
     marginTop: "10px",
-    color: "#444",
-    lineHeight: "1.5",
+    fontSize: "11px",
+    color: "gray",
   },
 };
+
 
