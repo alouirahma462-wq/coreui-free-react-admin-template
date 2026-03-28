@@ -8,7 +8,8 @@ import './scss/examples.scss'
 
 const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
 
-const Login = React.lazy(() => import('./views/pages/login/Login'))
+const Login = React.lazy(() => import('./Login'))
+
 const Register = React.lazy(() => import('./views/pages/register/Register'))
 const Page404 = React.lazy(() => import('./views/pages/page404/Page404'))
 const Page500 = React.lazy(() => import('./views/pages/page500/Page500'))
