@@ -12,6 +12,7 @@
  *
  * @module routes
  */
+import Login from './views/auth/Login'
 
 import React from 'react'
 
