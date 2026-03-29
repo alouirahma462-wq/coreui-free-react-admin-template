@@ -21,8 +21,41 @@ export default function Login() {
     audio.play();
   };
 
-  const handleLogin = async () => {
+ const handleLogin = async () => {
   playSound();
+
+  console.log("sending request...");
+
+  try {
+    const res = await fetch("https://justice-system-1x8q.onrender.com/login", {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: username,
+        password: password
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setMessage("❌ خطأ في الدخول");
+      return;
+    }
+
+    localStorage.setItem("token", data.token);
+
+    setMessage("✅ تم الدخول");
+
+  } catch (err) {
+    console.log(err);
+    setMessage("❌ لا يوجد اتصال بالسيرفر");
+  }
+};
+
 
   try {
     const res = await fetch("https://justice-system-1x8q.onrender.com/login", {
