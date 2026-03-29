@@ -21,10 +21,41 @@ export default function Login() {
     audio.play();
   };
 
-  const handleLogin = () => {
-    playSound();
-    setMessage("⚠️ النظام تحت التحديث - الدخول التجريبي فقط");
-  };
+  const handleLogin = async () => {
+  playSound();
+
+  try {
+    const res = await fetch("https://justice-system-1x8q.onrender.com/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: username,   // مهم: أنت تستخدم username
+        password: password
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setMessage("❌ خطأ في الدخول");
+      return;
+    }
+
+    // حفظ التوكن
+    localStorage.setItem("token", data.token);
+
+    setMessage("✅ تم الدخول إلى المنظومة القضائية");
+
+    console.log("USER:", data.user);
+    console.log("TOKEN:", data.token);
+
+  } catch (err) {
+    setMessage("❌ لا يوجد اتصال بالسيرفر");
+  }
+};
+
 
   if (loading) {
     return (
