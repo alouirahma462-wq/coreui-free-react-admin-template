@@ -21,74 +21,42 @@ export default function Login() {
     audio.play();
   };
 
- const handleLogin = async () => {
-  playSound();
+  const handleLogin = async () => {
+    playSound();
 
-  console.log("sending request...");
+    console.log("sending request...");
 
-  try {
-    const res = await fetch("https://justice-system-1x8q.onrender.com/login", {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        email: username,
-        password: password
-      })
-    });
+    try {
+      const res = await fetch("https://justice-system-1x8q.onrender.com/login", {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: username,
+          password: password
+        })
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      setMessage("❌ خطأ في الدخول");
-      return;
+      if (!res.ok) {
+        setMessage("❌ خطأ في الدخول");
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      setMessage("✅ تم الدخول إلى المنظومة القضائية");
+
+      console.log("USER:", data.user);
+      console.log("TOKEN:", data.token);
+
+    } catch (err) {
+      console.log(err);
+      setMessage("❌ لا يوجد اتصال بالسيرفر");
     }
-
-    localStorage.setItem("token", data.token);
-
-    setMessage("✅ تم الدخول");
-
-  } catch (err) {
-    console.log(err);
-    setMessage("❌ لا يوجد اتصال بالسيرفر");
-  }
-};
-
-
-  try {
-    const res = await fetch("https://justice-system-1x8q.onrender.com/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        email: username,   // مهم: أنت تستخدم username
-        password: password
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      setMessage("❌ خطأ في الدخول");
-      return;
-    }
-
-    // حفظ التوكن
-    localStorage.setItem("token", data.token);
-
-    setMessage("✅ تم الدخول إلى المنظومة القضائية");
-
-    console.log("USER:", data.user);
-    console.log("TOKEN:", data.token);
-
-  } catch (err) {
-    setMessage("❌ لا يوجد اتصال بالسيرفر");
-  }
-};
-
+  };
 
   if (loading) {
     return (
@@ -105,33 +73,19 @@ export default function Login() {
     <div style={styles.page}>
       <div style={styles.overlay}></div>
 
-      {/* GLOW LOGO BACKGROUND */}
       <img
         src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg"
         style={styles.watermark}
         alt="logo"
       />
 
-      {/* LIGHT EFFECT */}
       <div style={styles.light}></div>
 
-      <div
-        style={{
-          ...styles.card,
-          transform: animate ? "scale(1)" : "scale(0.85)",
-          opacity: animate ? 1 : 0,
-        }}
-      >
-        {/* HEADER */}
+      <div style={{ ...styles.card, transform: animate ? "scale(1)" : "scale(0.85)", opacity: animate ? 1 : 0 }}>
+
         <div style={styles.header}>
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Tunisia.svg"
-            style={styles.flag}
-          />
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg"
-            style={styles.logo}
-          />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Tunisia.svg" style={styles.flag} />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg" style={styles.logo} />
         </div>
 
         <h2>النيابة العمومية</h2>
@@ -180,14 +134,11 @@ const styles = {
     position: "relative",
     fontFamily: "Arial",
   },
-
   overlay: {
     position: "absolute",
     inset: 0,
-    background:
-      "radial-gradient(circle at center, rgba(0,0,0,0.25), rgba(0,0,0,0.6))",
+    background: "radial-gradient(circle at center, rgba(0,0,0,0.25), rgba(0,0,0,0.6))",
   },
-
   watermark: {
     position: "absolute",
     width: "350px",
@@ -195,102 +146,59 @@ const styles = {
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    filter: "drop-shadow(0 0 20px rgba(255,255,255,0.2))",
   },
-
   light: {
     position: "absolute",
     width: "450px",
     height: "450px",
-    background:
-      "radial-gradient(circle, rgba(255,255,255,0.18), transparent)",
+    background: "radial-gradient(circle, rgba(255,255,255,0.18), transparent)",
     top: "20%",
     left: "50%",
     transform: "translateX(-50%)",
     filter: "blur(50px)",
   },
-
   card: {
     width: "420px",
     padding: "22px",
     borderRadius: "18px",
     textAlign: "center",
-
     background: "rgba(255,255,255,0.12)",
     border: "1px solid rgba(255,255,255,0.25)",
-
     backdropFilter: "blur(18px)",
-    WebkitBackdropFilter: "blur(18px)",
-
     color: "white",
-    zIndex: 2,
     position: "relative",
-
     transition: "all 0.6s ease",
   },
-
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-  },
-
+  header: { display: "flex", justifyContent: "space-between" },
   flag: { width: 55 },
-  logo: { width: 60, filter: "drop-shadow(0 0 10px rgba(255,255,255,0.3))" },
-
-  subtitle: {
-    fontSize: "13px",
-    color: "rgba(255,255,255,0.8)",
-  },
-
+  logo: { width: 60 },
+  subtitle: { fontSize: "13px", color: "rgba(255,255,255,0.8)" },
   input: {
     width: "100%",
     padding: "10px",
     margin: "6px 0",
     borderRadius: "8px",
     border: "none",
-    outline: "none",
   },
-
   button: {
     width: "100%",
     padding: "12px",
     marginTop: "10px",
-
     background: "linear-gradient(135deg, #1e3a8a, #0b1f3a)",
     color: "white",
-
     borderRadius: "10px",
-    border: "1px solid rgba(255,255,255,0.2)",
-
     cursor: "pointer",
     fontWeight: "bold",
-
-    boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
-
-    position: "relative",
-    overflow: "hidden",
   },
-
-  message: {
-    marginTop: 10,
-    color: "#fff",
-  },
-
-  footer: {
-    marginTop: 12,
-    fontSize: 12,
-    color: "rgba(255,255,255,0.6)",
-  },
-
+  message: { marginTop: 10 },
+  footer: { marginTop: 12, fontSize: 12 },
   loading: {
     height: "100vh",
     display: "flex",
-    flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
     background: "#0b1f3a",
   },
-
   spinner: {
     width: 50,
     height: 50,
@@ -298,7 +206,7 @@ const styles = {
     borderTop: "4px solid white",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
-  },
+  }
 };
 
 
