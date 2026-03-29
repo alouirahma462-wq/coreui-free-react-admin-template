@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 
 const API = "https://justice-system-tunisia.onrender.com";
 
-
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -11,25 +10,36 @@ export default function Login() {
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setLoading(false);
       setAnimate(true);
-    }, 1200);
+    }, 1000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const playSound = () => {
-    const audio = new Audio(
-      "https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3"
-    );
-    audio.play();
+    try {
+      const audio = new Audio(
+        "https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3"
+      );
+      audio.play();
+    } catch (e) {
+      console.log("sound blocked");
+    }
   };
 
   const handleLogin = async () => {
     playSound();
 
-    console.log("sending request...");
+    if (!username || !password) {
+      setMessage("❌ الرجاء إدخال البيانات");
+      return;
+    }
 
     try {
+      setMessage("⏳ جاري تسجيل الدخول...");
+
       const res = await fetch(`${API}/login`, {
         method: "POST",
         headers: {
@@ -41,18 +51,28 @@ export default function Login() {
         })
       });
 
-      const data = await res.json();
+      const text = await res.text();
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.log("RAW RESPONSE:", text);
+        setMessage("❌ خطأ في استجابة السيرفر");
+        return;
+      }
 
       console.log("STATUS:", res.status);
       console.log("RESPONSE:", data);
 
       if (!res.ok) {
-        setMessage(data.error || "❌ خطأ في الدخول");
+        setMessage(data.error || "❌ بيانات غير صحيحة");
         return;
       }
 
       localStorage.setItem("token", data.token);
-      setMessage("✅ تم الدخول إلى المنظومة القضائية");
+
+      setMessage("✅ تم تسجيل الدخول بنجاح");
 
       console.log("USER:", data.user);
       console.log("TOKEN:", data.token);
@@ -60,11 +80,7 @@ export default function Login() {
     } catch (err) {
       console.log("FETCH ERROR:", err);
 
-      if (err.message.includes("Failed to fetch")) {
-        setMessage("❌ مشكلة اتصال بالسيرفر (Render)");
-      } else {
-        setMessage("❌ خطأ غير متوقع");
-      }
+      setMessage("❌ مشكلة اتصال بالسيرفر");
     }
   };
 
@@ -94,23 +110,10 @@ export default function Login() {
       <div
         style={{
           ...styles.card,
-          transform: animate ? "scale(1)" : "scale(0.85)",
+          transform: animate ? "scale(1)" : "scale(0.9)",
           opacity: animate ? 1 : 0
         }}
       >
-        <div style={styles.header}>
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Tunisia.svg"
-            style={styles.flag}
-            alt="flag"
-          />
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg"
-            style={styles.logo}
-            alt="logo"
-          />
-        </div>
-
         <h2>النيابة العمومية</h2>
         <h3>وزارة العدل - الجمهورية التونسية</h3>
 
@@ -137,7 +140,7 @@ export default function Login() {
 
         {message && <p style={styles.message}>{message}</p>}
 
-        <p style={styles.footer}>🔒 نظام محمي ومراقب</p>
+        <p style={styles.footer}>🔒 نظام قضائي محمي</p>
       </div>
     </div>
   );
@@ -160,61 +163,67 @@ const styles = {
   overlay: {
     position: "absolute",
     inset: 0,
-    background: "radial-gradient(circle at center, rgba(0,0,0,0.25), rgba(0,0,0,0.6))"
+    background: "rgba(0,0,0,0.5)"
   },
   watermark: {
     position: "absolute",
-    width: "350px",
-    opacity: 0.12,
+    width: "300px",
+    opacity: 0.1,
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)"
   },
   light: {
     position: "absolute",
-    width: "450px",
-    height: "450px",
-    background: "radial-gradient(circle, rgba(255,255,255,0.18), transparent)",
+    width: "400px",
+    height: "400px",
+    background: "radial-gradient(circle, rgba(255,255,255,0.2), transparent)",
     top: "20%",
     left: "50%",
     transform: "translateX(-50%)",
-    filter: "blur(50px)"
+    filter: "blur(40px)"
   },
   card: {
-    width: "420px",
-    padding: "22px",
-    borderRadius: "18px",
+    width: "380px",
+    padding: "20px",
+    borderRadius: "16px",
     textAlign: "center",
     background: "rgba(255,255,255,0.12)",
-    border: "1px solid rgba(255,255,255,0.25)",
-    backdropFilter: "blur(18px)",
+    border: "1px solid rgba(255,255,255,0.2)",
+    backdropFilter: "blur(15px)",
     color: "white",
-    position: "relative",
-    transition: "all 0.6s ease"
+    transition: "all 0.5s ease"
   },
-  header: { display: "flex", justifyContent: "space-between" },
-  flag: { width: 55 },
-  logo: { width: 60 },
-  subtitle: { fontSize: "13px", color: "rgba(255,255,255,0.8)" },
+  subtitle: {
+    fontSize: "13px",
+    color: "rgba(255,255,255,0.8)"
+  },
   input: {
     width: "100%",
     padding: "10px",
     margin: "6px 0",
     borderRadius: "8px",
-    border: "none"
+    border: "none",
+    outline: "none"
   },
   button: {
     width: "100%",
     padding: "12px",
     marginTop: "10px",
-    background: "linear-gradient(135deg, #1e3a8a, #0b1f3a)",
+    background: "#1e3a8a",
     color: "white",
     borderRadius: "10px",
     cursor: "pointer",
     fontWeight: "bold"
   },
-  message: { marginTop: 10 },
-  footer: { marginTop: 12, fontSize: 12 },
+  message: {
+    marginTop: "10px",
+    fontSize: "14px"
+  },
+  footer: {
+    marginTop: "10px",
+    fontSize: "12px"
+  },
   loading: {
     height: "100vh",
     display: "flex",
@@ -223,14 +232,15 @@ const styles = {
     background: "#0b1f3a"
   },
   spinner: {
-    width: 50,
-    height: 50,
+    width: "50px",
+    height: "50px",
     border: "4px solid rgba(255,255,255,0.2)",
     borderTop: "4px solid white",
     borderRadius: "50%",
     animation: "spin 1s linear infinite"
   }
 };
+
 
 
 
