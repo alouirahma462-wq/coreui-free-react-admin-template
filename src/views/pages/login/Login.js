@@ -6,12 +6,15 @@ export default function Login() {
   const [message, setMessage] = useState("");
 
   const handleLogin = () => {
-    // 🚧 مؤقت - سيتم ربطه بالباكند لاحقاً
     setMessage("⚠️ النظام تحت التحديث - سيتم تفعيل الدخول الحقيقي قريباً");
   };
 
   return (
     <div style={styles.page}>
+
+      {/* OVERLAY */}
+      <div style={styles.overlay}></div>
+
       <div style={styles.card}>
 
         {/* HEADER */}
@@ -86,26 +89,45 @@ export default function Login() {
 
 const styles = {
   page: {
-    height: "100vh",
+    minHeight: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "#0b1220",
+    backgroundImage: "url('/pgpng.png')", // 🔥 صورتك
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    position: "relative",
     fontFamily: "Arial",
   },
+
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    background:
+      "linear-gradient(135deg, rgba(0,0,0,0.75), rgba(10,20,50,0.85))",
+  },
+
   card: {
     width: "430px",
-    background: "white",
+    background: "rgba(255,255,255,0.95)",
     padding: "22px",
     borderRadius: "14px",
     textAlign: "center",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+    position: "relative",
+    zIndex: 2,
   },
+
   header: {
     display: "flex",
     justifyContent: "space-between",
     marginBottom: "10px",
   },
+
   flag: { width: "60px" },
   logo: { width: "60px" },
   judge: { width: "110px", margin: "10px auto" },
@@ -121,7 +143,7 @@ const styles = {
   button: {
     width: "100%",
     padding: "10px",
-    background: "#1e3a8a",
+    background: "#0b1f3a",
     color: "white",
     border: "none",
     borderRadius: "6px",
