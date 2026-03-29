@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 
+const API = "https://justice-system-1x8q.onrender.com";
+
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [animate, setAnimate] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setTimeout(() => {
@@ -14,20 +17,14 @@ export default function Login() {
     }, 1200);
   }, []);
 
-  const playSound = () => {
-    const audio = new Audio(
-      "https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3"
-    );
-    audio.play();
-  };
-
   const handleLogin = async () => {
-    playSound();
+    if (isSubmitting) return;
 
-    console.log("sending request...");
+    setIsSubmitting(true);
+    setMessage("⏳ جاري تسجيل الدخول...");
 
     try {
-      const res = await fetch("https://justice-system-1x8q.onrender.com/login", {
+      const res = await fetch(`${API}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -38,26 +35,26 @@ export default function Login() {
         })
       });
 
-      console.log("STATUS:", res.status);
-
       const data = await res.json();
+
+      console.log("STATUS:", res.status);
       console.log("RESPONSE:", data);
 
       if (!res.ok) {
         setMessage(data.error || "❌ خطأ في الدخول");
+        setIsSubmitting(false);
         return;
       }
 
       localStorage.setItem("token", data.token);
       setMessage("✅ تم الدخول إلى المنظومة القضائية");
 
-      console.log("USER:", data.user);
-      console.log("TOKEN:", data.token);
-
     } catch (err) {
       console.log("FETCH ERROR:", err);
       setMessage("❌ لا يوجد اتصال بالسيرفر");
     }
+
+    setIsSubmitting(false);
   };
 
   if (loading) {
@@ -75,40 +72,13 @@ export default function Login() {
     <div style={styles.page}>
       <div style={styles.overlay}></div>
 
-      <img
-        src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg"
-        style={styles.watermark}
-        alt="logo"
-      />
-
-      <div style={styles.light}></div>
-
-      <div
-        style={{
-          ...styles.card,
-          transform: animate ? "scale(1)" : "scale(0.85)",
-          opacity: animate ? 1 : 0
-        }}
-      >
-        <div style={styles.header}>
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Tunisia.svg"
-            style={styles.flag}
-            alt="flag"
-          />
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg"
-            style={styles.logo}
-            alt="logo"
-          />
-        </div>
-
+      <div style={styles.card}>
         <h2>النيابة العمومية</h2>
-        <h3>وزارة العدل - الجمهورية التونسية</h3>
-
-        <p style={styles.subtitle}>تسجيل الدخول إلى المنظومة القضائية</p>
+        <p>تسجيل الدخول</p>
 
         <input
+          id="email"
+          name="email"
           placeholder="اسم المستخدم"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
@@ -116,6 +86,8 @@ export default function Login() {
         />
 
         <input
+          id="password"
+          name="password"
           type="password"
           placeholder="كلمة المرور"
           value={password}
@@ -123,13 +95,18 @@ export default function Login() {
           style={styles.input}
         />
 
-        <button onClick={handleLogin} style={styles.button}>
+        <button
+          onClick={handleLogin}
+          style={{
+            ...styles.button,
+            opacity: isSubmitting ? 0.6 : 1
+          }}
+          disabled={isSubmitting}
+        >
           دخول النظام
         </button>
 
         {message && <p style={styles.message}>{message}</p>}
-
-        <p style={styles.footer}>🔒 نظام محمي ومراقب</p>
       </div>
     </div>
   );
@@ -143,70 +120,37 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    backgroundImage: "url('/pg.png')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    position: "relative",
-    fontFamily: "Arial"
+    background: "#0b1f3a"
   },
   overlay: {
     position: "absolute",
-    inset: 0,
-    background: "radial-gradient(circle at center, rgba(0,0,0,0.25), rgba(0,0,0,0.6))"
-  },
-  watermark: {
-    position: "absolute",
-    width: "350px",
-    opacity: 0.12,
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)"
-  },
-  light: {
-    position: "absolute",
-    width: "450px",
-    height: "450px",
-    background: "radial-gradient(circle, rgba(255,255,255,0.18), transparent)",
-    top: "20%",
-    left: "50%",
-    transform: "translateX(-50%)",
-    filter: "blur(50px)"
+    inset: 0
   },
   card: {
     width: "420px",
     padding: "22px",
-    borderRadius: "18px",
-    textAlign: "center",
-    background: "rgba(255,255,255,0.12)",
-    border: "1px solid rgba(255,255,255,0.25)",
-    backdropFilter: "blur(18px)",
-    color: "white",
-    position: "relative",
-    transition: "all 0.6s ease"
+    borderRadius: "12px",
+    background: "white",
+    textAlign: "center"
   },
-  header: { display: "flex", justifyContent: "space-between" },
-  flag: { width: 55 },
-  logo: { width: 60 },
-  subtitle: { fontSize: "13px", color: "rgba(255,255,255,0.8)" },
   input: {
     width: "100%",
     padding: "10px",
-    margin: "6px 0",
-    borderRadius: "8px",
-    border: "none"
+    margin: "6px 0"
   },
   button: {
     width: "100%",
     padding: "12px",
     marginTop: "10px",
-    background: "linear-gradient(135deg, #1e3a8a, #0b1f3a)",
+    background: "#1e3a8a",
     color: "white",
-    borderRadius: "10px",
-    cursor: "pointer",
-    fontWeight: "bold"
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer"
   },
-  message: { marginTop: 10 },
-  footer: { marginTop: 12, fontSize: 12 },
+  message: {
+    marginTop: 10
+  },
   loading: {
     height: "100vh",
     display: "flex",
