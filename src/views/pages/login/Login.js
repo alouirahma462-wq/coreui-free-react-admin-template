@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { supabase } from "../../../supabaseClient";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  "https://wdjssmvfwzpahhnifihd.supabase.co",
+  "sb_publishable_CsYZU2031CakNqTp3X121A_fBYKamBE"
+);
+
 
 
 export default function Login() {
