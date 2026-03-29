@@ -122,7 +122,8 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    backgroundImage: "url('/bg.png')",
+    backgroundImage: "url('/pg.png')",
+
     backgroundSize: "cover",
     backgroundPosition: "center",
     position: "relative",
