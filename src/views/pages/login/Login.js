@@ -11,19 +11,27 @@ export default function Login() {
     setTimeout(() => {
       setLoading(false);
       setAnimate(true);
-    }, 1500);
+    }, 1200);
   }, []);
 
+  const playSound = () => {
+    const audio = new Audio(
+      "https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3"
+    );
+    audio.play();
+  };
+
   const handleLogin = () => {
-    setMessage("⚠️ النظام تحت التحديث - سيتم تفعيل الدخول الحقيقي قريباً");
+    playSound();
+    setMessage("⚠️ النظام تحت التحديث - الدخول التجريبي فقط");
   };
 
   if (loading) {
     return (
-      <div style={styles.loadingScreen}>
+      <div style={styles.loading}>
         <div style={styles.spinner}></div>
-        <p style={{ color: "white", marginTop: "15px" }}>
-          جاري تحميل النظام القضائي...
+        <p style={{ color: "white", marginTop: 10 }}>
+          جاري تحميل المنظومة القضائية...
         </p>
       </div>
     );
@@ -31,53 +39,42 @@ export default function Login() {
 
   return (
     <div style={styles.page}>
-
-      {/* OVERLAY */}
       <div style={styles.overlay}></div>
 
-      {/* WATERMARK LOGO CENTER BACKGROUND */}
+      {/* GLOW LOGO BACKGROUND */}
       <img
         src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg"
         style={styles.watermark}
-        alt="watermark"
+        alt="logo"
       />
 
-      <div style={{ 
-        ...styles.card, 
-        transform: animate ? "translateY(0)" : "translateY(40px)",
-        opacity: animate ? 1 : 0,
-      }}>
+      {/* LIGHT EFFECT */}
+      <div style={styles.light}></div>
 
+      <div
+        style={{
+          ...styles.card,
+          transform: animate ? "scale(1)" : "scale(0.85)",
+          opacity: animate ? 1 : 0,
+        }}
+      >
         {/* HEADER */}
         <div style={styles.header}>
           <img
             src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Tunisia.svg"
             style={styles.flag}
-            alt="flag"
           />
-
           <img
             src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg"
             style={styles.logo}
-            alt="logo"
           />
         </div>
 
         <h2>النيابة العمومية</h2>
         <h3>وزارة العدل - الجمهورية التونسية</h3>
 
-        <p style={styles.subtitle}>
-          تسجيل الدخول إلى المنظومة القضائية الرقمية
-        </p>
+        <p style={styles.subtitle}>تسجيل الدخول إلى المنظومة القضائية</p>
 
-        {/* IMAGE */}
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Lady_Justice_%28sculpture%29.jpg"
-          style={styles.judge}
-          alt="justice"
-        />
-
-        {/* INPUTS */}
         <input
           placeholder="اسم المستخدم"
           value={username}
@@ -93,37 +90,27 @@ export default function Login() {
           style={styles.input}
         />
 
-        {/* BUTTON */}
         <button onClick={handleLogin} style={styles.button}>
           دخول النظام
         </button>
 
-        {/* MESSAGE */}
         {message && <p style={styles.message}>{message}</p>}
 
-        {/* FOOTER */}
-        <p style={styles.footer}>
-          🔒 نظام محمي ومراقب – الدخول للموظفين المخولين فقط
-        </p>
-
-        <p style={styles.slogan}>العدل أساس العمران</p>
-
-        <p style={styles.desc}>
-          منظومة رقمية متكاملة لإدارة وتتبع مسار القضايا العدلية وفق أعلى معايير الحوكمة والأمان.
-        </p>
+        <p style={styles.footer}>🔒 نظام محمي ومراقب</p>
       </div>
     </div>
   );
 }
 
+/* ================= STYLES ================= */
+
 const styles = {
   page: {
-    minHeight: "100vh",
+    height: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     backgroundImage: "url('/pg.png')",
-
     backgroundSize: "cover",
     backgroundPosition: "center",
     position: "relative",
@@ -133,51 +120,62 @@ const styles = {
   overlay: {
     position: "absolute",
     inset: 0,
-    background: "linear-gradient(135deg, rgba(0,0,0,0.75), rgba(10,20,50,0.85))",
+    background:
+      "radial-gradient(circle at center, rgba(0,0,0,0.25), rgba(0,0,0,0.6))",
   },
 
   watermark: {
     position: "absolute",
-    width: "320px",
-    opacity: 0.08,
+    width: "350px",
+    opacity: 0.12,
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    zIndex: 1,
+    filter: "drop-shadow(0 0 20px rgba(255,255,255,0.2))",
+  },
+
+  light: {
+    position: "absolute",
+    width: "450px",
+    height: "450px",
+    background:
+      "radial-gradient(circle, rgba(255,255,255,0.18), transparent)",
+    top: "20%",
+    left: "50%",
+    transform: "translateX(-50%)",
+    filter: "blur(50px)",
   },
 
   card: {
-    width: "430px",
-    background: "rgba(255,255,255,0.92)",
+    width: "420px",
     padding: "22px",
     borderRadius: "18px",
     textAlign: "center",
-    boxShadow: "0 15px 40px rgba(0,0,0,0.55)",
-    position: "relative",
+
+    background: "rgba(255,255,255,0.12)",
+    border: "1px solid rgba(255,255,255,0.25)",
+
+    backdropFilter: "blur(18px)",
+    WebkitBackdropFilter: "blur(18px)",
+
+    color: "white",
     zIndex: 2,
-    backdropFilter: "blur(10px)",
+    position: "relative",
+
     transition: "all 0.6s ease",
   },
 
   header: {
     display: "flex",
     justifyContent: "space-between",
-    marginBottom: "10px",
   },
 
-  flag: {
-    width: "55px",
-    borderRadius: "6px",
-  },
+  flag: { width: 55 },
+  logo: { width: 60, filter: "drop-shadow(0 0 10px rgba(255,255,255,0.3))" },
 
-  logo: {
-    width: "65px",
-    filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
-  },
-
-  judge: {
-    width: "110px",
-    margin: "10px auto",
+  subtitle: {
+    fontSize: "13px",
+    color: "rgba(255,255,255,0.8)",
   },
 
   input: {
@@ -185,48 +183,42 @@ const styles = {
     padding: "10px",
     margin: "6px 0",
     borderRadius: "8px",
-    border: "1px solid #ccc",
+    border: "none",
     outline: "none",
   },
 
   button: {
     width: "100%",
-    padding: "11px",
-    marginTop: "8px",
-    background: "linear-gradient(90deg, #0b1f3a, #1e3a8a)",
+    padding: "12px",
+    marginTop: "10px",
+
+    background: "linear-gradient(135deg, #1e3a8a, #0b1f3a)",
     color: "white",
-    border: "none",
-    borderRadius: "8px",
+
+    borderRadius: "10px",
+    border: "1px solid rgba(255,255,255,0.2)",
+
     cursor: "pointer",
     fontWeight: "bold",
-    transition: "0.3s",
+
+    boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
+
+    position: "relative",
+    overflow: "hidden",
   },
 
   message: {
-    marginTop: "10px",
-    fontWeight: "bold",
-    color: "#1e3a8a",
+    marginTop: 10,
+    color: "#fff",
   },
 
   footer: {
-    marginTop: "12px",
-    fontSize: "12px",
-    color: "gray",
+    marginTop: 12,
+    fontSize: 12,
+    color: "rgba(255,255,255,0.6)",
   },
 
-  slogan: {
-    marginTop: "5px",
-    fontWeight: "bold",
-    color: "#1e3a8a",
-  },
-
-  desc: {
-    fontSize: "11px",
-    color: "#666",
-    marginTop: "6px",
-  },
-
-  loadingScreen: {
+  loading: {
     height: "100vh",
     display: "flex",
     flexDirection: "column",
@@ -236,14 +228,15 @@ const styles = {
   },
 
   spinner: {
-    width: "50px",
-    height: "50px",
-    border: "5px solid rgba(255,255,255,0.2)",
-    borderTop: "5px solid white",
+    width: 50,
+    height: 50,
+    border: "4px solid rgba(255,255,255,0.2)",
+    borderTop: "4px solid white",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },
 };
+
 
 
 
