@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { supabase } from "../../../supabaseClient";
+import { supabase } from "../../../supabaseClient.js";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -28,7 +28,7 @@ export default function Login() {
     }
   };
 
-  // 🔥 LOGIN FUNCTION (SUPABASE)
+  // ✅ LOGIN FUNCTION
   const handleLogin = async () => {
     playSound();
 
@@ -45,23 +45,25 @@ export default function Login() {
         .select("*")
         .eq("username", username)
         .eq("password", password)
-        .single();
+        .limit(1);
 
-      if (error || !data) {
+      if (error || !data || data.length === 0) {
         setMessage("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
         return;
       }
 
-      // 🧠 تخزين بيانات المستخدم
-      localStorage.setItem("user", JSON.stringify(data));
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("courtCode", data.courtCode);
+      const user = data[0];
 
-      setMessage("✅ مرحباً " + data.fullName);
+      // 🧠 تخزين البيانات
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("role", user.role);
+      localStorage.setItem("courtCode", user.courtCode);
 
-      console.log("USER:", data);
+      setMessage("✅ مرحباً " + user.fullName);
 
-      // 🚀 تحويل لاحق (اختياري الآن)
+      console.log("USER:", user);
+
+      // 🚀 (نضيفها لاحقاً)
       // window.location.href = "/dashboard";
 
     } catch (err) {
@@ -70,7 +72,7 @@ export default function Login() {
     }
   };
 
-  // 🟡 شاشة التحميل
+  // 🟡 Loading Screen
   if (loading) {
     return (
       <div style={styles.loading}>
