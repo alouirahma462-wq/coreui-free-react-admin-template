@@ -29,7 +29,6 @@ export default function Login() {
     try {
       const res = await fetch("https://justice-system-1x8q.onrender.com/login", {
         method: "POST",
-        mode: "cors",
         headers: {
           "Content-Type": "application/json"
         },
@@ -39,10 +38,13 @@ export default function Login() {
         })
       });
 
+      console.log("STATUS:", res.status);
+
       const data = await res.json();
+      console.log("RESPONSE:", data);
 
       if (!res.ok) {
-        setMessage("❌ خطأ في الدخول");
+        setMessage(data.error || "❌ خطأ في الدخول");
         return;
       }
 
@@ -53,7 +55,7 @@ export default function Login() {
       console.log("TOKEN:", data.token);
 
     } catch (err) {
-      console.log(err);
+      console.log("FETCH ERROR:", err);
       setMessage("❌ لا يوجد اتصال بالسيرفر");
     }
   };
@@ -81,11 +83,24 @@ export default function Login() {
 
       <div style={styles.light}></div>
 
-      <div style={{ ...styles.card, transform: animate ? "scale(1)" : "scale(0.85)", opacity: animate ? 1 : 0 }}>
-
+      <div
+        style={{
+          ...styles.card,
+          transform: animate ? "scale(1)" : "scale(0.85)",
+          opacity: animate ? 1 : 0
+        }}
+      >
         <div style={styles.header}>
-          <img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Tunisia.svg" style={styles.flag} />
-          <img src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg" style={styles.logo} />
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Tunisia.svg"
+            style={styles.flag}
+            alt="flag"
+          />
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg"
+            style={styles.logo}
+            alt="logo"
+          />
         </div>
 
         <h2>النيابة العمومية</h2>
@@ -132,12 +147,12 @@ const styles = {
     backgroundSize: "cover",
     backgroundPosition: "center",
     position: "relative",
-    fontFamily: "Arial",
+    fontFamily: "Arial"
   },
   overlay: {
     position: "absolute",
     inset: 0,
-    background: "radial-gradient(circle at center, rgba(0,0,0,0.25), rgba(0,0,0,0.6))",
+    background: "radial-gradient(circle at center, rgba(0,0,0,0.25), rgba(0,0,0,0.6))"
   },
   watermark: {
     position: "absolute",
@@ -145,7 +160,7 @@ const styles = {
     opacity: 0.12,
     top: "50%",
     left: "50%",
-    transform: "translate(-50%, -50%)",
+    transform: "translate(-50%, -50%)"
   },
   light: {
     position: "absolute",
@@ -155,7 +170,7 @@ const styles = {
     top: "20%",
     left: "50%",
     transform: "translateX(-50%)",
-    filter: "blur(50px)",
+    filter: "blur(50px)"
   },
   card: {
     width: "420px",
@@ -167,7 +182,7 @@ const styles = {
     backdropFilter: "blur(18px)",
     color: "white",
     position: "relative",
-    transition: "all 0.6s ease",
+    transition: "all 0.6s ease"
   },
   header: { display: "flex", justifyContent: "space-between" },
   flag: { width: 55 },
@@ -178,7 +193,7 @@ const styles = {
     padding: "10px",
     margin: "6px 0",
     borderRadius: "8px",
-    border: "none",
+    border: "none"
   },
   button: {
     width: "100%",
@@ -188,7 +203,7 @@ const styles = {
     color: "white",
     borderRadius: "10px",
     cursor: "pointer",
-    fontWeight: "bold",
+    fontWeight: "bold"
   },
   message: { marginTop: 10 },
   footer: { marginTop: 12, fontSize: 12 },
@@ -197,7 +212,7 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "#0b1f3a",
+    background: "#0b1f3a"
   },
   spinner: {
     width: 50,
@@ -205,9 +220,10 @@ const styles = {
     border: "4px solid rgba(255,255,255,0.2)",
     borderTop: "4px solid white",
     borderRadius: "50%",
-    animation: "spin 1s linear infinite",
+    animation: "spin 1s linear infinite"
   }
 };
+
 
 
 
