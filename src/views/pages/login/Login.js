@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-
-const API = "https://justice-system-tunisia.onrender.com";
+import { supabase } from "../../../supabaseClient";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -29,6 +28,7 @@ export default function Login() {
     }
   };
 
+  // 🔥 LOGIN FUNCTION (SUPABASE)
   const handleLogin = async () => {
     playSound();
 
@@ -40,50 +40,37 @@ export default function Login() {
     try {
       setMessage("⏳ جاري تسجيل الدخول...");
 
-      const res = await fetch(`${API}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email: username,
-          password: password
-        })
-      });
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("username", username)
+        .eq("password", password)
+        .single();
 
-      const text = await res.text();
-
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (e) {
-        console.log("RAW RESPONSE:", text);
-        setMessage("❌ خطأ في استجابة السيرفر");
+      if (error || !data) {
+        setMessage("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
         return;
       }
 
-      console.log("STATUS:", res.status);
-      console.log("RESPONSE:", data);
+      // 🧠 تخزين بيانات المستخدم
+      localStorage.setItem("user", JSON.stringify(data));
+      localStorage.setItem("role", data.role);
+      localStorage.setItem("courtCode", data.courtCode);
 
-      if (!res.ok) {
-        setMessage(data.error || "❌ بيانات غير صحيحة");
-        return;
-      }
+      setMessage("✅ مرحباً " + data.fullName);
 
-      localStorage.setItem("token", data.token);
+      console.log("USER:", data);
 
-      setMessage("✅ تم تسجيل الدخول بنجاح");
-
-      console.log("USER:", data.user);
-      console.log("TOKEN:", data.token);
+      // 🚀 تحويل لاحق (اختياري الآن)
+      // window.location.href = "/dashboard";
 
     } catch (err) {
-      console.log("FETCH ERROR:", err);
-
-      setMessage("❌ مشكلة اتصال بالسيرفر");
+      console.log("LOGIN ERROR:", err);
+      setMessage("❌ خطأ في الاتصال بقاعدة البيانات");
     }
   };
 
+  // 🟡 شاشة التحميل
   if (loading) {
     return (
       <div style={styles.loading}>
@@ -240,7 +227,6 @@ const styles = {
     animation: "spin 1s linear infinite"
   }
 };
-
 
 
 
