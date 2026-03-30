@@ -1,5 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
-import bcrypt from "bcryptjs";
+const { createClient } = require("@supabase/supabase-js");
+const bcrypt = require("bcryptjs");
 
 const supabase = createClient(
   "YOUR_SUPABASE_URL",
@@ -33,4 +33,5 @@ async function run() {
 }
 
 run();
+
 
