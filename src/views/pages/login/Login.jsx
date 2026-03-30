@@ -6,12 +6,10 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
-  const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-      setAnimate(true);
     }, 1000);
 
     return () => clearTimeout(timer);
@@ -28,24 +26,29 @@ export default function Login() {
 
       const { data, error } = await supabase
         .from("users")
-        .select("*, courts(*)")
+        .select("*")
         .eq("username", username)
-        .eq("password", password)
-        .single();
+        .eq("password", password);
 
-      if (error || !data) {
+      if (error) {
+        console.log(error);
+        setMessage("❌ خطأ في قاعدة البيانات");
+        return;
+      }
+
+      if (!data || data.length === 0) {
         setMessage("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
         return;
       }
 
-      // 💥 حفظ المستخدم كامل
-      localStorage.setItem("user", JSON.stringify(data));
+      const user = data[0];
 
-      setMessage("✅ مرحباً " + data.fullName);
+      localStorage.setItem("user", JSON.stringify(user));
 
-      console.log("USER:", data);
+      setMessage("✅ مرحباً " + user.fullName);
 
-      // 🚀 تحويل مباشر
+      console.log("USER:", user);
+
       setTimeout(() => {
         window.location.href = "/dashboard";
       }, 800);
@@ -78,7 +81,6 @@ export default function Login() {
       />
 
       <div style={styles.card}>
-
         <h2>النيابة العمومية</h2>
         <h3>الجمهورية التونسية - وزارة العدل</h3>
 
@@ -134,7 +136,7 @@ const styles = {
   watermark: {
     position: "absolute",
     width: "300px",
-    opacity: 0.1,
+    opacity: "0.1",
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)"
@@ -195,4 +197,5 @@ const styles = {
     animation: "spin 1s linear infinite"
   }
 };
+
 
