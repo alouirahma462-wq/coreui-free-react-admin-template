@@ -17,22 +17,9 @@ export default function Login() {
     return () => clearTimeout(timer);
   }, []);
 
-  const playSound = () => {
-    try {
-      const audio = new Audio(
-        "https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3"
-      );
-      audio.play();
-    } catch (e) {
-      console.log("sound blocked");
-    }
-  };
-
   const handleLogin = async () => {
-    playSound();
-
     if (!username || !password) {
-      setMessage("❌ الرجاء إدخال البيانات");
+      setMessage("❌ الرجاء إدخال اسم المستخدم وكلمة المرور");
       return;
     }
 
@@ -41,7 +28,7 @@ export default function Login() {
 
       const { data, error } = await supabase
         .from("users")
-        .select("*")
+        .select("*, courts(*)")
         .eq("username", username)
         .eq("password", password)
         .single();
@@ -51,16 +38,17 @@ export default function Login() {
         return;
       }
 
+      // 💥 حفظ المستخدم كامل
       localStorage.setItem("user", JSON.stringify(data));
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("courtCode", data.courtCode);
 
       setMessage("✅ مرحباً " + data.fullName);
 
       console.log("USER:", data);
 
-      // بعدين نفعّلها
-      // window.location.href = "/dashboard";
+      // 🚀 تحويل مباشر
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 800);
 
     } catch (err) {
       console.log(err);
@@ -89,17 +77,10 @@ export default function Login() {
         alt="logo"
       />
 
-      <div style={styles.light}></div>
+      <div style={styles.card}>
 
-      <div
-        style={{
-          ...styles.card,
-          transform: animate ? "scale(1)" : "scale(0.9)",
-          opacity: animate ? 1 : 0
-        }}
-      >
         <h2>النيابة العمومية</h2>
-        <h3>وزارة العدل - الجمهورية التونسية</h3>
+        <h3>الجمهورية التونسية - وزارة العدل</h3>
 
         <p style={styles.subtitle}>تسجيل الدخول إلى المنظومة القضائية</p>
 
@@ -142,7 +123,8 @@ const styles = {
     backgroundSize: "cover",
     backgroundPosition: "center",
     position: "relative",
-    fontFamily: "Arial"
+    fontFamily: "Tahoma",
+    direction: "rtl"
   },
   overlay: {
     position: "absolute",
@@ -157,16 +139,6 @@ const styles = {
     left: "50%",
     transform: "translate(-50%, -50%)"
   },
-  light: {
-    position: "absolute",
-    width: "400px",
-    height: "400px",
-    background: "radial-gradient(circle, rgba(255,255,255,0.2), transparent)",
-    top: "20%",
-    left: "50%",
-    transform: "translateX(-50%)",
-    filter: "blur(40px)"
-  },
   card: {
     width: "380px",
     padding: "20px",
@@ -175,8 +147,7 @@ const styles = {
     background: "rgba(255,255,255,0.12)",
     border: "1px solid rgba(255,255,255,0.2)",
     backdropFilter: "blur(15px)",
-    color: "white",
-    transition: "all 0.5s ease"
+    color: "white"
   },
   subtitle: {
     fontSize: "13px",
@@ -224,3 +195,4 @@ const styles = {
     animation: "spin 1s linear infinite"
   }
 };
+
