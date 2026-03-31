@@ -25,24 +25,23 @@ export default function Login() {
     try {
       setMessage("⏳ جاري تسجيل الدخول...");
 
-      // 🟢 جلب المستخدم
+      // 🟢 جلب المستخدم فقط (بدون courts لتجنب الخطأ)
       const { data, error } = await supabase
         .from("users")
-        .select("*, courts(*)")
+        .select("*")
         .eq("username", username)
         .single();
 
       if (error) {
-  console.log("ERROR:", error);
-  setMessage("❌ خطأ في قاعدة البيانات");
-  return;
-}
+        console.log("SUPABASE ERROR:", error);
+        setMessage("❌ خطأ في قاعدة البيانات");
+        return;
+      }
 
-if (!data) {
-  setMessage("❌ المستخدم غير موجود");
-  return;
-}
-
+      if (!data) {
+        setMessage("❌ المستخدم غير موجود");
+        return;
+      }
 
       // 🔐 مقارنة الباسورد مع الهاش
       const valid = await bcrypt.compare(password, data.password_hash);
@@ -55,11 +54,7 @@ if (!data) {
       // 💾 حفظ المستخدم
       localStorage.setItem("user", JSON.stringify(data));
 
-      setMessage(
-        `✅ مرحباً ${data.fullName} - ${
-          data.courts?.court_name || "التفقدية العامة"
-        }`
-      );
+      setMessage(`✅ مرحباً ${data.fullName}`);
 
       console.log("USER:", data);
 
@@ -75,8 +70,9 @@ if (!data) {
       setTimeout(() => {
         window.location.href = "/dashboard";
       }, 800);
+
     } catch (err) {
-      console.log(err);
+      console.log("CATCH ERROR:", err);
       setMessage("❌ خطأ في الاتصال بالسيرفر");
     }
   };
@@ -221,5 +217,6 @@ const styles = {
     animation: "spin 1s linear infinite"
   }
 };
+
 
 
