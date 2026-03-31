@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../../supabaseClient.js";
 import bcrypt from "bcryptjs";
@@ -23,21 +22,16 @@ export default function Login() {
     try {
       setMessage("⏳ جاري تسجيل الدخول...");
 
-      // 🔥 جلب المستخدم فقط (بدون test query)
+      // 🔥 جلب المستخدم من Supabase
       const { data, error } = await supabase
         .from("users")
         .select("*")
         .eq("username", username)
         .single();
 
-      if (error) {
+      if (error || !data) {
         console.log("SUPABASE ERROR:", error);
-        setMessage("❌ خطأ في قاعدة البيانات أو المستخدم غير موجود");
-        return;
-      }
-
-      if (!data) {
-        setMessage("❌ المستخدم غير موجود");
+        setMessage("❌ المستخدم غير موجود أو خطأ في قاعدة البيانات");
         return;
       }
 
@@ -190,6 +184,8 @@ const styles = {
     animation: "spin 1s linear infinite"
   }
 };
+
+
 
 
 
