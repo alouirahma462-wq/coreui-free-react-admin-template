@@ -33,8 +33,8 @@ export default function Login() {
         .single();
 
       if (error) {
-  console.log("SUPABASE ERROR FULL:", error);
-  setMessage(error.message); // مهم جدًا
+  console.log("FULL ERROR:", error);
+  setMessage(error.message);
   return;
 }
 
