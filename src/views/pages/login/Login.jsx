@@ -9,47 +9,51 @@ export default function Login() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
+    setTimeout(() => setLoading(false), 1000);
   }, []);
 
   const handleLogin = async () => {
-  const { data, error } = await supabase
-    .from("users")
-    .select("*");
-
-  console.log("DATA:", data);
-  console.log("ERROR:", error);
-};
-
+    if (!username || !password) {
+      setMessage("❌ الرجاء إدخال البيانات");
+      return;
+    }
 
     try {
       setMessage("⏳ جاري تسجيل الدخول...");
 
-      // 🟢 جلب المستخدم فقط (بدون courts لتجنب الخطأ)
+      // 🔥 اختبار الاتصال
+      const test = await supabase.from("users").select("*");
+
+      console.log("TEST DATA:", test.data);
+      console.log("TEST ERROR:", test.error);
+
+      if (test.error) {
+        setMessage("❌ مشكلة في الاتصال بقاعدة البيانات");
+        return;
+      }
+
+      // 🟢 جلب المستخدم
       const { data, error } = await supabase
         .from("users")
         .select("*")
         .eq("username", username)
-        .single();
+        .limit(1);
 
       if (error) {
-  console.log("FULL ERROR:", error);
-  setMessage(error.message);
-  return;
-}
+        console.log("LOGIN ERROR:", error);
+        setMessage("❌ خطأ في قاعدة البيانات");
+        return;
+      }
 
+      const user = data?.[0];
 
-      if (!data) {
+      if (!user) {
         setMessage("❌ المستخدم غير موجود");
         return;
       }
 
-      // 🔐 مقارنة الباسورد مع الهاش
-      const valid = await bcrypt.compare(password, data.password_hash);
+      // 🔐 تحقق من كلمة المرور
+      const valid = await bcrypt.compare(password, user.password_hash);
 
       if (!valid) {
         setMessage("❌ كلمة المرور غير صحيحة");
@@ -57,14 +61,12 @@ export default function Login() {
       }
 
       // 💾 حفظ المستخدم
-      localStorage.setItem("user", JSON.stringify(data));
+      localStorage.setItem("user", JSON.stringify(user));
 
-      setMessage(`✅ مرحباً ${data.fullName}`);
-
-      console.log("USER:", data);
+      setMessage(`✅ مرحباً ${user.fullName}`);
 
       // 🔥 إجبار تغيير كلمة المرور
-      if (data.must_change_password) {
+      if (user.must_change_password) {
         setTimeout(() => {
           window.location.href = "/change-password";
         }, 800);
@@ -86,7 +88,7 @@ export default function Login() {
     return (
       <div style={styles.loading}>
         <div style={styles.spinner}></div>
-        <p style={{ color: "white", marginTop: 10 }}>
+        <p style={{ color: "white" }}>
           جاري تحميل المنظومة القضائية...
         </p>
       </div>
@@ -106,10 +108,6 @@ export default function Login() {
       <div style={styles.card}>
         <h2>النيابة العمومية</h2>
         <h3>الجمهورية التونسية - وزارة العدل</h3>
-
-        <p style={styles.subtitle}>
-          تسجيل الدخول إلى المنظومة القضائية
-        </p>
 
         <input
           placeholder="اسم المستخدم"
@@ -131,8 +129,6 @@ export default function Login() {
         </button>
 
         {message && <p style={styles.message}>{message}</p>}
-
-        <p style={styles.footer}>🔒 نظام قضائي محمي</p>
       </div>
     </div>
   );
@@ -148,9 +144,7 @@ const styles = {
     alignItems: "center",
     backgroundImage: "url('/pg.png')",
     backgroundSize: "cover",
-    backgroundPosition: "center",
     position: "relative",
-    fontFamily: "Tahoma",
     direction: "rtl"
   },
   overlay: {
@@ -172,39 +166,26 @@ const styles = {
     borderRadius: "16px",
     textAlign: "center",
     background: "rgba(255,255,255,0.12)",
-    border: "1px solid rgba(255,255,255,0.2)",
     backdropFilter: "blur(15px)",
     color: "white"
-  },
-  subtitle: {
-    fontSize: "13px",
-    color: "rgba(255,255,255,0.8)"
   },
   input: {
     width: "100%",
     padding: "10px",
     margin: "6px 0",
     borderRadius: "8px",
-    border: "none",
-    outline: "none"
+    border: "none"
   },
   button: {
     width: "100%",
     padding: "12px",
-    marginTop: "10px",
     background: "#1e3a8a",
     color: "white",
     borderRadius: "10px",
-    cursor: "pointer",
-    fontWeight: "bold"
+    cursor: "pointer"
   },
   message: {
-    marginTop: "10px",
-    fontSize: "14px"
-  },
-  footer: {
-    marginTop: "10px",
-    fontSize: "12px"
+    marginTop: "10px"
   },
   loading: {
     height: "100vh",
@@ -218,10 +199,10 @@ const styles = {
     height: "50px",
     border: "4px solid rgba(255,255,255,0.2)",
     borderTop: "4px solid white",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite"
+    borderRadius: "50%"
   }
 };
+
 
 
 
