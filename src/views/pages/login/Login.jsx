@@ -6,11 +6,22 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [welcome, setWelcome] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
+
+  const buildWelcomeMessage = (user) => {
+    // التفقدية العامة (بدون محكمة)
+    if (user.role === "inspection_generale") {
+      return `مرحبا التفقدية العامة - إشراف مركزي`;
+    }
+
+    // باقي المستخدمين مع المحكمة
+    return `مرحبا ${user.fullName || user.role} - ${user.court_name || ""}`;
+  };
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -21,7 +32,6 @@ export default function Login() {
     try {
       setMessage("⏳ جاري تسجيل الدخول...");
 
-      // 🔥 استدعاء دالة Supabase (بدون bcrypt)
       const { data, error } = await supabase.rpc("login_user", {
         input_username: username,
         input_password: password
@@ -40,23 +50,26 @@ export default function Login() {
 
       const user = data.user;
 
-      // 💾 حفظ المستخدم
+      // حفظ المستخدم
       localStorage.setItem("user", JSON.stringify(user));
 
-      setMessage(`✅ مرحباً ${user.username}`);
+      // 👇 رسالة الترحيب الجديدة
+      const welcomeMsg = buildWelcomeMessage(user);
+      setWelcome(welcomeMsg);
+      setMessage("✅ تم تسجيل الدخول بنجاح");
 
-      // 🔒 تغيير كلمة المرور إذا مطلوب
+      // تغيير كلمة المرور
       if (user.must_change_password) {
         setTimeout(() => {
           window.location.href = "/change-password";
-        }, 800);
+        }, 1000);
         return;
       }
 
-      // 🚀 دخول عادي
+      // دخول النظام
       setTimeout(() => {
         window.location.href = "/dashboard";
-      }, 800);
+      }, 1200);
 
     } catch (err) {
       console.log(err);
@@ -105,6 +118,12 @@ export default function Login() {
         <button onClick={handleLogin} style={styles.button}>
           دخول النظام
         </button>
+
+        {welcome && (
+          <p style={{ marginTop: 10, color: "#00ffcc", fontWeight: "bold" }}>
+            {welcome}
+          </p>
+        )}
 
         {message && <p style={styles.message}>{message}</p>}
       </div>
@@ -181,6 +200,7 @@ const styles = {
     animation: "spin 1s linear infinite"
   }
 };
+
 
 
 
