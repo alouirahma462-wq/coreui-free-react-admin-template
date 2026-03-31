@@ -17,10 +17,14 @@ export default function Login() {
   }, []);
 
   const handleLogin = async () => {
-    if (!username || !password) {
-      setMessage("❌ الرجاء إدخال اسم المستخدم وكلمة المرور");
-      return;
-    }
+  const { data, error } = await supabase
+    .from("users")
+    .select("*");
+
+  console.log("DATA:", data);
+  console.log("ERROR:", error);
+};
+
 
     try {
       setMessage("⏳ جاري تسجيل الدخول...");
