@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../../supabaseClient.js";
+import bcrypt from "bcryptjs";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -24,35 +25,49 @@ export default function Login() {
     try {
       setMessage("⏳ جاري تسجيل الدخول...");
 
+      // 🟢 جلب المستخدم
       const { data, error } = await supabase
         .from("users")
-        .select("*")
+        .select("*, courts(*)")
         .eq("username", username)
-        .eq("password", password);
+        .single();
 
-      if (error) {
-        console.log(error);
-        setMessage("❌ خطأ في قاعدة البيانات");
+      if (error || !data) {
+        setMessage("❌ المستخدم غير موجود");
         return;
       }
 
-      if (!data || data.length === 0) {
-        setMessage("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
+      // 🔐 مقارنة الباسورد مع الهاش
+      const valid = await bcrypt.compare(password, data.password_hash);
+
+      if (!valid) {
+        setMessage("❌ كلمة المرور غير صحيحة");
         return;
       }
 
-      const user = data[0];
+      // 💾 حفظ المستخدم
+      localStorage.setItem("user", JSON.stringify(data));
 
-      localStorage.setItem("user", JSON.stringify(user));
+      setMessage(
+        `✅ مرحباً ${data.fullName} - ${
+          data.courts?.court_name || "التفقدية العامة"
+        }`
+      );
 
-      setMessage("✅ مرحباً " + user.fullName);
+      console.log("USER:", data);
 
-      console.log("USER:", user);
+      // 🔥 إجبار تغيير كلمة المرور
+      if (data.must_change_password) {
+        setTimeout(() => {
+          window.location.href = "/change-password";
+        }, 800);
+        return;
+      }
 
+      // 🚀 دخول عادي
       setTimeout(() => {
         window.location.href = "/dashboard";
       }, 800);
-
     } catch (err) {
       console.log(err);
       setMessage("❌ خطأ في الاتصال بالسيرفر");
@@ -84,7 +99,9 @@ export default function Login() {
         <h2>النيابة العمومية</h2>
         <h3>الجمهورية التونسية - وزارة العدل</h3>
 
-        <p style={styles.subtitle}>تسجيل الدخول إلى المنظومة القضائية</p>
+        <p style={styles.subtitle}>
+          تسجيل الدخول إلى المنظومة القضائية
+        </p>
 
         <input
           placeholder="اسم المستخدم"
@@ -136,7 +153,7 @@ const styles = {
   watermark: {
     position: "absolute",
     width: "300px",
-    opacity: "0.1",
+    opacity: 0.1,
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)"
