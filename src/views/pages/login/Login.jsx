@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../../supabaseClient.js";
 import bcrypt from "bcryptjs";
@@ -9,51 +10,39 @@ export default function Login() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleLogin = async () => {
     if (!username || !password) {
-      setMessage("❌ الرجاء إدخال البيانات");
+      setMessage("❌ الرجاء إدخال اسم المستخدم وكلمة المرور");
       return;
     }
 
     try {
       setMessage("⏳ جاري تسجيل الدخول...");
 
-      // 🔥 اختبار الاتصال
-      const test = await supabase.from("users").select("*");
-
-      console.log("TEST DATA:", test.data);
-      console.log("TEST ERROR:", test.error);
-
-      if (test.error) {
-        setMessage("❌ مشكلة في الاتصال بقاعدة البيانات");
-        return;
-      }
-
-      // 🟢 جلب المستخدم
+      // 🔥 جلب المستخدم فقط (بدون test query)
       const { data, error } = await supabase
         .from("users")
         .select("*")
         .eq("username", username)
-        .limit(1);
+        .single();
 
       if (error) {
-        console.log("LOGIN ERROR:", error);
-        setMessage("❌ خطأ في قاعدة البيانات");
+        console.log("SUPABASE ERROR:", error);
+        setMessage("❌ خطأ في قاعدة البيانات أو المستخدم غير موجود");
         return;
       }
 
-      const user = data?.[0];
-
-      if (!user) {
+      if (!data) {
         setMessage("❌ المستخدم غير موجود");
         return;
       }
 
-      // 🔐 تحقق من كلمة المرور
-      const valid = await bcrypt.compare(password, user.password_hash);
+      // 🔐 التحقق من كلمة المرور
+      const valid = await bcrypt.compare(password, data.password_hash);
 
       if (!valid) {
         setMessage("❌ كلمة المرور غير صحيحة");
@@ -61,12 +50,12 @@ export default function Login() {
       }
 
       // 💾 حفظ المستخدم
-      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("user", JSON.stringify(data));
 
-      setMessage(`✅ مرحباً ${user.fullName}`);
+      setMessage(`✅ مرحباً ${data.fullName || data.username}`);
 
-      // 🔥 إجبار تغيير كلمة المرور
-      if (user.must_change_password) {
+      // 🔒 تغيير كلمة المرور الإجباري
+      if (data.must_change_password) {
         setTimeout(() => {
           window.location.href = "/change-password";
         }, 800);
@@ -88,9 +77,7 @@ export default function Login() {
     return (
       <div style={styles.loading}>
         <div style={styles.spinner}></div>
-        <p style={{ color: "white" }}>
-          جاري تحميل المنظومة القضائية...
-        </p>
+        <p style={{ color: "white" }}>جاري تحميل النظام...</p>
       </div>
     );
   }
@@ -199,10 +186,10 @@ const styles = {
     height: "50px",
     border: "4px solid rgba(255,255,255,0.2)",
     borderTop: "4px solid white",
-    borderRadius: "50%"
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite"
   }
 };
-
 
 
 
