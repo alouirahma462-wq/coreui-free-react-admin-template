@@ -22,21 +22,34 @@ export default function Login() {
     try {
       setMessage("⏳ جاري تسجيل الدخول...");
 
-      // 🔥 جلب المستخدم من Supabase
+      // 🟢 جلب المستخدم (بدون single)
       const { data, error } = await supabase
         .from("users")
         .select("*")
         .eq("username", username)
-        .single();
+        .limit(1);
 
-      if (error || !data) {
+      if (error) {
         console.log("SUPABASE ERROR:", error);
-        setMessage("❌ المستخدم غير موجود أو خطأ في قاعدة البيانات");
+        setMessage("❌ خطأ في الاتصال بقاعدة البيانات");
         return;
       }
 
-      // 🔐 التحقق من كلمة المرور
-      const valid = await bcrypt.compare(password, data.password_hash);
+      const user = data?.[0];
+
+      if (!user) {
+        setMessage("❌ المستخدم غير موجود");
+        return;
+      }
+
+      // 🔐 تحقق من وجود hash
+      if (!user.password_hash) {
+        setMessage("❌ خطأ: كلمة المرور غير مهيأة");
+        return;
+      }
+
+      // 🔐 مقارنة كلمة المرور
+      const valid = await bcrypt.compare(password, user.password_hash);
 
       if (!valid) {
         setMessage("❌ كلمة المرور غير صحيحة");
@@ -44,12 +57,12 @@ export default function Login() {
       }
 
       // 💾 حفظ المستخدم
-      localStorage.setItem("user", JSON.stringify(data));
+      localStorage.setItem("user", JSON.stringify(user));
 
-      setMessage(`✅ مرحباً ${data.fullName || data.username}`);
+      setMessage(`✅ مرحباً ${user.fullName || user.username}`);
 
-      // 🔒 تغيير كلمة المرور الإجباري
-      if (data.must_change_password) {
+      // 🔒 إجبار تغيير كلمة المرور
+      if (user.must_change_password) {
         setTimeout(() => {
           window.location.href = "/change-password";
         }, 800);
@@ -184,6 +197,7 @@ const styles = {
     animation: "spin 1s linear infinite"
   }
 };
+
 
 
 
