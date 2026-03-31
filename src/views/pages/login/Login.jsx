@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../../supabaseClient.js";
-import bcrypt from "bcryptjs";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -22,46 +21,31 @@ export default function Login() {
     try {
       setMessage("⏳ جاري تسجيل الدخول...");
 
-      // 🟢 جلب المستخدم (بدون single)
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("username", username)
-        .limit(1);
+      // 🔥 استدعاء دالة Supabase (بدون bcrypt)
+      const { data, error } = await supabase.rpc("login_user", {
+        input_username: username,
+        input_password: password
+      });
 
       if (error) {
-        console.log("SUPABASE ERROR:", error);
-        setMessage("❌ خطأ في الاتصال بقاعدة البيانات");
+        console.log(error);
+        setMessage("❌ خطأ في الاتصال بالسيرفر");
         return;
       }
 
-      const user = data?.[0];
-
-      if (!user) {
-        setMessage("❌ المستخدم غير موجود");
+      if (!data || !data.success) {
+        setMessage("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
         return;
       }
 
-      // 🔐 تحقق من وجود hash
-      if (!user.password_hash) {
-        setMessage("❌ خطأ: كلمة المرور غير مهيأة");
-        return;
-      }
-
-      // 🔐 مقارنة كلمة المرور
-      const valid = await bcrypt.compare(password, user.password_hash);
-
-      if (!valid) {
-        setMessage("❌ كلمة المرور غير صحيحة");
-        return;
-      }
+      const user = data.user;
 
       // 💾 حفظ المستخدم
       localStorage.setItem("user", JSON.stringify(user));
 
-      setMessage(`✅ مرحباً ${user.fullName || user.username}`);
+      setMessage(`✅ مرحباً ${user.username}`);
 
-      // 🔒 إجبار تغيير كلمة المرور
+      // 🔒 تغيير كلمة المرور إذا مطلوب
       if (user.must_change_password) {
         setTimeout(() => {
           window.location.href = "/change-password";
@@ -75,8 +59,8 @@ export default function Login() {
       }, 800);
 
     } catch (err) {
-      console.log("CATCH ERROR:", err);
-      setMessage("❌ خطأ في الاتصال بالسيرفر");
+      console.log(err);
+      setMessage("❌ خطأ غير متوقع");
     }
   };
 
