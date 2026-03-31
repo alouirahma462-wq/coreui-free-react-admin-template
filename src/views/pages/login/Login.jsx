@@ -32,10 +32,17 @@ export default function Login() {
         .eq("username", username)
         .single();
 
-      if (error || !data) {
-        setMessage("❌ المستخدم غير موجود");
-        return;
-      }
+      if (error) {
+  console.log("ERROR:", error);
+  setMessage("❌ خطأ في قاعدة البيانات");
+  return;
+}
+
+if (!data) {
+  setMessage("❌ المستخدم غير موجود");
+  return;
+}
+
 
       // 🔐 مقارنة الباسورد مع الهاش
       const valid = await bcrypt.compare(password, data.password_hash);
