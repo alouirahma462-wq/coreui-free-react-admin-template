@@ -33,10 +33,11 @@ export default function Login() {
         .single();
 
       if (error) {
-        console.log("SUPABASE ERROR:", error);
-        setMessage("❌ خطأ في قاعدة البيانات");
-        return;
-      }
+  console.log("SUPABASE ERROR FULL:", error);
+  setMessage(error.message); // مهم جدًا
+  return;
+}
+
 
       if (!data) {
         setMessage("❌ المستخدم غير موجود");
