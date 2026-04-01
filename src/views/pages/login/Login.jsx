@@ -1,64 +1,57 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "../../../supabaseClient";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
-
   const [message, setMessage] = useState("");
   const [welcome, setWelcome] = useState("");
+  const [checkingSession, setCheckingSession] = useState(true); // 🔥 مهم
 
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-
-  const redirectDone = useRef(false);
-
-  /* ================= AUTO SESSION CHECK ================= */
+  // ✅ تحقق من الجلسة مرة واحدة فقط (بدون Loop)
   useEffect(() => {
-    const checkSession = async () => {
+    const checkSession = () => {
       try {
         const savedUser =
-          localStorage.getItem("user") || sessionStorage.getItem("user");
+          localStorage.getItem("user") ||
+          sessionStorage.getItem("user");
 
         if (!savedUser) {
-          setIsCheckingAuth(false);
+          setCheckingSession(false);
           return;
         }
 
         const user = JSON.parse(savedUser);
 
-        if (redirectDone.current) return;
-        redirectDone.current = true;
-
-        if (user.must_change_password) {
-          window.location.replace("/change-password");
-        } else {
-          window.location.replace("/dashboard");
+        // 🔥 منع الرعشة (تحقق من الصفحة الحالية)
+        if (window.location.pathname === "/login") {
+          if (user.must_change_password) {
+            window.location.replace("/change-password");
+          } else {
+            window.location.replace("/dashboard");
+          }
         }
-      } catch (e) {
-        console.log(e);
+      } catch (err) {
+        console.log(err);
       } finally {
-        setIsCheckingAuth(false);
+        setCheckingSession(false);
       }
     };
 
     checkSession();
   }, []);
 
-  /* ================= SUPABASE PING (اختياري بدون تأثير UI) ================= */
+  // 🛡️ Ping خفيف بدون تأثير
   useEffect(() => {
-    const ping = async () => {
-      try {
-        await supabase.from("users").select("id").limit(1);
-      } catch {}
-    };
+    const interval = setInterval(() => {
+      supabase.from("users").select("id").limit(1);
+    }, 300000);
 
-    ping();
-    const interval = setInterval(ping, 300000);
     return () => clearInterval(interval);
   }, []);
 
-  /* ================= LOGIN ================= */
+  // 🔐 LOGIN
   const handleLogin = async () => {
     if (!username || !password) {
       setMessage("❌ الرجاء إدخال البيانات");
@@ -84,23 +77,26 @@ export default function Login() {
       return;
     }
 
+    // 🕒 تحديث آخر دخول
     await supabase
       .from("users")
       .update({ last_login: new Date() })
       .eq("id", data.id);
 
-    const userSession = JSON.stringify(data);
+    // 💾 تخزين الجلسة
+    const userData = JSON.stringify(data);
 
     if (remember) {
-      localStorage.setItem("user", userSession);
+      localStorage.setItem("user", userData);
     } else {
-      sessionStorage.setItem("user", userSession);
+      sessionStorage.setItem("user", userData);
     }
 
+    // 🏛️ اسم المحكمة
     let courtName = "";
 
     if (data.role === "inspection_generale") {
-      courtName = "إشراف مركزي على جميع المحاكم";
+      courtName = "إشراف مركزي";
     } else {
       const { data: court } = await supabase
         .from("courts")
@@ -111,6 +107,7 @@ export default function Login() {
       courtName = court?.name || "";
     }
 
+    // 🎯 رسالة الترحيب
     const welcomeText =
       data.role === "inspection_generale"
         ? "مرحبا التفقدية العامة - إشراف مركزي"
@@ -119,49 +116,26 @@ export default function Login() {
     setWelcome(welcomeText);
     setMessage("✅ تم تسجيل الدخول بنجاح");
 
+    // 🔥 Redirect بدون رعشة
     setTimeout(() => {
       if (data.must_change_password) {
         window.location.replace("/change-password");
       } else {
         window.location.replace("/dashboard");
       }
-    }, 600);
+    }, 800);
   };
 
-  /* ================= RESET PASSWORD ================= */
-  const handleResetPassword = async () => {
-    if (!username) {
-      setMessage("❌ أدخل اسم المستخدم أولاً");
-      return;
-    }
-
-    const newPass = "Temp@" + Math.floor(Math.random() * 99999);
-
-    const { error } = await supabase
-      .from("users")
-      .update({
-        password: newPass,
-        must_change_password: true,
-      })
-      .eq("username", username);
-
-    if (error) {
-      setMessage("❌ فشل إعادة التعيين");
-    } else {
-      setMessage(`✅ كلمة المرور الجديدة: ${newPass}`);
-    }
-  };
-
-  /* ================= LOADING SCREEN (حل الرعشة نهائياً) ================= */
-  if (isCheckingAuth) {
+  // ⛔ مهم: منع ظهور الصفحة أثناء التحقق
+  if (checkingSession) {
     return (
       <div style={styles.loading}>
-        ⏳ جاري التحقق من الجلسة...
+        <div style={styles.spinner}></div>
+        <p style={{ color: "white" }}>جاري التحقق من الجلسة...</p>
       </div>
     );
   }
 
-  /* ================= UI ================= */
   return (
     <div style={styles.page}>
       <div style={styles.overlay}></div>
@@ -204,10 +178,6 @@ export default function Login() {
           دخول
         </button>
 
-        <button onClick={handleResetPassword} style={styles.link}>
-          🔑 إعادة تعيين كلمة المرور
-        </button>
-
         {welcome && <p style={styles.welcome}>{welcome}</p>}
 
         {message && (
@@ -225,8 +195,7 @@ export default function Login() {
   );
 }
 
-/* ================= STYLES ================= */
-
+/* نفس الستايل بدون تغيير */
 const styles = {
   page: {
     height: "100vh",
@@ -247,7 +216,7 @@ const styles = {
   watermark: {
     position: "absolute",
     width: "300px",
-    opacity: "0.08",
+    opacity: 0.1,
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
@@ -280,13 +249,6 @@ const styles = {
     marginTop: "10px",
     fontWeight: "bold",
   },
-  link: {
-    marginTop: "10px",
-    background: "transparent",
-    border: "none",
-    color: "#60a5fa",
-    cursor: "pointer",
-  },
   welcome: {
     marginTop: "12px",
     color: "#22c55e",
@@ -301,11 +263,18 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "#0f172a",
-    color: "white",
-    fontSize: "18px",
+    background: "#0b1f3a",
+  },
+  spinner: {
+    width: "50px",
+    height: "50px",
+    border: "4px solid rgba(255,255,255,0.2)",
+    borderTop: "4px solid white",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
   },
 };
+
 
 
 
