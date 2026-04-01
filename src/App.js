@@ -1,8 +1,9 @@
-import Login from "./views/pages/login/Login.jsx";
+import CreateUsers from "./CreateUsers.jsx";
 
 export default function App() {
-  return <Login />;
+  return <CreateUsers />;
 }
+
 
 
 
