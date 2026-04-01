@@ -8,12 +8,15 @@ export default function Login() {
   const [message, setMessage] = useState("");
   const [welcome, setWelcome] = useState("");
 
-  // 🛡️ حماية Supabase
+  // 🛡️ حماية المشروع (Ping)
   useEffect(() => {
     const ping = async () => {
       try {
         await supabase.from("users").select("id").limit(1);
-      } catch {}
+        console.log("🟢 Supabase Active");
+      } catch (err) {
+        console.log(err);
+      }
     };
 
     ping();
@@ -59,17 +62,17 @@ export default function Login() {
       sessionStorage.setItem("user", JSON.stringify(data));
     }
 
-    // 🔐 أول دخول
+    // 🔒 أول دخول
     if (data.must_change_password) {
       window.location.href = "/change-password";
       return;
     }
 
-    // 🏛️ جلب اسم المحكمة
+    // 🏛️ تحديد المحكمة
     let courtName = "";
 
     if (data.role === "inspection_generale") {
-      courtName = "إشراف مركزي - جميع المحاكم";
+      courtName = "إشراف مركزي";
     } else {
       const { data: court } = await supabase
         .from("courts")
@@ -80,8 +83,11 @@ export default function Login() {
       courtName = court?.name || "محكمة غير محددة";
     }
 
-    // 🎯 الرسالة النهائية (كما طلبت حرفياً)
-    const welcomeText = `مرحبا ${data.fullName} - ${courtName}`;
+    // 🎯 الرسالة المطلوبة بالحرف
+    const welcomeText =
+      data.role === "inspection_generale"
+        ? `مرحبا التفقدية العامة - إشراف مركزي`
+        : `مرحبا ${data.fullName} - ${courtName}`;
 
     setWelcome(welcomeText);
     setMessage("✅ تم تسجيل الدخول بنجاح");
@@ -105,7 +111,7 @@ export default function Login() {
       .from("users")
       .update({
         password: newPass,
-        must_change_password: true
+        must_change_password: true,
       })
       .eq("username", username);
 
@@ -155,22 +161,20 @@ export default function Login() {
         </label>
 
         <button onClick={handleLogin} style={styles.button}>
-          دخول النظام
+          دخول
         </button>
 
         <button onClick={handleResetPassword} style={styles.link}>
           نسيت كلمة المرور؟
         </button>
 
-        {/* 🟢 رسالة الترحيب */}
         {welcome && <p style={styles.welcome}>{welcome}</p>}
 
-        {/* 🔴 / 🟢 الحالة */}
         {message && (
           <p
             style={{
               ...styles.message,
-              color: message.includes("✅") ? "#22c55e" : "#ef4444"
+              color: message.includes("✅") ? "#22c55e" : "#ef4444",
             }}
           >
             {message}
@@ -236,6 +240,13 @@ const styles = {
     marginTop: "10px",
     fontWeight: "bold"
   },
+  link: {
+    marginTop: "10px",
+    background: "transparent",
+    border: "none",
+    color: "#60a5fa",
+    cursor: "pointer"
+  },
   welcome: {
     marginTop: "12px",
     color: "#22c55e",
@@ -246,23 +257,9 @@ const styles = {
     marginTop: "10px",
     fontSize: "14px",
     fontWeight: "bold"
-  },
-  loading: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "#0b1f3a"
-  },
-  spinner: {
-    width: "50px",
-    height: "50px",
-    border: "4px solid rgba(255,255,255,0.2)",
-    borderTop: "4px solid white",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite"
   }
 };
+
 
 
 
