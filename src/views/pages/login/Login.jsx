@@ -8,20 +8,19 @@ export default function Login() {
   const [message, setMessage] = useState("");
   const [welcome, setWelcome] = useState("");
 
-  // ✅ إذا المستخدم مسجل → ادخليه مباشرة
+  // ✅ دخول مباشر إذا موجود session
   useEffect(() => {
-  const savedUser =
-    localStorage.getItem("user") || sessionStorage.getItem("user");
+    const savedUser =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
 
-  if (savedUser) {
-    if (window.location.pathname !== "/dashboard") {
-      window.location.href = "/dashboard";
+    if (savedUser) {
+      if (window.location.pathname !== "/dashboard") {
+        window.location.href = "/dashboard";
+      }
     }
-  }
-}, []);
+  }, []);
 
-
-  // 🛡️ Ping لحماية Supabase
+  // 🛡️ حماية Supabase
   useEffect(() => {
     const ping = async () => {
       await supabase.from("users").select("id").limit(1);
@@ -48,7 +47,7 @@ export default function Login() {
       .single();
 
     if (error || !data) {
-      setMessage("❌ كلمة المرور الحالية غير صحيحة (ربما تم تغييرها)");
+      setMessage("❌ كلمة المرور غير صحيحة - استخدم إعادة التعيين");
       return;
     }
 
@@ -63,18 +62,18 @@ export default function Login() {
       .update({ last_login: new Date() })
       .eq("id", data.id);
 
-    // 💾 session
+    // 💾 حفظ الجلسة
     if (remember) {
       localStorage.setItem("user", JSON.stringify(data));
     } else {
       sessionStorage.setItem("user", JSON.stringify(data));
     }
 
-    // 🏛️ تحديد المحكمة
+    // 🏛️ جلب اسم المحكمة
     let courtName = "";
 
     if (data.role === "inspection_generale") {
-      courtName = "إشراف مركزي";
+      courtName = "إشراف مركزي على جميع المحاكم";
     } else {
       const { data: court } = await supabase
         .from("courts")
@@ -82,14 +81,17 @@ export default function Login() {
         .eq("id", data.court_id)
         .single();
 
-      courtName = court?.name || "محكمة غير محددة";
+      courtName = court?.name || "";
     }
 
-    // 🎯 رسالة احترافية
-    const welcomeText =
-      data.role === "inspection_generale"
-        ? `مرحبا التفقدية العامة - إشراف مركزي`
-        : `مرحبا ${data.fullName} - ${courtName}`;
+    // 🎯 رسالة ترحيب احترافية
+    let welcomeText = "";
+
+    if (data.role === "inspection_generale") {
+      welcomeText = "مرحبا التفقدية العامة - إشراف مركزي";
+    } else {
+      welcomeText = `مرحبا ${data.fullName} - ${courtName}`;
+    }
 
     setWelcome(welcomeText);
     setMessage("✅ تم تسجيل الدخول بنجاح");
@@ -107,29 +109,27 @@ export default function Login() {
     }, 1500);
   };
 
-  // 🔁 Reset احترافي
+  // 🔥 Reset احترافي (توليد تلقائي)
   const handleResetPassword = async () => {
     if (!username) {
       setMessage("❌ أدخل اسم المستخدم أولاً");
       return;
     }
 
-    const newPass = prompt("أدخل كلمة المرور الجديدة:");
-
-    if (!newPass) return;
+    const newPass = "Temp@" + Math.floor(Math.random() * 99999);
 
     const { error } = await supabase
       .from("users")
       .update({
         password: newPass,
-        must_change_password: false,
+        must_change_password: true,
       })
       .eq("username", username);
 
     if (error) {
-      setMessage("❌ فشل التحديث");
+      setMessage("❌ فشل إعادة التعيين");
     } else {
-      setMessage("✅ تم تعيين كلمة مرور جديدة، استخدمها للدخول");
+      setMessage(`✅ كلمة المرور الجديدة: ${newPass}`);
     }
   };
 
@@ -176,7 +176,7 @@ export default function Login() {
         </button>
 
         <button onClick={handleResetPassword} style={styles.link}>
-          نسيت كلمة المرور؟
+          🔑 إعادة تعيين كلمة المرور
         </button>
 
         {welcome && <p style={styles.welcome}>{welcome}</p>}
@@ -196,7 +196,8 @@ export default function Login() {
   );
 }
 
-/* نفس الستايل تبعك بدون تغيير */
+/* ================= STYLES ================= */
+
 const styles = {
   page: {
     height: "100vh",
@@ -267,6 +268,7 @@ const styles = {
     fontWeight: "bold"
   }
 };
+
 
 
 
