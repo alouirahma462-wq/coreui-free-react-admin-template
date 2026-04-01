@@ -7,24 +7,49 @@ export default function Login() {
   const [remember, setRemember] = useState(false);
   const [message, setMessage] = useState("");
   const [welcome, setWelcome] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [checkingAuth, setCheckingAuth] = useState(false);
 
-  // 🔒 Auto login session
+  // =========================
+  // 🔒 فحص الجلسة (بدون رعشة)
+  // =========================
   useEffect(() => {
-    const savedUser =
-      localStorage.getItem("user") || sessionStorage.getItem("user");
+    const checkSession = async () => {
+      setCheckingAuth(true);
 
-    if (savedUser) {
-      const user = JSON.parse(savedUser);
+      const savedUser =
+        localStorage.getItem("user") || sessionStorage.getItem("user");
 
-      if (user.must_change_password) {
-        window.location.href = "/change-password";
-      } else {
-        window.location.href = "/dashboard";
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+
+          // تأخير بسيط يمنع flicker
+          setTimeout(() => {
+            if (user.must_change_password) {
+              window.location.replace("/change-password");
+            } else {
+              window.location.replace("/dashboard");
+            }
+          }, 300);
+
+          return;
+        } catch (e) {
+          localStorage.removeItem("user");
+          sessionStorage.removeItem("user");
+        }
       }
-    }
+
+      setLoading(false);
+      setCheckingAuth(false);
+    };
+
+    checkSession();
   }, []);
 
-  // 🛡️ Supabase ping (حماية اتصال)
+  // =========================
+  // 🛡️ Ping Supabase
+  // =========================
   useEffect(() => {
     const ping = async () => {
       await supabase.from("users").select("id").limit(1);
@@ -35,7 +60,9 @@ export default function Login() {
     return () => clearInterval(interval);
   }, []);
 
+  // =========================
   // 🔐 LOGIN
+  // =========================
   const handleLogin = async () => {
     if (!username || !password) {
       setMessage("❌ الرجاء إدخال البيانات");
@@ -61,13 +88,11 @@ export default function Login() {
       return;
     }
 
-    // 🕒 تحديث آخر دخول
     await supabase
       .from("users")
       .update({ last_login: new Date() })
       .eq("id", data.id);
 
-    // 💾 حفظ الجلسة
     const userSession = JSON.stringify(data);
 
     if (remember) {
@@ -76,7 +101,6 @@ export default function Login() {
       sessionStorage.setItem("user", userSession);
     }
 
-    // 🏛️ جلب اسم المحكمة
     let courtName = "";
 
     if (data.role === "inspection_generale") {
@@ -91,29 +115,24 @@ export default function Login() {
       courtName = court?.name || "";
     }
 
-    // 🎯 رسالة ترحيب
-    let welcomeText = "";
-
-    if (data.role === "inspection_generale") {
-      welcomeText = "مرحبا التفقدية العامة - إشراف مركزي";
-    } else {
-      welcomeText = `مرحبا ${data.fullName} - ${courtName}`;
-    }
+    const welcomeText =
+      data.role === "inspection_generale"
+        ? "مرحبا التفقدية العامة - إشراف مركزي"
+        : `مرحبا ${data.fullName} - ${courtName}`;
 
     setWelcome(welcomeText);
     setMessage("✅ تم تسجيل الدخول بنجاح");
 
-    // 🔥 أهم شرط في النظام (إجبار تغيير كلمة المرور)
     setTimeout(() => {
-      if (data.must_change_password) {
-        window.location.href = "/change-password";
-      } else {
-        window.location.href = "/dashboard";
-      }
-    }, 800);
+      window.location.replace(
+        data.must_change_password ? "/change-password" : "/dashboard"
+      );
+    }, 600);
   };
 
-  // 🔥 Reset Password (نسخة بسيطة آمنة)
+  // =========================
+  // 🔑 Reset Password (مؤقت)
+  // =========================
   const handleResetPassword = async () => {
     if (!username) {
       setMessage("❌ أدخل اسم المستخدم أولاً");
@@ -133,9 +152,20 @@ export default function Login() {
     if (error) {
       setMessage("❌ فشل إعادة التعيين");
     } else {
-      setMessage(`✅ كلمة المرور الجديدة: ${newPass}`);
+      setMessage(`✅ كلمة المرور المؤقتة: ${newPass}`);
     }
   };
+
+  // =========================
+  // ⛔ منع الرندر أثناء التحقق
+  // =========================
+  if (loading || checkingAuth) {
+    return (
+      <div style={styles.loading}>
+        ⏳ جاري التحقق من الجلسة...
+      </div>
+    );
+  }
 
   return (
     <div style={styles.page}>
@@ -180,7 +210,7 @@ export default function Login() {
         </button>
 
         <button onClick={handleResetPassword} style={styles.link}>
-          🔑 إعادة تعيين كلمة المرور
+          🔑 نسيت كلمة المرور
         </button>
 
         {welcome && <p style={styles.welcome}>{welcome}</p>}
@@ -222,7 +252,7 @@ const styles = {
   watermark: {
     position: "absolute",
     width: "300px",
-    opacity: 0.1,
+    opacity: 0.08,
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
@@ -233,7 +263,7 @@ const styles = {
     borderRadius: "16px",
     textAlign: "center",
     background: "rgba(255,255,255,0.12)",
-    backdropFilter: "blur(15px)",
+    backdropFilter: "blur(18px)",
     color: "white",
     zIndex: 1,
   },
@@ -270,6 +300,13 @@ const styles = {
   message: {
     marginTop: "10px",
     fontWeight: "bold",
+  },
+  loading: {
+    height: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: "18px",
   },
 };
 
