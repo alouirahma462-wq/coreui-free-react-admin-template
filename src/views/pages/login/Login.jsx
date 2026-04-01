@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { supabase } from "../../../supabaseClient.js";
+import { supabase } from "../../../supabaseClient";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(false);
   const [message, setMessage] = useState("");
   const [welcome, setWelcome] = useState("");
-  const [loading, setLoading] = useState(true);
 
+  // 🛡️ حماية Supabase
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(timer);
+    const ping = async () => {
+      try {
+        await supabase.from("users").select("id").limit(1);
+      } catch {}
+    };
+
+    ping();
+    const interval = setInterval(ping, 300000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleLogin = async () => {
@@ -19,93 +27,94 @@ export default function Login() {
       return;
     }
 
-    try {
-      setMessage("⏳ جاري تسجيل الدخول...");
+    setMessage("⏳ جاري تسجيل الدخول...");
 
-      // 🔐 تحويل username → email
-      const email = username + "@justice.tunisia";
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("username", username)
+      .eq("password", password)
+      .single();
 
-      // 🔑 تسجيل الدخول عبر Supabase Auth
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-        options: { persistSession: true }, // تذكرني
-      });
+    if (error || !data) {
+      setMessage("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
+      return;
+    }
 
-      if (error) {
-        setMessage("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
-        return;
-      }
+    if (!data.isActive) {
+      setMessage("❌ الحساب معطل من الإدارة");
+      return;
+    }
 
-      // 📥 جلب بيانات المستخدم
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("username", username)
+    // 🕒 تحديث آخر دخول
+    await supabase
+      .from("users")
+      .update({ last_login: new Date() })
+      .eq("id", data.id);
+
+    // 💾 حفظ الجلسة
+    if (remember) {
+      localStorage.setItem("user", JSON.stringify(data));
+    } else {
+      sessionStorage.setItem("user", JSON.stringify(data));
+    }
+
+    // 🔐 أول دخول
+    if (data.must_change_password) {
+      window.location.href = "/change-password";
+      return;
+    }
+
+    // 🏛️ جلب اسم المحكمة
+    let courtName = "";
+
+    if (data.role === "inspection_generale") {
+      courtName = "إشراف مركزي - جميع المحاكم";
+    } else {
+      const { data: court } = await supabase
+        .from("courts")
+        .select("name")
+        .eq("id", data.court_id)
         .single();
 
-      if (profileError || !profile) {
-        setMessage("❌ خطأ في تحميل بيانات المستخدم");
-        return;
-      }
-
-      // 🚫 تحقق من التفعيل
-      if (!profile.is_active) {
-        setMessage("❌ الحساب معطل من الإدارة");
-        return;
-      }
-
-      // 🏛️ تحديد المحكمة
-      let courtName = "";
-
-      if (profile.role === "inspection_generale") {
-        courtName = "إشراف مركزي - جميع المحاكم";
-      } else {
-        const { data: court } = await supabase
-          .from("courts")
-          .select("name")
-          .eq("id", profile.court_id)
-          .single();
-
-        courtName = court?.name || "محكمة غير محددة";
-      }
-
-      // 💾 حفظ المستخدم
-      localStorage.setItem("user", JSON.stringify(profile));
-
-      // 🎯 رسالة الترحيب الاحترافية
-      const welcomeText = `مرحباً ${profile.full_name} - ${courtName}`;
-      setWelcome(welcomeText);
-
-      setMessage("✅ تم تسجيل الدخول بنجاح");
-
-      // 🔒 أول دخول → تغيير كلمة المرور
-      if (profile.must_change_password) {
-        setTimeout(() => {
-          window.location.href = "/change-password";
-        }, 1200);
-        return;
-      }
-
-      // 🚀 دخول عادي
-      setTimeout(() => {
-        window.location.href = "/dashboard";
-      }, 1500);
-
-    } catch (err) {
-      console.log(err);
-      setMessage("❌ خطأ في الاتصال بالسيرفر");
+      courtName = court?.name || "محكمة غير محددة";
     }
+
+    // 🎯 الرسالة النهائية (كما طلبت حرفياً)
+    const welcomeText = `مرحبا ${data.fullName} - ${courtName}`;
+
+    setWelcome(welcomeText);
+    setMessage("✅ تم تسجيل الدخول بنجاح");
+
+    setTimeout(() => {
+      window.location.href = "/dashboard";
+    }, 1200);
   };
 
-  if (loading) {
-    return (
-      <div style={styles.loading}>
-        <div style={styles.spinner}></div>
-        <p style={{ color: "white" }}>جاري تحميل النظام...</p>
-      </div>
-    );
-  }
+  // 🔁 نسيان كلمة المرور
+  const handleResetPassword = async () => {
+    if (!username) {
+      setMessage("❌ أدخل اسم المستخدم أولاً");
+      return;
+    }
+
+    const newPass = prompt("أدخل كلمة مرور جديدة:");
+    if (!newPass) return;
+
+    const { error } = await supabase
+      .from("users")
+      .update({
+        password: newPass,
+        must_change_password: true
+      })
+      .eq("username", username);
+
+    if (error) {
+      setMessage("❌ حدث خطأ");
+    } else {
+      setMessage("✅ تم تعيين كلمة مرور جديدة");
+    }
+  };
 
   return (
     <div style={styles.page}>
@@ -118,8 +127,8 @@ export default function Login() {
       />
 
       <div style={styles.card}>
-        <h2>النيابة العمومية</h2>
-        <h3>الجمهورية التونسية - وزارة العدل</h3>
+        <h2>🏛️ منظومة النيابة العمومية</h2>
+        <h3>وزارة العدل - الجمهورية التونسية</h3>
 
         <input
           placeholder="اسم المستخدم"
@@ -136,23 +145,32 @@ export default function Login() {
           style={styles.input}
         />
 
+        <label style={{ color: "white" }}>
+          <input
+            type="checkbox"
+            checked={remember}
+            onChange={(e) => setRemember(e.target.checked)}
+          />
+          تذكرني
+        </label>
+
         <button onClick={handleLogin} style={styles.button}>
           دخول النظام
         </button>
 
-        {/* 🟢 رسالة الترحيب */}
-        {welcome && (
-          <p style={styles.welcome}>
-            {welcome}
-          </p>
-        )}
+        <button onClick={handleResetPassword} style={styles.link}>
+          نسيت كلمة المرور؟
+        </button>
 
-        {/* 🔴 / 🟢 الرسالة */}
+        {/* 🟢 رسالة الترحيب */}
+        {welcome && <p style={styles.welcome}>{welcome}</p>}
+
+        {/* 🔴 / 🟢 الحالة */}
         {message && (
           <p
             style={{
               ...styles.message,
-              color: message.includes("✅") ? "#22c55e" : "#ef4444",
+              color: message.includes("✅") ? "#22c55e" : "#ef4444"
             }}
           >
             {message}
@@ -245,6 +263,7 @@ const styles = {
     animation: "spin 1s linear infinite"
   }
 };
+
 
 
 
