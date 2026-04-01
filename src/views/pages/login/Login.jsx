@@ -10,13 +10,16 @@ export default function Login() {
 
   // ✅ إذا المستخدم مسجل → ادخليه مباشرة
   useEffect(() => {
-    const savedUser =
-      localStorage.getItem("user") || sessionStorage.getItem("user");
+  const savedUser =
+    localStorage.getItem("user") || sessionStorage.getItem("user");
 
-    if (savedUser) {
+  if (savedUser) {
+    if (window.location.pathname !== "/dashboard") {
       window.location.href = "/dashboard";
     }
-  }, []);
+  }
+}, []);
+
 
   // 🛡️ Ping لحماية Supabase
   useEffect(() => {
