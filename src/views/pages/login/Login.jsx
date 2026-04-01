@@ -5,23 +5,13 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(true);
   const [welcome, setWelcome] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
-
-  const buildWelcomeMessage = (user) => {
-    // التفقدية العامة (بدون محكمة)
-    if (user.role === "inspection_generale") {
-      return `مرحبا التفقدية العامة - إشراف مركزي`;
-    }
-
-    // باقي المستخدمين مع المحكمة
-    return `مرحبا ${user.fullName || user.role} - ${user.court_name || ""}`;
-  };
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -32,48 +22,79 @@ export default function Login() {
     try {
       setMessage("⏳ جاري تسجيل الدخول...");
 
-      const { data, error } = await supabase.rpc("login_user", {
-        input_username: username,
-        input_password: password
+      // 🔐 تحويل username → email
+      const email = username + "@justice.tunisia";
+
+      // 🔑 تسجيل الدخول عبر Supabase Auth
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+        options: { persistSession: true }, // تذكرني
       });
 
       if (error) {
-        console.log(error);
-        setMessage("❌ خطأ في الاتصال بالسيرفر");
-        return;
-      }
-
-      if (!data || !data.success) {
         setMessage("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
         return;
       }
 
-      const user = data.user;
+      // 📥 جلب بيانات المستخدم
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("username", username)
+        .single();
 
-      // حفظ المستخدم
-      localStorage.setItem("user", JSON.stringify(user));
-
-      // 👇 رسالة الترحيب الجديدة
-      const welcomeMsg = buildWelcomeMessage(user);
-      setWelcome(welcomeMsg);
-      setMessage("✅ تم تسجيل الدخول بنجاح");
-
-      // تغيير كلمة المرور
-      if (user.must_change_password) {
-        setTimeout(() => {
-          window.location.href = "/change-password";
-        }, 1000);
+      if (profileError || !profile) {
+        setMessage("❌ خطأ في تحميل بيانات المستخدم");
         return;
       }
 
-      // دخول النظام
+      // 🚫 تحقق من التفعيل
+      if (!profile.is_active) {
+        setMessage("❌ الحساب معطل من الإدارة");
+        return;
+      }
+
+      // 🏛️ تحديد المحكمة
+      let courtName = "";
+
+      if (profile.role === "inspection_generale") {
+        courtName = "إشراف مركزي - جميع المحاكم";
+      } else {
+        const { data: court } = await supabase
+          .from("courts")
+          .select("name")
+          .eq("id", profile.court_id)
+          .single();
+
+        courtName = court?.name || "محكمة غير محددة";
+      }
+
+      // 💾 حفظ المستخدم
+      localStorage.setItem("user", JSON.stringify(profile));
+
+      // 🎯 رسالة الترحيب الاحترافية
+      const welcomeText = `مرحباً ${profile.full_name} - ${courtName}`;
+      setWelcome(welcomeText);
+
+      setMessage("✅ تم تسجيل الدخول بنجاح");
+
+      // 🔒 أول دخول → تغيير كلمة المرور
+      if (profile.must_change_password) {
+        setTimeout(() => {
+          window.location.href = "/change-password";
+        }, 1200);
+        return;
+      }
+
+      // 🚀 دخول عادي
       setTimeout(() => {
         window.location.href = "/dashboard";
-      }, 1200);
+      }, 1500);
 
     } catch (err) {
       console.log(err);
-      setMessage("❌ خطأ غير متوقع");
+      setMessage("❌ خطأ في الاتصال بالسيرفر");
     }
   };
 
@@ -119,13 +140,24 @@ export default function Login() {
           دخول النظام
         </button>
 
+        {/* 🟢 رسالة الترحيب */}
         {welcome && (
-          <p style={{ marginTop: 10, color: "#00ffcc", fontWeight: "bold" }}>
+          <p style={styles.welcome}>
             {welcome}
           </p>
         )}
 
-        {message && <p style={styles.message}>{message}</p>}
+        {/* 🔴 / 🟢 الرسالة */}
+        {message && (
+          <p
+            style={{
+              ...styles.message,
+              color: message.includes("✅") ? "#22c55e" : "#ef4444",
+            }}
+          >
+            {message}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -142,12 +174,13 @@ const styles = {
     backgroundImage: "url('/pg.png')",
     backgroundSize: "cover",
     position: "relative",
-    direction: "rtl"
+    direction: "rtl",
+    fontFamily: "Tahoma"
   },
   overlay: {
     position: "absolute",
     inset: 0,
-    background: "rgba(0,0,0,0.5)"
+    background: "rgba(0,0,0,0.6)"
   },
   watermark: {
     position: "absolute",
@@ -159,19 +192,21 @@ const styles = {
   },
   card: {
     width: "380px",
-    padding: "20px",
+    padding: "25px",
     borderRadius: "16px",
     textAlign: "center",
     background: "rgba(255,255,255,0.12)",
     backdropFilter: "blur(15px)",
-    color: "white"
+    color: "white",
+    zIndex: 1
   },
   input: {
     width: "100%",
     padding: "10px",
-    margin: "6px 0",
+    margin: "8px 0",
     borderRadius: "8px",
-    border: "none"
+    border: "none",
+    outline: "none"
   },
   button: {
     width: "100%",
@@ -179,10 +214,20 @@ const styles = {
     background: "#1e3a8a",
     color: "white",
     borderRadius: "10px",
-    cursor: "pointer"
+    cursor: "pointer",
+    marginTop: "10px",
+    fontWeight: "bold"
+  },
+  welcome: {
+    marginTop: "12px",
+    color: "#22c55e",
+    fontWeight: "bold",
+    fontSize: "15px"
   },
   message: {
-    marginTop: "10px"
+    marginTop: "10px",
+    fontSize: "14px",
+    fontWeight: "bold"
   },
   loading: {
     height: "100vh",
