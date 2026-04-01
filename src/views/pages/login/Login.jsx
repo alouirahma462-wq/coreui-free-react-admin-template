@@ -1,58 +1,56 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "../../../supabaseClient";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
+
   const [message, setMessage] = useState("");
   const [welcome, setWelcome] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [checkingAuth, setCheckingAuth] = useState(false);
 
-  // =========================
-  // 🔒 فحص الجلسة (بدون رعشة)
-  // =========================
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  const redirectDone = useRef(false);
+
+  /* ================= AUTO SESSION CHECK ================= */
   useEffect(() => {
     const checkSession = async () => {
-      setCheckingAuth(true);
+      try {
+        const savedUser =
+          localStorage.getItem("user") || sessionStorage.getItem("user");
 
-      const savedUser =
-        localStorage.getItem("user") || sessionStorage.getItem("user");
-
-      if (savedUser) {
-        try {
-          const user = JSON.parse(savedUser);
-
-          // تأخير بسيط يمنع flicker
-          setTimeout(() => {
-            if (user.must_change_password) {
-              window.location.replace("/change-password");
-            } else {
-              window.location.replace("/dashboard");
-            }
-          }, 300);
-
+        if (!savedUser) {
+          setIsCheckingAuth(false);
           return;
-        } catch (e) {
-          localStorage.removeItem("user");
-          sessionStorage.removeItem("user");
         }
-      }
 
-      setLoading(false);
-      setCheckingAuth(false);
+        const user = JSON.parse(savedUser);
+
+        if (redirectDone.current) return;
+        redirectDone.current = true;
+
+        if (user.must_change_password) {
+          window.location.replace("/change-password");
+        } else {
+          window.location.replace("/dashboard");
+        }
+      } catch (e) {
+        console.log(e);
+      } finally {
+        setIsCheckingAuth(false);
+      }
     };
 
     checkSession();
   }, []);
 
-  // =========================
-  // 🛡️ Ping Supabase
-  // =========================
+  /* ================= SUPABASE PING (اختياري بدون تأثير UI) ================= */
   useEffect(() => {
     const ping = async () => {
-      await supabase.from("users").select("id").limit(1);
+      try {
+        await supabase.from("users").select("id").limit(1);
+      } catch {}
     };
 
     ping();
@@ -60,9 +58,7 @@ export default function Login() {
     return () => clearInterval(interval);
   }, []);
 
-  // =========================
-  // 🔐 LOGIN
-  // =========================
+  /* ================= LOGIN ================= */
   const handleLogin = async () => {
     if (!username || !password) {
       setMessage("❌ الرجاء إدخال البيانات");
@@ -124,15 +120,15 @@ export default function Login() {
     setMessage("✅ تم تسجيل الدخول بنجاح");
 
     setTimeout(() => {
-      window.location.replace(
-        data.must_change_password ? "/change-password" : "/dashboard"
-      );
+      if (data.must_change_password) {
+        window.location.replace("/change-password");
+      } else {
+        window.location.replace("/dashboard");
+      }
     }, 600);
   };
 
-  // =========================
-  // 🔑 Reset Password (مؤقت)
-  // =========================
+  /* ================= RESET PASSWORD ================= */
   const handleResetPassword = async () => {
     if (!username) {
       setMessage("❌ أدخل اسم المستخدم أولاً");
@@ -152,14 +148,12 @@ export default function Login() {
     if (error) {
       setMessage("❌ فشل إعادة التعيين");
     } else {
-      setMessage(`✅ كلمة المرور المؤقتة: ${newPass}`);
+      setMessage(`✅ كلمة المرور الجديدة: ${newPass}`);
     }
   };
 
-  // =========================
-  // ⛔ منع الرندر أثناء التحقق
-  // =========================
-  if (loading || checkingAuth) {
+  /* ================= LOADING SCREEN (حل الرعشة نهائياً) ================= */
+  if (isCheckingAuth) {
     return (
       <div style={styles.loading}>
         ⏳ جاري التحقق من الجلسة...
@@ -167,6 +161,7 @@ export default function Login() {
     );
   }
 
+  /* ================= UI ================= */
   return (
     <div style={styles.page}>
       <div style={styles.overlay}></div>
@@ -210,7 +205,7 @@ export default function Login() {
         </button>
 
         <button onClick={handleResetPassword} style={styles.link}>
-          🔑 نسيت كلمة المرور
+          🔑 إعادة تعيين كلمة المرور
         </button>
 
         {welcome && <p style={styles.welcome}>{welcome}</p>}
@@ -252,7 +247,7 @@ const styles = {
   watermark: {
     position: "absolute",
     width: "300px",
-    opacity: 0.08,
+    opacity: "0.08",
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
@@ -263,7 +258,7 @@ const styles = {
     borderRadius: "16px",
     textAlign: "center",
     background: "rgba(255,255,255,0.12)",
-    backdropFilter: "blur(18px)",
+    backdropFilter: "blur(15px)",
     color: "white",
     zIndex: 1,
   },
@@ -306,9 +301,12 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    background: "#0f172a",
+    color: "white",
     fontSize: "18px",
   },
 };
+
 
 
 
