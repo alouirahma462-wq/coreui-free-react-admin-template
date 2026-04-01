@@ -8,19 +8,23 @@ export default function Login() {
   const [message, setMessage] = useState("");
   const [welcome, setWelcome] = useState("");
 
-  // ✅ دخول مباشر إذا موجود session
+  // 🔒 Auto login session
   useEffect(() => {
     const savedUser =
       localStorage.getItem("user") || sessionStorage.getItem("user");
 
     if (savedUser) {
-      if (window.location.pathname !== "/dashboard") {
+      const user = JSON.parse(savedUser);
+
+      if (user.must_change_password) {
+        window.location.href = "/change-password";
+      } else {
         window.location.href = "/dashboard";
       }
     }
   }, []);
 
-  // 🛡️ حماية Supabase
+  // 🛡️ Supabase ping (حماية اتصال)
   useEffect(() => {
     const ping = async () => {
       await supabase.from("users").select("id").limit(1);
@@ -31,6 +35,7 @@ export default function Login() {
     return () => clearInterval(interval);
   }, []);
 
+  // 🔐 LOGIN
   const handleLogin = async () => {
     if (!username || !password) {
       setMessage("❌ الرجاء إدخال البيانات");
@@ -47,7 +52,7 @@ export default function Login() {
       .single();
 
     if (error || !data) {
-      setMessage("❌ كلمة المرور غير صحيحة - استخدم إعادة التعيين");
+      setMessage("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
       return;
     }
 
@@ -63,10 +68,12 @@ export default function Login() {
       .eq("id", data.id);
 
     // 💾 حفظ الجلسة
+    const userSession = JSON.stringify(data);
+
     if (remember) {
-      localStorage.setItem("user", JSON.stringify(data));
+      localStorage.setItem("user", userSession);
     } else {
-      sessionStorage.setItem("user", JSON.stringify(data));
+      sessionStorage.setItem("user", userSession);
     }
 
     // 🏛️ جلب اسم المحكمة
@@ -84,7 +91,7 @@ export default function Login() {
       courtName = court?.name || "";
     }
 
-    // 🎯 رسالة ترحيب احترافية
+    // 🎯 رسالة ترحيب
     let welcomeText = "";
 
     if (data.role === "inspection_generale") {
@@ -96,20 +103,17 @@ export default function Login() {
     setWelcome(welcomeText);
     setMessage("✅ تم تسجيل الدخول بنجاح");
 
-    // 🔒 أول دخول
-    if (data.must_change_password) {
-      setTimeout(() => {
-        window.location.href = "/change-password";
-      }, 1200);
-      return;
-    }
-
+    // 🔥 أهم شرط في النظام (إجبار تغيير كلمة المرور)
     setTimeout(() => {
-      window.location.href = "/dashboard";
-    }, 1500);
+      if (data.must_change_password) {
+        window.location.href = "/change-password";
+      } else {
+        window.location.href = "/dashboard";
+      }
+    }, 800);
   };
 
-  // 🔥 Reset احترافي (توليد تلقائي)
+  // 🔥 Reset Password (نسخة بسيطة آمنة)
   const handleResetPassword = async () => {
     if (!username) {
       setMessage("❌ أدخل اسم المستخدم أولاً");
@@ -208,12 +212,12 @@ const styles = {
     backgroundSize: "cover",
     position: "relative",
     direction: "rtl",
-    fontFamily: "Tahoma"
+    fontFamily: "Tahoma",
   },
   overlay: {
     position: "absolute",
     inset: 0,
-    background: "rgba(0,0,0,0.6)"
+    background: "rgba(0,0,0,0.6)",
   },
   watermark: {
     position: "absolute",
@@ -221,7 +225,7 @@ const styles = {
     opacity: 0.1,
     top: "50%",
     left: "50%",
-    transform: "translate(-50%, -50%)"
+    transform: "translate(-50%, -50%)",
   },
   card: {
     width: "380px",
@@ -231,7 +235,7 @@ const styles = {
     background: "rgba(255,255,255,0.12)",
     backdropFilter: "blur(15px)",
     color: "white",
-    zIndex: 1
+    zIndex: 1,
   },
   input: {
     width: "100%",
@@ -239,7 +243,7 @@ const styles = {
     margin: "8px 0",
     borderRadius: "8px",
     border: "none",
-    outline: "none"
+    outline: "none",
   },
   button: {
     width: "100%",
@@ -249,25 +253,26 @@ const styles = {
     borderRadius: "10px",
     cursor: "pointer",
     marginTop: "10px",
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   link: {
     marginTop: "10px",
     background: "transparent",
     border: "none",
     color: "#60a5fa",
-    cursor: "pointer"
+    cursor: "pointer",
   },
   welcome: {
     marginTop: "12px",
     color: "#22c55e",
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   message: {
     marginTop: "10px",
-    fontWeight: "bold"
-  }
+    fontWeight: "bold",
+  },
 };
+
 
 
 
