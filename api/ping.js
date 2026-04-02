@@ -7,25 +7,37 @@ const supabase = createClient(
 );
 
 export async function GET(req) {
-  // 1. حماية CRON_SECRET
-  const auth = req.headers.get("authorization");
+  try {
+    // 🔐 حماية CRON_SECRET
+    const auth = req.headers.get("authorization");
 
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    // 🟢 تحديث keep_alive
+    const { error } = await supabase
+      .from("keep_alive")
+      .update({ updated_at: new Date().toISOString() }) // ✅ مهم
+      .eq("id", 1);
+
+    return NextResponse.json({
+      ok: true,
+      db: error ? "error" : "updated",
+      time: new Date().toISOString()
+    });
+
+  } catch (e) {
+    return NextResponse.json({
+      ok: false,
+      error: e.message
+    });
   }
-
-  // 2. تحديث نفس السطر فقط (بدون تكديس)
-  const { error } = await supabase
-    .from("keep_alive")
-    .update({ updated_at: new Date() })
-    .eq("id", 1);
-
-  // 3. رد بسيط
-  return NextResponse.json({
-    ok: true,
-    db: error ? "error" : "updated"
-  });
 }
+
 
 
 
