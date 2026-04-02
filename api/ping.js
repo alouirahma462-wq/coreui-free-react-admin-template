@@ -6,15 +6,20 @@ const supabase = createClient(
 )
 
 export default async function handler(req, res) {
-  const { error } = await supabase
-    .from('keep_alive')
-    .update({ updated_at: new Date().toISOString() })  // ✅ FIX
-    .eq('id', 1)
+  try {
+    const { error } = await supabase
+      .from('keep_alive')
+      .update({ updated_at: new Date().toISOString() })
+      .eq('id', 1)
 
-  if (error) {
-    return res.status(500).json({ ok: false, error })
+    if (error) {
+      return res.status(500).json({ ok: false, error: error.message })
+    }
+
+    return res.status(200).json({ ok: true, time: new Date().toISOString() })
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message })
   }
-
-  return res.status(200).json({ ok: true })
 }
+
 
