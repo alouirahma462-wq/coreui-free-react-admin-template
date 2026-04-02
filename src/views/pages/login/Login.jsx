@@ -9,7 +9,7 @@ export default function Login() {
   const [welcome, setWelcome] = useState("");
   const [checkingSession, setCheckingSession] = useState(true);
 
-  // 🔥 Session check
+  // 🔥 Session check (Auto redirect)
   useEffect(() => {
     const savedUser =
       localStorage.getItem("user") ||
@@ -19,15 +19,15 @@ export default function Login() {
       try {
         const user = JSON.parse(savedUser);
 
-        if (window.location.pathname === "/login") {
-          if (user.must_change_password) {
-            window.location.replace("/change-password");
-          } else {
-            window.location.replace("/dashboard");
-          }
+        if (user?.must_change_password) {
+          window.location.replace("/change-password");
+        } else {
+          window.location.replace("/dashboard");
         }
-      } catch (err) {
-        console.log(err);
+      } catch (e) {
+        console.log("Session error", e);
+        localStorage.removeItem("user");
+        sessionStorage.removeItem("user");
       }
     }
 
@@ -36,8 +36,10 @@ export default function Login() {
 
   // 🔐 LOGIN
   const handleLogin = async () => {
+    setMessage("");
+
     if (!username || !password) {
-      setMessage("❌ الرجاء إدخال البيانات");
+      setMessage("❌ الرجاء إدخال اسم المستخدم وكلمة المرور");
       return;
     }
 
@@ -51,7 +53,7 @@ export default function Login() {
       .single();
 
     if (error || !data) {
-      setMessage("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
+      setMessage("❌ بيانات الدخول غير صحيحة");
       return;
     }
 
@@ -63,24 +65,26 @@ export default function Login() {
     // 🕒 تحديث آخر دخول
     await supabase
       .from("users")
-      .update({ last_login: new Date() })
+      .update({ last_login: new Date().toISOString() })
       .eq("id", data.id);
 
-    // 💾 session
+    // 💾 حفظ الجلسة
     const userData = JSON.stringify(data);
 
     if (remember) {
       localStorage.setItem("user", userData);
+      sessionStorage.removeItem("user");
     } else {
       sessionStorage.setItem("user", userData);
+      localStorage.removeItem("user");
     }
 
-    // 🏛️ court name
+    // 🏛️ اسم المحكمة
     let courtName = "";
 
     if (data.role === "inspection_generale") {
       courtName = "إشراف مركزي";
-    } else {
+    } else if (data.court_id) {
       const { data: court } = await supabase
         .from("courts")
         .select("name")
@@ -93,22 +97,22 @@ export default function Login() {
     setWelcome(
       data.role === "inspection_generale"
         ? "مرحبا التفقدية العامة - إشراف مركزي"
-        : `مرحبا ${data.fullName} - ${courtName}`
+        : `مرحبا ${data.fullName || data.username} - ${courtName}`
     );
 
     setMessage("✅ تم تسجيل الدخول بنجاح");
 
-    // 🔥 REDIRECT SYSTEM (المهم)
+    // 🚀 Redirect system
     setTimeout(() => {
       if (data.must_change_password) {
         window.location.replace("/change-password");
       } else {
         window.location.replace("/dashboard");
       }
-    }, 600);
+    }, 800);
   };
 
-  // ⛔ loading session
+  // ⛔ Loading session check
   if (checkingSession) {
     return (
       <div style={styles.loading}>
@@ -147,7 +151,7 @@ export default function Login() {
           style={styles.input}
         />
 
-        <label style={{ color: "white" }}>
+        <label style={{ color: "white", display: "flex", gap: "8px" }}>
           <input
             type="checkbox"
             checked={remember}
@@ -160,7 +164,7 @@ export default function Login() {
           دخول
         </button>
 
-        {/* 🔥 روابط جديدة */}
+        {/* 🔥 Forgot password */}
         <div style={{ marginTop: "10px" }}>
           <a href="/forgot-password" style={{ color: "#fbbf24" }}>
             نسيت كلمة المرور؟
@@ -184,7 +188,7 @@ export default function Login() {
   );
 }
 
-/* نفس الستايل */
+// 🎨 Styles
 const styles = {
   page: {
     height: "100vh",
@@ -263,6 +267,7 @@ const styles = {
     animation: "spin 1s linear infinite",
   },
 };
+
 
 
 
