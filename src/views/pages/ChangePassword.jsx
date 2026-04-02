@@ -2,13 +2,43 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 
 export default function ChangePasswordFirstLogin() {
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
+  const [user, setUser] = useState(null);
 
   const [pass1, setPass1] = useState("");
   const [pass2, setPass2] = useState("");
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // 🔥 جلب المستخدم الحقيقي من قاعدة البيانات
+  useEffect(() => {
+    const localUser = JSON.parse(localStorage.getItem("user"));
+
+    if (!localUser) {
+      window.location.replace("/login");
+      return;
+    }
+
+    const fetchUser = async () => {
+      const { data } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", localUser.id)
+        .single();
+
+      if (!data) {
+        window.location.replace("/login");
+        return;
+      }
+
+      setUser(data);
+
+      if (!data.must_change_password) {
+        window.location.replace("/dashboard");
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   // 🔒 منع الرجوع
   useEffect(() => {
@@ -22,19 +52,6 @@ export default function ChangePasswordFirstLogin() {
     return () => window.removeEventListener("popstate", onBack);
   }, []);
 
-  // 🛡️ حماية الصفحة
-  useEffect(() => {
-    if (!user || !user.id) {
-      window.location.replace("/login");
-      return;
-    }
-
-    if (!user.must_change_password) {
-      window.location.replace("/dashboard");
-    }
-  }, [user]);
-
-  // 🔐 Change password
   const handleChange = async () => {
     if (!pass1 || !pass2) {
       setMsg("❌ الرجاء إدخال كلمة المرور");
@@ -64,20 +81,22 @@ export default function ChangePasswordFirstLogin() {
       return;
     }
 
+    // 🔥 تحديث localStorage
     const updatedUser = {
       ...user,
       must_change_password: false,
     };
 
     localStorage.setItem("user", JSON.stringify(updatedUser));
-    sessionStorage.setItem("user", JSON.stringify(updatedUser));
 
     setMsg("✅ تم تغيير كلمة المرور بنجاح");
 
     setTimeout(() => {
       window.location.replace("/dashboard");
-    }, 1000);
+    }, 1200);
   };
+
+  if (!user) return null;
 
   return (
     <div style={styles.page}>
@@ -89,20 +108,20 @@ export default function ChangePasswordFirstLogin() {
         <img
           src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg"
           style={styles.logo}
-          alt="logo"
         />
 
-        <h2>⚖️ العدل أساس العمران</h2>
+        <h2 style={styles.title}>⚖️ العدل أساس العمران</h2>
 
         <div style={styles.notice}>
-          مرحباً <b>{user?.fullName}</b><br />
-          يرجى تغيير كلمة المرور للدخول إلى النظام
+          مرحباً <b>{user.fullName}</b><br />
+          ({user.role || "المحكمة"})<br /><br />
+
+          يرجى إعادة تعيين كلمة المرور للدخول للنظام.
         </div>
 
         <input
           type="password"
           placeholder="كلمة المرور الجديدة"
-          value={pass1}
           onChange={(e) => setPass1(e.target.value)}
           style={styles.input}
         />
@@ -110,17 +129,91 @@ export default function ChangePasswordFirstLogin() {
         <input
           type="password"
           placeholder="تأكيد كلمة المرور"
-          value={pass2}
           onChange={(e) => setPass2(e.target.value)}
           style={styles.input}
         />
 
-        <button onClick={handleChange} style={styles.button}>
+        <button onClick={handleChange} style={styles.button} disabled={loading}>
           {loading ? "جاري الحفظ..." : "اعتماد كلمة المرور"}
         </button>
 
-        {msg && <p>{msg}</p>}
+        {msg && <p style={styles.msg}>{msg}</p>}
       </div>
     </div>
   );
 }
+
+const styles = {
+  page: {
+    minHeight: "100vh",
+    background: "linear-gradient(135deg, #0b2e4a, #0f4c75)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    fontFamily: "Tahoma",
+    direction: "rtl",
+    padding: "10px",
+  },
+  header: {
+    width: "100%",
+    background: "#b91c1c",
+    color: "white",
+    textAlign: "center",
+    padding: "12px",
+    fontWeight: "bold",
+    fontSize: "16px",
+    borderRadius: "0 0 12px 12px",
+  },
+  container: {
+    marginTop: "40px",
+    width: "100%",
+    maxWidth: "420px",
+    background: "rgba(255,255,255,0.12)",
+    backdropFilter: "blur(20px)",
+    borderRadius: "18px",
+    padding: "25px",
+    textAlign: "center",
+    color: "white",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
+  },
+  logo: { width: "90px", marginBottom: "10px" },
+  title: {
+    color: "#fbbf24",
+    marginBottom: "15px",
+    fontSize: "18px",
+    fontWeight: "bold",
+  },
+  notice: {
+    background: "rgba(255,255,255,0.15)",
+    padding: "12px",
+    borderRadius: "12px",
+    fontSize: "14px",
+    marginBottom: "15px",
+    lineHeight: "1.6",
+  },
+  input: {
+    width: "100%",
+    padding: "12px",
+    margin: "8px 0",
+    borderRadius: "10px",
+    border: "none",
+    outline: "none",
+    fontSize: "14px",
+  },
+  button: {
+    width: "100%",
+    padding: "12px",
+    marginTop: "10px",
+    borderRadius: "10px",
+    background: "#1e3a8a",
+    color: "white",
+    fontWeight: "bold",
+    cursor: "pointer",
+    border: "none",
+  },
+  msg: {
+    marginTop: "12px",
+    fontWeight: "bold",
+    color: "#22c55e",
+  },
+};
