@@ -7,24 +7,18 @@ export default function Login() {
   const [remember, setRemember] = useState(false);
   const [message, setMessage] = useState("");
   const [welcome, setWelcome] = useState("");
-  const [checkingSession, setCheckingSession] = useState(true); // 🔥 مهم
+  const [checkingSession, setCheckingSession] = useState(true);
 
-  // ✅ تحقق من الجلسة مرة واحدة فقط (بدون Loop)
+  // 🔥 Session check
   useEffect(() => {
-    const checkSession = () => {
+    const savedUser =
+      localStorage.getItem("user") ||
+      sessionStorage.getItem("user");
+
+    if (savedUser) {
       try {
-        const savedUser =
-          localStorage.getItem("user") ||
-          sessionStorage.getItem("user");
-
-        if (!savedUser) {
-          setCheckingSession(false);
-          return;
-        }
-
         const user = JSON.parse(savedUser);
 
-        // 🔥 منع الرعشة (تحقق من الصفحة الحالية)
         if (window.location.pathname === "/login") {
           if (user.must_change_password) {
             window.location.replace("/change-password");
@@ -34,21 +28,10 @@ export default function Login() {
         }
       } catch (err) {
         console.log(err);
-      } finally {
-        setCheckingSession(false);
       }
-    };
+    }
 
-    checkSession();
-  }, []);
-
-  // 🛡️ Ping خفيف بدون تأثير
-  useEffect(() => {
-    const interval = setInterval(() => {
-      supabase.from("users").select("id").limit(1);
-    }, 300000);
-
-    return () => clearInterval(interval);
+    setCheckingSession(false);
   }, []);
 
   // 🔐 LOGIN
@@ -83,7 +66,7 @@ export default function Login() {
       .update({ last_login: new Date() })
       .eq("id", data.id);
 
-    // 💾 تخزين الجلسة
+    // 💾 session
     const userData = JSON.stringify(data);
 
     if (remember) {
@@ -92,7 +75,7 @@ export default function Login() {
       sessionStorage.setItem("user", userData);
     }
 
-    // 🏛️ اسم المحكمة
+    // 🏛️ court name
     let courtName = "";
 
     if (data.role === "inspection_generale") {
@@ -107,26 +90,25 @@ export default function Login() {
       courtName = court?.name || "";
     }
 
-    // 🎯 رسالة الترحيب
-    const welcomeText =
+    setWelcome(
       data.role === "inspection_generale"
         ? "مرحبا التفقدية العامة - إشراف مركزي"
-        : `مرحبا ${data.fullName} - ${courtName}`;
+        : `مرحبا ${data.fullName} - ${courtName}`
+    );
 
-    setWelcome(welcomeText);
     setMessage("✅ تم تسجيل الدخول بنجاح");
 
-    // 🔥 Redirect بدون رعشة
+    // 🔥 REDIRECT SYSTEM (المهم)
     setTimeout(() => {
       if (data.must_change_password) {
         window.location.replace("/change-password");
       } else {
         window.location.replace("/dashboard");
       }
-    }, 800);
+    }, 600);
   };
 
-  // ⛔ مهم: منع ظهور الصفحة أثناء التحقق
+  // ⛔ loading session
   if (checkingSession) {
     return (
       <div style={styles.loading}>
@@ -178,6 +160,13 @@ export default function Login() {
           دخول
         </button>
 
+        {/* 🔥 روابط جديدة */}
+        <div style={{ marginTop: "10px" }}>
+          <a href="/forgot-password" style={{ color: "#fbbf24" }}>
+            نسيت كلمة المرور؟
+          </a>
+        </div>
+
         {welcome && <p style={styles.welcome}>{welcome}</p>}
 
         {message && (
@@ -195,7 +184,7 @@ export default function Login() {
   );
 }
 
-/* نفس الستايل بدون تغيير */
+/* نفس الستايل */
 const styles = {
   page: {
     height: "100vh",
