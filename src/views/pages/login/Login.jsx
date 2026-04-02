@@ -6,10 +6,9 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [message, setMessage] = useState("");
-  const [welcome, setWelcome] = useState("");
   const [checkingSession, setCheckingSession] = useState(true);
 
-  // 🔥 Session Check
+  // 🔥 Session Check (FIXED)
   useEffect(() => {
     const savedUser =
       localStorage.getItem("user") ||
@@ -19,12 +18,28 @@ export default function Login() {
       try {
         const user = JSON.parse(savedUser);
 
-        // 🚨 مهم جداً: شرط صارم
-        if (user?.must_change_password === true) {
-          window.location.replace("/change-password");
-        } else {
-          window.location.replace("/dashboard");
-        }
+        // 🚨 لا نثق بالـ localStorage وحده
+        supabase
+          .from("users")
+          .select("must_change_password, role, id")
+          .eq("id", user.id)
+          .single()
+          .then(({ data }) => {
+            if (!data) {
+              localStorage.removeItem("user");
+              sessionStorage.removeItem("user");
+              setCheckingSession(false);
+              return;
+            }
+
+            if (data.must_change_password) {
+              window.location.replace("/change-password");
+            } else {
+              window.location.replace("/dashboard");
+            }
+          });
+
+        return;
       } catch (e) {
         localStorage.removeItem("user");
         sessionStorage.removeItem("user");
@@ -62,79 +77,46 @@ export default function Login() {
       return;
     }
 
-    // 🕒 تحديث آخر دخول
+    // 🕒 update last login
     await supabase
       .from("users")
       .update({ last_login: new Date().toISOString() })
       .eq("id", data.id);
 
-    // 💾 حفظ الجلسة (مهم)
+    // 💾 session storage
     const userData = JSON.stringify(data);
 
     if (remember) {
       localStorage.setItem("user", userData);
-      sessionStorage.removeItem("user");
     } else {
       sessionStorage.setItem("user", userData);
-      localStorage.removeItem("user");
     }
 
-    // 🏛️ اسم المحكمة
-    let courtName = "";
+    setMessage("✅ تم تسجيل الدخول");
 
-    if (data.role === "inspection_generale") {
-      courtName = "إشراف مركزي";
-    } else if (data.court_id) {
-      const { data: court } = await supabase
-        .from("courts")
-        .select("name")
-        .eq("id", data.court_id)
-        .single();
-
-      courtName = court?.name || "";
-    }
-
-    setWelcome(
-      data.role === "inspection_generale"
-        ? "مرحبا التفقدية العامة - إشراف مركزي"
-        : `مرحبا ${data.fullName || data.username} - ${courtName}`
-    );
-
-    setMessage("✅ تم تسجيل الدخول بنجاح");
-
-    // 🚀 Redirect FIXED (الأهم)
+    // 🚀 REDIRECT FIXED (القرار من Supabase مباشرة)
     setTimeout(() => {
       if (data.must_change_password === true) {
         window.location.replace("/change-password");
       } else {
         window.location.replace("/dashboard");
       }
-    }, 600);
+    }, 500);
   };
 
   // ⛔ Loading
   if (checkingSession) {
     return (
       <div style={styles.loading}>
-        <div style={styles.spinner}></div>
-        <p style={{ color: "white" }}>جاري التحقق من الجلسة...</p>
+        <p style={{ color: "white" }}>جاري التحقق...</p>
       </div>
     );
   }
 
   return (
     <div style={styles.page}>
-      <div style={styles.overlay}></div>
-
-      <img
-        src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg"
-        style={styles.watermark}
-        alt="logo"
-      />
-
       <div style={styles.card}>
         <h2>🏛️ منظومة النيابة العمومية</h2>
-        <h3>وزارة العدل - الجمهورية التونسية</h3>
 
         <input
           placeholder="اسم المستخدم"
@@ -151,11 +133,11 @@ export default function Login() {
           style={styles.input}
         />
 
-        <label style={{ color: "white", display: "flex", gap: "8px" }}>
+        <label style={{ color: "white" }}>
           <input
             type="checkbox"
             checked={remember}
-            onChange={(e) => setRemember(e.target.value)}
+            onChange={(e) => setRemember(e.target.checked)}
           />
           تذكرني
         </label>
@@ -164,54 +146,24 @@ export default function Login() {
           دخول
         </button>
 
-        <div style={{ marginTop: "10px" }}>
-          <a href="/forgot-password" style={{ color: "#fbbf24" }}>
-            نسيت كلمة المرور؟
-          </a>
-        </div>
+        <a href="/forgot-password" style={{ color: "#fbbf24" }}>
+          نسيت كلمة المرور؟
+        </a>
 
-        {welcome && <p style={styles.welcome}>{welcome}</p>}
-
-        {message && (
-          <p
-            style={{
-              ...styles.message,
-              color: message.includes("✅") ? "#22c55e" : "#ef4444",
-            }}
-          >
-            {message}
-          </p>
-        )}
+        {message && <p style={{ color: "white" }}>{message}</p>}
       </div>
     </div>
   );
 }
 
-// 🎨 Styles
 const styles = {
   page: {
     height: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    backgroundImage: "url('/pg.png')",
-    backgroundSize: "cover",
-    position: "relative",
+    background: "#0b1f3a",
     direction: "rtl",
-    fontFamily: "Tahoma",
-  },
-  overlay: {
-    position: "absolute",
-    inset: 0,
-    background: "rgba(0,0,0,0.6)",
-  },
-  watermark: {
-    position: "absolute",
-    width: "300px",
-    opacity: 0.1,
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
   },
   card: {
     width: "380px",
@@ -221,15 +173,12 @@ const styles = {
     background: "rgba(255,255,255,0.12)",
     backdropFilter: "blur(15px)",
     color: "white",
-    zIndex: 1,
   },
   input: {
     width: "100%",
     padding: "10px",
     margin: "8px 0",
     borderRadius: "8px",
-    border: "none",
-    outline: "none",
   },
   button: {
     width: "100%",
@@ -237,16 +186,6 @@ const styles = {
     background: "#1e3a8a",
     color: "white",
     borderRadius: "10px",
-    cursor: "pointer",
-    marginTop: "10px",
-    fontWeight: "bold",
-  },
-  welcome: {
-    marginTop: "12px",
-    color: "#22c55e",
-    fontWeight: "bold",
-  },
-  message: {
     marginTop: "10px",
     fontWeight: "bold",
   },
@@ -255,15 +194,6 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "#0b1f3a",
-  },
-  spinner: {
-    width: "50px",
-    height: "50px",
-    border: "4px solid rgba(255,255,255,0.2)",
-    borderTop: "4px solid white",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
   },
 };
 
