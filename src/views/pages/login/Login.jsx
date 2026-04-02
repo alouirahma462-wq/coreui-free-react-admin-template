@@ -9,7 +9,7 @@ export default function Login() {
   const [welcome, setWelcome] = useState("");
   const [checkingSession, setCheckingSession] = useState(true);
 
-  // 🔥 Session check (Auto redirect)
+  // 🔥 Session Check
   useEffect(() => {
     const savedUser =
       localStorage.getItem("user") ||
@@ -19,13 +19,13 @@ export default function Login() {
       try {
         const user = JSON.parse(savedUser);
 
-        if (user?.must_change_password) {
+        // 🚨 مهم جداً: شرط صارم
+        if (user?.must_change_password === true) {
           window.location.replace("/change-password");
         } else {
           window.location.replace("/dashboard");
         }
       } catch (e) {
-        console.log("Session error", e);
         localStorage.removeItem("user");
         sessionStorage.removeItem("user");
       }
@@ -39,7 +39,7 @@ export default function Login() {
     setMessage("");
 
     if (!username || !password) {
-      setMessage("❌ الرجاء إدخال اسم المستخدم وكلمة المرور");
+      setMessage("❌ الرجاء إدخال البيانات");
       return;
     }
 
@@ -53,7 +53,7 @@ export default function Login() {
       .single();
 
     if (error || !data) {
-      setMessage("❌ بيانات الدخول غير صحيحة");
+      setMessage("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
       return;
     }
 
@@ -68,7 +68,7 @@ export default function Login() {
       .update({ last_login: new Date().toISOString() })
       .eq("id", data.id);
 
-    // 💾 حفظ الجلسة
+    // 💾 حفظ الجلسة (مهم)
     const userData = JSON.stringify(data);
 
     if (remember) {
@@ -102,17 +102,17 @@ export default function Login() {
 
     setMessage("✅ تم تسجيل الدخول بنجاح");
 
-    // 🚀 Redirect system
+    // 🚀 Redirect FIXED (الأهم)
     setTimeout(() => {
-      if (data.must_change_password) {
+      if (data.must_change_password === true) {
         window.location.replace("/change-password");
       } else {
         window.location.replace("/dashboard");
       }
-    }, 800);
+    }, 600);
   };
 
-  // ⛔ Loading session check
+  // ⛔ Loading
   if (checkingSession) {
     return (
       <div style={styles.loading}>
@@ -155,7 +155,7 @@ export default function Login() {
           <input
             type="checkbox"
             checked={remember}
-            onChange={(e) => setRemember(e.target.checked)}
+            onChange={(e) => setRemember(e.target.value)}
           />
           تذكرني
         </label>
@@ -164,7 +164,6 @@ export default function Login() {
           دخول
         </button>
 
-        {/* 🔥 Forgot password */}
         <div style={{ marginTop: "10px" }}>
           <a href="/forgot-password" style={{ color: "#fbbf24" }}>
             نسيت كلمة المرور؟
