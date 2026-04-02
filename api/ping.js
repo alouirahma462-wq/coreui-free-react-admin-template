@@ -8,7 +8,7 @@ const supabase = createClient(
 export default async function handler(req, res) {
   const { error } = await supabase
     .from('keep_alive')
-    .update({ updated_at: new Date() })
+    .update({ updated_at: new Date().toISOString() })  // ✅ FIX
     .eq('id', 1)
 
   if (error) {
@@ -17,3 +17,4 @@ export default async function handler(req, res) {
 
   return res.status(200).json({ ok: true })
 }
+
