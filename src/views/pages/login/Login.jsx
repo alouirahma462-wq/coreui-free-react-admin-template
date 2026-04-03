@@ -16,9 +16,6 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // =========================
-      // VALIDATION
-      // =========================
       if (!username || !password) {
         setMessage("❌ الرجاء إدخال البيانات");
         setLoading(false);
@@ -26,7 +23,7 @@ export default function Login() {
       }
 
       // =========================
-      // CHECK USER
+      // GET USER FROM SUPABASE
       // =========================
       const { data, error } = await supabase
         .from("users")
@@ -56,27 +53,35 @@ export default function Login() {
         .eq("id", data.id);
 
       // =========================
-      // SAVE SESSION
+      // SAVE USER SAFE
       // =========================
-      const userData = JSON.stringify(data);
+      const userData = {
+        id: data.id,
+        username: data.username,
+        role: data.role,
+        must_change_password: data.must_change_password,
+      };
 
       if (remember) {
-        localStorage.setItem("user", userData);
+        localStorage.setItem("user", JSON.stringify(userData));
       } else {
-        sessionStorage.setItem("user", userData);
+        sessionStorage.setItem("user", JSON.stringify(userData));
       }
 
-      // =========================
-      // SUCCESS MESSAGE
-      // =========================
       setMessage("✅ تم تسجيل الدخول");
 
       setLoading(false);
 
       // =========================
-      // FORCE CHANGE PASSWORD FLOW
+      // SMART ROUTING (IMPORTANT FIX)
       // =========================
-      navigate("/change-password", { replace: true });
+      setTimeout(() => {
+        if (data.must_change_password) {
+          navigate("/change-password", { replace: true });
+        } else {
+          navigate("/dashboard", { replace: true });
+        }
+      }, 300);
 
     } catch (err) {
       console.error(err);
@@ -85,23 +90,14 @@ export default function Login() {
     }
   };
 
-  // =========================
-  // UI
-  // =========================
   return (
     <div style={styles.page}>
       <div style={styles.header}>
         🇹🇳 الجمهورية التونسية - وزارة العدل
       </div>
 
-      <img
-        src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg"
-        style={styles.watermark}
-      />
-
       <div style={styles.card}>
-        <h2 style={styles.title}>🏛️ منظومة النيابة العمومية</h2>
-        <h3 style={styles.subtitle}>وزارة العدل - الجمهورية التونسية</h3>
+        <h2>🏛️ منظومة النيابة العمومية</h2>
 
         <input
           placeholder="اسم المستخدم"
@@ -118,7 +114,7 @@ export default function Login() {
           style={styles.input}
         />
 
-        <label style={styles.checkbox}>
+        <label>
           <input
             type="checkbox"
             checked={remember}
@@ -130,69 +126,16 @@ export default function Login() {
         <button
           onClick={handleLogin}
           disabled={loading}
-          style={{
-            ...styles.button,
-            opacity: loading ? 0.6 : 1
-          }}
+          style={styles.button}
         >
           {loading ? "جاري الدخول..." : "دخول"}
         </button>
 
-        {message && <p style={styles.message}>{message}</p>}
+        {message && <p>{message}</p>}
       </div>
     </div>
   );
 }
-
-// =========================
-// STYLES
-// =========================
-const styles = {
-  page: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "#061a33",
-    direction: "rtl"
-  },
-  header: {
-    position: "absolute",
-    top: 0,
-    width: "100%",
-    background: "#b91c1c",
-    color: "white",
-    textAlign: "center",
-    padding: "10px"
-  },
-  watermark: {
-    position: "absolute",
-    width: "280px",
-    opacity: 0.08
-  },
-  card: {
-    width: "420px",
-    padding: "25px",
-    borderRadius: "18px",
-    background: "rgba(255,255,255,0.10)",
-    backdropFilter: "blur(18px)",
-    color: "white"
-  },
-  title: { color: "#fbbf24" },
-  subtitle: { fontSize: "14px" },
-  input: { width: "100%", padding: "10px", margin: "6px 0" },
-  checkbox: { color: "white", display: "flex", gap: "8px" },
-  button: {
-    width: "100%",
-    padding: "12px",
-    marginTop: "10px",
-    background: "#1e3a8a",
-    color: "white",
-    border: "none",
-    cursor: "pointer"
-  },
-  message: { marginTop: "10px", fontWeight: "bold" }
-};
 
 
 
