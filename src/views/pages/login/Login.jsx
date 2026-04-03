@@ -72,11 +72,11 @@ export default function Login() {
 
       // 🔥 redirect آمن بدون loop
       setTimeout(() => {
-        navigate(
-          mustChange ? "/change-password" : "/",
-          { replace: true }
-        );
-      }, 250);
+  navigate(
+    mustChange ? "/change-password" : "/dashboard",
+    { replace: true }
+  );
+}, 200);
 
     } catch (err) {
       console.error(err);
