@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 import Login from "./views/pages/login/Login.jsx";
-import ChangePassword from "./views/pages/changePassword/ChangePassword.jsx";
+import ChangePassword from "./views/pages/ChangePassword.jsx";
 import Dashboard from "./views/pages/dashboard/Dashboard.jsx";
 
 export default function App() {
