@@ -1,13 +1,20 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
+import { useNavigate } from "react-router-dom";
 
 export default function ChangePassword({ user, onSuccess }) {
+  const navigate = useNavigate();
+
   const [newPass, setNewPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [finalUser, setFinalUser] = useState(null);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  // 🔥 دمج user + localStorage (حل جذري)
+  // 🔥 دمج user + localStorage
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     setFinalUser(user || storedUser);
@@ -15,14 +22,34 @@ export default function ChangePassword({ user, onSuccess }) {
 
   const fullName = finalUser?.fullName || "المستخدم";
 
+  // 🔥 قوة كلمة المرور
+  const getStrength = (pass) => {
+    if (pass.length < 6) return "ضعيفة";
+    if (pass.match(/[A-Z]/) && pass.match(/[0-9]/) && pass.length >= 8)
+      return "قوية";
+    return "متوسطة";
+  };
+
   const handleChange = async () => {
+    setErrorMsg("");
+
     if (!finalUser?.id) {
-      alert("❌ لا يوجد مستخدم مسجل");
+      setErrorMsg("❌ لا يوجد مستخدم");
       return;
     }
 
     if (!newPass || newPass.length < 4) {
-      alert("❌ كلمة المرور يجب أن تكون 4 أحرف على الأقل");
+      setErrorMsg("❌ كلمة المرور قصيرة جداً");
+      return;
+    }
+
+    if (newPass !== confirmPass) {
+      setErrorMsg("❌ كلمة المرور غير متطابقة");
+      return;
+    }
+
+    if (getStrength(newPass) === "ضعيفة") {
+      setErrorMsg("❌ كلمة المرور ضعيفة جداً");
       return;
     }
 
@@ -39,19 +66,30 @@ export default function ChangePassword({ user, onSuccess }) {
     setLoading(false);
 
     if (!error) {
+      // حفظ localStorage
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          ...finalUser,
+          must_change_password: false,
+          rememberMe,
+        })
+      );
+
       setShowModal(true);
 
       setTimeout(() => {
         setShowModal(false);
         onSuccess?.();
-      }, 2000);
+        navigate("/dashboard");
+      }, 1500);
     } else {
-      alert("❌ خطأ في تغيير كلمة المرور");
+      setErrorMsg("❌ خطأ في تغيير كلمة المرور");
       console.error(error);
     }
   };
 
-  // 🔥 حماية قبل العرض (منع white screen / crash)
+  // 🔥 حماية قبل العرض
   if (!finalUser) {
     return (
       <div style={styles.loadingPage}>
@@ -73,6 +111,7 @@ export default function ChangePassword({ user, onSuccess }) {
           يرجى تغيير كلمة المرور الخاصة بك أول مرة
         </div>
 
+        {/* 🔐 كلمة المرور الجديدة */}
         <input
           type="password"
           placeholder="كلمة المرور الجديدة"
@@ -81,6 +120,32 @@ export default function ChangePassword({ user, onSuccess }) {
           style={styles.input}
         />
 
+        {/* 🔐 تأكيد كلمة المرور */}
+        <input
+          type="password"
+          placeholder="تأكيد كلمة المرور"
+          value={confirmPass}
+          onChange={(e) => setConfirmPass(e.target.value)}
+          style={styles.input}
+        />
+
+        {/* 🔥 قوة كلمة المرور */}
+        {newPass && (
+          <p style={{ color: "#fbbf24", fontSize: "14px" }}>
+            قوة كلمة المرور: <b>{getStrength(newPass)}</b>
+          </p>
+        )}
+
+        {/* 🔥 تذكرني */}
+        <label style={{ color: "white", fontSize: "14px" }}>
+          <input
+            type="checkbox"
+            onChange={(e) => setRememberMe(e.target.checked)}
+          />{" "}
+          تذكرني
+        </label>
+
+        {/* 🔥 زر الحفظ */}
         <button
           onClick={handleChange}
           disabled={loading}
@@ -92,6 +157,17 @@ export default function ChangePassword({ user, onSuccess }) {
         >
           {loading ? "جاري الحفظ..." : "تغيير كلمة المرور"}
         </button>
+
+        {/* 🔥 نسيت كلمة المرور */}
+        <p
+          onClick={() => navigate("/forgot-password")}
+          style={styles.forgot}
+        >
+          هل نسيت كلمة المرور؟
+        </p>
+
+        {/* ❌ رسالة خطأ */}
+        {errorMsg && <p style={{ color: "#ff6b6b" }}>{errorMsg}</p>}
       </div>
 
       {/* 🔥 MODAL نجاح */}
@@ -112,7 +188,7 @@ export default function ChangePassword({ user, onSuccess }) {
 }
 
 /* =========================
-   🎨 FULL STYLES PACKAGE
+   🎨 STYLE (نفس ستايلك + إضافات)
 ========================= */
 const styles = {
   page: {
@@ -181,6 +257,13 @@ const styles = {
     border: "none",
   },
 
+  forgot: {
+    marginTop: "10px",
+    color: "#60a5fa",
+    cursor: "pointer",
+    textDecoration: "underline",
+  },
+
   modalOverlay: {
     position: "fixed",
     top: 0,
@@ -215,6 +298,7 @@ const styles = {
     fontSize: "18px",
   },
 };
+
 
 
 
