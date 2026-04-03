@@ -4,16 +4,17 @@ import Login from './views/auth/Login'
 
 // Lazy pages
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
+const ChangePassword = React.lazy(() => import('./views/pages/ChangePassword'))
 
 const routes = [
-  // 🔥 الصفحة الأولى = Login
   { path: '/', exact: true, name: 'Home', element: <Navigate to="/login" /> },
 
-  // 🔐 Login
-  { path: '/login', name: 'Login', element: Login },
+  { path: '/login', name: 'Login', element: <Login /> },
 
-  // 🏛 Dashboard
-  { path: '/dashboard', name: 'Dashboard', element: Dashboard },
+  // ✅ أضف هذا
+  { path: '/change-password', name: 'ChangePassword', element: <ChangePassword /> },
+
+  { path: '/dashboard', name: 'Dashboard', element: <Dashboard /> },
 ]
 
 export default routes
