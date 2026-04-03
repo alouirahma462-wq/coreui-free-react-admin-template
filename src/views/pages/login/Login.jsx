@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../../supabaseClient";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
+  const navigate = useNavigate();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [message, setMessage] = useState("");
   const [checkingSession, setCheckingSession] = useState(true);
 
-  // 🔐 SESSION CHECK (حماية الدخول)
+  // 🔐 SESSION CHECK (معدل للـ Router)
   useEffect(() => {
     const savedUser =
       localStorage.getItem("user") ||
@@ -26,36 +29,36 @@ export default function Login() {
             .single();
 
           if (!data) {
-            localStorage.removeItem("user");
-            sessionStorage.removeItem("user");
+            localStorage.clear();
+            sessionStorage.clear();
             setCheckingSession(false);
             return;
           }
 
           if (data.must_change_password) {
-            window.location.replace("/change-password");
+            navigate("/change-password");
           } else {
-            window.location.replace("/dashboard");
+            navigate("/dashboard");
           }
         };
 
         checkUser();
         return;
       } catch (e) {
-        localStorage.removeItem("user");
-        sessionStorage.removeItem("user");
+        localStorage.clear();
+        sessionStorage.clear();
       }
     }
 
     setCheckingSession(false);
-  }, []);
+  }, [navigate]);
 
   // 🔐 LOGIN
   const handleLogin = async () => {
     setMessage("");
 
     if (!username || !password) {
-      setMessage("❌ الرجاء إدخال اسم المستخدم وكلمة المرور");
+      setMessage("❌ الرجاء إدخال البيانات");
       return;
     }
 
@@ -69,22 +72,20 @@ export default function Login() {
       .single();
 
     if (error || !data) {
-      setMessage("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
+      setMessage("❌ بيانات الدخول غير صحيحة");
       return;
     }
 
     if (!data.isActive) {
-      setMessage("❌ الحساب غير مفعل، يرجى مراجعة الإدارة");
+      setMessage("❌ الحساب غير مفعل");
       return;
     }
 
-    // 🕒 تحديث آخر دخول
     await supabase
       .from("users")
       .update({ last_login: new Date().toISOString() })
       .eq("id", data.id);
 
-    // 💾 حفظ الجلسة
     const userData = JSON.stringify(data);
 
     if (remember) {
@@ -93,13 +94,13 @@ export default function Login() {
       sessionStorage.setItem("user", userData);
     }
 
-    setMessage("✅ تم تسجيل الدخول بنجاح");
+    setMessage("✅ تم تسجيل الدخول");
 
-    // 🚀 Redirect مباشر (بدون مشاكل)
-    if (data.must_change_password === true) {
-      window.location.replace("/change-password");
+    // 🚀 NAVIGATE بدل window.location
+    if (data.must_change_password) {
+      navigate("/change-password");
     } else {
-      window.location.replace("/dashboard");
+      navigate("/dashboard");
     }
   };
 
@@ -113,9 +114,6 @@ export default function Login() {
 
   return (
     <div style={styles.page}>
-      <div style={styles.overlay}></div>
-
-      {/* 🇹🇳 Header رسمي */}
       <div style={styles.header}>
         🇹🇳 الجمهورية التونسية - وزارة العدل
       </div>
@@ -130,8 +128,7 @@ export default function Login() {
         <h3 style={styles.subtitle}>وزارة العدل - الجمهورية التونسية</h3>
 
         <p style={styles.notice}>
-          الدخول إلى النظام القضائي يتطلب مصادقة رسمية من الإدارة المركزية.
-          جميع العمليات مسجلة وتخضع للمراقبة الأمنية.
+          الدخول يخضع للمراقبة الأمنية وتسجيل العمليات.
         </p>
 
         <input
@@ -166,22 +163,13 @@ export default function Login() {
           نسيت كلمة المرور؟
         </a>
 
-        {message && (
-          <p
-            style={{
-              ...styles.message,
-              color: message.includes("✅") ? "#22c55e" : "#ef4444",
-            }}
-          >
-            {message}
-          </p>
-        )}
+        {message && <p style={styles.message}>{message}</p>}
       </div>
     </div>
   );
 }
 
-/* 🎨 STYLE FINAL (رسمي + وزاري) */
+/* 🎨 STYLE */
 const styles = {
   page: {
     height: "100vh",
@@ -190,7 +178,6 @@ const styles = {
     alignItems: "center",
     background: "linear-gradient(135deg, #061a33, #0b3a66)",
     direction: "rtl",
-    fontFamily: "Tahoma",
     position: "relative",
     overflow: "hidden",
   },
@@ -202,28 +189,18 @@ const styles = {
     background: "#b91c1c",
     color: "white",
     textAlign: "center",
-    padding: "12px",
+    padding: "10px",
     fontWeight: "bold",
-    fontSize: "14px",
-  },
-
-  overlay: {
-    position: "absolute",
-    inset: 0,
-    background: "rgba(0,0,0,0.4)",
   },
 
   watermark: {
     position: "absolute",
     width: "280px",
     opacity: 0.08,
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
   },
 
   card: {
-    width: "400px",
+    width: "420px",
     padding: "25px",
     borderRadius: "18px",
     textAlign: "center",
@@ -231,68 +208,49 @@ const styles = {
     backdropFilter: "blur(18px)",
     color: "white",
     zIndex: 2,
-    boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
   },
 
-  title: {
-    color: "#fbbf24",
-    marginBottom: "5px",
-  },
-
-  subtitle: {
-    fontSize: "14px",
-    marginBottom: "10px",
-    opacity: 0.9,
-  },
+  title: { color: "#fbbf24" },
+  subtitle: { fontSize: "14px" },
 
   notice: {
     fontSize: "13px",
-    background: "rgba(255,255,255,0.12)",
-    padding: "10px",
-    borderRadius: "10px",
     marginBottom: "15px",
-    lineHeight: "1.6",
   },
 
   input: {
     width: "100%",
-    padding: "11px",
-    margin: "8px 0",
-    borderRadius: "10px",
+    padding: "10px",
+    margin: "6px 0",
+    borderRadius: "8px",
     border: "none",
-    outline: "none",
-    fontSize: "14px",
   },
 
   checkbox: {
     color: "white",
     display: "flex",
     gap: "8px",
-    marginTop: "5px",
     fontSize: "13px",
   },
 
   button: {
     width: "100%",
     padding: "12px",
-    marginTop: "12px",
-    borderRadius: "10px",
+    marginTop: "10px",
     background: "#1e3a8a",
     color: "white",
+    borderRadius: "10px",
     fontWeight: "bold",
-    cursor: "pointer",
-    border: "none",
   },
 
   link: {
     display: "block",
     marginTop: "10px",
     color: "#fbbf24",
-    fontSize: "13px",
   },
 
   message: {
-    marginTop: "12px",
+    marginTop: "10px",
     fontWeight: "bold",
   },
 
@@ -304,6 +262,7 @@ const styles = {
     background: "#061a33",
   },
 };
+
 
 
 
