@@ -2,6 +2,7 @@ import { useState } from "react";
 import { supabase } from "../../../supabaseClient";
 
 
+
 export default function ChangePassword({ user, onSuccess }) {
   const [newPass, setNewPass] = useState("");
   const [loading, setLoading] = useState(false);
