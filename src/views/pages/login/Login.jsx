@@ -11,20 +11,23 @@ export default function Login() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // =========================
-  // LOGIN FINAL SAFE VERSION
-  // =========================
   const handleLogin = async () => {
     setMessage("");
     setLoading(true);
 
     try {
+      // =========================
+      // VALIDATION
+      // =========================
       if (!username || !password) {
         setMessage("❌ الرجاء إدخال البيانات");
         setLoading(false);
         return;
       }
 
+      // =========================
+      // CHECK USER
+      // =========================
       const { data, error } = await supabase
         .from("users")
         .select("*")
@@ -44,13 +47,17 @@ export default function Login() {
         return;
       }
 
-      // تحديث آخر دخول
+      // =========================
+      // UPDATE LAST LOGIN
+      // =========================
       await supabase
         .from("users")
         .update({ last_login: new Date().toISOString() })
         .eq("id", data.id);
 
-      // حفظ session
+      // =========================
+      // SAVE SESSION
+      // =========================
       const userData = JSON.stringify(data);
 
       if (remember) {
@@ -59,24 +66,17 @@ export default function Login() {
         sessionStorage.setItem("user", userData);
       }
 
+      // =========================
+      // SUCCESS MESSAGE
+      // =========================
       setMessage("✅ تم تسجيل الدخول");
 
-      const mustChange = data.must_change_password === true;
-
-      // =========================
-      // FIX الجذري النهائي
-      // =========================
-
-      // 🔥 نوقف أي state update قبل الانتقال
       setLoading(false);
 
-      // 🔥 redirect آمن بدون loop
-      setTimeout(() => {
-  navigate(
-    mustChange ? "/change-password" : "/dashboard",
-    { replace: true }
-  );
-}, 200);
+      // =========================
+      // FORCE CHANGE PASSWORD FLOW
+      // =========================
+      navigate("/change-password", { replace: true });
 
     } catch (err) {
       console.error(err);
@@ -193,6 +193,7 @@ const styles = {
   },
   message: { marginTop: "10px", fontWeight: "bold" }
 };
+
 
 
 
