@@ -11,7 +11,6 @@ export default function Login() {
   const [message, setMessage] = useState("");
   const [checkingSession, setCheckingSession] = useState(true);
 
-  // 🔐 SESSION CHECK (معدل للـ Router)
   useEffect(() => {
     const savedUser =
       localStorage.getItem("user") ||
@@ -35,7 +34,7 @@ export default function Login() {
             return;
           }
 
-          if (data.must_change_password) {
+          if (data.must_change_password === true || data.must_change_password === "true") {
             navigate("/change-password");
           } else {
             navigate("/dashboard");
@@ -53,7 +52,6 @@ export default function Login() {
     setCheckingSession(false);
   }, [navigate]);
 
-  // 🔐 LOGIN
   const handleLogin = async () => {
     setMessage("");
 
@@ -66,7 +64,7 @@ export default function Login() {
 
     const { data, error } = await supabase
       .from("users")
-      .select("*")
+      .select("id, username, password, must_change_password, isActive")
       .eq("username", username)
       .eq("password", password)
       .single();
@@ -96,11 +94,15 @@ export default function Login() {
 
     setMessage("✅ تم تسجيل الدخول");
 
-    // 🚀 NAVIGATE بدل window.location
-    if (data.must_change_password) {
-      navigate("/change-password");
+    // 🔥 FIXED NAVIGATION (هذا الجزء اللي طلبته)
+    if (data.must_change_password === true || data.must_change_password === "true") {
+      setTimeout(() => {
+        navigate("/change-password");
+      }, 0);
     } else {
-      navigate("/dashboard");
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 0);
     }
   };
 
@@ -169,7 +171,7 @@ export default function Login() {
   );
 }
 
-/* 🎨 STYLE */
+/* 🎨 STYLE (نفسه بدون تغيير) */
 const styles = {
   page: {
     height: "100vh",
@@ -262,6 +264,7 @@ const styles = {
     background: "#061a33",
   },
 };
+
 
 
 
