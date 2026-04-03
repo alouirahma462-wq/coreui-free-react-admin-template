@@ -14,7 +14,7 @@ export default function ChangePassword() {
   const [showModal, setShowModal] = useState(false);
 
   // =========================
-  // تحميل المستخدم + حماية
+  // تحميل المستخدم الحقيقي من Supabase
   // =========================
   useEffect(() => {
     const stored =
@@ -28,24 +28,53 @@ export default function ChangePassword() {
 
     const parsed = JSON.parse(stored);
 
-    if (!parsed.must_change_password) {
-      navigate("/dashboard", { replace: true });
-      return;
-    }
+    const fetchUser = async () => {
+      const { data, error } = await supabase
+        .from("users")
+        .select(`
+          id,
+          username,
+          fullName,
+          must_change_password,
+          court_id,
+          courts (
+            name
+          )
+        `)
+        .eq("id", parsed.id)
+        .single();
 
-    setUser(parsed);
-    setChecking(false);
+      if (error || !data) {
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      // إذا ما يحتاج تغيير → روح داشبورد
+      if (data.must_change_password === false) {
+        navigate("/dashboard", { replace: true });
+        return;
+      }
+
+      setUser(data);
+      setChecking(false);
+    };
+
+    fetchUser();
   }, [navigate]);
 
   // =========================
-  // رسالة الترحيب (fullName فقط)
+  // رسالة الترحيب
   // =========================
   const getWelcomeMessage = () => {
-    if (user?.fullName === "التفقدية العامة") {
+    if (!user) return "";
+
+    if (user.fullName === "التفقدية العامة") {
       return "مرحبا التفقدية العامة - إشراف مركزي";
     }
 
-    return "مرحبا وكيل الجمهورية - تونس المحكمة الابتدائية تونس";
+    return `مرحبا ${user.fullName} - ${
+      user.courts?.name || "محكمة غير محددة"
+    }`;
   };
 
   // =========================
@@ -65,19 +94,24 @@ export default function ChangePassword() {
 
     setLoading(true);
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("users")
       .update({
         password: pass1,
         must_change_password: false,
         last_login: new Date().toISOString(),
       })
-      .eq("id", user.id);
+      .eq("id", user.id)
+      .select();
 
     setLoading(false);
 
-    if (error) return setMsg("❌ حدث خطأ أثناء الحفظ");
+    if (error) {
+      setMsg("❌ حدث خطأ أثناء الحفظ");
+      return;
+    }
 
+    // تحديث local storage
     const updatedUser = {
       ...user,
       must_change_password: false,
@@ -145,31 +179,27 @@ export default function ChangePassword() {
         {msg && <p style={styles.msg}>{msg}</p>}
       </div>
 
-      {/* =========================
-          MODAL SUCCESS
-      ========================= */}
+      {/* MODAL */}
       {showModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalBox}>
-
             <div style={{ fontSize: "55px" }}>🎉</div>
 
             <h2 style={{ color: "#22c55e" }}>
               تم تسجيل الدخول بنجاح
             </h2>
 
-            <h3 style={{ color: "#fbbf24", marginTop: "10px" }}>
+            <h3 style={{ color: "#fbbf24" }}>
               {user.fullName}
             </h3>
 
-            <p style={{ marginTop: "15px", fontSize: "16px" }}>
+            <p style={{ marginTop: "15px" }}>
               {getWelcomeMessage()}
             </p>
 
-            <p style={{ marginTop: "10px", opacity: 0.8 }}>
+            <p style={{ opacity: 0.8 }}>
               جاري تحويلك إلى لوحة التحكم...
             </p>
-
           </div>
         </div>
       )}
@@ -177,117 +207,6 @@ export default function ChangePassword() {
   );
 }
 
-// =========================
-// STYLES (FINAL CLEAN PACK)
-// =========================
-const styles = {
-  page: {
-    height: "100vh",
-    background: "linear-gradient(135deg, #061a33, #0b2e4a)",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    direction: "rtl",
-    fontFamily: "Tahoma",
-  },
-
-  header: {
-    width: "100%",
-    background: "#b91c1c",
-    color: "white",
-    textAlign: "center",
-    padding: "12px",
-    fontWeight: "bold",
-  },
-
-  card: {
-    marginTop: "40px",
-    width: "420px",
-    background: "rgba(255,255,255,0.12)",
-    backdropFilter: "blur(18px)",
-    borderRadius: "18px",
-    padding: "25px",
-    textAlign: "center",
-    color: "white",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
-  },
-
-  logo: {
-    width: "80px",
-    marginBottom: "10px",
-  },
-
-  title: {
-    color: "#fbbf24",
-    marginBottom: "15px",
-  },
-
-  infoBox: {
-    background: "rgba(255,255,255,0.15)",
-    padding: "10px",
-    borderRadius: "10px",
-    marginBottom: "12px",
-  },
-
-  input: {
-    width: "100%",
-    padding: "12px",
-    margin: "8px 0",
-    borderRadius: "10px",
-    border: "none",
-    outline: "none",
-  },
-
-  button: {
-    width: "100%",
-    padding: "12px",
-    marginTop: "10px",
-    borderRadius: "10px",
-    background: "#1e3a8a",
-    color: "white",
-    fontWeight: "bold",
-    cursor: "pointer",
-    border: "none",
-  },
-
-  msg: {
-    marginTop: "10px",
-    fontWeight: "bold",
-    color: "#22c55e",
-  },
-
-  loading: {
-    color: "white",
-    textAlign: "center",
-    marginTop: "50px",
-  },
-
-  modalOverlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    background: "rgba(0,0,0,0.75)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 9999,
-    padding: "20px",
-  },
-
-  modalBox: {
-    width: "100%",
-    maxWidth: "420px",
-    padding: "30px",
-    borderRadius: "18px",
-    textAlign: "center",
-    background: "rgba(255,255,255,0.12)",
-    backdropFilter: "blur(20px)",
-    color: "white",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
-  },
-};
 
 
 
