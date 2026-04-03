@@ -9,11 +9,12 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/change-password" element={<ChangePassword />} />
 
-      {/* الافتراضي */}
-      <Route path="*" element={<Login />} />
+      {/* 🟢 خلّي الافتراضي login فقط */}
+      <Route path="/" element={<Login />} />
     </Routes>
   );
 }
+
 
 
 
