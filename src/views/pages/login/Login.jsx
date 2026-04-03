@@ -15,44 +15,47 @@ export default function Login() {
     setLoading(true);
 
     if (!username || !password) {
-      setMessage("❌ الرجاء إدخال البيانات");
+      setMessage("❌ الرجاء إدخال اسم المستخدم وكلمة المرور");
       setLoading(false);
       return;
     }
 
+    const cleanUsername = username.trim();
+    const cleanPassword = password.trim();
+
     const { data, error } = await supabase
       .from("users")
       .select("id, username, fullName, court_id, must_change_password, isActive")
-      .eq("username", username)
-      .eq("password", password);
+      .eq("username", cleanUsername)
+      .eq("password", cleanPassword)
+      .single();
 
-    const user = data?.[0];
-
-    if (error || !user) {
+    if (error || !data) {
+      console.log("LOGIN ERROR:", error);
       setMessage("❌ بيانات الدخول غير صحيحة");
       setLoading(false);
       return;
     }
 
-    if (user.isActive === false) {
+    if (data.isActive === false) {
       setMessage("❌ الحساب غير مفعل");
       setLoading(false);
       return;
     }
 
     const userData = {
-      id: user.id,
-      username: user.username,
-      fullName: user.fullName,
-      court_id: user.court_id,
-      must_change_password: user.must_change_password,
+      id: data.id,
+      username: data.username,
+      fullName: data.fullName,
+      court_id: data.court_id,
+      must_change_password: data.must_change_password,
     };
 
     localStorage.setItem("user", JSON.stringify(userData));
 
     setLoading(false);
 
-    if (user.must_change_password) {
+    if (data.must_change_password) {
       navigate("/change-password");
     } else {
       navigate("/dashboard");
@@ -66,7 +69,7 @@ export default function Login() {
       </div>
 
       <div style={styles.card}>
-        <h2>🏛️ منظومة النيابة العمومية</h2>
+        <h2 style={{ marginBottom: "15px" }}>🏛️ منظومة النيابة العمومية</h2>
 
         <input
           placeholder="اسم المستخدم"
@@ -82,10 +85,10 @@ export default function Login() {
         />
 
         <button onClick={handleLogin} style={styles.button}>
-          {loading ? "..." : "دخول"}
+          {loading ? "جاري الدخول..." : "دخول"}
         </button>
 
-        {message && <p>{message}</p>}
+        {message && <p style={styles.message}>{message}</p>}
       </div>
     </div>
   );
@@ -98,38 +101,55 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "column",
-    background: "#061a33",
+    background: "linear-gradient(135deg, #061a33, #0b2a4a)",
     color: "white",
     direction: "rtl",
   },
+
   header: {
     position: "absolute",
     top: 0,
     width: "100%",
     background: "#b91c1c",
     textAlign: "center",
-    padding: "10px",
+    padding: "12px",
+    fontWeight: "bold",
   },
+
   card: {
-    width: "400px",
-    padding: "20px",
-    borderRadius: "12px",
-    background: "rgba(255,255,255,0.1)",
+    width: "380px",
+    padding: "25px",
+    borderRadius: "15px",
+    background: "rgba(255,255,255,0.08)",
+    backdropFilter: "blur(10px)",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+    textAlign: "center",
   },
+
   input: {
     width: "100%",
-    padding: "10px",
-    margin: "6px 0",
-    borderRadius: "6px",
+    padding: "12px",
+    margin: "8px 0",
+    borderRadius: "8px",
     border: "none",
+    outline: "none",
   },
+
   button: {
     width: "100%",
-    padding: "10px",
+    padding: "12px",
     marginTop: "10px",
     background: "#1e3a8a",
     color: "white",
     border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
+
+  message: {
+    marginTop: "10px",
+    color: "#ffcccb",
   },
 };
 
