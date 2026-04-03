@@ -13,71 +13,38 @@ export default function ChangePassword() {
   const [checking, setChecking] = useState(true);
 
   // =========================
-  // LOAD USER SAFE (NO LOOP)
+  // تحميل المستخدم + حماية
   // =========================
   useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const stored =
-          localStorage.getItem("user") ||
-          sessionStorage.getItem("user");
+    const stored =
+      localStorage.getItem("user") ||
+      sessionStorage.getItem("user");
 
-        if (!stored) {
-          navigate("/login", { replace: true });
-          return;
-        }
+    if (!stored) {
+      navigate("/login", { replace: true });
+      return;
+    }
 
-        const localUser = JSON.parse(stored);
+    const parsed = JSON.parse(stored);
 
-        const { data, error } = await supabase
-          .from("users")
-          .select("*")
-          .eq("id", localUser.id)
-          .single();
+    if (!parsed.must_change_password) {
+      navigate("/dashboard", { replace: true });
+      return;
+    }
 
-        if (error || !data) {
-          navigate("/login", { replace: true });
-          return;
-        }
-
-        // إذا ما يحتاج تغيير كلمة المرور → روح مباشرة
-        if (!data.must_change_password) {
-          navigate("/dashboard", { replace: true });
-          return;
-        }
-
-        setUser(data);
-      } catch (err) {
-        console.log(err);
-        navigate("/login", { replace: true });
-      } finally {
-        setChecking(false);
-      }
-    };
-
-    loadUser();
+    setUser(parsed);
+    setChecking(false);
   }, [navigate]);
 
   // =========================
-  // CHANGE PASSWORD
+  // تغيير كلمة المرور
   // =========================
   const handleChange = async () => {
     setMsg("");
 
-    if (!pass1 || !pass2) {
-      setMsg("❌ الرجاء إدخال كلمة المرور");
-      return;
-    }
-
-    if (pass1 !== pass2) {
-      setMsg("❌ كلمات المرور غير متطابقة");
-      return;
-    }
-
-    if (pass1.length < 6) {
-      setMsg("❌ كلمة المرور ضعيفة (6 أحرف على الأقل)");
-      return;
-    }
+    if (!pass1 || !pass2) return setMsg("❌ الرجاء إدخال كلمة المرور");
+    if (pass1 !== pass2) return setMsg("❌ كلمات المرور غير متطابقة");
+    if (pass1.length < 6) return setMsg("❌ كلمة المرور ضعيفة");
 
     setLoading(true);
 
@@ -86,18 +53,16 @@ export default function ChangePassword() {
       .update({
         password: pass1,
         must_change_password: false,
+        last_login: new Date().toISOString(),
       })
       .eq("id", user.id);
 
     setLoading(false);
 
-    if (error) {
-      setMsg("❌ حدث خطأ أثناء التحديث");
-      return;
-    }
+    if (error) return setMsg("❌ حدث خطأ أثناء الحفظ");
 
     // =========================
-    // UPDATE LOCAL STORAGE
+    // تحديث المستخدم
     // =========================
     const updatedUser = {
       ...user,
@@ -107,33 +72,46 @@ export default function ChangePassword() {
     localStorage.setItem("user", JSON.stringify(updatedUser));
     sessionStorage.setItem("user", JSON.stringify(updatedUser));
 
-    setMsg("✅ تم تغيير كلمة المرور");
+    // =========================
+    // رسالة النجاح المطلوبة منك
+    // =========================
+    setMsg(
+      `✅ مرحباً ${updatedUser.jobTitle || "المسمى الوظيفي"} - المحكمة - النيابة العامة - إشراف مركزي`
+    );
 
     setTimeout(() => {
       navigate("/dashboard", { replace: true });
-    }, 800);
+    }, 1500);
   };
 
-  // =========================
-  // LOADING SCREEN
-  // =========================
-  if (checking) {
+  if (checking)
     return (
-      <div style={{ textAlign: "center", marginTop: 50 }}>
-        ⏳ جاري التحقق...
-      </div>
+      <div style={styles.loading}>⏳ جاري التحقق...</div>
     );
-  }
 
   if (!user) return null;
 
-  // =========================
-  // UI
-  // =========================
   return (
     <div style={styles.page}>
+      <div style={styles.header}>
+        🇹🇳 الجمهورية التونسية - وزارة العدل
+      </div>
+
       <div style={styles.card}>
-        <h2>🔐 تغيير كلمة المرور</h2>
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg"
+          style={styles.logo}
+        />
+
+        <h2 style={styles.title}>⚖️ العدل أساس العمران</h2>
+
+        <div style={styles.infoBox}>
+          👤 {user.username}
+          <br />
+          🏛️ {user.role || "المحكمة"}
+          <br />
+          🔐 يجب تغيير كلمة المرور لتفعيل الحساب
+        </div>
 
         <input
           type="password"
@@ -154,48 +132,98 @@ export default function ChangePassword() {
           disabled={loading}
           style={styles.button}
         >
-          {loading ? "جاري الحفظ..." : "تأكيد"}
+          {loading ? "جاري الحفظ..." : "تأكيد وتفعيل"}
         </button>
 
-        {msg && <p>{msg}</p>}
+        {msg && <p style={styles.msg}>{msg}</p>}
       </div>
     </div>
   );
 }
 
 // =========================
-// STYLES
+// تصميم وزاري احترافي
 // =========================
 const styles = {
   page: {
     height: "100vh",
+    background: "linear-gradient(135deg, #061a33, #0b2e4a)",
     display: "flex",
-    justifyContent: "center",
+    flexDirection: "column",
     alignItems: "center",
-    background: "#061a33",
+    direction: "rtl",
+    fontFamily: "Tahoma",
+  },
+
+  header: {
+    width: "100%",
+    background: "#b91c1c",
+    color: "white",
+    textAlign: "center",
+    padding: "12px",
+    fontWeight: "bold",
   },
 
   card: {
-    width: "400px",
-    padding: "20px",
-    borderRadius: "12px",
-    background: "white",
+    marginTop: "40px",
+    width: "420px",
+    background: "rgba(255,255,255,0.12)",
+    backdropFilter: "blur(18px)",
+    borderRadius: "18px",
+    padding: "25px",
+    textAlign: "center",
+    color: "white",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
+  },
+
+  logo: {
+    width: "80px",
+    marginBottom: "10px",
+  },
+
+  title: {
+    color: "#fbbf24",
+    marginBottom: "15px",
+  },
+
+  infoBox: {
+    background: "rgba(255,255,255,0.15)",
+    padding: "10px",
+    borderRadius: "10px",
+    marginBottom: "12px",
   },
 
   input: {
     width: "100%",
-    padding: "10px",
-    margin: "6px 0",
+    padding: "12px",
+    margin: "8px 0",
+    borderRadius: "10px",
+    border: "none",
+    outline: "none",
   },
 
   button: {
     width: "100%",
-    padding: "10px",
+    padding: "12px",
     marginTop: "10px",
+    borderRadius: "10px",
     background: "#1e3a8a",
     color: "white",
-    border: "none",
+    fontWeight: "bold",
     cursor: "pointer",
+    border: "none",
+  },
+
+  msg: {
+    marginTop: "10px",
+    fontWeight: "bold",
+    color: "#22c55e",
+  },
+
+  loading: {
+    color: "white",
+    textAlign: "center",
+    marginTop: "50px",
   },
 };
 
