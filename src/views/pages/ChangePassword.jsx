@@ -14,7 +14,7 @@ export default function ChangePassword() {
   const [showModal, setShowModal] = useState(false);
 
   // =========================
-  // تحميل المستخدم الحقيقي من Supabase
+  // LOAD USER (Supabase FULL FIX)
   // =========================
   useEffect(() => {
     const stored =
@@ -49,7 +49,7 @@ export default function ChangePassword() {
         return;
       }
 
-      // إذا ما يحتاج تغيير → روح داشبورد
+      // ❗ منع الدخول إذا لا يحتاج تغيير
       if (data.must_change_password === false) {
         navigate("/dashboard", { replace: true });
         return;
@@ -63,7 +63,7 @@ export default function ChangePassword() {
   }, [navigate]);
 
   // =========================
-  // رسالة الترحيب
+  // SMART WELCOME MESSAGE
   // =========================
   const getWelcomeMessage = () => {
     if (!user) return "";
@@ -78,7 +78,7 @@ export default function ChangePassword() {
   };
 
   // =========================
-  // تغيير كلمة المرور
+  // CHANGE PASSWORD (FINAL FIX)
   // =========================
   const handleChange = async () => {
     setMsg("");
@@ -94,15 +94,14 @@ export default function ChangePassword() {
 
     setLoading(true);
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("users")
       .update({
         password: pass1,
         must_change_password: false,
         last_login: new Date().toISOString(),
       })
-      .eq("id", user.id)
-      .select();
+      .eq("id", user.id);
 
     setLoading(false);
 
@@ -111,7 +110,7 @@ export default function ChangePassword() {
       return;
     }
 
-    // تحديث local storage
+    // update local cache
     const updatedUser = {
       ...user,
       must_change_password: false,
@@ -127,11 +126,21 @@ export default function ChangePassword() {
     }, 2000);
   };
 
+  // =========================
+  // LOADING STATE
+  // =========================
   if (checking)
-    return <div style={styles.loading}>⏳ جاري التحقق...</div>;
+    return (
+      <div style={styles.loading}>
+        ⏳ جاري التحقق من الحساب...
+      </div>
+    );
 
   if (!user) return null;
 
+  // =========================
+  // UI
+  // =========================
   return (
     <div style={styles.page}>
       <div style={styles.header}>
@@ -144,14 +153,14 @@ export default function ChangePassword() {
           style={styles.logo}
         />
 
-        <h2 style={styles.title}>⚖️ العدل أساس العمران</h2>
+        <h2 style={styles.title}>⚖️ تغيير كلمة المرور</h2>
 
         <div style={styles.infoBox}>
           👤 {user.username}
           <br />
           🏛️ {user.fullName}
           <br />
-          🔐 يجب تغيير كلمة المرور لتفعيل الحساب
+          📍 {user.courts?.name || "محكمة غير محددة"}
         </div>
 
         <input
@@ -179,7 +188,9 @@ export default function ChangePassword() {
         {msg && <p style={styles.msg}>{msg}</p>}
       </div>
 
-      {/* MODAL */}
+      {/* =========================
+          RESPONSIVE MODAL
+      ========================= */}
       {showModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalBox}>
@@ -206,6 +217,7 @@ export default function ChangePassword() {
     </div>
   );
 }
+
 
 
 
