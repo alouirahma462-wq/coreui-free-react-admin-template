@@ -11,47 +11,50 @@ export default function Login() {
   const [message, setMessage] = useState("");
   const [checkingSession, setCheckingSession] = useState(true);
 
+  // 🔥 SESSION CHECK (مصحح بالكامل)
   useEffect(() => {
     const savedUser =
       localStorage.getItem("user") ||
       sessionStorage.getItem("user");
 
-    if (savedUser) {
-      try {
-        const user = JSON.parse(savedUser);
-
-        const checkUser = async () => {
-          const { data } = await supabase
-            .from("users")
-            .select("id, must_change_password")
-            .eq("id", user.id)
-            .single();
-
-          if (!data) {
-            localStorage.clear();
-            sessionStorage.clear();
-            setCheckingSession(false);
-            return;
-          }
-
-          if (data.must_change_password === true || data.must_change_password === "true") {
-            navigate("/change-password");
-          } else {
-            navigate("/dashboard");
-          }
-        };
-
-        checkUser();
-        return;
-      } catch (e) {
-        localStorage.clear();
-        sessionStorage.clear();
-      }
+    if (!savedUser) {
+      setCheckingSession(false);
+      return;
     }
 
-    setCheckingSession(false);
+    const user = JSON.parse(savedUser);
+
+    const checkUser = async () => {
+      const { data } = await supabase
+        .from("users")
+        .select("id, must_change_password")
+        .eq("id", user.id)
+        .single();
+
+      if (!data) {
+        localStorage.clear();
+        sessionStorage.clear();
+        setCheckingSession(false);
+        return;
+      }
+
+      setCheckingSession(false);
+
+      const mustChange =
+        data.must_change_password === true ||
+        data.must_change_password === "true";
+
+      if (mustChange) {
+        navigate("/change-password", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+    };
+
+    checkUser();
   }, [navigate]);
 
+  // 🔐 LOGIN
   const handleLogin = async () => {
     setMessage("");
 
@@ -94,15 +97,14 @@ export default function Login() {
 
     setMessage("✅ تم تسجيل الدخول");
 
-    // 🔥 FIXED NAVIGATION (هذا الجزء اللي طلبته)
-    if (data.must_change_password === true || data.must_change_password === "true") {
-      setTimeout(() => {
-        navigate("/change-password");
-      }, 0);
+    const mustChange =
+      data.must_change_password === true ||
+      data.must_change_password === "true";
+
+    if (mustChange) {
+      navigate("/change-password", { replace: true });
     } else {
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 0);
+      navigate("/dashboard", { replace: true });
     }
   };
 
@@ -161,17 +163,13 @@ export default function Login() {
           دخول إلى المنظومة
         </button>
 
-        <a href="/forgot-password" style={styles.link}>
-          نسيت كلمة المرور؟
-        </a>
-
         {message && <p style={styles.message}>{message}</p>}
       </div>
     </div>
   );
 }
 
-/* 🎨 STYLE (نفسه بدون تغيير) */
+/* 🎨 نفس الستايل */
 const styles = {
   page: {
     height: "100vh",
@@ -245,12 +243,6 @@ const styles = {
     fontWeight: "bold",
   },
 
-  link: {
-    display: "block",
-    marginTop: "10px",
-    color: "#fbbf24",
-  },
-
   message: {
     marginTop: "10px",
     fontWeight: "bold",
@@ -264,6 +256,7 @@ const styles = {
     background: "#061a33",
   },
 };
+
 
 
 
