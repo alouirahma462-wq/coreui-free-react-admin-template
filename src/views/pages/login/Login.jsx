@@ -16,6 +16,9 @@ export default function Login() {
     setLoading(true);
 
     try {
+      // =========================
+      // VALIDATION
+      // =========================
       if (!username || !password) {
         setMessage("❌ الرجاء إدخال البيانات");
         setLoading(false);
@@ -23,7 +26,7 @@ export default function Login() {
       }
 
       // =========================
-      // GET USER FROM SUPABASE
+      // FETCH USER
       // =========================
       const { data, error } = await supabase
         .from("users")
@@ -53,7 +56,7 @@ export default function Login() {
         .eq("id", data.id);
 
       // =========================
-      // SAVE USER SAFE
+      // SAVE SESSION
       // =========================
       const userData = {
         id: data.id,
@@ -69,11 +72,10 @@ export default function Login() {
       }
 
       setMessage("✅ تم تسجيل الدخول");
-
       setLoading(false);
 
       // =========================
-      // SMART ROUTING (IMPORTANT FIX)
+      // REDIRECT LOGIC (FIXED)
       // =========================
       setTimeout(() => {
         if (data.must_change_password) {
@@ -90,6 +92,9 @@ export default function Login() {
     }
   };
 
+  // =========================
+  // UI
+  // =========================
   return (
     <div style={styles.page}>
       <div style={styles.header}>
@@ -136,6 +141,59 @@ export default function Login() {
     </div>
   );
 }
+
+// =========================
+// STYLES (IMPORTANT FIX)
+// =========================
+const styles = {
+  page: {
+    height: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "column",
+    background: "#061a33",
+    color: "white",
+    direction: "rtl",
+  },
+
+  header: {
+    position: "absolute",
+    top: 0,
+    width: "100%",
+    background: "#b91c1c",
+    color: "white",
+    textAlign: "center",
+    padding: "10px",
+  },
+
+  card: {
+    width: "400px",
+    padding: "20px",
+    borderRadius: "12px",
+    background: "rgba(255,255,255,0.1)",
+    backdropFilter: "blur(10px)",
+  },
+
+  input: {
+    width: "100%",
+    padding: "10px",
+    margin: "6px 0",
+    borderRadius: "6px",
+    border: "none",
+  },
+
+  button: {
+    width: "100%",
+    padding: "10px",
+    marginTop: "10px",
+    background: "#1e3a8a",
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+  },
+};
+
 
 
 
