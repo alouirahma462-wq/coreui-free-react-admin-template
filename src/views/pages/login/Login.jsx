@@ -9,21 +9,24 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [message, setMessage] = useState("");
-  const [checkingSession, setCheckingSession] = useState(true);
+  const [loading, setLoading] = useState(true);
 
+  // =========================
+  // SESSION CHECK (مرة واحدة فقط)
+  // =========================
   useEffect(() => {
     const savedUser =
       localStorage.getItem("user") ||
       sessionStorage.getItem("user");
 
     if (!savedUser) {
-      setCheckingSession(false);
+      setLoading(false);
       return;
     }
 
     const user = JSON.parse(savedUser);
 
-    (async () => {
+    const checkSession = async () => {
       const { data } = await supabase
         .from("users")
         .select("id, must_change_password")
@@ -33,17 +36,29 @@ export default function Login() {
       if (!data) {
         localStorage.clear();
         sessionStorage.clear();
-        setCheckingSession(false);
+        setLoading(false);
         return;
       }
 
       const mustChange = data.must_change_password === true;
 
-      navigate(mustChange ? "/change-password" : "/dashboard");
-    })();
+      // 🔥 حماية من التكرار
+      const currentPath = window.location.pathname;
 
+      if (currentPath === "/login") {
+        navigate(
+          mustChange ? "/change-password" : "/dashboard",
+          { replace: true }
+        );
+      }
+    };
+
+    checkSession();
   }, [navigate]);
 
+  // =========================
+  // LOGIN FUNCTION
+  // =========================
   const handleLogin = async () => {
     setMessage("");
 
@@ -71,11 +86,13 @@ export default function Login() {
       return;
     }
 
+    // تحديث آخر دخول
     await supabase
       .from("users")
       .update({ last_login: new Date().toISOString() })
       .eq("id", data.id);
 
+    // حفظ الجلسة
     const userData = JSON.stringify(data);
 
     if (remember) {
@@ -86,13 +103,14 @@ export default function Login() {
 
     setMessage("✅ تم تسجيل الدخول");
 
-    // 🔥 FIX NAVIGATION (بدون setTimeout)
-    const mustChange = data.must_change_password === true;
-
-    navigate(mustChange ? "/change-password" : "/dashboard");
+    // 🔥 لا تعمل navigate هنا (ممنوع منع الرعشة)
+    // التوجيه يتم في useEffect فقط
   };
 
-  if (checkingSession) {
+  // =========================
+  // LOADING SCREEN
+  // =========================
+  if (loading) {
     return (
       <div style={styles.loading}>
         <p style={{ color: "white" }}>جاري التحقق من الجلسة...</p>
@@ -100,6 +118,9 @@ export default function Login() {
     );
   }
 
+  // =========================
+  // UI
+  // =========================
   return (
     <div style={styles.page}>
       <div style={styles.header}>
@@ -149,19 +170,60 @@ export default function Login() {
   );
 }
 
+// =========================
+// STYLES
+// =========================
 const styles = {
-  page: { height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", background: "#061a33", direction: "rtl" },
-  header: { position: "absolute", top: 0, width: "100%", background: "#b91c1c", color: "white", textAlign: "center", padding: "10px" },
-  watermark: { position: "absolute", width: "280px", opacity: 0.08 },
-  card: { width: "420px", padding: "25px", borderRadius: "18px", background: "rgba(255,255,255,0.10)", backdropFilter: "blur(18px)", color: "white" },
+  page: {
+    height: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "#061a33",
+    direction: "rtl"
+  },
+  header: {
+    position: "absolute",
+    top: 0,
+    width: "100%",
+    background: "#b91c1c",
+    color: "white",
+    textAlign: "center",
+    padding: "10px"
+  },
+  watermark: {
+    position: "absolute",
+    width: "280px",
+    opacity: 0.08
+  },
+  card: {
+    width: "420px",
+    padding: "25px",
+    borderRadius: "18px",
+    background: "rgba(255,255,255,0.10)",
+    backdropFilter: "blur(18px)",
+    color: "white"
+  },
   title: { color: "#fbbf24" },
   subtitle: { fontSize: "14px" },
   input: { width: "100%", padding: "10px", margin: "6px 0" },
   checkbox: { color: "white", display: "flex", gap: "8px" },
-  button: { width: "100%", padding: "12px", marginTop: "10px", background: "#1e3a8a", color: "white" },
+  button: {
+    width: "100%",
+    padding: "12px",
+    marginTop: "10px",
+    background: "#1e3a8a",
+    color: "white"
+  },
   message: { marginTop: "10px", fontWeight: "bold" },
-  loading: { height: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }
+  loading: {
+    height: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center"
+  }
 };
+
 
 
 
