@@ -9,6 +9,16 @@ export default function ChangePassword({ user, onSuccess }) {
   const fullName = user?.fullName || "المستخدم";
 
   const handleChange = async () => {
+    if (!user) {
+      alert("❌ لا يوجد مستخدم");
+      return;
+    }
+
+    if (!newPass || newPass.length < 4) {
+      alert("❌ كلمة المرور يجب أن تكون 4 أحرف على الأقل");
+      return;
+    }
+
     setLoading(true);
 
     const { error } = await supabase
@@ -26,17 +36,18 @@ export default function ChangePassword({ user, onSuccess }) {
 
       setTimeout(() => {
         setShowModal(false);
-        onSuccess(); // يوديك للداشبورد
-      }, 2500);
+        onSuccess?.();
+      }, 2000);
     } else {
-      alert("خطأ في تغيير كلمة المرور");
+      alert("❌ خطأ في تغيير كلمة المرور");
+      console.error(error);
     }
   };
 
   return (
     <div style={styles.page}>
       <div style={styles.header}>
-        المحكمة / النيابة العامة - نظام تغيير كلمة المرور
+        🇹🇳 المحكمة / النيابة العامة - نظام تغيير كلمة المرور
       </div>
 
       <div style={styles.card}>
@@ -49,15 +60,15 @@ export default function ChangePassword({ user, onSuccess }) {
         <input
           type="password"
           placeholder="كلمة المرور الجديدة"
-          style={styles.input}
           value={newPass}
           onChange={(e) => setNewPass(e.target.value)}
+          style={styles.input}
         />
 
         <button
-          style={styles.button}
           onClick={handleChange}
           disabled={loading}
+          style={styles.button}
         >
           {loading ? "جاري الحفظ..." : "تغيير كلمة المرور"}
         </button>
@@ -81,7 +92,7 @@ export default function ChangePassword({ user, onSuccess }) {
 }
 
 /* =========================
-   STYLES (جاهز بدون نقص)
+   🔥 FULL STYLES (COMPLETE)
 ========================= */
 const styles = {
   page: {
@@ -175,6 +186,7 @@ const styles = {
     color: "white",
   },
 };
+
 
 
 
