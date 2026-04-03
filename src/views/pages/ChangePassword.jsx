@@ -1,16 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
 
 export default function ChangePassword({ user, onSuccess }) {
   const [newPass, setNewPass] = useState("");
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [finalUser, setFinalUser] = useState(null);
 
-  const fullName = user?.fullName || "المستخدم";
+  // 🔥 دمج user + localStorage (حل جذري)
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    setFinalUser(user || storedUser);
+  }, [user]);
+
+  const fullName = finalUser?.fullName || "المستخدم";
 
   const handleChange = async () => {
-    if (!user) {
-      alert("❌ لا يوجد مستخدم");
+    if (!finalUser?.id) {
+      alert("❌ لا يوجد مستخدم مسجل");
       return;
     }
 
@@ -27,7 +34,7 @@ export default function ChangePassword({ user, onSuccess }) {
         password: newPass,
         must_change_password: false,
       })
-      .eq("id", user.id);
+      .eq("id", finalUser.id);
 
     setLoading(false);
 
@@ -43,6 +50,15 @@ export default function ChangePassword({ user, onSuccess }) {
       console.error(error);
     }
   };
+
+  // 🔥 حماية قبل العرض (منع white screen / crash)
+  if (!finalUser) {
+    return (
+      <div style={styles.loadingPage}>
+        جاري تحميل بيانات المستخدم...
+      </div>
+    );
+  }
 
   return (
     <div style={styles.page}>
@@ -68,13 +84,17 @@ export default function ChangePassword({ user, onSuccess }) {
         <button
           onClick={handleChange}
           disabled={loading}
-          style={styles.button}
+          style={{
+            ...styles.button,
+            opacity: loading ? 0.6 : 1,
+            cursor: loading ? "not-allowed" : "pointer",
+          }}
         >
           {loading ? "جاري الحفظ..." : "تغيير كلمة المرور"}
         </button>
       </div>
 
-      {/* MODAL */}
+      {/* 🔥 MODAL نجاح */}
       {showModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalBox}>
@@ -92,7 +112,7 @@ export default function ChangePassword({ user, onSuccess }) {
 }
 
 /* =========================
-   🔥 FULL STYLES (COMPLETE)
+   🎨 FULL STYLES PACKAGE
 ========================= */
 const styles = {
   page: {
@@ -158,7 +178,6 @@ const styles = {
     background: "#1e3a8a",
     color: "white",
     fontWeight: "bold",
-    cursor: "pointer",
     border: "none",
   },
 
@@ -185,7 +204,18 @@ const styles = {
     backdropFilter: "blur(20px)",
     color: "white",
   },
+
+  loadingPage: {
+    height: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "#061a33",
+    color: "white",
+    fontSize: "18px",
+  },
 };
+
 
 
 
