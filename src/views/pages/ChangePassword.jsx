@@ -12,9 +12,18 @@ export default function ChangePassword() {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [animate, setAnimate] = useState(false);
+
+  // 🔊 sound success
+  const playSound = () => {
+    const audio = new Audio(
+      "https://assets.mixkit.co/sfx/preview/mixkit-success-notification-2310.mp3"
+    );
+    audio.play();
+  };
 
   // =========================
-  // LOAD USER (Supabase FULL FIX)
+  // LOAD USER
   // =========================
   useEffect(() => {
     const stored =
@@ -31,16 +40,7 @@ export default function ChangePassword() {
     const fetchUser = async () => {
       const { data, error } = await supabase
         .from("users")
-        .select(`
-          id,
-          username,
-          fullName,
-          must_change_password,
-          court_id,
-          courts (
-            name
-          )
-        `)
+        .select("id, username, fullName, must_change_password, courts(name)")
         .eq("id", parsed.id)
         .single();
 
@@ -49,8 +49,7 @@ export default function ChangePassword() {
         return;
       }
 
-      // ❗ منع الدخول إذا لا يحتاج تغيير
-      if (data.must_change_password === false) {
+      if (!data.must_change_password) {
         navigate("/dashboard", { replace: true });
         return;
       }
@@ -63,22 +62,20 @@ export default function ChangePassword() {
   }, [navigate]);
 
   // =========================
-  // SMART WELCOME MESSAGE
+  // WELCOME MESSAGE
   // =========================
-  const getWelcomeMessage = () => {
+  const welcome = () => {
     if (!user) return "";
 
     if (user.fullName === "التفقدية العامة") {
       return "مرحبا التفقدية العامة - إشراف مركزي";
     }
 
-    return `مرحبا ${user.fullName} - ${
-      user.courts?.name || "محكمة غير محددة"
-    }`;
+    return `مرحبا ${user.fullName} - ${user.courts?.name || "محكمة غير محددة"}`;
   };
 
   // =========================
-  // CHANGE PASSWORD (FINAL FIX)
+  // CHANGE PASSWORD
   // =========================
   const handleChange = async () => {
     setMsg("");
@@ -106,41 +103,30 @@ export default function ChangePassword() {
     setLoading(false);
 
     if (error) {
-      setMsg("❌ حدث خطأ أثناء الحفظ");
+      setMsg("❌ خطأ أثناء الحفظ");
       return;
     }
 
-    // update local cache
-    const updatedUser = {
-      ...user,
-      must_change_password: false,
-    };
+    playSound();
 
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-    sessionStorage.setItem("user", JSON.stringify(updatedUser));
+    const updated = { ...user, must_change_password: false };
+
+    localStorage.setItem("user", JSON.stringify(updated));
+    sessionStorage.setItem("user", JSON.stringify(updated));
 
     setShowModal(true);
+    setTimeout(() => setAnimate(true), 50);
 
     setTimeout(() => {
       navigate("/dashboard", { replace: true });
-    }, 2000);
+    }, 2500);
   };
 
-  // =========================
-  // LOADING STATE
-  // =========================
   if (checking)
-    return (
-      <div style={styles.loading}>
-        ⏳ جاري التحقق من الحساب...
-      </div>
-    );
+    return <div style={styles.loading}>⏳ جاري التحقق...</div>;
 
   if (!user) return null;
 
-  // =========================
-  // UI
-  // =========================
   return (
     <div style={styles.page}>
       <div style={styles.header}>
@@ -155,7 +141,7 @@ export default function ChangePassword() {
 
         <h2 style={styles.title}>⚖️ تغيير كلمة المرور</h2>
 
-        <div style={styles.infoBox}>
+        <div style={styles.info}>
           👤 {user.username}
           <br />
           🏛️ {user.fullName}
@@ -188,13 +174,17 @@ export default function ChangePassword() {
         {msg && <p style={styles.msg}>{msg}</p>}
       </div>
 
-      {/* =========================
-          RESPONSIVE MODAL
-      ========================= */}
+      {/* MODAL */}
       {showModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modalBox}>
-            <div style={{ fontSize: "55px" }}>🎉</div>
+        <div style={styles.overlay}>
+          <div
+            style={{
+              ...styles.modal,
+              transform: animate ? "scale(1)" : "scale(0.7)",
+              opacity: animate ? 1 : 0,
+            }}
+          >
+            <div style={{ fontSize: "60px" }}>🎉</div>
 
             <h2 style={{ color: "#22c55e" }}>
               تم تسجيل الدخول بنجاح
@@ -204,9 +194,7 @@ export default function ChangePassword() {
               {user.fullName}
             </h3>
 
-            <p style={{ marginTop: "15px" }}>
-              {getWelcomeMessage()}
-            </p>
+            <p style={{ marginTop: "15px" }}>{welcome()}</p>
 
             <p style={{ opacity: 0.8 }}>
               جاري تحويلك إلى لوحة التحكم...
@@ -217,6 +205,111 @@ export default function ChangePassword() {
     </div>
   );
 }
+
+/* =========================
+   FULL STYLES INSIDE SAME FILE
+========================= */
+
+const styles = {
+  page: {
+    minHeight: "100vh",
+    background: "linear-gradient(135deg, #061a33, #0b2e4a)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    direction: "rtl",
+    fontFamily: "Tahoma",
+  },
+
+  header: {
+    width: "100%",
+    background: "#b91c1c",
+    color: "white",
+    textAlign: "center",
+    padding: "14px",
+    fontWeight: "bold",
+  },
+
+  card: {
+    marginTop: "40px",
+    width: "92%",
+    maxWidth: "420px",
+    background: "rgba(255,255,255,0.12)",
+    backdropFilter: "blur(18px)",
+    borderRadius: "18px",
+    padding: "25px",
+    textAlign: "center",
+    color: "white",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
+  },
+
+  logo: { width: "80px", marginBottom: "10px" },
+
+  title: { color: "#fbbf24", marginBottom: "15px" },
+
+  info: {
+    background: "rgba(255,255,255,0.15)",
+    padding: "12px",
+    borderRadius: "10px",
+    marginBottom: "15px",
+  },
+
+  input: {
+    width: "100%",
+    padding: "12px",
+    margin: "8px 0",
+    borderRadius: "10px",
+    border: "none",
+    outline: "none",
+  },
+
+  button: {
+    width: "100%",
+    padding: "12px",
+    marginTop: "10px",
+    borderRadius: "10px",
+    background: "#1e3a8a",
+    color: "white",
+    fontWeight: "bold",
+    border: "none",
+  },
+
+  msg: {
+    marginTop: "10px",
+    color: "#22c55e",
+  },
+
+  loading: {
+    color: "white",
+    textAlign: "center",
+    marginTop: "80px",
+  },
+
+  overlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    background: "rgba(0,0,0,0.75)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  modal: {
+    width: "90%",
+    maxWidth: "420px",
+    padding: "30px",
+    borderRadius: "18px",
+    textAlign: "center",
+    background: "rgba(255,255,255,0.12)",
+    backdropFilter: "blur(20px)",
+    color: "white",
+    transition: "0.4s ease",
+  },
+};
+
 
 
 
