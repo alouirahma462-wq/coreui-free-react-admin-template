@@ -14,7 +14,6 @@ export default function ChangePassword({ user, onSuccess }) {
   const [finalUser, setFinalUser] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // 🔥 دمج user + localStorage
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     setFinalUser(user || storedUser);
@@ -22,7 +21,6 @@ export default function ChangePassword({ user, onSuccess }) {
 
   const fullName = finalUser?.fullName || "المستخدم";
 
-  // 🔥 قوة كلمة المرور
   const getStrength = (pass) => {
     if (pass.length < 6) return "ضعيفة";
     if (pass.match(/[A-Z]/) && pass.match(/[0-9]/) && pass.length >= 8)
@@ -66,7 +64,6 @@ export default function ChangePassword({ user, onSuccess }) {
     setLoading(false);
 
     if (!error) {
-      // حفظ localStorage
       localStorage.setItem(
         "user",
         JSON.stringify({
@@ -89,13 +86,8 @@ export default function ChangePassword({ user, onSuccess }) {
     }
   };
 
-  // 🔥 حماية قبل العرض
   if (!finalUser) {
-    return (
-      <div style={styles.loadingPage}>
-        جاري تحميل بيانات المستخدم...
-      </div>
-    );
+    return <div style={styles.loadingPage}>جاري تحميل بيانات المستخدم...</div>;
   }
 
   return (
@@ -111,7 +103,6 @@ export default function ChangePassword({ user, onSuccess }) {
           يرجى تغيير كلمة المرور الخاصة بك أول مرة
         </div>
 
-        {/* 🔐 كلمة المرور الجديدة */}
         <input
           type="password"
           placeholder="كلمة المرور الجديدة"
@@ -120,7 +111,6 @@ export default function ChangePassword({ user, onSuccess }) {
           style={styles.input}
         />
 
-        {/* 🔐 تأكيد كلمة المرور */}
         <input
           type="password"
           placeholder="تأكيد كلمة المرور"
@@ -129,14 +119,12 @@ export default function ChangePassword({ user, onSuccess }) {
           style={styles.input}
         />
 
-        {/* 🔥 قوة كلمة المرور */}
         {newPass && (
           <p style={{ color: "#fbbf24", fontSize: "14px" }}>
             قوة كلمة المرور: <b>{getStrength(newPass)}</b>
           </p>
         )}
 
-        {/* 🔥 تذكرني */}
         <label style={{ color: "white", fontSize: "14px" }}>
           <input
             type="checkbox"
@@ -145,7 +133,6 @@ export default function ChangePassword({ user, onSuccess }) {
           تذكرني
         </label>
 
-        {/* 🔥 زر الحفظ */}
         <button
           onClick={handleChange}
           disabled={loading}
@@ -158,19 +145,18 @@ export default function ChangePassword({ user, onSuccess }) {
           {loading ? "جاري الحفظ..." : "تغيير كلمة المرور"}
         </button>
 
-        {/* 🔥 نسيت كلمة المرور */}
-        <p
+        {/* 🔥 فقط تعديل زر نسيت كلمة المرور */}
+        <button
+          type="button"
           onClick={() => navigate("/forgot-password")}
           style={styles.forgot}
         >
           هل نسيت كلمة المرور؟
-        </p>
+        </button>
 
-        {/* ❌ رسالة خطأ */}
         {errorMsg && <p style={{ color: "#ff6b6b" }}>{errorMsg}</p>}
       </div>
 
-      {/* 🔥 MODAL نجاح */}
       {showModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalBox}>
@@ -188,18 +174,24 @@ export default function ChangePassword({ user, onSuccess }) {
 }
 
 /* =========================
-   🎨 STYLE (نفس ستايلك + إضافات)
+   🎨 STYLE (مع خلفية جديدة)
 ========================= */
 const styles = {
   page: {
     height: "100vh",
-    background: "linear-gradient(135deg, #061a33, #0b2e4a)",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     direction: "rtl",
     fontFamily: "Tahoma",
+
+    /* 🟢 خلفية محكمة + إدارة */
+    backgroundImage:
+      "linear-gradient(rgba(6,26,51,0.85), rgba(11,46,74,0.9)), url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
   },
 
   header: {
@@ -259,9 +251,12 @@ const styles = {
 
   forgot: {
     marginTop: "10px",
-    color: "#60a5fa",
+    color: "#fbbf24",
     cursor: "pointer",
     textDecoration: "underline",
+    background: "none",
+    border: "none",
+    fontSize: "13px",
   },
 
   modalOverlay: {
@@ -298,6 +293,7 @@ const styles = {
     fontSize: "18px",
   },
 };
+
 
 
 
