@@ -16,53 +16,46 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // =========================
-      // VALIDATION
-      // =========================
       if (!username || !password) {
         setMessage("❌ الرجاء إدخال البيانات");
         setLoading(false);
         return;
       }
 
-      // =========================
-      // FETCH USER
-      // =========================
+      // ✅ FIX 406 ERROR → remove .single()
       const { data, error } = await supabase
         .from("users")
         .select("*")
         .eq("username", username)
-        .eq("password", password)
-        .single();
+        .eq("password", password);
 
-      if (error || !data) {
+      if (error || !data || data.length === 0) {
         setMessage("❌ بيانات الدخول غير صحيحة");
         setLoading(false);
         return;
       }
 
-      if (!data.isActive) {
+      const user = data[0]; // ✅ important
+
+      if (!user.isActive) {
         setMessage("❌ الحساب غير مفعل");
         setLoading(false);
         return;
       }
 
-      // =========================
-      // UPDATE LAST LOGIN
-      // =========================
+      // ✅ تحديث آخر دخول
       await supabase
         .from("users")
         .update({ last_login: new Date().toISOString() })
-        .eq("id", data.id);
+        .eq("id", user.id);
 
-      // =========================
-      // SAVE SESSION
-      // =========================
+      // ✅ تخزين كل البيانات المهمة
       const userData = {
-        id: data.id,
-        username: data.username,
-        role: data.role,
-        must_change_password: data.must_change_password,
+        id: user.id,
+        username: user.username,
+        fullName: user.fullName,
+        court_id: user.court_id,
+        must_change_password: user.must_change_password,
       };
 
       if (remember) {
@@ -74,16 +67,14 @@ export default function Login() {
       setMessage("✅ تم تسجيل الدخول");
       setLoading(false);
 
-      // =========================
-      // REDIRECT LOGIC (FIXED)
-      // =========================
+      // ✅ FIX REDIRECT
       setTimeout(() => {
-        if (data.must_change_password) {
+        if (user.must_change_password === true) {
           navigate("/change-password", { replace: true });
         } else {
           navigate("/dashboard", { replace: true });
         }
-      }, 300);
+      }, 500);
 
     } catch (err) {
       console.error(err);
@@ -92,9 +83,6 @@ export default function Login() {
     }
   };
 
-  // =========================
-  // UI
-  // =========================
   return (
     <div style={styles.page}>
       <div style={styles.header}>
@@ -119,7 +107,7 @@ export default function Login() {
           style={styles.input}
         />
 
-        <label>
+        <label style={{ fontSize: "14px" }}>
           <input
             type="checkbox"
             checked={remember}
@@ -136,14 +124,14 @@ export default function Login() {
           {loading ? "جاري الدخول..." : "دخول"}
         </button>
 
-        {message && <p>{message}</p>}
+        {message && <p style={{ marginTop: "10px" }}>{message}</p>}
       </div>
     </div>
   );
 }
 
 // =========================
-// STYLES (IMPORTANT FIX)
+// STYLES
 // =========================
 const styles = {
   page: {
@@ -152,9 +140,10 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "column",
-    background: "#061a33",
+    background: "linear-gradient(135deg, #061a33, #0b2e4a)",
     color: "white",
     direction: "rtl",
+    fontFamily: "Tahoma",
   },
 
   header: {
@@ -164,35 +153,43 @@ const styles = {
     background: "#b91c1c",
     color: "white",
     textAlign: "center",
-    padding: "10px",
+    padding: "12px",
+    fontWeight: "bold",
   },
 
   card: {
-    width: "400px",
-    padding: "20px",
-    borderRadius: "12px",
-    background: "rgba(255,255,255,0.1)",
-    backdropFilter: "blur(10px)",
+    width: "90%",
+    maxWidth: "400px",
+    padding: "25px",
+    borderRadius: "16px",
+    background: "rgba(255,255,255,0.12)",
+    backdropFilter: "blur(12px)",
+    textAlign: "center",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
   },
 
   input: {
     width: "100%",
-    padding: "10px",
-    margin: "6px 0",
-    borderRadius: "6px",
+    padding: "12px",
+    margin: "8px 0",
+    borderRadius: "8px",
     border: "none",
+    outline: "none",
   },
 
   button: {
     width: "100%",
-    padding: "10px",
+    padding: "12px",
     marginTop: "10px",
+    borderRadius: "8px",
     background: "#1e3a8a",
     color: "white",
+    fontWeight: "bold",
     border: "none",
     cursor: "pointer",
   },
 };
+
 
 
 
