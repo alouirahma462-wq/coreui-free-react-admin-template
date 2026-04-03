@@ -22,31 +22,37 @@ export default function Login() {
 
     const { data, error } = await supabase
       .from("users")
-      .select("id, username, fullName, court_id, must_change_password")
+      .select("id, username, fullName, court_id, must_change_password, isActive")
       .eq("username", username)
-      .eq("password", password)
-      .single();
+      .eq("password", password);
 
-    if (error || !data) {
+    const user = data?.[0];
+
+    if (error || !user) {
       setMessage("❌ بيانات الدخول غير صحيحة");
       setLoading(false);
       return;
     }
 
+    if (user.isActive === false) {
+      setMessage("❌ الحساب غير مفعل");
+      setLoading(false);
+      return;
+    }
+
     const userData = {
-      id: data.id,
-      username: data.username,
-      fullName: data.fullName,
-      court_id: data.court_id,
-      must_change_password: data.must_change_password,
+      id: user.id,
+      username: user.username,
+      fullName: user.fullName,
+      court_id: user.court_id,
+      must_change_password: user.must_change_password,
     };
 
     localStorage.setItem("user", JSON.stringify(userData));
 
     setLoading(false);
 
-    // 🔥 أهم سطر
-    if (data.must_change_password) {
+    if (user.must_change_password) {
       navigate("/change-password");
     } else {
       navigate("/dashboard");
@@ -126,6 +132,7 @@ const styles = {
     border: "none",
   },
 };
+
 
 
 
