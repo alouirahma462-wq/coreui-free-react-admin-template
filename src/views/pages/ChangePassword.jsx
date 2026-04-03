@@ -11,6 +11,7 @@ export default function ChangePassword() {
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
   // =========================
   // تحميل المستخدم + حماية
@@ -35,6 +36,17 @@ export default function ChangePassword() {
     setUser(parsed);
     setChecking(false);
   }, [navigate]);
+
+  // =========================
+  // رسالة الترحيب حسب fullName
+  // =========================
+  const getWelcomeMessage = () => {
+    if (user?.fullName === "التفقدية العامة") {
+      return "مرحبا التفقدية العامة - إشراف مركزي";
+    }
+
+    return "مرحبا وكيل الجمهورية - تونس المحكمة الابتدائية تونس";
+  };
 
   // =========================
   // تغيير كلمة المرور
@@ -73,21 +85,17 @@ export default function ChangePassword() {
     sessionStorage.setItem("user", JSON.stringify(updatedUser));
 
     // =========================
-    // رسالة النجاح المطلوبة منك
+    // تشغيل المودال بدل msg
     // =========================
-    setMsg(
-      `✅ مرحباً ${updatedUser.jobTitle || "المسمى الوظيفي"} - المحكمة - النيابة العامة - إشراف مركزي`
-    );
+    setShowModal(true);
 
     setTimeout(() => {
       navigate("/dashboard", { replace: true });
-    }, 1500);
+    }, 2000);
   };
 
   if (checking)
-    return (
-      <div style={styles.loading}>⏳ جاري التحقق...</div>
-    );
+    return <div style={styles.loading}>⏳ جاري التحقق...</div>;
 
   if (!user) return null;
 
@@ -108,7 +116,7 @@ export default function ChangePassword() {
         <div style={styles.infoBox}>
           👤 {user.username}
           <br />
-          🏛️ {user.role || "المحكمة"}
+          🏛️ {user.fullName}
           <br />
           🔐 يجب تغيير كلمة المرور لتفعيل الحساب
         </div>
@@ -137,95 +145,39 @@ export default function ChangePassword() {
 
         {msg && <p style={styles.msg}>{msg}</p>}
       </div>
+
+      {/* =========================
+          MODAL FANCY SUCCESS
+      ========================= */}
+      {showModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modalBox}>
+
+            <div style={{ fontSize: "55px" }}>🎉</div>
+
+            <h2 style={{ color: "#22c55e" }}>
+              تم تسجيل الدخول بنجاح
+            </h2>
+
+            <h3 style={{ color: "#fbbf24", marginTop: "10px" }}>
+              {user.fullName}
+            </h3>
+
+            <p style={{ marginTop: "15px", fontSize: "16px" }}>
+              {getWelcomeMessage()}
+            </p>
+
+            <p style={{ marginTop: "10px", opacity: 0.8 }}>
+              جاري تحويلك إلى لوحة التحكم...
+            </p>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// =========================
-// تصميم وزاري احترافي
-// =========================
-const styles = {
-  page: {
-    height: "100vh",
-    background: "linear-gradient(135deg, #061a33, #0b2e4a)",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    direction: "rtl",
-    fontFamily: "Tahoma",
-  },
-
-  header: {
-    width: "100%",
-    background: "#b91c1c",
-    color: "white",
-    textAlign: "center",
-    padding: "12px",
-    fontWeight: "bold",
-  },
-
-  card: {
-    marginTop: "40px",
-    width: "420px",
-    background: "rgba(255,255,255,0.12)",
-    backdropFilter: "blur(18px)",
-    borderRadius: "18px",
-    padding: "25px",
-    textAlign: "center",
-    color: "white",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
-  },
-
-  logo: {
-    width: "80px",
-    marginBottom: "10px",
-  },
-
-  title: {
-    color: "#fbbf24",
-    marginBottom: "15px",
-  },
-
-  infoBox: {
-    background: "rgba(255,255,255,0.15)",
-    padding: "10px",
-    borderRadius: "10px",
-    marginBottom: "12px",
-  },
-
-  input: {
-    width: "100%",
-    padding: "12px",
-    margin: "8px 0",
-    borderRadius: "10px",
-    border: "none",
-    outline: "none",
-  },
-
-  button: {
-    width: "100%",
-    padding: "12px",
-    marginTop: "10px",
-    borderRadius: "10px",
-    background: "#1e3a8a",
-    color: "white",
-    fontWeight: "bold",
-    cursor: "pointer",
-    border: "none",
-  },
-
-  msg: {
-    marginTop: "10px",
-    fontWeight: "bold",
-    color: "#22c55e",
-  },
-
-  loading: {
-    color: "white",
-    textAlign: "center",
-    marginTop: "50px",
-  },
-};
 
 
 
