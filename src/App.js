@@ -7,7 +7,9 @@ function Dashboard() {
   return <h1>Dashboard</h1>;
 }
 
+// =========================
 // حماية الصفحات
+// =========================
 function ProtectedRoute({ children }) {
   const user =
     JSON.parse(localStorage.getItem("user")) ||
@@ -20,13 +22,38 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+// =========================
+// منع دخول login إذا user مسجل
+// =========================
+function PublicRoute({ children }) {
+  const user =
+    JSON.parse(localStorage.getItem("user")) ||
+    JSON.parse(sessionStorage.getItem("user"));
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+}
+
 export default function App() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
+      {/* Login */}
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
 
+      {/* Change Password */}
       <Route path="/change-password" element={<ChangePassword />} />
 
+      {/* Dashboard (محمي) */}
       <Route
         path="/dashboard"
         element={
@@ -36,12 +63,21 @@ export default function App() {
         }
       />
 
-      {/* default */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* root → smart redirect */}
+      <Route
+        path="/"
+        element={<Navigate to="/login" replace />}
+      />
+
+      {/* fallback */}
+      <Route
+        path="*"
+        element={<Navigate to="/login" replace />}
+      />
     </Routes>
   );
 }
+
 
 
 
