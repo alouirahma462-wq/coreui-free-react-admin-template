@@ -12,63 +12,77 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   // =========================
-  // LOGIN (FINAL FIX)
+  // LOGIN FINAL SAFE VERSION
   // =========================
   const handleLogin = async () => {
     setMessage("");
     setLoading(true);
 
-    if (!username || !password) {
-      setMessage("❌ الرجاء إدخال البيانات");
+    try {
+      if (!username || !password) {
+        setMessage("❌ الرجاء إدخال البيانات");
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("username", username)
+        .eq("password", password)
+        .single();
+
+      if (error || !data) {
+        setMessage("❌ بيانات الدخول غير صحيحة");
+        setLoading(false);
+        return;
+      }
+
+      if (!data.isActive) {
+        setMessage("❌ الحساب غير مفعل");
+        setLoading(false);
+        return;
+      }
+
+      // تحديث آخر دخول
+      await supabase
+        .from("users")
+        .update({ last_login: new Date().toISOString() })
+        .eq("id", data.id);
+
+      // حفظ session
+      const userData = JSON.stringify(data);
+
+      if (remember) {
+        localStorage.setItem("user", userData);
+      } else {
+        sessionStorage.setItem("user", userData);
+      }
+
+      setMessage("✅ تم تسجيل الدخول");
+
+      const mustChange = data.must_change_password === true;
+
+      // =========================
+      // FIX الجذري النهائي
+      // =========================
+
+      // 🔥 نوقف أي state update قبل الانتقال
       setLoading(false);
-      return;
-    }
 
-    const { data, error } = await supabase
-      .from("users")
-      .select("*")
-      .eq("username", username)
-      .eq("password", password)
-      .single();
+      // 🔥 redirect آمن بدون loop
+      setTimeout(() => {
+        navigate(
+          mustChange ? "/change-password" : "/",
+          { replace: true }
+        );
+      }, 250);
 
-    if (error || !data) {
-      setMessage("❌ بيانات الدخول غير صحيحة");
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ حدث خطأ غير متوقع");
       setLoading(false);
-      return;
     }
-
-    if (!data.isActive) {
-      setMessage("❌ الحساب غير مفعل");
-      setLoading(false);
-      return;
-    }
-
-    // تحديث آخر دخول
-    await supabase
-      .from("users")
-      .update({ last_login: new Date().toISOString() })
-      .eq("id", data.id);
-
-    // حفظ session
-    const userData = JSON.stringify(data);
-
-    if (remember) {
-      localStorage.setItem("user", userData);
-    } else {
-      sessionStorage.setItem("user", userData);
-    }
-
-    setMessage("✅ تم تسجيل الدخول");
-
-    const mustChange = data.must_change_password === true;
-
-    // 🔥 FIX جذري: تأخير بسيط + redirect واحد فقط
-    setTimeout(() => {
-      navigate(
-        mustChange ? "/change-password" : "/dashboard",
-        { replace: true }
-      );
-    }, 300);
   };
 
   // =========================
@@ -115,8 +129,11 @@ export default function Login() {
 
         <button
           onClick={handleLogin}
-          style={styles.button}
           disabled={loading}
+          style={{
+            ...styles.button,
+            opacity: loading ? 0.6 : 1
+          }}
         >
           {loading ? "جاري الدخول..." : "دخول"}
         </button>
@@ -176,6 +193,7 @@ const styles = {
   },
   message: { marginTop: "10px", fontWeight: "bold" }
 };
+
 
 
 
