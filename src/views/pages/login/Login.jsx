@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { supabase } from "../../../supabaseClient";
 import { useNavigate } from "react-router-dom";
 
@@ -9,65 +9,20 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // =========================
-  // SESSION CHECK (مرة واحدة فقط)
-  // =========================
-  useEffect(() => {
-    const savedUser =
-      localStorage.getItem("user") ||
-      sessionStorage.getItem("user");
-
-    if (!savedUser) {
-      setLoading(false);
-      return;
-    }
-
-    const user = JSON.parse(savedUser);
-
-    const checkSession = async () => {
-      const { data } = await supabase
-        .from("users")
-        .select("id, must_change_password")
-        .eq("id", user.id)
-        .single();
-
-      if (!data) {
-        localStorage.clear();
-        sessionStorage.clear();
-        setLoading(false);
-        return;
-      }
-
-      const mustChange = data.must_change_password === true;
-
-      // 🔥 حماية من التكرار
-      const currentPath = window.location.pathname;
-
-      if (currentPath === "/login") {
-        navigate(
-          mustChange ? "/change-password" : "/dashboard",
-          { replace: true }
-        );
-      }
-    };
-
-    checkSession();
-  }, [navigate]);
-
-  // =========================
-  // LOGIN FUNCTION
+  // LOGIN (FINAL FIX)
   // =========================
   const handleLogin = async () => {
     setMessage("");
+    setLoading(true);
 
     if (!username || !password) {
       setMessage("❌ الرجاء إدخال البيانات");
+      setLoading(false);
       return;
     }
-
-    setMessage("⏳ جاري تسجيل الدخول...");
 
     const { data, error } = await supabase
       .from("users")
@@ -78,11 +33,13 @@ export default function Login() {
 
     if (error || !data) {
       setMessage("❌ بيانات الدخول غير صحيحة");
+      setLoading(false);
       return;
     }
 
     if (!data.isActive) {
       setMessage("❌ الحساب غير مفعل");
+      setLoading(false);
       return;
     }
 
@@ -92,7 +49,7 @@ export default function Login() {
       .update({ last_login: new Date().toISOString() })
       .eq("id", data.id);
 
-    // حفظ الجلسة
+    // حفظ session
     const userData = JSON.stringify(data);
 
     if (remember) {
@@ -103,20 +60,16 @@ export default function Login() {
 
     setMessage("✅ تم تسجيل الدخول");
 
-    // 🔥 لا تعمل navigate هنا (ممنوع منع الرعشة)
-    // التوجيه يتم في useEffect فقط
-  };
+    const mustChange = data.must_change_password === true;
 
-  // =========================
-  // LOADING SCREEN
-  // =========================
-  if (loading) {
-    return (
-      <div style={styles.loading}>
-        <p style={{ color: "white" }}>جاري التحقق من الجلسة...</p>
-      </div>
-    );
-  }
+    // 🔥 FIX جذري: تأخير بسيط + redirect واحد فقط
+    setTimeout(() => {
+      navigate(
+        mustChange ? "/change-password" : "/dashboard",
+        { replace: true }
+      );
+    }, 300);
+  };
 
   // =========================
   // UI
@@ -160,8 +113,12 @@ export default function Login() {
           تذكرني
         </label>
 
-        <button onClick={handleLogin} style={styles.button}>
-          دخول
+        <button
+          onClick={handleLogin}
+          style={styles.button}
+          disabled={loading}
+        >
+          {loading ? "جاري الدخول..." : "دخول"}
         </button>
 
         {message && <p style={styles.message}>{message}</p>}
@@ -213,16 +170,13 @@ const styles = {
     padding: "12px",
     marginTop: "10px",
     background: "#1e3a8a",
-    color: "white"
+    color: "white",
+    border: "none",
+    cursor: "pointer"
   },
-  message: { marginTop: "10px", fontWeight: "bold" },
-  loading: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center"
-  }
+  message: { marginTop: "10px", fontWeight: "bold" }
 };
+
 
 
 
