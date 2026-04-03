@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
 import { useNavigate } from "react-router-dom";
 
-export default function ChangePasswordFirstLogin() {
+export default function ChangePassword() {
   const [user, setUser] = useState(null);
   const [pass1, setPass1] = useState("");
   const [pass2, setPass2] = useState("");
@@ -13,7 +13,7 @@ export default function ChangePasswordFirstLogin() {
   const navigate = useNavigate();
 
   // =========================
-  // LOAD USER SAFELY
+  // LOAD USER (SAFE + NO LOOP)
   // =========================
   useEffect(() => {
     const loadUser = async () => {
@@ -29,24 +29,24 @@ export default function ChangePasswordFirstLogin() {
 
         const localUser = JSON.parse(stored);
 
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("users")
           .select("*")
           .eq("id", localUser.id)
           .single();
 
-        if (!data) {
+        if (error || !data) {
           navigate("/login", { replace: true });
           return;
         }
 
-        setUser(data);
-
-        // إذا ما يحتاج تغيير كلمة مرور
+        // 🔥 إذا ما يحتاج تغيير كلمة مرور → اخرج
         if (!data.must_change_password) {
           navigate("/dashboard", { replace: true });
+          return;
         }
 
+        setUser(data);
       } catch (err) {
         console.error(err);
         navigate("/login", { replace: true });
@@ -59,17 +59,17 @@ export default function ChangePasswordFirstLogin() {
   }, [navigate]);
 
   // =========================
-  // PREVENT BACK BUTTON
+  // BLOCK BACK BUTTON
   // =========================
   useEffect(() => {
-    window.history.pushState(null, "", window.location.href);
-
-    const onBack = () => {
+    const blockBack = () => {
       window.history.pushState(null, "", window.location.href);
     };
 
-    window.addEventListener("popstate", onBack);
-    return () => window.removeEventListener("popstate", onBack);
+    window.history.pushState(null, "", window.location.href);
+    window.addEventListener("popstate", blockBack);
+
+    return () => window.removeEventListener("popstate", blockBack);
   }, []);
 
   // =========================
@@ -89,7 +89,7 @@ export default function ChangePasswordFirstLogin() {
     }
 
     if (pass1.length < 6) {
-      setMsg("❌ كلمة المرور ضعيفة (أقل من 6 أحرف)");
+      setMsg("❌ كلمة المرور ضعيفة (6 أحرف على الأقل)");
       return;
     }
 
@@ -106,13 +106,11 @@ export default function ChangePasswordFirstLogin() {
     setLoading(false);
 
     if (error) {
-      setMsg("❌ حدث خطأ أثناء التحديث");
+      setMsg("❌ خطأ في التحديث");
       return;
     }
 
-    // =========================
-    // UPDATE LOCAL STORAGE
-    // =========================
+    // 🔥 تحديث التخزين المحلي
     const updatedUser = {
       ...user,
       must_change_password: false,
@@ -121,7 +119,7 @@ export default function ChangePasswordFirstLogin() {
     localStorage.setItem("user", JSON.stringify(updatedUser));
     sessionStorage.setItem("user", JSON.stringify(updatedUser));
 
-    setMsg("✅ تم تغيير كلمة المرور بنجاح");
+    setMsg("✅ تم تغيير كلمة المرور");
 
     setTimeout(() => {
       navigate("/dashboard", { replace: true });
@@ -129,14 +127,18 @@ export default function ChangePasswordFirstLogin() {
   };
 
   // =========================
-  // LOADING STATE
+  // LOADING SAFE SCREEN
   // =========================
-  if (checking || !user) {
+  if (checking) {
     return (
-      <div style={{ color: "white", textAlign: "center", marginTop: 50 }}>
+      <div style={{ textAlign: "center", marginTop: 50 }}>
         ⏳ جاري التحقق من المستخدم...
       </div>
     );
+  }
+
+  if (!user) {
+    return null;
   }
 
   // =========================
@@ -152,14 +154,17 @@ export default function ChangePasswordFirstLogin() {
         <img
           src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg"
           style={styles.logo}
+          alt="logo"
         />
 
         <h2 style={styles.title}>⚖️ العدل أساس العمران</h2>
 
         <div style={styles.notice}>
-          مرحباً <b>{user.fullName}</b><br />
-          ({user.role || "المحكمة"})<br /><br />
-          يرجى تغيير كلمة المرور للمتابعة.
+          مرحباً <b>{user?.fullName}</b>
+          <br />
+          ({user?.role || "المحكمة"})
+          <br />
+          يرجى تغيير كلمة المرور للمتابعة
         </div>
 
         <input
@@ -181,7 +186,7 @@ export default function ChangePasswordFirstLogin() {
           disabled={loading}
           style={{
             ...styles.button,
-            opacity: loading ? 0.6 : 1
+            opacity: loading ? 0.6 : 1,
           }}
         >
           {loading ? "جاري الحفظ..." : "اعتماد كلمة المرور"}
@@ -192,4 +197,5 @@ export default function ChangePasswordFirstLogin() {
     </div>
   );
 }
+
 
