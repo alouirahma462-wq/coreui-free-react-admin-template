@@ -3,6 +3,8 @@ import { supabase } from "../../supabaseClient";
 import { useNavigate } from "react-router-dom";
 
 export default function ChangePassword() {
+  const navigate = useNavigate();
+
   const [user, setUser] = useState(null);
   const [pass1, setPass1] = useState("");
   const [pass2, setPass2] = useState("");
@@ -10,10 +12,8 @@ export default function ChangePassword() {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
 
-  const navigate = useNavigate();
-
   // =========================
-  // LOAD USER (SAFE + NO LOOP)
+  // LOAD USER SAFE (NO LOOP)
   // =========================
   useEffect(() => {
     const loadUser = async () => {
@@ -40,7 +40,7 @@ export default function ChangePassword() {
           return;
         }
 
-        // 🔥 إذا ما يحتاج تغيير كلمة مرور → اخرج
+        // إذا ما يحتاج تغيير كلمة المرور → روح مباشرة
         if (!data.must_change_password) {
           navigate("/dashboard", { replace: true });
           return;
@@ -48,7 +48,7 @@ export default function ChangePassword() {
 
         setUser(data);
       } catch (err) {
-        console.error(err);
+        console.log(err);
         navigate("/login", { replace: true });
       } finally {
         setChecking(false);
@@ -57,20 +57,6 @@ export default function ChangePassword() {
 
     loadUser();
   }, [navigate]);
-
-  // =========================
-  // BLOCK BACK BUTTON
-  // =========================
-  useEffect(() => {
-    const blockBack = () => {
-      window.history.pushState(null, "", window.location.href);
-    };
-
-    window.history.pushState(null, "", window.location.href);
-    window.addEventListener("popstate", blockBack);
-
-    return () => window.removeEventListener("popstate", blockBack);
-  }, []);
 
   // =========================
   // CHANGE PASSWORD
@@ -106,11 +92,13 @@ export default function ChangePassword() {
     setLoading(false);
 
     if (error) {
-      setMsg("❌ خطأ في التحديث");
+      setMsg("❌ حدث خطأ أثناء التحديث");
       return;
     }
 
-    // 🔥 تحديث التخزين المحلي
+    // =========================
+    // UPDATE LOCAL STORAGE
+    // =========================
     const updatedUser = {
       ...user,
       must_change_password: false,
@@ -123,49 +111,29 @@ export default function ChangePassword() {
 
     setTimeout(() => {
       navigate("/dashboard", { replace: true });
-    }, 1000);
+    }, 800);
   };
 
   // =========================
-  // LOADING SAFE SCREEN
+  // LOADING SCREEN
   // =========================
   if (checking) {
     return (
       <div style={{ textAlign: "center", marginTop: 50 }}>
-        ⏳ جاري التحقق من المستخدم...
+        ⏳ جاري التحقق...
       </div>
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   // =========================
   // UI
   // =========================
   return (
     <div style={styles.page}>
-      <div style={styles.header}>
-        🇹🇳 الجمهورية التونسية - وزارة العدل
-      </div>
-
-      <div style={styles.container}>
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/0/0f/Emblem_of_Tunisia.svg"
-          style={styles.logo}
-          alt="logo"
-        />
-
-        <h2 style={styles.title}>⚖️ العدل أساس العمران</h2>
-
-        <div style={styles.notice}>
-          مرحباً <b>{user?.fullName}</b>
-          <br />
-          ({user?.role || "المحكمة"})
-          <br />
-          يرجى تغيير كلمة المرور للمتابعة
-        </div>
+      <div style={styles.card}>
+        <h2>🔐 تغيير كلمة المرور</h2>
 
         <input
           type="password"
@@ -184,18 +152,52 @@ export default function ChangePassword() {
         <button
           onClick={handleChange}
           disabled={loading}
-          style={{
-            ...styles.button,
-            opacity: loading ? 0.6 : 1,
-          }}
+          style={styles.button}
         >
-          {loading ? "جاري الحفظ..." : "اعتماد كلمة المرور"}
+          {loading ? "جاري الحفظ..." : "تأكيد"}
         </button>
 
-        {msg && <p style={styles.msg}>{msg}</p>}
+        {msg && <p>{msg}</p>}
       </div>
     </div>
   );
 }
+
+// =========================
+// STYLES
+// =========================
+const styles = {
+  page: {
+    height: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "#061a33",
+  },
+
+  card: {
+    width: "400px",
+    padding: "20px",
+    borderRadius: "12px",
+    background: "white",
+  },
+
+  input: {
+    width: "100%",
+    padding: "10px",
+    margin: "6px 0",
+  },
+
+  button: {
+    width: "100%",
+    padding: "10px",
+    marginTop: "10px",
+    background: "#1e3a8a",
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+  },
+};
+
 
 
