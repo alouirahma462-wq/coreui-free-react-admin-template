@@ -38,7 +38,7 @@ export default function ChangePassword() {
   }, [navigate]);
 
   // =========================
-  // رسالة الترحيب حسب fullName
+  // رسالة الترحيب (fullName فقط)
   // =========================
   const getWelcomeMessage = () => {
     if (user?.fullName === "التفقدية العامة") {
@@ -54,9 +54,14 @@ export default function ChangePassword() {
   const handleChange = async () => {
     setMsg("");
 
-    if (!pass1 || !pass2) return setMsg("❌ الرجاء إدخال كلمة المرور");
-    if (pass1 !== pass2) return setMsg("❌ كلمات المرور غير متطابقة");
-    if (pass1.length < 6) return setMsg("❌ كلمة المرور ضعيفة");
+    if (!pass1 || !pass2)
+      return setMsg("❌ الرجاء إدخال كلمة المرور");
+
+    if (pass1 !== pass2)
+      return setMsg("❌ كلمات المرور غير متطابقة");
+
+    if (pass1.length < 6)
+      return setMsg("❌ كلمة المرور ضعيفة");
 
     setLoading(true);
 
@@ -73,9 +78,6 @@ export default function ChangePassword() {
 
     if (error) return setMsg("❌ حدث خطأ أثناء الحفظ");
 
-    // =========================
-    // تحديث المستخدم
-    // =========================
     const updatedUser = {
       ...user,
       must_change_password: false,
@@ -84,9 +86,6 @@ export default function ChangePassword() {
     localStorage.setItem("user", JSON.stringify(updatedUser));
     sessionStorage.setItem("user", JSON.stringify(updatedUser));
 
-    // =========================
-    // تشغيل المودال بدل msg
-    // =========================
     setShowModal(true);
 
     setTimeout(() => {
@@ -147,7 +146,7 @@ export default function ChangePassword() {
       </div>
 
       {/* =========================
-          MODAL FANCY SUCCESS
+          MODAL SUCCESS
       ========================= */}
       {showModal && (
         <div style={styles.modalOverlay}>
@@ -177,6 +176,119 @@ export default function ChangePassword() {
     </div>
   );
 }
+
+// =========================
+// STYLES (FINAL CLEAN PACK)
+// =========================
+const styles = {
+  page: {
+    height: "100vh",
+    background: "linear-gradient(135deg, #061a33, #0b2e4a)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    direction: "rtl",
+    fontFamily: "Tahoma",
+  },
+
+  header: {
+    width: "100%",
+    background: "#b91c1c",
+    color: "white",
+    textAlign: "center",
+    padding: "12px",
+    fontWeight: "bold",
+  },
+
+  card: {
+    marginTop: "40px",
+    width: "420px",
+    background: "rgba(255,255,255,0.12)",
+    backdropFilter: "blur(18px)",
+    borderRadius: "18px",
+    padding: "25px",
+    textAlign: "center",
+    color: "white",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
+  },
+
+  logo: {
+    width: "80px",
+    marginBottom: "10px",
+  },
+
+  title: {
+    color: "#fbbf24",
+    marginBottom: "15px",
+  },
+
+  infoBox: {
+    background: "rgba(255,255,255,0.15)",
+    padding: "10px",
+    borderRadius: "10px",
+    marginBottom: "12px",
+  },
+
+  input: {
+    width: "100%",
+    padding: "12px",
+    margin: "8px 0",
+    borderRadius: "10px",
+    border: "none",
+    outline: "none",
+  },
+
+  button: {
+    width: "100%",
+    padding: "12px",
+    marginTop: "10px",
+    borderRadius: "10px",
+    background: "#1e3a8a",
+    color: "white",
+    fontWeight: "bold",
+    cursor: "pointer",
+    border: "none",
+  },
+
+  msg: {
+    marginTop: "10px",
+    fontWeight: "bold",
+    color: "#22c55e",
+  },
+
+  loading: {
+    color: "white",
+    textAlign: "center",
+    marginTop: "50px",
+  },
+
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    background: "rgba(0,0,0,0.75)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 9999,
+    padding: "20px",
+  },
+
+  modalBox: {
+    width: "100%",
+    maxWidth: "420px",
+    padding: "30px",
+    borderRadius: "18px",
+    textAlign: "center",
+    background: "rgba(255,255,255,0.12)",
+    backdropFilter: "blur(20px)",
+    color: "white",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
+  },
+};
+
 
 
 
