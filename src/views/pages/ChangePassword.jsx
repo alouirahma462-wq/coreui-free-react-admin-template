@@ -1,47 +1,66 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
-
+import { useNavigate } from "react-router-dom";
 
 export default function ChangePasswordFirstLogin() {
   const [user, setUser] = useState(null);
-
   const [pass1, setPass1] = useState("");
   const [pass2, setPass2] = useState("");
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
 
-  // 🔥 جلب المستخدم الحقيقي من قاعدة البيانات
+  const navigate = useNavigate();
+
+  // =========================
+  // LOAD USER SAFELY
+  // =========================
   useEffect(() => {
-    const localUser = JSON.parse(localStorage.getItem("user"));
+    const loadUser = async () => {
+      try {
+        const stored =
+          localStorage.getItem("user") ||
+          sessionStorage.getItem("user");
 
-    if (!localUser) {
-      window.location.replace("/login");
-      return;
-    }
+        if (!stored) {
+          navigate("/login", { replace: true });
+          return;
+        }
 
-    const fetchUser = async () => {
-      const { data } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", localUser.id)
-        .single();
+        const localUser = JSON.parse(stored);
 
-      if (!data) {
-        window.location.replace("/login");
-        return;
-      }
+        const { data } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", localUser.id)
+          .single();
 
-      setUser(data);
+        if (!data) {
+          navigate("/login", { replace: true });
+          return;
+        }
 
-      if (!data.must_change_password) {
-        window.location.replace("/dashboard");
+        setUser(data);
+
+        // إذا ما يحتاج تغيير كلمة مرور
+        if (!data.must_change_password) {
+          navigate("/dashboard", { replace: true });
+        }
+
+      } catch (err) {
+        console.error(err);
+        navigate("/login", { replace: true });
+      } finally {
+        setChecking(false);
       }
     };
 
-    fetchUser();
-  }, []);
+    loadUser();
+  }, [navigate]);
 
-  // 🔒 منع الرجوع
+  // =========================
+  // PREVENT BACK BUTTON
+  // =========================
   useEffect(() => {
     window.history.pushState(null, "", window.location.href);
 
@@ -53,7 +72,12 @@ export default function ChangePasswordFirstLogin() {
     return () => window.removeEventListener("popstate", onBack);
   }, []);
 
+  // =========================
+  // CHANGE PASSWORD
+  // =========================
   const handleChange = async () => {
+    setMsg("");
+
     if (!pass1 || !pass2) {
       setMsg("❌ الرجاء إدخال كلمة المرور");
       return;
@@ -64,8 +88,12 @@ export default function ChangePasswordFirstLogin() {
       return;
     }
 
+    if (pass1.length < 6) {
+      setMsg("❌ كلمة المرور ضعيفة (أقل من 6 أحرف)");
+      return;
+    }
+
     setLoading(true);
-    setMsg("⏳ جاري تحديث كلمة المرور...");
 
     const { error } = await supabase
       .from("users")
@@ -82,23 +110,38 @@ export default function ChangePasswordFirstLogin() {
       return;
     }
 
-    // 🔥 تحديث localStorage
+    // =========================
+    // UPDATE LOCAL STORAGE
+    // =========================
     const updatedUser = {
       ...user,
       must_change_password: false,
     };
 
     localStorage.setItem("user", JSON.stringify(updatedUser));
+    sessionStorage.setItem("user", JSON.stringify(updatedUser));
 
     setMsg("✅ تم تغيير كلمة المرور بنجاح");
 
     setTimeout(() => {
-      window.location.replace("/dashboard");
-    }, 1200);
+      navigate("/dashboard", { replace: true });
+    }, 1000);
   };
 
-  if (!user) return null;
+  // =========================
+  // LOADING STATE
+  // =========================
+  if (checking || !user) {
+    return (
+      <div style={{ color: "white", textAlign: "center", marginTop: 50 }}>
+        ⏳ جاري التحقق من المستخدم...
+      </div>
+    );
+  }
 
+  // =========================
+  // UI
+  // =========================
   return (
     <div style={styles.page}>
       <div style={styles.header}>
@@ -116,8 +159,7 @@ export default function ChangePasswordFirstLogin() {
         <div style={styles.notice}>
           مرحباً <b>{user.fullName}</b><br />
           ({user.role || "المحكمة"})<br /><br />
-
-          يرجى إعادة تعيين كلمة المرور للدخول للنظام.
+          يرجى تغيير كلمة المرور للمتابعة.
         </div>
 
         <input
@@ -134,7 +176,14 @@ export default function ChangePasswordFirstLogin() {
           style={styles.input}
         />
 
-        <button onClick={handleChange} style={styles.button} disabled={loading}>
+        <button
+          onClick={handleChange}
+          disabled={loading}
+          style={{
+            ...styles.button,
+            opacity: loading ? 0.6 : 1
+          }}
+        >
           {loading ? "جاري الحفظ..." : "اعتماد كلمة المرور"}
         </button>
 
@@ -144,77 +193,3 @@ export default function ChangePasswordFirstLogin() {
   );
 }
 
-const styles = {
-  page: {
-    minHeight: "100vh",
-    background: "linear-gradient(135deg, #0b2e4a, #0f4c75)",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    fontFamily: "Tahoma",
-    direction: "rtl",
-    padding: "10px",
-  },
-  header: {
-    width: "100%",
-    background: "#b91c1c",
-    color: "white",
-    textAlign: "center",
-    padding: "12px",
-    fontWeight: "bold",
-    fontSize: "16px",
-    borderRadius: "0 0 12px 12px",
-  },
-  container: {
-    marginTop: "40px",
-    width: "100%",
-    maxWidth: "420px",
-    background: "rgba(255,255,255,0.12)",
-    backdropFilter: "blur(20px)",
-    borderRadius: "18px",
-    padding: "25px",
-    textAlign: "center",
-    color: "white",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
-  },
-  logo: { width: "90px", marginBottom: "10px" },
-  title: {
-    color: "#fbbf24",
-    marginBottom: "15px",
-    fontSize: "18px",
-    fontWeight: "bold",
-  },
-  notice: {
-    background: "rgba(255,255,255,0.15)",
-    padding: "12px",
-    borderRadius: "12px",
-    fontSize: "14px",
-    marginBottom: "15px",
-    lineHeight: "1.6",
-  },
-  input: {
-    width: "100%",
-    padding: "12px",
-    margin: "8px 0",
-    borderRadius: "10px",
-    border: "none",
-    outline: "none",
-    fontSize: "14px",
-  },
-  button: {
-    width: "100%",
-    padding: "12px",
-    marginTop: "10px",
-    borderRadius: "10px",
-    background: "#1e3a8a",
-    color: "white",
-    fontWeight: "bold",
-    cursor: "pointer",
-    border: "none",
-  },
-  msg: {
-    marginTop: "12px",
-    fontWeight: "bold",
-    color: "#22c55e",
-  },
-};
