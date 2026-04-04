@@ -10,13 +10,11 @@ export default function ForgotPassword() {
   const [error, setError] = useState("");
   const [debugOtp, setDebugOtp] = useState("");
 
-  // 🎵 optional sound (safe)
+  // 🧹 تنظيف أي session قديم (IMPORTANT FIX)
   useEffect(() => {
-    const audio = new Audio(
-      "https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3"
-    );
-    audio.volume = 0.2;
-    audio.play().catch(() => {});
+    localStorage.removeItem("reset_user");
+    localStorage.removeItem("reset_otp");
+    localStorage.removeItem("reset_flow");
   }, []);
 
   const handleSubmit = async () => {
@@ -27,9 +25,10 @@ export default function ForgotPassword() {
 
     setLoading(true);
     setError("");
+    setDebugOtp("");
 
     try {
-      // 🔥 FIX 1: use maybeSingle instead of single (IMPORTANT)
+      // 🔥 SAFE QUERY (no crash)
       const { data: user, error: userError } = await supabase
         .from("users")
         .select("*")
@@ -42,11 +41,11 @@ export default function ForgotPassword() {
         return;
       }
 
-      // 🔐 OTP generation
+      // 🔐 OTP generation (secure flow)
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       const expiry = new Date(Date.now() + 5 * 60 * 1000);
 
-      // 🔥 FIX 2: update safely
+      // 💾 store OTP in DB
       const { error: updateError } = await supabase
         .from("users")
         .update({
@@ -62,16 +61,19 @@ export default function ForgotPassword() {
         return;
       }
 
-      // 🔥 FIX 3: persist flow (NO STATE LOSS)
+      // 💾 persist flow (CRITICAL FIX)
       localStorage.setItem("reset_user", user.username);
+      localStorage.setItem("reset_otp", otp);
       localStorage.setItem("reset_flow", "active");
 
       setDebugOtp(otp);
 
       setLoading(false);
 
-      // 🚀 SAFE NAVIGATION
-      navigate("/reset-password");
+      // 🚀 IMPORTANT: small delay prevents router race bug
+      setTimeout(() => {
+        navigate("/reset-password");
+      }, 150);
 
     } catch (err) {
       setError("❌ حدث خطأ غير متوقع");
@@ -107,7 +109,7 @@ export default function ForgotPassword() {
 
         {debugOtp && (
           <div style={styles.otpBox}>
-            🔐 OTP (DEV): {debugOtp}
+            🔐 OTP (DEV ONLY): {debugOtp}
           </div>
         )}
 
@@ -119,7 +121,7 @@ export default function ForgotPassword() {
   );
 }
 
-/* 🎨 SAME UI (kept clean) */
+/* 🎨 UI CLEAN */
 const styles = {
   page: {
     height: "100vh",
@@ -145,7 +147,7 @@ const styles = {
   overlay: {
     position: "absolute",
     inset: 0,
-    background: "rgba(0,0,0,0.45)",
+    background: "rgba(0,0,0,0.5)",
   },
 
   card: {
