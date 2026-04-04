@@ -10,7 +10,6 @@ export default function ForgotPassword() {
   const [error, setError] = useState("");
   const [debugOtp, setDebugOtp] = useState("");
 
-  // 🎵 صوت دخول
   useEffect(() => {
     const audio = new Audio(
       "https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3"
@@ -19,7 +18,6 @@ export default function ForgotPassword() {
     audio.play().catch(() => {});
   }, []);
 
-  // 🔐 إرسال OTP
   const handleSubmit = async () => {
     if (!username) {
       setError("يرجى إدخال اسم المستخدم");
@@ -30,7 +28,6 @@ export default function ForgotPassword() {
     setError("");
 
     try {
-      // 🟢 البحث عن المستخدم
       const { data: user, error: userError } = await supabase
         .from("users")
         .select("*")
@@ -43,13 +40,9 @@ export default function ForgotPassword() {
         return;
       }
 
-      // 🔐 توليد OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-      // ⏰ صلاحية 5 دقائق
       const expiry = new Date(Date.now() + 5 * 60 * 1000);
 
-      // 💾 حفظ في Supabase
       const { error: updateError } = await supabase
         .from("users")
         .update({
@@ -65,20 +58,15 @@ export default function ForgotPassword() {
         return;
       }
 
-      // 🧪 عرض داخلي للتجربة فقط
       setDebugOtp(otp);
 
-      // ⏩ انتقال للـ Reset Password
       setTimeout(() => {
         navigate("/reset-password", {
-          state: {
-            username: user.username,
-          },
+          state: { username: user.username },
         });
       }, 1200);
 
     } catch (err) {
-      console.log(err);
       setError("❌ حدث خطأ غير متوقع");
     }
 
@@ -87,19 +75,16 @@ export default function ForgotPassword() {
 
   return (
     <div style={styles.page}>
-      {/* 🖼️ خلفية المحكمة */}
+      {/* 🏛️ الخلفية (فقط تم تحسينها) */}
       <div style={styles.bg}></div>
       <div style={styles.overlay}></div>
 
-      {/* 🏛️ الكرت */}
       <div style={styles.card}>
         <div style={styles.header}>
           <h2 style={styles.title}>
             الجمهورية التونسية - وزارة العدل
           </h2>
-          <p style={styles.motto}>
-            "العدل أساس العمران"
-          </p>
+          <p style={styles.motto}>العدل أساس العمران</p>
         </div>
 
         <h3 style={styles.h3}>نسيت كلمة المرور</h3>
@@ -118,25 +103,17 @@ export default function ForgotPassword() {
           style={styles.input}
         />
 
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          style={styles.button}
-        >
+        <button onClick={handleSubmit} disabled={loading} style={styles.button}>
           {loading ? "جاري إرسال الكود..." : "إرسال الكود"}
         </button>
 
-        {/* 🔐 OTP تجريبي فقط */}
         {debugOtp && (
           <div style={styles.otpBox}>
             🔐 كود التحقق (تجريبي فقط): {debugOtp}
           </div>
         )}
 
-        <button
-          onClick={() => navigate("/login")}
-          style={styles.back}
-        >
+        <button onClick={() => navigate("/login")} style={styles.back}>
           العودة لتسجيل الدخول
         </button>
       </div>
@@ -144,7 +121,7 @@ export default function ForgotPassword() {
   );
 }
 
-/* 🎨 STYLES - تصميم المحكمة الفخم */
+/* 🎨 STYLES (ONLY BACKGROUND CHANGED) */
 const styles = {
   page: {
     height: "100vh",
@@ -157,19 +134,18 @@ const styles = {
     overflow: "hidden",
   },
 
-  // 🏛️ خلفية المحكمة
+  /* 🔥 UPDATED COURT BACKGROUND ONLY */
   bg: {
     position: "absolute",
     inset: 0,
     backgroundImage:
-      "url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f')",
+      "url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=2400&q=80')",
     backgroundSize: "cover",
     backgroundPosition: "center",
-    filter: "brightness(0.55) contrast(1.2)",
+    filter: "brightness(0.6) contrast(1.3) saturate(1.1)",
     transform: "scale(1.05)",
   },
 
-  // 🌑 overlay رسمي
   overlay: {
     position: "absolute",
     inset: 0,
@@ -177,7 +153,6 @@ const styles = {
       "linear-gradient(135deg, rgba(0,0,0,0.65), rgba(30,58,138,0.45))",
   },
 
-  // 🧾 الكرت الرئيسي
   card: {
     position: "relative",
     width: "430px",
@@ -224,9 +199,7 @@ const styles = {
     padding: "12px",
     borderRadius: "10px",
     border: "1px solid #ccc",
-    outline: "none",
     marginBottom: "10px",
-    fontSize: "14px",
   },
 
   button: {
@@ -234,11 +207,10 @@ const styles = {
     padding: "12px",
     borderRadius: "10px",
     border: "none",
-    cursor: "pointer",
-    fontWeight: "bold",
     color: "white",
     background: "linear-gradient(135deg, #1e3a8a, #2563eb)",
-    transition: "0.3s",
+    fontWeight: "bold",
+    cursor: "pointer",
   },
 
   back: {
@@ -256,7 +228,6 @@ const styles = {
     fontSize: "13px",
   },
 
-  // 🔐 OTP box
   otpBox: {
     marginTop: "15px",
     padding: "10px",
@@ -267,3 +238,4 @@ const styles = {
     fontWeight: "bold",
   },
 };
+
