@@ -5,16 +5,17 @@ import { supabase } from "../../supabaseClient";
 export default function ResetPassword() {
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState(null);
+  const [username, setUsername] = useState("");
   const [ready, setReady] = useState(false);
 
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
-  // 🔥 FIX 1: safe load (NO render navigation)
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
+  // 🔥 SAFE LOAD
   useEffect(() => {
     const user = localStorage.getItem("reset_user");
 
@@ -29,42 +30,43 @@ export default function ResetPassword() {
 
   const handleReset = async () => {
     if (!otp || !newPassword) {
-      setError("يرجى إدخال جميع الحقول");
+      setErrorMsg("يرجى إدخال جميع الحقول");
       return;
     }
 
     setLoading(true);
-    setError("");
-    setSuccess("");
+    setErrorMsg("");
+    setSuccessMsg("");
 
     try {
-      const { data: user, error } = await supabase
+      // 🔥 SAFE QUERY
+      const { data, error: supabaseError } = await supabase
         .from("users")
         .select("*")
         .eq("username", username)
         .maybeSingle();
 
-      if (error || !user) {
-        setError("المستخدم غير موجود");
+      if (supabaseError || !data) {
+        setErrorMsg("المستخدم غير موجود");
         setLoading(false);
         return;
       }
 
-      // ⛔ OTP check
-      if (user.reset_token !== otp) {
-        setError("رمز التحقق غير صحيح");
+      // ⛔ OTP CHECK
+      if (data.reset_token !== otp) {
+        setErrorMsg("رمز التحقق غير صحيح");
         setLoading(false);
         return;
       }
 
-      // ⏰ expiry check
-      if (new Date(user.reset_token_expiry) < new Date()) {
-        setError("انتهت صلاحية الرمز");
+      // ⏰ EXPIRY CHECK
+      if (new Date(data.reset_token_expiry) < new Date()) {
+        setErrorMsg("انتهت صلاحية الرمز");
         setLoading(false);
         return;
       }
 
-      // 🔐 update password
+      // 🔐 UPDATE PASSWORD
       const { error: updateError } = await supabase
         .from("users")
         .update({
@@ -73,31 +75,32 @@ export default function ResetPassword() {
           reset_token_expiry: null,
           reset_attempts: 0,
         })
-        .eq("id", user.id);
+        .eq("id", data.id);
 
       if (updateError) {
-        setError("فشل تحديث كلمة المرور");
+        setErrorMsg("فشل تحديث كلمة المرور");
         setLoading(false);
         return;
       }
 
-      setSuccess("تم تغيير كلمة المرور بنجاح ✔");
+      setSuccessMsg("تم تغيير كلمة المرور بنجاح ✔");
 
-      // 🧹 clean session
+      // 🧹 CLEAN FLOW
       localStorage.removeItem("reset_user");
+      localStorage.removeItem("reset_otp");
+      localStorage.removeItem("reset_flow");
 
       setTimeout(() => {
         navigate("/login");
       }, 1200);
 
     } catch (err) {
-      setError("حدث خطأ غير متوقع");
+      setErrorMsg("حدث خطأ غير متوقع");
     }
 
     setLoading(false);
   };
 
-  // 🔥 FIX 2: prevent flash render
   if (!ready) {
     return (
       <div style={{ textAlign: "center", marginTop: "50px" }}>
@@ -116,8 +119,8 @@ export default function ResetPassword() {
 
         <p style={styles.subtitle}>حساب: {username}</p>
 
-        {error && <div style={styles.error}>{error}</div>}
-        {success && <div style={styles.success}>{success}</div>}
+        {errorMsg && <div style={styles.error}>{errorMsg}</div>}
+        {successMsg && <div style={styles.success}>{successMsg}</div>}
 
         <input
           placeholder="رمز التحقق OTP"
@@ -218,5 +221,6 @@ const styles = {
   error: { color: "red" },
   success: { color: "green" },
 };
+
 
 
