@@ -60,22 +60,22 @@ export default function ForgotPassword() {
 
       setDebugOtp(otp);
 
-      setTimeout(() => {
-        navigate("/reset-password", {
-          state: { username: user.username },
-        });
-      }, 1200);
+      // 🚀 FIXED: بدل state → localStorage
+      localStorage.setItem("reset_user", user.username);
+
+      setLoading(false);
+
+      // 🚀 direct navigation (NO timeout)
+      navigate("/reset-password");
 
     } catch (err) {
       setError("❌ حدث خطأ غير متوقع");
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
     <div style={styles.page}>
-      {/* 🏛️ الخلفية (فقط تم تحسينها) */}
       <div style={styles.bg}></div>
       <div style={styles.overlay}></div>
 
@@ -121,7 +121,7 @@ export default function ForgotPassword() {
   );
 }
 
-/* 🎨 STYLES (ONLY BACKGROUND CHANGED) */
+/* 🎨 STYLES (UNCHANGED) */
 const styles = {
   page: {
     height: "100vh",
@@ -134,7 +134,6 @@ const styles = {
     overflow: "hidden",
   },
 
-  /* 🔥 UPDATED COURT BACKGROUND ONLY */
   bg: {
     position: "absolute",
     inset: 0,
@@ -238,4 +237,5 @@ const styles = {
     fontWeight: "bold",
   },
 };
+
 
