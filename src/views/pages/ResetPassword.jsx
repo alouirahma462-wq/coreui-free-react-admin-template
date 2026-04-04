@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
 
-  // 🔐 بدل location.state
-  const username = localStorage.getItem("reset_user");
+  const [username, setUsername] = useState(null);
+  const [ready, setReady] = useState(false);
 
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -14,11 +14,18 @@ export default function ResetPassword() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // 🚨 حماية: إذا ما في username
-  if (!username) {
-    navigate("/login");
-    return null;
-  }
+  // 🔥 FIX 1: safe load (NO render navigation)
+  useEffect(() => {
+    const user = localStorage.getItem("reset_user");
+
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    setUsername(user);
+    setReady(true);
+  }, [navigate]);
 
   const handleReset = async () => {
     if (!otp || !newPassword) {
@@ -35,7 +42,7 @@ export default function ResetPassword() {
         .from("users")
         .select("*")
         .eq("username", username)
-        .single();
+        .maybeSingle();
 
       if (error || !user) {
         setError("المستخدم غير موجود");
@@ -76,7 +83,7 @@ export default function ResetPassword() {
 
       setSuccess("تم تغيير كلمة المرور بنجاح ✔");
 
-      // 🧹 تنظيف الجلسة
+      // 🧹 clean session
       localStorage.removeItem("reset_user");
 
       setTimeout(() => {
@@ -90,13 +97,20 @@ export default function ResetPassword() {
     setLoading(false);
   };
 
+  // 🔥 FIX 2: prevent flash render
+  if (!ready) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "50px" }}>
+        جاري التحقق...
+      </div>
+    );
+  }
+
   return (
     <div style={styles.page}>
-      {/* 🏛️ الخلفية */}
       <div style={styles.bg}></div>
       <div style={styles.overlay}></div>
 
-      {/* 🧾 الكرت */}
       <div style={styles.card}>
         <h2 style={styles.title}>إعادة تعيين كلمة المرور</h2>
 
@@ -132,7 +146,7 @@ export default function ResetPassword() {
   );
 }
 
-/* 🎨 UI (نفس تصميم المحكمة) */
+/* 🎨 UI */
 const styles = {
   page: {
     height: "100vh",
@@ -169,20 +183,12 @@ const styles = {
     borderRadius: "18px",
     background: "rgba(255,255,255,0.92)",
     backdropFilter: "blur(20px)",
-    boxShadow: "0 30px 80px rgba(0,0,0,0.5)",
     textAlign: "center",
     zIndex: 2,
   },
 
-  title: {
-    color: "#1e3a8a",
-    marginBottom: "10px",
-  },
-
-  subtitle: {
-    fontSize: "13px",
-    marginBottom: "15px",
-  },
+  title: { color: "#1e3a8a" },
+  subtitle: { fontSize: "13px", marginBottom: "10px" },
 
   input: {
     width: "100%",
@@ -200,7 +206,6 @@ const styles = {
     color: "white",
     border: "none",
     fontWeight: "bold",
-    cursor: "pointer",
   },
 
   back: {
@@ -208,17 +213,10 @@ const styles = {
     background: "none",
     border: "none",
     color: "#b91c1c",
-    cursor: "pointer",
   },
 
-  error: {
-    color: "red",
-    marginBottom: "10px",
-  },
-
-  success: {
-    color: "green",
-    marginBottom: "10px",
-  },
+  error: { color: "red" },
+  success: { color: "green" },
 };
+
 
