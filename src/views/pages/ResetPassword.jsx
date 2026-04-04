@@ -1,18 +1,24 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const username = location.state?.username || "";
+  // 🔐 بدل location.state
+  const username = localStorage.getItem("reset_user");
 
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // 🚨 حماية: إذا ما في username
+  if (!username) {
+    navigate("/login");
+    return null;
+  }
 
   const handleReset = async () => {
     if (!otp || !newPassword) {
@@ -25,7 +31,6 @@ export default function ResetPassword() {
     setSuccess("");
 
     try {
-      // 🔍 جلب المستخدم
       const { data: user, error } = await supabase
         .from("users")
         .select("*")
@@ -38,21 +43,21 @@ export default function ResetPassword() {
         return;
       }
 
-      // ⛔ تحقق من OTP
+      // ⛔ OTP check
       if (user.reset_token !== otp) {
         setError("رمز التحقق غير صحيح");
         setLoading(false);
         return;
       }
 
-      // ⏰ تحقق من انتهاء الصلاحية
+      // ⏰ expiry check
       if (new Date(user.reset_token_expiry) < new Date()) {
         setError("انتهت صلاحية الرمز");
         setLoading(false);
         return;
       }
 
-      // 🔐 تحديث كلمة المرور + تنظيف التوكن
+      // 🔐 update password
       const { error: updateError } = await supabase
         .from("users")
         .update({
@@ -71,9 +76,12 @@ export default function ResetPassword() {
 
       setSuccess("تم تغيير كلمة المرور بنجاح ✔");
 
+      // 🧹 تنظيف الجلسة
+      localStorage.removeItem("reset_user");
+
       setTimeout(() => {
         navigate("/login");
-      }, 1500);
+      }, 1200);
 
     } catch (err) {
       setError("حدث خطأ غير متوقع");
@@ -84,7 +92,7 @@ export default function ResetPassword() {
 
   return (
     <div style={styles.page}>
-      {/* 🏛️ خلفية المحكمة */}
+      {/* 🏛️ الخلفية */}
       <div style={styles.bg}></div>
       <div style={styles.overlay}></div>
 
@@ -92,9 +100,7 @@ export default function ResetPassword() {
       <div style={styles.card}>
         <h2 style={styles.title}>إعادة تعيين كلمة المرور</h2>
 
-        <p style={styles.subtitle}>
-          حساب: {username}
-        </p>
+        <p style={styles.subtitle}>حساب: {username}</p>
 
         {error && <div style={styles.error}>{error}</div>}
         {success && <div style={styles.success}>{success}</div>}
@@ -114,7 +120,7 @@ export default function ResetPassword() {
           style={styles.input}
         />
 
-        <button onClick={handleReset} style={styles.button} disabled={loading}>
+        <button onClick={handleReset} disabled={loading} style={styles.button}>
           {loading ? "جاري التحديث..." : "تغيير كلمة المرور"}
         </button>
 
@@ -126,7 +132,7 @@ export default function ResetPassword() {
   );
 }
 
-/* 🎨 نفس هوية المحكمة */
+/* 🎨 UI (نفس تصميم المحكمة) */
 const styles = {
   page: {
     height: "100vh",
@@ -215,3 +221,4 @@ const styles = {
     marginBottom: "10px",
   },
 };
+
