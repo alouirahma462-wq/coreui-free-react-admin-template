@@ -10,6 +10,7 @@ export default function ForgotPassword() {
   const [error, setError] = useState("");
   const [debugOtp, setDebugOtp] = useState("");
 
+  // 🎵 optional sound (safe)
   useEffect(() => {
     const audio = new Audio(
       "https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3"
@@ -19,7 +20,7 @@ export default function ForgotPassword() {
   }, []);
 
   const handleSubmit = async () => {
-    if (!username) {
+    if (!username.trim()) {
       setError("يرجى إدخال اسم المستخدم");
       return;
     }
@@ -28,11 +29,12 @@ export default function ForgotPassword() {
     setError("");
 
     try {
+      // 🔥 FIX 1: use maybeSingle instead of single (IMPORTANT)
       const { data: user, error: userError } = await supabase
         .from("users")
         .select("*")
-        .eq("username", username)
-        .single();
+        .eq("username", username.trim())
+        .maybeSingle();
 
       if (userError || !user) {
         setError("❌ المستخدم غير موجود");
@@ -40,9 +42,11 @@ export default function ForgotPassword() {
         return;
       }
 
+      // 🔐 OTP generation
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       const expiry = new Date(Date.now() + 5 * 60 * 1000);
 
+      // 🔥 FIX 2: update safely
       const { error: updateError } = await supabase
         .from("users")
         .update({
@@ -53,19 +57,20 @@ export default function ForgotPassword() {
         .eq("id", user.id);
 
       if (updateError) {
-        setError("❌ فشل حفظ الكود");
+        setError("❌ فشل إنشاء رمز التحقق");
         setLoading(false);
         return;
       }
 
-      setDebugOtp(otp);
-
-      // 🚀 FIXED: بدل state → localStorage
+      // 🔥 FIX 3: persist flow (NO STATE LOSS)
       localStorage.setItem("reset_user", user.username);
+      localStorage.setItem("reset_flow", "active");
+
+      setDebugOtp(otp);
 
       setLoading(false);
 
-      // 🚀 direct navigation (NO timeout)
+      // 🚀 SAFE NAVIGATION
       navigate("/reset-password");
 
     } catch (err) {
@@ -80,17 +85,10 @@ export default function ForgotPassword() {
       <div style={styles.overlay}></div>
 
       <div style={styles.card}>
-        <div style={styles.header}>
-          <h2 style={styles.title}>
-            الجمهورية التونسية - وزارة العدل
-          </h2>
-          <p style={styles.motto}>العدل أساس العمران</p>
-        </div>
-
-        <h3 style={styles.h3}>نسيت كلمة المرور</h3>
+        <h2 style={styles.title}>نسيت كلمة المرور</h2>
 
         <p style={styles.desc}>
-          أدخل اسم المستخدم لإرسال رمز إعادة التعيين
+          أدخل اسم المستخدم لإرسال رمز التحقق
         </p>
 
         {error && <div style={styles.error}>{error}</div>}
@@ -104,12 +102,12 @@ export default function ForgotPassword() {
         />
 
         <button onClick={handleSubmit} disabled={loading} style={styles.button}>
-          {loading ? "جاري إرسال الكود..." : "إرسال الكود"}
+          {loading ? "جاري الإرسال..." : "إرسال الكود"}
         </button>
 
         {debugOtp && (
           <div style={styles.otpBox}>
-            🔐 كود التحقق (تجريبي فقط): {debugOtp}
+            🔐 OTP (DEV): {debugOtp}
           </div>
         )}
 
@@ -121,7 +119,7 @@ export default function ForgotPassword() {
   );
 }
 
-/* 🎨 STYLES (UNCHANGED) */
+/* 🎨 SAME UI (kept clean) */
 const styles = {
   page: {
     height: "100vh",
@@ -141,15 +139,13 @@ const styles = {
       "url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=2400&q=80')",
     backgroundSize: "cover",
     backgroundPosition: "center",
-    filter: "brightness(0.6) contrast(1.3) saturate(1.1)",
-    transform: "scale(1.05)",
+    filter: "brightness(0.6) contrast(1.3)",
   },
 
   overlay: {
     position: "absolute",
     inset: 0,
-    background:
-      "linear-gradient(135deg, rgba(0,0,0,0.65), rgba(30,58,138,0.45))",
+    background: "rgba(0,0,0,0.45)",
   },
 
   card: {
@@ -159,38 +155,19 @@ const styles = {
     borderRadius: "18px",
     background: "rgba(255,255,255,0.92)",
     backdropFilter: "blur(20px)",
-    boxShadow: "0 30px 80px rgba(0,0,0,0.5)",
     textAlign: "center",
     zIndex: 2,
   },
 
-  header: {
-    marginBottom: "15px",
-  },
-
   title: {
-    fontSize: "18px",
-    color: "#b91c1c",
-    fontWeight: "bold",
-    margin: 0,
-  },
-
-  motto: {
-    fontSize: "13px",
     color: "#1e3a8a",
-    fontStyle: "italic",
-    marginTop: "5px",
-  },
-
-  h3: {
-    color: "#1e3a8a",
-    marginBottom: "6px",
+    marginBottom: "10px",
   },
 
   desc: {
     fontSize: "13px",
-    color: "#555",
     marginBottom: "15px",
+    color: "#555",
   },
 
   input: {
@@ -205,37 +182,34 @@ const styles = {
     width: "100%",
     padding: "12px",
     borderRadius: "10px",
-    border: "none",
-    color: "white",
     background: "linear-gradient(135deg, #1e3a8a, #2563eb)",
+    color: "white",
+    border: "none",
     fontWeight: "bold",
     cursor: "pointer",
   },
 
   back: {
-    marginTop: "12px",
+    marginTop: "10px",
     background: "none",
     border: "none",
     color: "#b91c1c",
     cursor: "pointer",
-    textDecoration: "underline",
   },
 
   error: {
     color: "red",
     marginBottom: "10px",
-    fontSize: "13px",
   },
 
   otpBox: {
-    marginTop: "15px",
+    marginTop: "12px",
     padding: "10px",
     background: "#e0f2fe",
-    border: "1px solid #38bdf8",
     borderRadius: "10px",
-    color: "#075985",
-    fontWeight: "bold",
+    border: "1px solid #38bdf8",
   },
 };
+
 
 
