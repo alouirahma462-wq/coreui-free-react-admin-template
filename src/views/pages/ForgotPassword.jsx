@@ -4,25 +4,36 @@ import { useNavigate } from "react-router-dom";
 export default function ForgotPassword() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
-  // 🔊 صوت دخول
   useEffect(() => {
     const audio = new Audio(
       "https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3"
     );
-    audio.volume = 0.3;
+    audio.volume = 0.2;
     audio.play().catch(() => {});
   }, []);
 
+  const handleSubmit = () => {
+    if (!email) return;
+
+    setLoading(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      setSuccess(true);
+    }, 2000);
+  };
+
   return (
     <div style={styles.page}>
-      {/* 🇹🇳 علم تونس */}
+      {/* 🇹🇳 العلم */}
       <div style={styles.flag}></div>
 
       <div style={styles.overlay}></div>
 
       <div style={styles.card}>
-        {/* 🔥 الهيدر الحكومي */}
         <div style={styles.govHeader}>
           <h2 style={styles.govTitle}>
             الجمهورية التونسية - وزارة العدل
@@ -35,23 +46,32 @@ export default function ForgotPassword() {
         <h3 style={styles.mainTitle}>نسيت كلمة المرور</h3>
 
         <p style={styles.desc}>
-          أدخل بريدك الإلكتروني لاستلام رابط إعادة تعيين كلمة المرور
+          أدخل بريدك الإلكتروني لاستعادة كلمة المرور
         </p>
 
-        <input
-          type="email"
-          placeholder="البريد الإلكتروني"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={styles.input}
-        />
+        {success ? (
+          <div style={styles.success}>
+            ✔ تم إرسال رابط إعادة التعيين إلى بريدك
+          </div>
+        ) : (
+          <>
+            <input
+              type="email"
+              placeholder="البريد الإلكتروني"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={styles.input}
+            />
 
-        <button
-          style={styles.button}
-          onClick={() => alert("تم إرسال رابط إعادة التعيين")}
-        >
-          إرسال الرابط
-        </button>
+            <button
+              style={styles.button}
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? "جاري الإرسال..." : "إرسال الرابط"}
+            </button>
+          </>
+        )}
 
         <button onClick={() => navigate("/login")} style={styles.back}>
           العودة لتسجيل الدخول
@@ -80,40 +100,40 @@ const styles = {
     position: "absolute",
     inset: 0,
     background:
-      "linear-gradient(rgba(255,255,255,0.9), rgba(230,240,255,0.9))",
+      "linear-gradient(rgba(255,255,255,0.92), rgba(220,235,255,0.92))",
   },
 
-  /* 🇹🇳 علم متحرك */
+  /* 🇹🇳 علم تونس واقعي */
   flag: {
     position: "absolute",
     top: 20,
     right: 20,
-    width: "80px",
-    height: "50px",
+    width: "90px",
+    height: "55px",
     backgroundImage:
       "url('https://upload.wikimedia.org/wikipedia/commons/c/ce/Flag_of_Tunisia.svg')",
     backgroundSize: "cover",
     borderRadius: "6px",
-    animation: "wave 3s infinite ease-in-out",
     zIndex: 2,
+    animation: "wave 2s infinite ease-in-out",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
   },
 
   card: {
     position: "relative",
-    width: "380px",
+    width: "400px",
     padding: "30px",
     borderRadius: "20px",
-    background: "rgba(255,255,255,0.75)",
-    backdropFilter: "blur(20px)",
-    boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+    background: "rgba(255,255,255,0.8)",
+    backdropFilter: "blur(25px)",
+    boxShadow: "0 25px 70px rgba(0,0,0,0.35)",
     textAlign: "center",
     zIndex: 3,
+    animation: "dropFancy 1s ease",
   },
 
-  /* 🔥 الهيدر مع animation */
   govHeader: {
     marginBottom: "15px",
-    animation: "dropFancy 1.2s ease forwards",
   },
 
   govTitle: {
@@ -121,21 +141,21 @@ const styles = {
     fontSize: "18px",
     color: "#b91c1c",
     fontWeight: "bold",
-    textShadow: "0 0 8px rgba(212,175,55,0.6)",
+    textShadow: "0 0 10px rgba(212,175,55,0.5)",
   },
 
   govMotto: {
     margin: 0,
     fontSize: "13px",
     color: "#1e3a8a",
-    marginTop: "5px",
     fontStyle: "italic",
-    textShadow: "0 0 6px rgba(212,175,55,0.5)",
+    marginTop: "4px",
+    textShadow: "0 0 6px rgba(212,175,55,0.4)",
   },
 
   mainTitle: {
-    marginTop: "15px",
     color: "#1e3a8a",
+    marginTop: "10px",
   },
 
   desc: {
@@ -147,22 +167,21 @@ const styles = {
   input: {
     width: "100%",
     padding: "12px",
-    margin: "10px 0",
     borderRadius: "10px",
     border: "1px solid #ccc",
     outline: "none",
+    marginBottom: "10px",
   },
 
   button: {
     width: "100%",
     padding: "12px",
-    background: "linear-gradient(135deg, #1e3a8a, #2563eb)",
-    color: "white",
-    border: "none",
     borderRadius: "10px",
-    marginTop: "10px",
-    fontWeight: "bold",
+    border: "none",
     cursor: "pointer",
+    fontWeight: "bold",
+    color: "white",
+    background: "linear-gradient(135deg, #1e3a8a, #2563eb)",
   },
 
   back: {
@@ -173,30 +192,40 @@ const styles = {
     cursor: "pointer",
     textDecoration: "underline",
   },
+
+  success: {
+    padding: "15px",
+    background: "#dcfce7",
+    color: "#166534",
+    borderRadius: "10px",
+    fontWeight: "bold",
+  },
 };
 
-/* 🔥 Animations */
-const styleSheet = document.styleSheets[0];
+/* 🔥 Animations آمنة */
+if (typeof document !== "undefined") {
+  const style = document.createElement("style");
 
-styleSheet.insertRule(`
-@keyframes wave {
-  0% { transform: rotate(0deg); }
-  50% { transform: rotate(2deg); }
-  100% { transform: rotate(0deg); }
-}
-`, styleSheet.cssRules.length);
+  style.innerHTML = `
+    @keyframes wave {
+      0% { transform: rotate(0deg) translateY(0px); }
+      50% { transform: rotate(2deg) translateY(-2px); }
+      100% { transform: rotate(0deg) translateY(0px); }
+    }
 
-styleSheet.insertRule(`
-@keyframes dropFancy {
-  0% {
-    transform: translateY(-80px);
-    opacity: 0;
-    filter: blur(8px);
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-    filter: blur(0);
-  }
+    @keyframes dropFancy {
+      0% {
+        transform: translateY(-60px);
+        opacity: 0;
+        filter: blur(10px);
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+        filter: blur(0);
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
 }
-`, styleSheet.cssRules.length);
