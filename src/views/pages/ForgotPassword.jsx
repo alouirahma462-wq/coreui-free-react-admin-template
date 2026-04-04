@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
 
-
 export default function ForgotPassword() {
   const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [debugOtp, setDebugOtp] = useState("");
 
   // 🎵 صوت دخول
   useEffect(() => {
@@ -19,15 +19,18 @@ export default function ForgotPassword() {
     audio.play().catch(() => {});
   }, []);
 
-  // 🔥 إرسال الكود
+  // 🔐 إرسال OTP
   const handleSubmit = async () => {
-    if (!username) return;
+    if (!username) {
+      setError("يرجى إدخال اسم المستخدم");
+      return;
+    }
 
     setLoading(true);
     setError("");
 
     try {
-      // 🟢 1. البحث عن المستخدم
+      // 🟢 البحث عن المستخدم
       const { data: user, error: userError } = await supabase
         .from("users")
         .select("*")
@@ -40,28 +43,39 @@ export default function ForgotPassword() {
         return;
       }
 
-      // 🟢 2. توليد OTP
+      // 🔐 توليد OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-      // 🟢 3. انتهاء الصلاحية (5 دقائق)
+      // ⏰ صلاحية 5 دقائق
       const expiry = new Date(Date.now() + 5 * 60 * 1000);
 
-      // 🟢 4. حفظ في Supabase
-      await supabase
+      // 💾 حفظ في Supabase
+      const { error: updateError } = await supabase
         .from("users")
         .update({
           reset_token: otp,
           reset_token_expiry: expiry.toISOString(),
+          reset_attempts: 0,
         })
         .eq("id", user.id);
 
-      // 🟢 5. الانتقال لصفحة Reset
-      navigate("/reset-password", {
-        state: {
-          username: user.username,
-          otp: otp,
-        },
-      });
+      if (updateError) {
+        setError("❌ فشل حفظ الكود");
+        setLoading(false);
+        return;
+      }
+
+      // 🧪 عرض داخلي للتجربة فقط
+      setDebugOtp(otp);
+
+      // ⏩ انتقال للـ Reset Password
+      setTimeout(() => {
+        navigate("/reset-password", {
+          state: {
+            username: user.username,
+          },
+        });
+      }, 1200);
 
     } catch (err) {
       console.log(err);
@@ -73,13 +87,11 @@ export default function ForgotPassword() {
 
   return (
     <div style={styles.page}>
-      {/* 🇹🇳 الخلفية المحكمة */}
+      {/* 🖼️ خلفية المحكمة */}
       <div style={styles.bg}></div>
-
-      {/* 🇹🇳 overlay */}
       <div style={styles.overlay}></div>
 
-      {/* 🇹🇳 card */}
+      {/* 🏛️ الكرت */}
       <div style={styles.card}>
         <div style={styles.header}>
           <h2 style={styles.title}>
@@ -111,8 +123,15 @@ export default function ForgotPassword() {
           disabled={loading}
           style={styles.button}
         >
-          {loading ? "جاري الإرسال..." : "إرسال الكود"}
+          {loading ? "جاري إرسال الكود..." : "إرسال الكود"}
         </button>
+
+        {/* 🔐 OTP تجريبي فقط */}
+        {debugOtp && (
+          <div style={styles.otpBox}>
+            🔐 كود التحقق (تجريبي فقط): {debugOtp}
+          </div>
+        )}
 
         <button
           onClick={() => navigate("/login")}
@@ -125,7 +144,7 @@ export default function ForgotPassword() {
   );
 }
 
-/* 🎨 STYLES (فخم + وزارة عدل) */
+/* 🎨 STYLES - تصميم المحكمة الفخم */
 const styles = {
   page: {
     height: "100vh",
@@ -138,7 +157,7 @@ const styles = {
     overflow: "hidden",
   },
 
-  /* 🖼️ صورة محكمة جلسة فخمة */
+  // 🏛️ خلفية المحكمة
   bg: {
     position: "absolute",
     inset: 0,
@@ -146,21 +165,23 @@ const styles = {
       "url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f')",
     backgroundSize: "cover",
     backgroundPosition: "center",
-    filter: "brightness(0.6) contrast(1.1)",
+    filter: "brightness(0.55) contrast(1.2)",
     transform: "scale(1.05)",
   },
 
+  // 🌑 overlay رسمي
   overlay: {
     position: "absolute",
     inset: 0,
     background:
-      "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(30,58,138,0.4))",
+      "linear-gradient(135deg, rgba(0,0,0,0.65), rgba(30,58,138,0.45))",
   },
 
+  // 🧾 الكرت الرئيسي
   card: {
     position: "relative",
-    width: "420px",
-    padding: "30px",
+    width: "430px",
+    padding: "32px",
     borderRadius: "18px",
     background: "rgba(255,255,255,0.92)",
     backdropFilter: "blur(20px)",
@@ -189,7 +210,7 @@ const styles = {
 
   h3: {
     color: "#1e3a8a",
-    marginBottom: "5px",
+    marginBottom: "6px",
   },
 
   desc: {
@@ -233,5 +254,16 @@ const styles = {
     color: "red",
     marginBottom: "10px",
     fontSize: "13px",
+  },
+
+  // 🔐 OTP box
+  otpBox: {
+    marginTop: "15px",
+    padding: "10px",
+    background: "#e0f2fe",
+    border: "1px solid #38bdf8",
+    borderRadius: "10px",
+    color: "#075985",
+    fontWeight: "bold",
   },
 };
