@@ -173,7 +173,7 @@ export default function ChangePassword({ user, onSuccess }) {
 }
 
 /* =========================
-   🎨 SAFE ORIGINAL STYLE
+   🎨 FIXED STYLE
 ========================= */
 
 const styles = {
@@ -186,9 +186,6 @@ const styles = {
     direction: "rtl",
     fontFamily: "Tahoma",
     color: "white",
-
-    /* 🔥 نفس الخلفية كانت عندك */
-    background: "linear-gradient(135deg, #1e3a8a, #0f172a)",
   },
 
   header: {
@@ -205,8 +202,13 @@ const styles = {
   card: {
     width: "90%",
     maxWidth: "420px",
-    background: "rgba(255,255,255,0.12)",
-    backdropFilter: "blur(18px)",
+
+    /* 🔥 GLASS */
+    background: "rgba(255,255,255,0.08)",
+    backdropFilter: "blur(15px)",
+    WebkitBackdropFilter: "blur(15px)",
+    border: "1px solid rgba(255,255,255,0.15)",
+
     borderRadius: "18px",
     padding: "25px",
     textAlign: "center",
@@ -272,11 +274,16 @@ const styles = {
   modalBox: {
     width: "90%",
     maxWidth: "400px",
+
+    /* 🔥 GLASS MODAL */
+    background: "rgba(255,255,255,0.08)",
+    backdropFilter: "blur(20px)",
+    WebkitBackdropFilter: "blur(20px)",
+    border: "1px solid rgba(255,255,255,0.15)",
+
     padding: "30px",
     borderRadius: "18px",
     textAlign: "center",
-    background: "rgba(255,255,255,0.12)",
-    backdropFilter: "blur(20px)",
     color: "white",
   },
 
@@ -285,11 +292,11 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "#061a33",
     color: "white",
     fontSize: "18px",
   },
 };
+
 
 
 
