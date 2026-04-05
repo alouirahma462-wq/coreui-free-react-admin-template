@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "../../../supabaseClient";
 import { useNavigate } from "react-router-dom";
 
@@ -9,6 +9,17 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  /* =========================
+     🎨 PAGE THEME CONTROL
+  ========================= */
+  useEffect(() => {
+    document.body.classList.add("login-page");
+
+    return () => {
+      document.body.classList.remove("login-page");
+    };
+  }, []);
 
   const handleLogin = async () => {
     setMessage("");
@@ -25,7 +36,9 @@ export default function Login() {
 
     const { data, error } = await supabase
       .from("users")
-      .select("id, username, fullName, court_id, must_change_password, isActive")
+      .select(
+        "id, username, fullName, court_id, must_change_password, isActive"
+      )
       .eq("username", cleanUsername)
       .eq("password", cleanPassword)
       .single();
@@ -69,7 +82,9 @@ export default function Login() {
       </div>
 
       <div style={styles.card}>
-        <h2 style={{ marginBottom: "15px" }}>🏛️ منظومة النيابة العمومية</h2>
+        <h2 style={{ marginBottom: "15px" }}>
+          🏛️ منظومة النيابة العمومية
+        </h2>
 
         <input
           placeholder="اسم المستخدم"
@@ -94,6 +109,10 @@ export default function Login() {
   );
 }
 
+/* =========================
+   🎨 UI STYLES (NO BACKGROUND HERE)
+========================= */
+
 const styles = {
   page: {
     height: "100vh",
@@ -101,7 +120,6 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "column",
-    background: "linear-gradient(135deg, #061a33, #0b2a4a)",
     color: "white",
     direction: "rtl",
   },
@@ -152,6 +170,7 @@ const styles = {
     color: "#ffcccb",
   },
 };
+
 
 
 
