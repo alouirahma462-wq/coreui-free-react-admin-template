@@ -69,11 +69,14 @@ export default function ForgotPassword() {
       const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
       const expiryTime = Date.now() + 60 * 1000;
 
-      await supabase.from("users").update({
-        reset_token: newOtp,
-        reset_token_expiry: new Date(expiryTime).toISOString(),
-        reset_attempts: 0,
-      }).eq("id", user.id);
+      await supabase
+        .from("users")
+        .update({
+          reset_token: newOtp,
+          reset_token_expiry: new Date(expiryTime).toISOString(),
+          reset_attempts: 0,
+        })
+        .eq("id", user.id);
 
       localStorage.setItem("reset_user", user.username);
       localStorage.setItem("reset_otp", newOtp);
@@ -84,7 +87,6 @@ export default function ForgotPassword() {
       startTimer(expiryTime);
 
       setLoading(false);
-
     } catch (err) {
       setError("❌ حدث خطأ غير متوقع");
       setLoading(false);
@@ -96,62 +98,176 @@ export default function ForgotPassword() {
 
   return (
     <>
-      {/* 🎬 ANIMATION STYLE INSIDE SAME FILE */}
+      {/* 💣 FORCE STYLE (يشتغل غصب عن CoreUI) */}
       <style>{`
+        body {
+          margin: 0 !important;
+          overflow: hidden !important;
+        }
+
+        .forgot-force-page {
+          position: fixed !important;
+          top: 0;
+          left: 0;
+          width: 100vw !important;
+          height: 100vh !important;
+          z-index: 999999 !important;
+
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          direction: rtl;
+          font-family: Tahoma;
+
+          background-image:
+            linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)),
+            url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80");
+
+          background-size: cover;
+          background-position: center;
+        }
+
+        .forgot-light {
+          position: absolute;
+          width: 250%;
+          height: 250%;
+          background: radial-gradient(circle, rgba(59,130,246,0.25), transparent 60%);
+          animation: moveLight 8s infinite linear;
+        }
+
+        .forgot-crest {
+          position: absolute;
+          top: 25px;
+          color: white;
+          font-size: 20px;
+          font-weight: bold;
+          text-shadow: 0 0 15px rgba(255,255,255,0.6);
+        }
+
+        .forgot-card {
+          width: 460px;
+          padding: 35px;
+          border-radius: 22px;
+          background: rgba(255,255,255,0.95);
+          backdrop-filter: blur(20px);
+          text-align: center;
+          box-shadow: 0 40px 120px rgba(0,0,0,0.85);
+          animation: fadeSlide 0.8s ease;
+          z-index: 2;
+        }
+
+        .forgot-input {
+          width: 100%;
+          padding: 13px;
+          border-radius: 12px;
+          border: 1px solid #ccc;
+          margin-bottom: 12px;
+        }
+
+        .forgot-btn {
+          width: 100%;
+          padding: 13px;
+          border-radius: 12px;
+          background: linear-gradient(135deg,#1e3a8a,#2563eb);
+          color: white;
+          border: none;
+          font-weight: bold;
+          cursor: pointer;
+        }
+
+        .forgot-otp-box {
+          margin-top: 18px;
+          padding: 18px;
+          border-radius: 14px;
+          background: #e0f2fe;
+        }
+
+        .forgot-otp {
+          font-size: 32px;
+          letter-spacing: 8px;
+          font-weight: bold;
+        }
+
+        .forgot-timer {
+          color: #1e3a8a;
+          font-weight: bold;
+        }
+
+        .forgot-expired {
+          color: red;
+          font-weight: bold;
+        }
+
+        .forgot-success-btn {
+          margin-top: 12px;
+          width: 100%;
+          padding: 13px;
+          border-radius: 12px;
+          background: #10b981;
+          color: white;
+          border: none;
+          font-weight: bold;
+        }
+
+        .forgot-error {
+          color: red;
+          margin-bottom: 10px;
+          font-weight: bold;
+        }
+
         @keyframes fadeSlide {
-          from { opacity: 0; transform: translateY(30px); }
+          from { opacity: 0; transform: translateY(40px); }
           to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes moveLight {
-          0% { transform: translate(-20%, -20%); }
-          50% { transform: translate(20%, 20%); }
-          100% { transform: translate(-20%, -20%); }
+          0% { transform: translate(-30%, -30%); }
+          50% { transform: translate(30%, 30%); }
+          100% { transform: translate(-30%, -30%); }
         }
       `}</style>
 
-      <div style={styles.page}>
-        <div style={styles.light}></div>
+      <div className="forgot-force-page">
+        <div className="forgot-light"></div>
 
-        <div style={styles.crest}>🇹🇳 الجمهورية التونسية</div>
+        <div className="forgot-crest">🇹🇳 الجمهورية التونسية</div>
 
-        <div style={styles.card}>
-          <h2 style={styles.title}>🔐 نسيت كلمة المرور</h2>
-          <p style={styles.desc}>أدخل اسم المستخدم لإرسال رمز التحقق</p>
+        <div className="forgot-card">
+          <h2>🔐 نسيت كلمة المرور</h2>
 
-          {error && <div style={styles.error}>{error}</div>}
+          {error && <div className="forgot-error">{error}</div>}
 
           <input
+            className="forgot-input"
             placeholder="اسم المستخدم"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            style={styles.input}
           />
 
-          <button onClick={handleSubmit} disabled={loading} style={styles.button}>
+          <button className="forgot-btn" onClick={handleSubmit}>
             {loading ? "جاري الإرسال..." : "إرسال الكود"}
           </button>
 
           {otp && (
-            <div style={styles.otpBox}>
-              <div style={styles.otp}>{otp}</div>
+            <div className="forgot-otp-box">
+              <div className="forgot-otp">{otp}</div>
 
               {active ? (
-                <p style={styles.timer}>⏱ {timer} ثانية</p>
+                <p className="forgot-timer">⏱ {timer} ثانية</p>
               ) : (
-                <p style={styles.expired}>⛔ انتهت الصلاحية</p>
+                <p className="forgot-expired">⛔ انتهت</p>
               )}
             </div>
           )}
 
           {otp && active && (
-            <button onClick={goToReset} style={styles.goBtn}>
+            <button className="forgot-success-btn" onClick={goToReset}>
               الانتقال لإدخال الرمز
             </button>
           )}
 
           {!active && otp && (
-            <button onClick={resendOtp} style={styles.resend}>
+            <button className="forgot-btn" onClick={resendOtp}>
               🔁 إعادة إرسال
             </button>
           )}
@@ -160,134 +276,6 @@ export default function ForgotPassword() {
     </>
   );
 }
-
-/* 🎨 FULL COURT DESIGN */
-const styles = {
-  page: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    fontFamily: "Tahoma",
-    direction: "rtl",
-    overflow: "hidden",
-
-    backgroundImage: `
-      linear-gradient(rgba(0,0,0,0.78), rgba(0,0,0,0.9)),
-      url("https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1600&q=80")
-    `,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    position: "relative",
-  },
-
-  light: {
-    position: "absolute",
-    width: "200%",
-    height: "200%",
-    background:
-      "radial-gradient(circle, rgba(59,130,246,0.25), transparent 60%)",
-    animation: "moveLight 6s infinite linear",
-  },
-
-  crest: {
-    position: "absolute",
-    top: "20px",
-    color: "white",
-    fontSize: "18px",
-    fontWeight: "bold",
-    letterSpacing: "1px",
-    textShadow: "0 0 10px rgba(255,255,255,0.4)",
-  },
-
-  card: {
-    width: "450px",
-    padding: "32px",
-    borderRadius: "18px",
-
-    background: "rgba(255,255,255,0.92)",
-    backdropFilter: "blur(18px)",
-
-    textAlign: "center",
-
-    border: "1px solid rgba(30,58,138,0.3)",
-
-    boxShadow: "0 30px 80px rgba(0,0,0,0.75)",
-
-    animation: "fadeSlide 0.8s ease",
-    zIndex: 2,
-  },
-
-  title: {
-    color: "#1e3a8a",
-    fontSize: "22px",
-    fontWeight: "bold",
-  },
-
-  desc: { fontSize: "13px", marginBottom: "10px", color: "#444" },
-
-  input: {
-    width: "100%",
-    padding: "12px",
-    borderRadius: "10px",
-    border: "1px solid #ccc",
-    marginBottom: "10px",
-  },
-
-  button: {
-    width: "100%",
-    padding: "12px",
-    borderRadius: "10px",
-    background: "linear-gradient(135deg,#1e3a8a,#2563eb)",
-    color: "white",
-    border: "none",
-    fontWeight: "bold",
-  },
-
-  otpBox: {
-    marginTop: "15px",
-    padding: "15px",
-    borderRadius: "12px",
-    background: "#e0f2fe",
-  },
-
-  otp: {
-    fontSize: "28px",
-    letterSpacing: "6px",
-    fontWeight: "bold",
-  },
-
-  timer: { color: "#1e3a8a", fontWeight: "bold" },
-
-  expired: { color: "red", fontWeight: "bold" },
-
-  goBtn: {
-    marginTop: "10px",
-    width: "100%",
-    padding: "12px",
-    borderRadius: "10px",
-    background: "#10b981",
-    color: "white",
-    border: "none",
-    fontWeight: "bold",
-  },
-
-  resend: {
-    marginTop: "10px",
-    width: "100%",
-    padding: "10px",
-    background: "#ef4444",
-    color: "white",
-    border: "none",
-    borderRadius: "10px",
-  },
-
-  error: {
-    color: "red",
-    marginBottom: "10px",
-    fontWeight: "bold",
-  },
-};
 
 
 
