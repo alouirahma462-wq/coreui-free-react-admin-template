@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { supabase } from "../../../supabaseClient";
 import { useNavigate } from "react-router-dom";
 
@@ -9,17 +9,6 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-
-  /* =========================
-     🎨 PAGE THEME CONTROL
-  ========================= */
-  useEffect(() => {
-    document.body.classList.add("login-page");
-
-    return () => {
-      document.body.classList.remove("login-page");
-    };
-  }, []);
 
   const handleLogin = async () => {
     setMessage("");
@@ -110,7 +99,7 @@ export default function Login() {
 }
 
 /* =========================
-   🎨 UI STYLES (NO BACKGROUND HERE)
+   🎨 ORIGINAL STYLES (SAFE)
 ========================= */
 
 const styles = {
@@ -120,6 +109,7 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "column",
+    background: "linear-gradient(135deg, #0f172a, #1e293b)",
     color: "white",
     direction: "rtl",
   },
@@ -170,6 +160,7 @@ const styles = {
     color: "#ffcccb",
   },
 };
+
 
 
 
