@@ -15,7 +15,6 @@ export default function ForgotPassword() {
 
   const intervalRef = useRef(null);
 
-  // 🧹 reset session
   useEffect(() => {
     localStorage.removeItem("reset_user");
     localStorage.removeItem("reset_otp");
@@ -23,7 +22,6 @@ export default function ForgotPassword() {
     localStorage.removeItem("reset_expiry");
   }, []);
 
-  // ⏱ real timer engine
   const startTimer = (expiryTime) => {
     clearInterval(intervalRef.current);
 
@@ -46,7 +44,6 @@ export default function ForgotPassword() {
     intervalRef.current = setInterval(update, 1000);
   };
 
-  // 📩 send OTP
   const handleSubmit = async () => {
     if (!username.trim()) {
       setError("يرجى إدخال اسم المستخدم");
@@ -69,10 +66,7 @@ export default function ForgotPassword() {
         return;
       }
 
-      // 🔐 generate OTP
       const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
-
-      // ⏱ FIXED expiry (60 seconds stable)
       const expiryTime = Date.now() + 60 * 1000;
 
       const { error: updateError } = await supabase
@@ -90,7 +84,6 @@ export default function ForgotPassword() {
         return;
       }
 
-      // 💾 SAFE STORAGE (single source of truth)
       localStorage.setItem("reset_user", user.username);
       localStorage.setItem("reset_otp", newOtp);
       localStorage.setItem("reset_flow", "active");
@@ -133,7 +126,6 @@ export default function ForgotPassword() {
           {loading ? "جاري الإرسال..." : "إرسال الكود"}
         </button>
 
-        {/* OTP DISPLAY */}
         {otp && (
           <div style={styles.otpBox}>
             <h3>رمز التحقق</h3>
@@ -148,7 +140,6 @@ export default function ForgotPassword() {
           </div>
         )}
 
-        {/* NAV BUTTON */}
         {otp && active && (
           <button onClick={goToReset} style={styles.goBtn}>
             الانتقال لإدخال الرمز
@@ -165,7 +156,7 @@ export default function ForgotPassword() {
   );
 }
 
-/* 🎨 STYLE */
+/* 🎨 COURT STYLE DESIGN */
 const styles = {
   page: {
     height: "100vh",
@@ -174,28 +165,52 @@ const styles = {
     alignItems: "center",
     direction: "rtl",
     fontFamily: "Tahoma",
-    background: "linear-gradient(135deg,#0f172a,#1e3a8a,#2563eb)",
+
+    /* 🏛️ COURT BACKGROUND */
+    backgroundImage: `
+      linear-gradient(rgba(0,0,0,0.78), rgba(0,0,0,0.85)),
+      url("https://images.unsplash.com/photo-1589829545856-d10d557cf95f")
+    `,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
   },
 
   card: {
-    width: "420px",
-    padding: "30px",
-    borderRadius: "18px",
-    background: "rgba(255,255,255,0.95)",
+    width: "440px",
+    padding: "32px",
+    borderRadius: "16px",
+
+    /* 🧊 GLASS COURT EFFECT */
+    background: "rgba(255, 255, 255, 0.92)",
+    backdropFilter: "blur(14px)",
+
     textAlign: "center",
-    boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
+
+    border: "1px solid rgba(30, 58, 138, 0.25)",
+
+    boxShadow: `
+      0 25px 60px rgba(0,0,0,0.65),
+      inset 0 0 0 1px rgba(255,255,255,0.3)
+    `,
   },
 
-  title: { color: "#1e3a8a" },
+  title: {
+    color: "#1e3a8a",
+    fontSize: "22px",
+    fontWeight: "bold",
+    letterSpacing: "1px",
+  },
 
-  desc: { fontSize: "13px", marginBottom: "10px", color: "#555" },
+  desc: { fontSize: "13px", marginBottom: "10px", color: "#444" },
 
   input: {
     width: "100%",
     padding: "12px",
     marginBottom: "10px",
     borderRadius: "10px",
-    border: "1px solid #ccc",
+    border: "1px solid #cbd5e1",
+    outline: "none",
   },
 
   button: {
@@ -206,6 +221,7 @@ const styles = {
     color: "white",
     border: "none",
     fontWeight: "bold",
+    cursor: "pointer",
   },
 
   otpBox: {
