@@ -119,22 +119,28 @@ export default function ResetPassword() {
 }
 
 const styles = {
-  page: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    direction: "rtl",
-    fontFamily: "Tahoma",
+page: {
+  height: "100vh",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  direction: "rtl",
+  fontFamily: "Tahoma",
 
-    // 🔥 خلفية محكمة فخمة فاتحة
-    background: `
-      linear-gradient(135deg, #f8fafc, #e2e8f0),
-      url("https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1800&q=80")
-    `,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-  },
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100vh",
+  zIndex: 99999,
+
+  background: `
+    linear-gradient(135deg, #f8fafc, #e2e8f0),
+    url("https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1800&q=80")
+  `,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+}
 
   card: {
     width: "420px",
