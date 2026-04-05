@@ -6,27 +6,58 @@
 @use "vendors/simplebar";
 
 /* =========================
-   🌐 GLOBAL BACKGROUND (CoreUI default)
+   🌐 GLOBAL COREUI BASE
 ========================= */
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   background-color: var(--cui-tertiary-bg);
   transition: background 0.3s ease;
 }
 
 /* =========================
-   🔥 FULLSCREEN AUTH PAGES FIX
-   (Login / Reset / Forgot Password)
+   🎨 PAGE BACKGROUND SYSTEM
+   (YOU CONTROL ONLY BACKGROUND)
 ========================= */
-body.reset-page,
-body.login-page,
-body.forgot-page,
+
+/* Login Page */
+body.login-page {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  background-size: cover;
+  background-position: center;
+}
+
+/* Reset Password Page */
+body.reset-page {
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  background-size: cover;
+  background-position: center;
+}
+
+/* Forgot Password Page */
+body.forgot-page {
+  background: linear-gradient(135deg, #0f172a, #334155);
+  background-size: cover;
+  background-position: center;
+}
+
+/* Change Password Page */
 body.change-password-page {
-  background: transparent !important;
+  background: linear-gradient(135deg, #111827, #1f2937);
+  background-size: cover;
+  background-position: center;
 }
 
 /* =========================
-   📦 LAYOUT WRAPPER
+   📦 COREUI LAYOUT (KEEP AS IS)
 ========================= */
+
 .wrapper {
   width: 100%;
   padding-inline: var(--cui-sidebar-occupy-start, 0)
@@ -38,6 +69,7 @@ body.change-password-page {
 /* =========================
    🧭 HEADER
 ========================= */
+
 .header > .container-fluid,
 .sidebar-header {
   min-height: calc(4rem + 1px);
@@ -50,6 +82,7 @@ body.change-password-page {
 /* =========================
    📌 SIDEBAR
 ========================= */
+
 .sidebar-brand-full {
   margin-left: 3px;
 }
@@ -81,6 +114,7 @@ body.change-password-page {
 /* =========================
    🦶 FOOTER
 ========================= */
+
 .footer {
   min-height: calc(3rem + 1px);
 }
@@ -88,6 +122,7 @@ body.change-password-page {
 /* =========================
    🌙 DARK MODE SUPPORT
 ========================= */
+
 @include color-mode(dark) {
   body {
     background-color: var(--cui-dark-bg-subtle);
@@ -97,4 +132,5 @@ body.change-password-page {
     --cui-footer-bg: var(--cui-body-bg);
   }
 }
+
 
