@@ -120,7 +120,8 @@ export default function ResetPassword() {
 }
 
 /* =========================
-   💎 PREMIUM GLASS DESIGN
+   🧊 GLASS RESET PASSWORD (NO BACKGROUND)
+   + uses global App background
 ========================= */
 
 const styles = {
@@ -133,13 +134,6 @@ const styles = {
     direction: "rtl",
     fontFamily: "Tahoma",
     color: "white",
-
-    background: `
-      radial-gradient(circle at 20% 20%, rgba(59,130,246,0.25), transparent 40%),
-      radial-gradient(circle at 80% 30%, rgba(16,185,129,0.20), transparent 45%),
-      radial-gradient(circle at 50% 80%, rgba(236,72,153,0.15), transparent 50%),
-      linear-gradient(135deg, #0b1220, #0f172a)
-    `,
   },
 
   header: {
