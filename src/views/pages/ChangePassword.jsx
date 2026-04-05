@@ -14,17 +14,6 @@ export default function ChangePassword({ user, onSuccess }) {
   const [finalUser, setFinalUser] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
 
-  /* =========================
-     🎨 PAGE THEME CONTROL
-  ========================= */
-  useEffect(() => {
-    document.body.classList.add("change-password-page");
-
-    return () => {
-      document.body.classList.remove("change-password-page");
-    };
-  }, []);
-
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     setFinalUser(user || storedUser);
@@ -184,7 +173,7 @@ export default function ChangePassword({ user, onSuccess }) {
 }
 
 /* =========================
-   🎨 STYLE (NO BACKGROUND HERE)
+   🎨 SAFE ORIGINAL STYLE
 ========================= */
 
 const styles = {
@@ -197,6 +186,9 @@ const styles = {
     direction: "rtl",
     fontFamily: "Tahoma",
     color: "white",
+
+    /* 🔥 نفس الخلفية كانت عندك */
+    background: "linear-gradient(135deg, #1e3a8a, #0f172a)",
   },
 
   header: {
@@ -298,6 +290,7 @@ const styles = {
     fontSize: "18px",
   },
 };
+
 
 
 
