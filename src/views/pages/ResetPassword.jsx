@@ -25,6 +25,15 @@ export default function ResetPassword() {
     setUsername(user);
   }, [navigate]);
 
+  // 🔥 التعديل الوحيد المطلوب (كما طلبت)
+  useEffect(() => {
+    document.body.classList.add("reset-page");
+
+    return () => {
+      document.body.classList.remove("reset-page");
+    };
+  }, []);
+
   const handleReset = async () => {
     setError("");
     setSuccess("");
@@ -120,25 +129,25 @@ export default function ResetPassword() {
 
 const styles = {
   page: {
-  position: "fixed",
-  inset: 0,
-  width: "100vw",
-  height: "100vh",
-  zIndex: 999999,
+    position: "fixed",
+    inset: 0,
+    width: "100vw",
+    height: "100vh",
+    zIndex: 999999,
 
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  direction: "rtl",
-  fontFamily: "Tahoma",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    direction: "rtl",
+    fontFamily: "Tahoma",
 
-  background: `
-    linear-gradient(135deg, #f8fafc, #e2e8f0),
-    url("https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1800&q=80")
-  `,
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-}
+    background: `
+      linear-gradient(135deg, #f8fafc, #e2e8f0),
+      url("https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1800&q=80")
+    `,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  },
 
   card: {
     width: "420px",
@@ -206,6 +215,7 @@ const styles = {
     color: "green",
   },
 };
+
 
 
 
