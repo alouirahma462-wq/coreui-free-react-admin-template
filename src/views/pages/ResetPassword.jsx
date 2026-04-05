@@ -133,7 +133,7 @@ const styles = {
     inset: 0,
     width: "100vw",
     height: "100vh",
-    zIndex: 999999,
+    zIndex: 1,
 
     display: "flex",
     justifyContent: "center",
