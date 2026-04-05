@@ -15,14 +15,17 @@ export default function ResetPassword() {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  const [timerMsg, setTimerMsg] = useState("");
+  // ⏱ TIMER
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [expired, setExpired] = useState(false);
 
-  // 🔥 SAFE LOAD
+  // 🔥 INIT
   useEffect(() => {
     const user = localStorage.getItem("reset_user");
     const flow = localStorage.getItem("reset_flow");
+    const expiry = localStorage.getItem("reset_expiry");
 
-    if (!user || flow !== "active") {
+    if (!user || flow !== "active" || !expiry) {
       navigate("/login");
       return;
     }
@@ -30,19 +33,40 @@ export default function ResetPassword() {
     setUsername(user);
     setReady(true);
 
-    // ⏱ check if OTP exists
-    const storedOtp = localStorage.getItem("reset_otp");
-    if (!storedOtp) {
-      setErrorMsg("⛔ انتهت صلاحية رمز التحقق، يرجى إعادة الإرسال");
-    }
+    const expiryTime = Number(expiry);
+
+    const updateTimer = () => {
+      const diff = Math.floor((expiryTime - Date.now()) / 1000);
+
+      if (diff <= 0) {
+        setTimeLeft(0);
+        setExpired(true);
+        setErrorMsg("⛔ انتهت صلاحية رمز التحقق");
+        localStorage.removeItem("reset_otp");
+        return;
+      }
+
+      setTimeLeft(diff);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(interval);
   }, [navigate]);
 
-  // 🔁 resend redirect
+  // 🔁 resend
   const resendOtp = () => {
     navigate("/forgot-password");
   };
 
+  // 🚨 RESET
   const handleReset = async () => {
+    if (expired) {
+      setErrorMsg("⛔ انتهت صلاحية الرمز");
+      return;
+    }
+
     if (!otp || !newPassword) {
       setErrorMsg("يرجى إدخال جميع الحقول");
       return;
@@ -65,36 +89,27 @@ export default function ResetPassword() {
         return;
       }
 
-      // 🔐 LOCAL OTP CHECK (FAST)
       const storedOtp = localStorage.getItem("reset_otp");
 
-      if (!storedOtp) {
-        setErrorMsg("⛔ انتهت صلاحية الرمز، أعد الإرسال");
-        setLoading(false);
-        return;
-      }
-
-      if (otp !== storedOtp) {
+      if (!storedOtp || otp !== storedOtp) {
         setErrorMsg("❌ رمز التحقق غير صحيح");
         setLoading(false);
         return;
       }
 
-      // ⏰ EXPIRY CHECK (DB)
-      if (new Date(data.reset_token_expiry) < new Date()) {
+      // ⛔ FINAL EXPIRY CHECK (MASTER)
+      if (Date.now() > Number(data.reset_token_expiry)) {
         setErrorMsg("⛔ انتهت صلاحية الرمز");
         setLoading(false);
         return;
       }
 
-      // 🔐 UPDATE PASSWORD
       const { error: updateError } = await supabase
         .from("users")
         .update({
           password: newPassword,
           reset_token: null,
           reset_token_expiry: null,
-          reset_attempts: 0,
         })
         .eq("id", data.id);
 
@@ -106,14 +121,12 @@ export default function ResetPassword() {
 
       setSuccessMsg("✔ تم تغيير كلمة المرور بنجاح");
 
-      // 🧹 CLEAN FLOW
       localStorage.removeItem("reset_user");
       localStorage.removeItem("reset_otp");
       localStorage.removeItem("reset_flow");
+      localStorage.removeItem("reset_expiry");
 
-      setTimeout(() => {
-        navigate("/login");
-      }, 1200);
+      setTimeout(() => navigate("/login"), 1200);
 
     } catch (err) {
       setErrorMsg("حدث خطأ غير متوقع");
@@ -123,34 +136,34 @@ export default function ResetPassword() {
   };
 
   if (!ready) {
-    return (
-      <div style={{ textAlign: "center", marginTop: "50px" }}>
-        جاري التحقق...
-      </div>
-    );
+    return <div style={{ textAlign: "center", marginTop: 50 }}>جاري التحقق...</div>;
   }
 
   return (
     <div style={styles.page}>
-      <div style={styles.bg}></div>
-      <div style={styles.overlay}></div>
-
       <div style={styles.card}>
-        <h2 style={styles.title}>إعادة تعيين كلمة المرور</h2>
 
-        <p style={styles.subtitle}>حساب: {username}</p>
+        <h2>إعادة تعيين كلمة المرور</h2>
+        <p>الحساب: {username}</p>
+
+        {/* ⏱ TIMER */}
+        <div style={{ marginBottom: 10, fontWeight: "bold" }}>
+          ⏱ الوقت المتبقي: {timeLeft} ثانية
+        </div>
 
         {errorMsg && <div style={styles.error}>{errorMsg}</div>}
         {successMsg && <div style={styles.success}>{successMsg}</div>}
 
         <input
-          placeholder="رمز التحقق OTP"
+          disabled={expired}
+          placeholder="OTP"
           value={otp}
           onChange={(e) => setOtp(e.target.value)}
           style={styles.input}
         />
 
         <input
+          disabled={expired}
           type="password"
           placeholder="كلمة المرور الجديدة"
           value={newPassword}
@@ -158,17 +171,16 @@ export default function ResetPassword() {
           style={styles.input}
         />
 
-        <button onClick={handleReset} disabled={loading} style={styles.button}>
-          {loading ? "جاري التحديث..." : "تغيير كلمة المرور"}
+        <button
+          disabled={loading || expired}
+          onClick={handleReset}
+          style={styles.button}
+        >
+          {loading ? "جاري..." : "تغيير كلمة المرور"}
         </button>
 
-        {/* 🔁 resend button */}
         <button onClick={resendOtp} style={styles.resend}>
-          إعادة إرسال رمز التحقق
-        </button>
-
-        <button onClick={() => navigate("/login")} style={styles.back}>
-          العودة لتسجيل الدخول
+          إعادة إرسال OTP
         </button>
       </div>
     </div>
@@ -183,85 +195,48 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     direction: "rtl",
-    position: "relative",
-    overflow: "hidden",
+    background: "#0f172a",
     fontFamily: "Tahoma",
   },
 
-  bg: {
-    position: "absolute",
-    inset: 0,
-    backgroundImage:
-      "url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=2400&q=80')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    filter: "brightness(0.6) contrast(1.3)",
-  },
-
-  overlay: {
-    position: "absolute",
-    inset: 0,
-    background:
-      "linear-gradient(135deg, rgba(0,0,0,0.65), rgba(30,58,138,0.45))",
-  },
-
   card: {
-    position: "relative",
     width: "420px",
-    padding: "30px",
-    borderRadius: "18px",
-    background: "rgba(255,255,255,0.92)",
-    backdropFilter: "blur(20px)",
+    padding: "25px",
+    borderRadius: "15px",
+    background: "white",
     textAlign: "center",
-    zIndex: 2,
-  },
-
-  title: { color: "#1e3a8a" },
-
-  subtitle: {
-    fontSize: "13px",
-    marginBottom: "10px",
   },
 
   input: {
     width: "100%",
-    padding: "12px",
+    padding: "10px",
     marginBottom: "10px",
-    borderRadius: "10px",
-    border: "1px solid #ccc",
+    borderRadius: "8px",
   },
 
   button: {
     width: "100%",
-    padding: "12px",
-    borderRadius: "10px",
-    background: "linear-gradient(135deg, #1e3a8a, #2563eb)",
+    padding: "10px",
+    background: "#2563eb",
     color: "white",
     border: "none",
-    fontWeight: "bold",
-    marginBottom: "8px",
+    borderRadius: "8px",
+    marginBottom: "10px",
   },
 
   resend: {
     width: "100%",
     padding: "10px",
-    borderRadius: "10px",
     background: "#ef4444",
     color: "white",
     border: "none",
-    marginBottom: "8px",
-    cursor: "pointer",
+    borderRadius: "8px",
   },
 
-  back: {
-    background: "none",
-    border: "none",
-    color: "#b91c1c",
-  },
-
-  error: { color: "red", marginBottom: "10px" },
-  success: { color: "green", marginBottom: "10px" },
+  error: { color: "red" },
+  success: { color: "green" },
 };
+
 
 
 
