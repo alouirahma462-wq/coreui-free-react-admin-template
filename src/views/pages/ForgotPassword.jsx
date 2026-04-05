@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
-import styles from "./ForgotPassword.module.css";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -15,6 +14,17 @@ export default function ForgotPassword() {
   const [active, setActive] = useState(false);
 
   const intervalRef = useRef(null);
+
+  /* =========================
+     🎨 PAGE THEME CONTROL
+  ========================= */
+  useEffect(() => {
+    document.body.classList.add("forgot-page");
+
+    return () => {
+      document.body.classList.remove("forgot-page");
+    };
+  }, []);
 
   useEffect(() => {
     localStorage.removeItem("reset_user");
@@ -69,11 +79,14 @@ export default function ForgotPassword() {
     const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiryTime = Date.now() + 60 * 1000;
 
-    await supabase.from("users").update({
-      reset_token: newOtp,
-      reset_token_expiry: new Date(expiryTime).toISOString(),
-      reset_attempts: 0,
-    }).eq("id", user.id);
+    await supabase
+      .from("users")
+      .update({
+        reset_token: newOtp,
+        reset_token_expiry: new Date(expiryTime).toISOString(),
+        reset_attempts: 0,
+      })
+      .eq("id", user.id);
 
     localStorage.setItem("reset_user", user.username);
     localStorage.setItem("reset_otp", newOtp);
@@ -86,50 +99,153 @@ export default function ForgotPassword() {
   };
 
   return (
-  <div className={styles.forgotPage}>
-    <div className={styles.crest}>🇹🇳 الجمهورية التونسية</div>
+    <div style={styles.page}>
+      <div style={styles.crest}>🇹🇳 الجمهورية التونسية</div>
 
-    <div className={styles.card}>
-      <h2 className={styles.title}>🔐 نسيت كلمة المرور</h2>
-      <p className={styles.subtitle}>أدخل اسم المستخدم لإرسال رمز التحقق</p>
+      <div style={styles.card}>
+        <h2 style={styles.title}>🔐 نسيت كلمة المرور</h2>
+        <p style={styles.subtitle}>
+          أدخل اسم المستخدم لإرسال رمز التحقق
+        </p>
 
-      {error && <div className={styles.subtitle}>{error}</div>}
+        {error && <div style={styles.error}>{error}</div>}
 
-      <input
-        className={styles.input}
-        placeholder="اسم المستخدم"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
+        <input
+          style={styles.input}
+          placeholder="اسم المستخدم"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
 
-      <button className={styles.btn} onClick={handleSubmit}>
-        {loading ? "جاري الإرسال..." : "إرسال الكود"}
-      </button>
-
-      {otp && (
-        <div className={styles.otpBox}>
-          <div className={styles.otp}>{otp}</div>
-
-          {active ? (
-            <p className={styles.timer}>⏱ {timer} ثانية</p>
-          ) : (
-            <p className={styles.expired}>⛔ انتهت الصلاحية</p>
-          )}
-        </div>
-      )}
-
-      {otp && active && (
-        <button
-          className={styles.btn}
-          onClick={() => navigate("/reset-password")}
-        >
-          الانتقال لإدخال الرمز
+        <button style={styles.btn} onClick={handleSubmit}>
+          {loading ? "جاري الإرسال..." : "إرسال الكود"}
         </button>
-      )}
+
+        {otp && (
+          <div style={styles.otpBox}>
+            <div style={styles.otp}>{otp}</div>
+
+            {active ? (
+              <p style={styles.timer}>⏱ {timer} ثانية</p>
+            ) : (
+              <p style={styles.expired}>⛔ انتهت الصلاحية</p>
+            )}
+          </div>
+        )}
+
+        {otp && active && (
+          <button
+            style={styles.btn}
+            onClick={() => navigate("/reset-password")}
+          >
+            الانتقال لإدخال الرمز
+          </button>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
 }
+
+/* =========================
+   🎨 STYLE (NO CSS MODULE)
+========================= */
+
+const styles = {
+  page: {
+    height: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    direction: "rtl",
+    color: "white",
+  },
+
+  crest: {
+    position: "absolute",
+    top: 0,
+    width: "100%",
+    background: "#b91c1c",
+    color: "white",
+    textAlign: "center",
+    padding: "12px",
+    fontWeight: "bold",
+  },
+
+  card: {
+    width: "90%",
+    maxWidth: "420px",
+    background: "rgba(255,255,255,0.12)",
+    backdropFilter: "blur(18px)",
+    borderRadius: "18px",
+    padding: "25px",
+    textAlign: "center",
+    color: "white",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
+  },
+
+  title: {
+    color: "#fbbf24",
+    marginBottom: "10px",
+  },
+
+  subtitle: {
+    fontSize: "14px",
+    marginBottom: "10px",
+    opacity: 0.9,
+  },
+
+  error: {
+    color: "#ff6b6b",
+    marginBottom: "10px",
+  },
+
+  input: {
+    width: "100%",
+    padding: "12px",
+    margin: "8px 0",
+    borderRadius: "10px",
+    border: "none",
+    outline: "none",
+  },
+
+  btn: {
+    width: "100%",
+    padding: "12px",
+    marginTop: "10px",
+    borderRadius: "10px",
+    background: "#1e3a8a",
+    color: "white",
+    fontWeight: "bold",
+    border: "none",
+    cursor: "pointer",
+  },
+
+  otpBox: {
+    marginTop: "15px",
+    padding: "15px",
+    background: "rgba(255,255,255,0.1)",
+    borderRadius: "12px",
+  },
+
+  otp: {
+    fontSize: "24px",
+    letterSpacing: "3px",
+    fontWeight: "bold",
+    color: "#22c55e",
+  },
+
+  timer: {
+    color: "#fbbf24",
+    marginTop: "5px",
+  },
+
+  expired: {
+    color: "#ff6b6b",
+    marginTop: "5px",
+  },
+};
+
 
 
 
