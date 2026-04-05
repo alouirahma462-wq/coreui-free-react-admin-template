@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
+import styles from "./ForgotPassword.module.css";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -85,182 +86,51 @@ export default function ForgotPassword() {
   };
 
   return (
-    <>
-      {/* ================= CSS INSIDE FILE ================= */}
-      <style>{`
-        .forgot-page {
-          height: 100vh;
-          width: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          direction: rtl;
-          font-family: Tahoma, Arial;
-          position: relative;
-          overflow: hidden;
+    <div className={styles.forgotPage}>
+      <div className={styles.crest}>🇹🇳 الجمهورية التونسية</div>
 
-          background: linear-gradient(
-              rgba(255,255,255,0.75),
-              rgba(240,240,240,0.85)
-            ),
-            url("https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1800&q=80");
+      <div className={styles.forgotCard}>
+        <h2 className={styles.title}>🔐 نسيت كلمة المرور</h2>
+        <p className={styles.desc}>أدخل اسم المستخدم لإرسال رمز التحقق</p>
 
-          background-size: cover;
-          background-position: center;
-        }
+        {error && <div className={styles.error}>{error}</div>}
 
-        .crest {
-          position: absolute;
-          top: 20px;
-          color: #1e3a8a;
-          font-weight: bold;
-          font-size: 18px;
-        }
+        <input
+          className={styles.input}
+          placeholder="اسم المستخدم"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
 
-        .forgot-card {
-          width: 460px;
-          padding: 35px;
-          border-radius: 18px;
-          background: rgba(255,255,255,0.92);
-          backdrop-filter: blur(18px);
-          text-align: center;
-          border: 1px solid rgba(30,58,138,0.2);
-          box-shadow: 0 30px 80px rgba(0,0,0,0.25);
-          animation: fadeSlide 0.7s ease;
-        }
+        <button className={styles.btn} onClick={handleSubmit}>
+          {loading ? "جاري الإرسال..." : "إرسال الكود"}
+        </button>
 
-        .title {
-          color: #1e3a8a;
-          font-size: 22px;
-          font-weight: bold;
-        }
+        {otp && (
+          <div className={styles.otpBox}>
+            <div className={styles.otp}>{otp}</div>
 
-        .desc {
-          font-size: 13px;
-          color: #444;
-          margin-bottom: 15px;
-        }
+            {active ? (
+              <p className={styles.timer}>⏱ {timer} ثانية</p>
+            ) : (
+              <p className={styles.expired}>⛔ انتهت الصلاحية</p>
+            )}
+          </div>
+        )}
 
-        .input {
-          width: 100%;
-          padding: 12px;
-          border-radius: 10px;
-          border: 1px solid #ccc;
-          margin-bottom: 12px;
-          outline: none;
-        }
-
-        .input:focus {
-          border-color: #1e3a8a;
-        }
-
-        .btn {
-          width: 100%;
-          padding: 12px;
-          border-radius: 10px;
-          background: linear-gradient(135deg,#1e3a8a,#2563eb);
-          color: white;
-          border: none;
-          font-weight: bold;
-          cursor: pointer;
-        }
-
-        .btn-success {
-          width: 100%;
-          margin-top: 10px;
-          padding: 12px;
-          border-radius: 10px;
-          background: #10b981;
-          color: white;
-          border: none;
-          font-weight: bold;
-        }
-
-        .otp-box {
-          margin-top: 15px;
-          padding: 15px;
-          border-radius: 12px;
-          background: #e0f2fe;
-          border: 1px solid #93c5fd;
-        }
-
-        .otp {
-          font-size: 28px;
-          letter-spacing: 6px;
-          font-weight: bold;
-          color: #1e3a8a;
-        }
-
-        .timer {
-          color: #1e3a8a;
-          font-weight: bold;
-        }
-
-        .expired {
-          color: red;
-          font-weight: bold;
-        }
-
-        .error {
-          color: red;
-          margin-bottom: 10px;
-          font-weight: bold;
-        }
-
-        @keyframes fadeSlide {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-
-      {/* ================= UI ================= */}
-      <div className="forgot-page">
-        <div className="crest">🇹🇳 الجمهورية التونسية</div>
-
-        <div className="forgot-card">
-
-          <h2 className="title">🔐 نسيت كلمة المرور</h2>
-          <p className="desc">أدخل اسم المستخدم لإرسال رمز التحقق</p>
-
-          {error && <div className="error">{error}</div>}
-
-          <input
-            className="input"
-            placeholder="اسم المستخدم"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-
-          <button className="btn" onClick={handleSubmit}>
-            {loading ? "جاري الإرسال..." : "إرسال الكود"}
+        {otp && active && (
+          <button
+            className={styles.btnSuccess}
+            onClick={() => navigate("/reset-password")}
+          >
+            الانتقال لإدخال الرمز
           </button>
-
-          {otp && (
-            <div className="otp-box">
-              <div className="otp">{otp}</div>
-
-              {active ? (
-                <p className="timer">⏱ {timer} ثانية</p>
-              ) : (
-                <p className="expired">⛔ انتهت الصلاحية</p>
-              )}
-            </div>
-          )}
-
-          {otp && active && (
-            <button
-              className="btn-success"
-              onClick={() => navigate("/reset-password")}
-            >
-              الانتقال لإدخال الرمز
-            </button>
-          )}
-
-        </div>
+        )}
       </div>
-    </>
+    </div>
   );
 }
+
 
 
 
