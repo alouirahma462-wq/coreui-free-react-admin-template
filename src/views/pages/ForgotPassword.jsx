@@ -15,17 +15,6 @@ export default function ForgotPassword() {
 
   const intervalRef = useRef(null);
 
-  /* =========================
-     🎨 PAGE THEME CONTROL
-  ========================= */
-  useEffect(() => {
-    document.body.classList.add("forgot-page");
-
-    return () => {
-      document.body.classList.remove("forgot-page");
-    };
-  }, []);
-
   useEffect(() => {
     localStorage.removeItem("reset_user");
     localStorage.removeItem("reset_otp");
@@ -100,10 +89,13 @@ export default function ForgotPassword() {
 
   return (
     <div style={styles.page}>
-      <div style={styles.crest}>🇹🇳 الجمهورية التونسية</div>
+      <div style={styles.header}>
+        🇹🇳 الجمهورية التونسية - وزارة العدل
+      </div>
 
       <div style={styles.card}>
         <h2 style={styles.title}>🔐 نسيت كلمة المرور</h2>
+
         <p style={styles.subtitle}>
           أدخل اسم المستخدم لإرسال رمز التحقق
         </p>
@@ -147,7 +139,7 @@ export default function ForgotPassword() {
 }
 
 /* =========================
-   🎨 STYLE (NO CSS MODULE)
+   🎨 UNIFIED STABLE STYLE
 ========================= */
 
 const styles = {
@@ -159,9 +151,12 @@ const styles = {
     justifyContent: "center",
     direction: "rtl",
     color: "white",
+
+    /* 🔥 unified background */
+    background: "linear-gradient(135deg, #0f172a, #1e3a8a)",
   },
 
-  crest: {
+  header: {
     position: "absolute",
     top: 0,
     width: "100%",
@@ -180,7 +175,6 @@ const styles = {
     borderRadius: "18px",
     padding: "25px",
     textAlign: "center",
-    color: "white",
     boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
   },
 
@@ -245,6 +239,7 @@ const styles = {
     marginTop: "5px",
   },
 };
+
 
 
 
