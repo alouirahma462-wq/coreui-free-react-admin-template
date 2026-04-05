@@ -14,6 +14,17 @@ export default function ChangePassword({ user, onSuccess }) {
   const [finalUser, setFinalUser] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
 
+  /* =========================
+     🎨 PAGE THEME CONTROL
+  ========================= */
+  useEffect(() => {
+    document.body.classList.add("change-password-page");
+
+    return () => {
+      document.body.classList.remove("change-password-page");
+    };
+  }, []);
+
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     setFinalUser(user || storedUser);
@@ -145,7 +156,6 @@ export default function ChangePassword({ user, onSuccess }) {
           {loading ? "جاري الحفظ..." : "تغيير كلمة المرور"}
         </button>
 
-        {/* 🔥 فقط تعديل زر نسيت كلمة المرور */}
         <button
           type="button"
           onClick={() => navigate("/forgot-password")}
@@ -174,8 +184,9 @@ export default function ChangePassword({ user, onSuccess }) {
 }
 
 /* =========================
-   🎨 STYLE (مع خلفية جديدة)
+   🎨 STYLE (NO BACKGROUND HERE)
 ========================= */
+
 const styles = {
   page: {
     height: "100vh",
@@ -185,13 +196,7 @@ const styles = {
     justifyContent: "center",
     direction: "rtl",
     fontFamily: "Tahoma",
-
-    /* 🟢 خلفية محكمة + إدارة */
-    backgroundImage:
-      "linear-gradient(rgba(6,26,51,0.85), rgba(11,46,74,0.9)), url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
+    color: "white",
   },
 
   header: {
@@ -293,6 +298,7 @@ const styles = {
     fontSize: "18px",
   },
 };
+
 
 
 
