@@ -86,50 +86,50 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className={styles.forgotPage}>
-      <div className={styles.crest}>🇹🇳 الجمهورية التونسية</div>
+  <div className={styles.forgotPage}>
+    <div className={styles.crest}>🇹🇳 الجمهورية التونسية</div>
 
-      <div className={styles.forgotCard}>
-        <h2 className={styles.title}>🔐 نسيت كلمة المرور</h2>
-        <p className={styles.desc}>أدخل اسم المستخدم لإرسال رمز التحقق</p>
+    <div className={styles.card}>
+      <h2 className={styles.title}>🔐 نسيت كلمة المرور</h2>
+      <p className={styles.subtitle}>أدخل اسم المستخدم لإرسال رمز التحقق</p>
 
-        {error && <div className={styles.error}>{error}</div>}
+      {error && <div className={styles.error}>{error}</div>}
 
-        <input
-          className={styles.input}
-          placeholder="اسم المستخدم"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
+      <input
+        className={styles.input}
+        placeholder="اسم المستخدم"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+      />
 
-        <button className={styles.btn} onClick={handleSubmit}>
-          {loading ? "جاري الإرسال..." : "إرسال الكود"}
+      <button className={styles.btn} onClick={handleSubmit}>
+        {loading ? "جاري الإرسال..." : "إرسال الكود"}
+      </button>
+
+      {otp && (
+        <div className={styles.otpBox}>
+          <div className={styles.otp}>{otp}</div>
+
+          {active ? (
+            <p className={styles.timer}>⏱ {timer} ثانية</p>
+          ) : (
+            <p className={styles.expired}>⛔ انتهت الصلاحية</p>
+          )}
+        </div>
+      )}
+
+      {otp && active && (
+        <button
+          className={styles.btn}
+          onClick={() => navigate("/reset-password")}
+        >
+          الانتقال لإدخال الرمز
         </button>
-
-        {otp && (
-          <div className={styles.otpBox}>
-            <div className={styles.otp}>{otp}</div>
-
-            {active ? (
-              <p className={styles.timer}>⏱ {timer} ثانية</p>
-            ) : (
-              <p className={styles.expired}>⛔ انتهت الصلاحية</p>
-            )}
-          </div>
-        )}
-
-        {otp && active && (
-          <button
-            className={styles.btnSuccess}
-            onClick={() => navigate("/reset-password")}
-          >
-            الانتقال لإدخال الرمز
-          </button>
-        )}
-      </div>
+      )}
     </div>
-  );
-}
+  </div>
+);
+
 
 
 
