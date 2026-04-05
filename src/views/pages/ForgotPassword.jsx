@@ -15,33 +15,35 @@ export default function ForgotPassword() {
 
   const intervalRef = useRef(null);
 
-  // 🧹 clean old session
+  // 🧹 reset old session
   useEffect(() => {
     localStorage.removeItem("reset_user");
     localStorage.removeItem("reset_otp");
     localStorage.removeItem("reset_flow");
+    localStorage.removeItem("reset_expiry");
   }, []);
 
-  // ⏱ start timer
-  const startTimer = () => {
-    let time = 30;
-    setTimer(time);
-    setActive(true);
-
+  // ⏱ timer based on real expiry
+  const startTimer = (expiryTime) => {
     clearInterval(intervalRef.current);
 
-    intervalRef.current = setInterval(() => {
-      time--;
-      setTimer(time);
+    const update = () => {
+      const diff = Math.floor((expiryTime - Date.now()) / 1000);
 
-      if (time <= 0) {
+      if (diff <= 0) {
         clearInterval(intervalRef.current);
+        setTimer(0);
         setActive(false);
-        setOtp("");
-
-        setError("⛔ انتهت صلاحية رمز التحقق. اضغط إعادة إرسال");
+        setError("⛔ انتهت صلاحية رمز التحقق");
+        return;
       }
-    }, 1000);
+
+      setTimer(diff);
+      setActive(true);
+    };
+
+    update();
+    intervalRef.current = setInterval(update, 1000);
   };
 
   // 📩 send OTP
@@ -70,13 +72,14 @@ export default function ForgotPassword() {
       // 🔐 OTP
       const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
 
-      const expiry = new Date(Date.now() + 30 * 1000);
+      // ⏱ REAL expiry (60s stable)
+      const expiryTime = Date.now() + 60 * 1000;
 
       const { error: updateError } = await supabase
         .from("users")
         .update({
           reset_token: newOtp,
-          reset_token_expiry: expiry.toISOString(),
+          reset_token_expiry: new Date(expiryTime).toISOString(),
           reset_attempts: 0,
         })
         .eq("id", user.id);
@@ -87,21 +90,20 @@ export default function ForgotPassword() {
         return;
       }
 
-      // 💾 save local flow
+      // 💾 local session
       localStorage.setItem("reset_user", user.username);
       localStorage.setItem("reset_otp", newOtp);
       localStorage.setItem("reset_flow", "active");
+      localStorage.setItem("reset_expiry", expiryTime.toString());
 
       setOtp(newOtp);
-
-      startTimer();
+      startTimer(expiryTime);
 
       setLoading(false);
 
-      // 🚀 auto go to reset page
       setTimeout(() => {
         navigate("/reset-password");
-      }, 2000);
+      }, 1500);
 
     } catch (err) {
       setError("❌ حدث خطأ غير متوقع");
@@ -109,24 +111,18 @@ export default function ForgotPassword() {
     }
   };
 
-  // 🔁 resend
-  const resendOtp = () => {
-    handleSubmit();
-  };
+  const resendOtp = () => handleSubmit();
 
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        <h2 style={styles.title}>نسيت كلمة المرور</h2>
+        <h2 style={styles.title}>🔐 نسيت كلمة المرور</h2>
 
-        <p style={styles.desc}>
-          أدخل اسم المستخدم لإرسال رمز التحقق
-        </p>
+        <p style={styles.desc}>أدخل اسم المستخدم لإرسال رمز التحقق</p>
 
         {error && <div style={styles.error}>{error}</div>}
 
         <input
-          type="text"
           placeholder="اسم المستخدم"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
@@ -137,33 +133,25 @@ export default function ForgotPassword() {
           {loading ? "جاري الإرسال..." : "إرسال الكود"}
         </button>
 
-        {/* 🔐 OTP BOX */}
         {otp && (
           <div style={styles.otpBox}>
             <h3>رمز التحقق</h3>
 
-            <h1 style={styles.otpText}>{otp}</h1>
+            <div style={styles.otp}>{otp}</div>
 
             {active ? (
-              <p style={styles.timer}>
-                ⏱ ينتهي خلال: {timer} ثانية
-              </p>
+              <p style={styles.timer}>⏱ {timer} ثانية متبقية</p>
             ) : (
               <p style={styles.expired}>⛔ انتهت الصلاحية</p>
             )}
           </div>
         )}
 
-        {/* 🔁 resend button */}
         {!active && otp && (
           <button onClick={resendOtp} style={styles.resend}>
-            🔁 إعادة إرسال الكود
+            🔁 إعادة إرسال
           </button>
         )}
-
-        <button onClick={() => navigate("/login")} style={styles.back}>
-          العودة لتسجيل الدخول
-        </button>
       </div>
     </div>
   );
@@ -178,49 +166,38 @@ const styles = {
     alignItems: "center",
     direction: "rtl",
     fontFamily: "Tahoma",
-    background:
-      "linear-gradient(135deg, #0f172a, #1e3a8a, #2563eb)",
+    background: "linear-gradient(135deg,#0f172a,#1e3a8a,#2563eb)",
   },
 
   card: {
-    width: "430px",
+    width: "420px",
     padding: "30px",
     borderRadius: "18px",
     background: "rgba(255,255,255,0.95)",
-    backdropFilter: "blur(20px)",
     textAlign: "center",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+    boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
   },
 
-  title: {
-    color: "#1e3a8a",
-    marginBottom: "5px",
-  },
+  title: { color: "#1e3a8a" },
 
-  desc: {
-    fontSize: "13px",
-    color: "#555",
-    marginBottom: "15px",
-  },
+  desc: { fontSize: "13px", marginBottom: "10px", color: "#555" },
 
   input: {
     width: "100%",
     padding: "12px",
+    marginBottom: "10px",
     borderRadius: "10px",
     border: "1px solid #ccc",
-    marginBottom: "10px",
-    outline: "none",
   },
 
   button: {
     width: "100%",
     padding: "12px",
     borderRadius: "10px",
-    background: "linear-gradient(135deg, #1e3a8a, #2563eb)",
+    background: "linear-gradient(135deg,#1e3a8a,#2563eb)",
     color: "white",
     border: "none",
     fontWeight: "bold",
-    cursor: "pointer",
   },
 
   otpBox: {
@@ -228,42 +205,26 @@ const styles = {
     padding: "15px",
     borderRadius: "12px",
     background: "#e0f2fe",
-    border: "1px solid #38bdf8",
   },
 
-  otpText: {
-    letterSpacing: "6px",
+  otp: {
     fontSize: "28px",
-    margin: "10px 0",
-  },
-
-  timer: {
-    color: "#1e3a8a",
+    letterSpacing: "6px",
     fontWeight: "bold",
   },
 
-  expired: {
-    color: "red",
-    fontWeight: "bold",
-  },
+  timer: { color: "#1e3a8a", fontWeight: "bold" },
+
+  expired: { color: "red", fontWeight: "bold" },
 
   resend: {
     marginTop: "10px",
+    width: "100%",
     padding: "10px",
-    borderRadius: "10px",
-    border: "none",
     background: "#ef4444",
     color: "white",
-    cursor: "pointer",
-    width: "100%",
-  },
-
-  back: {
-    marginTop: "10px",
-    background: "none",
     border: "none",
-    color: "#b91c1c",
-    cursor: "pointer",
+    borderRadius: "10px",
   },
 
   error: {
@@ -272,6 +233,7 @@ const styles = {
     fontWeight: "bold",
   },
 };
+
 
 
 
