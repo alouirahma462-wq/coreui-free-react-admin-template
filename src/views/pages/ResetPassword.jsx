@@ -10,23 +10,37 @@ export default function ResetPassword() {
 
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [loading, setLoading] = useState(false);
 
+  const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+
+  const [timerMsg, setTimerMsg] = useState("");
 
   // 🔥 SAFE LOAD
   useEffect(() => {
     const user = localStorage.getItem("reset_user");
+    const flow = localStorage.getItem("reset_flow");
 
-    if (!user) {
+    if (!user || flow !== "active") {
       navigate("/login");
       return;
     }
 
     setUsername(user);
     setReady(true);
+
+    // ⏱ check if OTP exists
+    const storedOtp = localStorage.getItem("reset_otp");
+    if (!storedOtp) {
+      setErrorMsg("⛔ انتهت صلاحية رمز التحقق، يرجى إعادة الإرسال");
+    }
   }, [navigate]);
+
+  // 🔁 resend redirect
+  const resendOtp = () => {
+    navigate("/forgot-password");
+  };
 
   const handleReset = async () => {
     if (!otp || !newPassword) {
@@ -39,29 +53,36 @@ export default function ResetPassword() {
     setSuccessMsg("");
 
     try {
-      // 🔥 SAFE QUERY
-      const { data, error: supabaseError } = await supabase
+      const { data, error } = await supabase
         .from("users")
         .select("*")
         .eq("username", username)
         .maybeSingle();
 
-      if (supabaseError || !data) {
+      if (error || !data) {
         setErrorMsg("المستخدم غير موجود");
         setLoading(false);
         return;
       }
 
-      // ⛔ OTP CHECK
-      if (data.reset_token !== otp) {
-        setErrorMsg("رمز التحقق غير صحيح");
+      // 🔐 LOCAL OTP CHECK (FAST)
+      const storedOtp = localStorage.getItem("reset_otp");
+
+      if (!storedOtp) {
+        setErrorMsg("⛔ انتهت صلاحية الرمز، أعد الإرسال");
         setLoading(false);
         return;
       }
 
-      // ⏰ EXPIRY CHECK
+      if (otp !== storedOtp) {
+        setErrorMsg("❌ رمز التحقق غير صحيح");
+        setLoading(false);
+        return;
+      }
+
+      // ⏰ EXPIRY CHECK (DB)
       if (new Date(data.reset_token_expiry) < new Date()) {
-        setErrorMsg("انتهت صلاحية الرمز");
+        setErrorMsg("⛔ انتهت صلاحية الرمز");
         setLoading(false);
         return;
       }
@@ -83,7 +104,7 @@ export default function ResetPassword() {
         return;
       }
 
-      setSuccessMsg("تم تغيير كلمة المرور بنجاح ✔");
+      setSuccessMsg("✔ تم تغيير كلمة المرور بنجاح");
 
       // 🧹 CLEAN FLOW
       localStorage.removeItem("reset_user");
@@ -141,6 +162,11 @@ export default function ResetPassword() {
           {loading ? "جاري التحديث..." : "تغيير كلمة المرور"}
         </button>
 
+        {/* 🔁 resend button */}
+        <button onClick={resendOtp} style={styles.resend}>
+          إعادة إرسال رمز التحقق
+        </button>
+
         <button onClick={() => navigate("/login")} style={styles.back}>
           العودة لتسجيل الدخول
         </button>
@@ -149,7 +175,7 @@ export default function ResetPassword() {
   );
 }
 
-/* 🎨 UI */
+/* 🎨 STYLE */
 const styles = {
   page: {
     height: "100vh",
@@ -191,7 +217,11 @@ const styles = {
   },
 
   title: { color: "#1e3a8a" },
-  subtitle: { fontSize: "13px", marginBottom: "10px" },
+
+  subtitle: {
+    fontSize: "13px",
+    marginBottom: "10px",
+  },
 
   input: {
     width: "100%",
@@ -209,18 +239,30 @@ const styles = {
     color: "white",
     border: "none",
     fontWeight: "bold",
+    marginBottom: "8px",
+  },
+
+  resend: {
+    width: "100%",
+    padding: "10px",
+    borderRadius: "10px",
+    background: "#ef4444",
+    color: "white",
+    border: "none",
+    marginBottom: "8px",
+    cursor: "pointer",
   },
 
   back: {
-    marginTop: "10px",
     background: "none",
     border: "none",
     color: "#b91c1c",
   },
 
-  error: { color: "red" },
-  success: { color: "green" },
+  error: { color: "red", marginBottom: "10px" },
+  success: { color: "green", marginBottom: "10px" },
 };
+
 
 
 
