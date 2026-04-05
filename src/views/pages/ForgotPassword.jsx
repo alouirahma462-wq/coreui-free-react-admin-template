@@ -15,7 +15,7 @@ export default function ForgotPassword() {
 
   const intervalRef = useRef(null);
 
-  // 🧹 reset old session
+  // 🧹 reset session
   useEffect(() => {
     localStorage.removeItem("reset_user");
     localStorage.removeItem("reset_otp");
@@ -23,7 +23,7 @@ export default function ForgotPassword() {
     localStorage.removeItem("reset_expiry");
   }, []);
 
-  // ⏱ timer based on real expiry
+  // ⏱ real timer engine
   const startTimer = (expiryTime) => {
     clearInterval(intervalRef.current);
 
@@ -69,10 +69,10 @@ export default function ForgotPassword() {
         return;
       }
 
-      // 🔐 OTP
+      // 🔐 generate OTP
       const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
 
-      // ⏱ REAL expiry (60s stable)
+      // ⏱ FIXED expiry (60 seconds stable)
       const expiryTime = Date.now() + 60 * 1000;
 
       const { error: updateError } = await supabase
@@ -90,25 +90,25 @@ export default function ForgotPassword() {
         return;
       }
 
-      // 💾 local session
+      // 💾 SAFE STORAGE (single source of truth)
       localStorage.setItem("reset_user", user.username);
       localStorage.setItem("reset_otp", newOtp);
       localStorage.setItem("reset_flow", "active");
-      localStorage.setItem("reset_expiry", expiryTime.toString());
+      localStorage.setItem("reset_expiry", String(expiryTime));
 
       setOtp(newOtp);
       startTimer(expiryTime);
 
       setLoading(false);
 
-      setTimeout(() => {
-        navigate("/reset-password");
-      }, 1500);
-
     } catch (err) {
       setError("❌ حدث خطأ غير متوقع");
       setLoading(false);
     }
+  };
+
+  const goToReset = () => {
+    navigate("/reset-password");
   };
 
   const resendOtp = () => handleSubmit();
@@ -133,6 +133,7 @@ export default function ForgotPassword() {
           {loading ? "جاري الإرسال..." : "إرسال الكود"}
         </button>
 
+        {/* OTP DISPLAY */}
         {otp && (
           <div style={styles.otpBox}>
             <h3>رمز التحقق</h3>
@@ -145,6 +146,13 @@ export default function ForgotPassword() {
               <p style={styles.expired}>⛔ انتهت الصلاحية</p>
             )}
           </div>
+        )}
+
+        {/* NAV BUTTON */}
+        {otp && active && (
+          <button onClick={goToReset} style={styles.goBtn}>
+            الانتقال لإدخال الرمز
+          </button>
         )}
 
         {!active && otp && (
@@ -217,6 +225,18 @@ const styles = {
 
   expired: { color: "red", fontWeight: "bold" },
 
+  goBtn: {
+    marginTop: "10px",
+    width: "100%",
+    padding: "12px",
+    borderRadius: "10px",
+    background: "#10b981",
+    color: "white",
+    border: "none",
+    fontWeight: "bold",
+    cursor: "pointer",
+  },
+
   resend: {
     marginTop: "10px",
     width: "100%",
@@ -233,6 +253,8 @@ const styles = {
     fontWeight: "bold",
   },
 };
+
+
 
 
 
