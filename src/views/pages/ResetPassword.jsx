@@ -13,6 +13,17 @@ export default function ResetPassword() {
   const [success, setSuccess] = useState("");
   const [showModal, setShowModal] = useState(false);
 
+  /* =========================
+     🎨 PAGE THEME CONTROL
+  ========================= */
+  useEffect(() => {
+    document.body.classList.add("reset-page");
+
+    return () => {
+      document.body.classList.remove("reset-page");
+    };
+  }, []);
+
   useEffect(() => {
     const user = localStorage.getItem("reset_user");
     const flow = localStorage.getItem("reset_flow");
@@ -24,15 +35,6 @@ export default function ResetPassword() {
 
     setUsername(user);
   }, [navigate]);
-
-  // 🔥 التعديل الوحيد المطلوب (كما طلبت)
-  useEffect(() => {
-    document.body.classList.add("reset-page");
-
-    return () => {
-      document.body.classList.remove("reset-page");
-    };
-  }, []);
 
   const handleReset = async () => {
     setError("");
@@ -113,7 +115,7 @@ export default function ResetPassword() {
         </button>
       </div>
 
-      {/* 🎉 مودال النجاح */}
+      {/* 🎉 SUCCESS MODAL */}
       {showModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
@@ -127,41 +129,38 @@ export default function ResetPassword() {
   );
 }
 
+/* =========================
+   🎨 STYLE (NO BACKGROUND HERE)
+========================= */
+
 const styles = {
   page: {
     position: "fixed",
     inset: 0,
     width: "100vw",
     height: "100vh",
-    zIndex: 1,
 
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     direction: "rtl",
     fontFamily: "Tahoma",
-
-    background: `
-      linear-gradient(135deg, #f8fafc, #e2e8f0),
-      url("https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1800&q=80")
-    `,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
+    color: "white",
   },
 
   card: {
     width: "420px",
     padding: "30px",
-    background: "rgba(255,255,255,0.95)",
+    background: "rgba(255,255,255,0.12)",
+    backdropFilter: "blur(18px)",
     borderRadius: "18px",
     textAlign: "center",
-    boxShadow: "0 25px 60px rgba(0,0,0,0.15)",
-    backdropFilter: "blur(10px)",
-    border: "1px solid rgba(30,58,138,0.2)",
+    boxShadow: "0 25px 60px rgba(0,0,0,0.4)",
+    border: "1px solid rgba(255,255,255,0.2)",
   },
 
   title: {
-    color: "#1e3a8a",
+    color: "#fbbf24",
     marginBottom: "15px",
   },
 
@@ -170,14 +169,14 @@ const styles = {
     padding: "12px",
     marginBottom: "10px",
     borderRadius: "10px",
-    border: "1px solid #ccc",
+    border: "none",
     outline: "none",
   },
 
   button: {
     width: "100%",
     padding: "12px",
-    background: "linear-gradient(135deg, #1e3a8a, #2563eb)",
+    background: "#1e3a8a",
     color: "white",
     border: "none",
     borderRadius: "10px",
@@ -186,7 +185,7 @@ const styles = {
   },
 
   error: {
-    color: "red",
+    color: "#ff6b6b",
     marginBottom: "10px",
   },
 
@@ -196,23 +195,25 @@ const styles = {
     left: 0,
     width: "100%",
     height: "100%",
-    background: "rgba(0,0,0,0.4)",
+    background: "rgba(0,0,0,0.6)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 100000,
+    zIndex: 9999,
   },
 
   modal: {
-    background: "white",
+    background: "rgba(255,255,255,0.12)",
+    backdropFilter: "blur(20px)",
     padding: "30px",
     borderRadius: "15px",
     textAlign: "center",
+    color: "white",
   },
 
   check: {
     fontSize: "40px",
-    color: "green",
+    color: "#22c55e",
   },
 };
 
