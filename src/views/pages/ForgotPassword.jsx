@@ -126,9 +126,11 @@ export default function ForgotPassword() {
           الانتقال لإدخال الرمز
         </button>
       )}
+          </div>
     </div>
-  </div>
-);
+  );
+}
+
 
 
 
