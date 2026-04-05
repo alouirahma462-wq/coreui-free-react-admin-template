@@ -9,50 +9,32 @@
    🌐 GLOBAL COREUI BASE
 ========================= */
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
 }
 
+/* 🔥 رجوع للوضع الطبيعي */
 body {
   background-color: var(--cui-tertiary-bg);
   transition: background 0.3s ease;
 }
 
 /* =========================
-   🎨 PAGE BACKGROUND SYSTEM
-   (YOU CONTROL ONLY BACKGROUND)
+   ❌ REMOVED PAGE BACKGROUNDS SYSTEM
+   (تم حذف التحكم اللي كان يكسّر الخلفية)
 ========================= */
 
-/* Login Page */
-body.login-page {
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  background-size: cover;
-  background-position: center;
-}
-
-/* Reset Password Page */
-body.reset-page {
-  background: linear-gradient(135deg, #1e3a8a, #2563eb);
-  background-size: cover;
-  background-position: center;
-}
-
-/* Forgot Password Page */
-body.forgot-page {
-  background: linear-gradient(135deg, #0f172a, #334155);
-  background-size: cover;
-  background-position: center;
-}
-
-/* Change Password Page */
-body.change-password-page {
-  background: linear-gradient(135deg, #111827, #1f2937);
-  background-size: cover;
-  background-position: center;
-}
+/*
+body.login-page { ... }
+body.reset-page { ... }
+body.forgot-page { ... }
+body.change-password-page { ... }
+*/
 
 /* =========================
    📦 COREUI LAYOUT (KEEP AS IS)
@@ -132,5 +114,6 @@ body.change-password-page {
     --cui-footer-bg: var(--cui-body-bg);
   }
 }
+
 
 
