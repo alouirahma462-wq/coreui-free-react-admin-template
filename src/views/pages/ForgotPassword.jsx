@@ -69,20 +69,11 @@ export default function ForgotPassword() {
       const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
       const expiryTime = Date.now() + 60 * 1000;
 
-      const { error: updateError } = await supabase
-        .from("users")
-        .update({
-          reset_token: newOtp,
-          reset_token_expiry: new Date(expiryTime).toISOString(),
-          reset_attempts: 0,
-        })
-        .eq("id", user.id);
-
-      if (updateError) {
-        setError("❌ خطأ في إنشاء الكود");
-        setLoading(false);
-        return;
-      }
+      await supabase.from("users").update({
+        reset_token: newOtp,
+        reset_token_expiry: new Date(expiryTime).toISOString(),
+        reset_attempts: 0,
+      }).eq("id", user.id);
 
       localStorage.setItem("reset_user", user.username);
       localStorage.setItem("reset_otp", newOtp);
@@ -100,106 +91,137 @@ export default function ForgotPassword() {
     }
   };
 
-  const goToReset = () => {
-    navigate("/reset-password");
-  };
-
+  const goToReset = () => navigate("/reset-password");
   const resendOtp = () => handleSubmit();
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>🔐 نسيت كلمة المرور</h2>
+    <>
+      {/* 🎬 ANIMATION STYLE INSIDE SAME FILE */}
+      <style>{`
+        @keyframes fadeSlide {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
 
-        <p style={styles.desc}>أدخل اسم المستخدم لإرسال رمز التحقق</p>
+        @keyframes moveLight {
+          0% { transform: translate(-20%, -20%); }
+          50% { transform: translate(20%, 20%); }
+          100% { transform: translate(-20%, -20%); }
+        }
+      `}</style>
 
-        {error && <div style={styles.error}>{error}</div>}
+      <div style={styles.page}>
+        <div style={styles.light}></div>
 
-        <input
-          placeholder="اسم المستخدم"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          style={styles.input}
-        />
+        <div style={styles.crest}>🇹🇳 الجمهورية التونسية</div>
 
-        <button onClick={handleSubmit} disabled={loading} style={styles.button}>
-          {loading ? "جاري الإرسال..." : "إرسال الكود"}
-        </button>
+        <div style={styles.card}>
+          <h2 style={styles.title}>🔐 نسيت كلمة المرور</h2>
+          <p style={styles.desc}>أدخل اسم المستخدم لإرسال رمز التحقق</p>
 
-        {otp && (
-          <div style={styles.otpBox}>
-            <h3>رمز التحقق</h3>
+          {error && <div style={styles.error}>{error}</div>}
 
-            <div style={styles.otp}>{otp}</div>
+          <input
+            placeholder="اسم المستخدم"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            style={styles.input}
+          />
 
-            {active ? (
-              <p style={styles.timer}>⏱ {timer} ثانية متبقية</p>
-            ) : (
-              <p style={styles.expired}>⛔ انتهت الصلاحية</p>
-            )}
-          </div>
-        )}
-
-        {otp && active && (
-          <button onClick={goToReset} style={styles.goBtn}>
-            الانتقال لإدخال الرمز
+          <button onClick={handleSubmit} disabled={loading} style={styles.button}>
+            {loading ? "جاري الإرسال..." : "إرسال الكود"}
           </button>
-        )}
 
-        {!active && otp && (
-          <button onClick={resendOtp} style={styles.resend}>
-            🔁 إعادة إرسال
-          </button>
-        )}
+          {otp && (
+            <div style={styles.otpBox}>
+              <div style={styles.otp}>{otp}</div>
+
+              {active ? (
+                <p style={styles.timer}>⏱ {timer} ثانية</p>
+              ) : (
+                <p style={styles.expired}>⛔ انتهت الصلاحية</p>
+              )}
+            </div>
+          )}
+
+          {otp && active && (
+            <button onClick={goToReset} style={styles.goBtn}>
+              الانتقال لإدخال الرمز
+            </button>
+          )}
+
+          {!active && otp && (
+            <button onClick={resendOtp} style={styles.resend}>
+              🔁 إعادة إرسال
+            </button>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
-/* 🎨 COURT STYLE DESIGN */
+/* 🎨 FULL COURT DESIGN */
 const styles = {
   page: {
     height: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    direction: "rtl",
     fontFamily: "Tahoma",
+    direction: "rtl",
+    overflow: "hidden",
 
-    /* 🏛️ COURT BACKGROUND */
     backgroundImage: `
-      linear-gradient(rgba(0,0,0,0.78), rgba(0,0,0,0.85)),
-      url("https://images.unsplash.com/photo-1589829545856-d10d557cf95f")
+      linear-gradient(rgba(0,0,0,0.78), rgba(0,0,0,0.9)),
+      url("https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1600&q=80")
     `,
     backgroundSize: "cover",
     backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
+    position: "relative",
+  },
+
+  light: {
+    position: "absolute",
+    width: "200%",
+    height: "200%",
+    background:
+      "radial-gradient(circle, rgba(59,130,246,0.25), transparent 60%)",
+    animation: "moveLight 6s infinite linear",
+  },
+
+  crest: {
+    position: "absolute",
+    top: "20px",
+    color: "white",
+    fontSize: "18px",
+    fontWeight: "bold",
+    letterSpacing: "1px",
+    textShadow: "0 0 10px rgba(255,255,255,0.4)",
   },
 
   card: {
-    width: "440px",
+    width: "450px",
     padding: "32px",
-    borderRadius: "16px",
+    borderRadius: "18px",
 
-    /* 🧊 GLASS COURT EFFECT */
-    background: "rgba(255, 255, 255, 0.92)",
-    backdropFilter: "blur(14px)",
+    background: "rgba(255,255,255,0.92)",
+    backdropFilter: "blur(18px)",
 
     textAlign: "center",
 
-    border: "1px solid rgba(30, 58, 138, 0.25)",
+    border: "1px solid rgba(30,58,138,0.3)",
 
-    boxShadow: `
-      0 25px 60px rgba(0,0,0,0.65),
-      inset 0 0 0 1px rgba(255,255,255,0.3)
-    `,
+    boxShadow: "0 30px 80px rgba(0,0,0,0.75)",
+
+    animation: "fadeSlide 0.8s ease",
+    zIndex: 2,
   },
 
   title: {
     color: "#1e3a8a",
     fontSize: "22px",
     fontWeight: "bold",
-    letterSpacing: "1px",
   },
 
   desc: { fontSize: "13px", marginBottom: "10px", color: "#444" },
@@ -207,10 +229,9 @@ const styles = {
   input: {
     width: "100%",
     padding: "12px",
-    marginBottom: "10px",
     borderRadius: "10px",
-    border: "1px solid #cbd5e1",
-    outline: "none",
+    border: "1px solid #ccc",
+    marginBottom: "10px",
   },
 
   button: {
@@ -221,7 +242,6 @@ const styles = {
     color: "white",
     border: "none",
     fontWeight: "bold",
-    cursor: "pointer",
   },
 
   otpBox: {
@@ -250,7 +270,6 @@ const styles = {
     color: "white",
     border: "none",
     fontWeight: "bold",
-    cursor: "pointer",
   },
 
   resend: {
@@ -267,8 +286,8 @@ const styles = {
     color: "red",
     marginBottom: "10px",
     fontWeight: "bold",
-  },
-};
+  }
+
 
 
 
