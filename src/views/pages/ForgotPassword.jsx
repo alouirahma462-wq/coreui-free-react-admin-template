@@ -109,11 +109,7 @@ export default function ForgotPassword() {
           onChange={(e) => setUsername(e.target.value)}
         />
 
-        <button
-          style={styles.btn}
-          onClick={handleSubmit}
-          disabled={loading}
-        >
+        <button style={styles.btn} onClick={handleSubmit}>
           {loading ? "جاري الإرسال..." : "إرسال الكود"}
         </button>
 
@@ -143,7 +139,8 @@ export default function ForgotPassword() {
 }
 
 /* =========================
-   💎 PREMIUM GLASS DESIGN
+   🧊 GLASS CARD ONLY (NO BACKGROUND)
+   + depends on App global background
 ========================= */
 
 const styles = {
@@ -155,13 +152,6 @@ const styles = {
     justifyContent: "center",
     direction: "rtl",
     color: "white",
-
-    background: `
-      radial-gradient(circle at 20% 20%, rgba(59,130,246,0.25), transparent 40%),
-      radial-gradient(circle at 80% 30%, rgba(16,185,129,0.20), transparent 45%),
-      radial-gradient(circle at 50% 80%, rgba(236,72,153,0.15), transparent 50%),
-      linear-gradient(135deg, #0b1220, #0f172a)
-    `,
   },
 
   header: {
@@ -174,7 +164,6 @@ const styles = {
     textAlign: "center",
     padding: "12px",
     fontWeight: "bold",
-    letterSpacing: "0.5px",
   },
 
   card: {
@@ -200,7 +189,6 @@ const styles = {
   title: {
     color: "#fbbf24",
     marginBottom: "10px",
-    fontSize: "22px",
   },
 
   subtitle: {
@@ -212,15 +200,16 @@ const styles = {
   error: {
     color: "#ff6b6b",
     marginBottom: "10px",
-    fontSize: "14px",
   },
 
   input: {
     width: "100%",
     padding: "12px",
     margin: "8px 0",
+
     borderRadius: "12px",
     border: "1px solid rgba(255,255,255,0.2)",
+
     outline: "none",
     background: "rgba(255,255,255,0.06)",
     color: "white",
@@ -230,9 +219,11 @@ const styles = {
     width: "100%",
     padding: "12px",
     marginTop: "10px",
+
     borderRadius: "12px",
     background: "linear-gradient(135deg, #1e3a8a, #2563eb)",
     color: "white",
+
     fontWeight: "bold",
     border: "none",
     cursor: "pointer",
@@ -242,9 +233,11 @@ const styles = {
     width: "100%",
     padding: "12px",
     marginTop: "10px",
+
     borderRadius: "12px",
     background: "rgba(255,255,255,0.12)",
     color: "white",
+
     fontWeight: "bold",
     border: "1px solid rgba(255,255,255,0.2)",
     cursor: "pointer",
@@ -253,8 +246,10 @@ const styles = {
   otpBox: {
     marginTop: "15px",
     padding: "15px",
+
     background: "rgba(255,255,255,0.06)",
     borderRadius: "14px",
+
     border: "1px solid rgba(255,255,255,0.1)",
   },
 
@@ -275,6 +270,7 @@ const styles = {
     marginTop: "5px",
   },
 };
+
 
 
 
