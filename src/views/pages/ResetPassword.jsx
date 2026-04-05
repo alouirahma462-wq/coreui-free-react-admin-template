@@ -130,7 +130,7 @@ const styles = {
     // 🔥 خلفية محكمة فخمة فاتحة
     background: `
       linear-gradient(135deg, #f8fafc, #e2e8f0),
-      url("https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1800&q=80")
+      url("https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1800&q=80")
     `,
     backgroundSize: "cover",
     backgroundPosition: "center",
