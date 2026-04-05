@@ -109,7 +109,11 @@ export default function ForgotPassword() {
           onChange={(e) => setUsername(e.target.value)}
         />
 
-        <button style={styles.btn} onClick={handleSubmit}>
+        <button
+          style={styles.btn}
+          onClick={handleSubmit}
+          disabled={loading}
+        >
           {loading ? "جاري الإرسال..." : "إرسال الكود"}
         </button>
 
@@ -127,7 +131,7 @@ export default function ForgotPassword() {
 
         {otp && active && (
           <button
-            style={styles.btn}
+            style={styles.btnSecondary}
             onClick={() => navigate("/reset-password")}
           >
             الانتقال لإدخال الرمز
@@ -139,7 +143,7 @@ export default function ForgotPassword() {
 }
 
 /* =========================
-   🎨 UNIFIED STABLE STYLE
+   💎 PREMIUM GLASS DESIGN
 ========================= */
 
 const styles = {
@@ -152,79 +156,111 @@ const styles = {
     direction: "rtl",
     color: "white",
 
-    /* 🔥 unified background */
-    background: "linear-gradient(135deg, #0f172a, #1e3a8a)",
+    background: `
+      radial-gradient(circle at 20% 20%, rgba(59,130,246,0.25), transparent 40%),
+      radial-gradient(circle at 80% 30%, rgba(16,185,129,0.20), transparent 45%),
+      radial-gradient(circle at 50% 80%, rgba(236,72,153,0.15), transparent 50%),
+      linear-gradient(135deg, #0b1220, #0f172a)
+    `,
   },
 
   header: {
     position: "absolute",
     top: 0,
     width: "100%",
-    background: "#b91c1c",
+    background: "rgba(185, 28, 28, 0.85)",
+    backdropFilter: "blur(10px)",
     color: "white",
     textAlign: "center",
     padding: "12px",
     fontWeight: "bold",
+    letterSpacing: "0.5px",
   },
 
   card: {
     width: "90%",
     maxWidth: "420px",
-    background: "rgba(255,255,255,0.12)",
-    backdropFilter: "blur(18px)",
-    borderRadius: "18px",
-    padding: "25px",
+
+    background: "rgba(255,255,255,0.08)",
+    backdropFilter: "blur(25px)",
+    WebkitBackdropFilter: "blur(25px)",
+
+    borderRadius: "22px",
+    padding: "28px",
     textAlign: "center",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
+
+    border: "1px solid rgba(255,255,255,0.15)",
+
+    boxShadow: `
+      0 20px 60px rgba(0,0,0,0.55),
+      inset 0 1px 0 rgba(255,255,255,0.08)
+    `,
   },
 
   title: {
     color: "#fbbf24",
     marginBottom: "10px",
+    fontSize: "22px",
   },
 
   subtitle: {
     fontSize: "14px",
-    marginBottom: "10px",
-    opacity: 0.9,
+    marginBottom: "12px",
+    opacity: 0.85,
   },
 
   error: {
     color: "#ff6b6b",
     marginBottom: "10px",
+    fontSize: "14px",
   },
 
   input: {
     width: "100%",
     padding: "12px",
     margin: "8px 0",
-    borderRadius: "10px",
-    border: "none",
+    borderRadius: "12px",
+    border: "1px solid rgba(255,255,255,0.2)",
     outline: "none",
+    background: "rgba(255,255,255,0.06)",
+    color: "white",
   },
 
   btn: {
     width: "100%",
     padding: "12px",
     marginTop: "10px",
-    borderRadius: "10px",
-    background: "#1e3a8a",
+    borderRadius: "12px",
+    background: "linear-gradient(135deg, #1e3a8a, #2563eb)",
     color: "white",
     fontWeight: "bold",
     border: "none",
     cursor: "pointer",
   },
 
+  btnSecondary: {
+    width: "100%",
+    padding: "12px",
+    marginTop: "10px",
+    borderRadius: "12px",
+    background: "rgba(255,255,255,0.12)",
+    color: "white",
+    fontWeight: "bold",
+    border: "1px solid rgba(255,255,255,0.2)",
+    cursor: "pointer",
+  },
+
   otpBox: {
     marginTop: "15px",
     padding: "15px",
-    background: "rgba(255,255,255,0.1)",
-    borderRadius: "12px",
+    background: "rgba(255,255,255,0.06)",
+    borderRadius: "14px",
+    border: "1px solid rgba(255,255,255,0.1)",
   },
 
   otp: {
-    fontSize: "24px",
-    letterSpacing: "3px",
+    fontSize: "26px",
+    letterSpacing: "4px",
     fontWeight: "bold",
     color: "#22c55e",
   },
@@ -239,6 +275,7 @@ const styles = {
     marginTop: "5px",
   },
 };
+
 
 
 
