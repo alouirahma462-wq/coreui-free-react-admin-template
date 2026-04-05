@@ -53,229 +53,223 @@ export default function ForgotPassword() {
     setLoading(true);
     setError("");
 
-    try {
-      const { data: user } = await supabase
-        .from("users")
-        .select("*")
-        .eq("username", username.trim())
-        .maybeSingle();
+    const { data: user } = await supabase
+      .from("users")
+      .select("*")
+      .eq("username", username.trim())
+      .maybeSingle();
 
-      if (!user) {
-        setError("❌ المستخدم غير موجود");
-        setLoading(false);
-        return;
-      }
-
-      const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
-      const expiryTime = Date.now() + 60 * 1000;
-
-      await supabase
-        .from("users")
-        .update({
-          reset_token: newOtp,
-          reset_token_expiry: new Date(expiryTime).toISOString(),
-          reset_attempts: 0,
-        })
-        .eq("id", user.id);
-
-      localStorage.setItem("reset_user", user.username);
-      localStorage.setItem("reset_otp", newOtp);
-      localStorage.setItem("reset_flow", "active");
-      localStorage.setItem("reset_expiry", String(expiryTime));
-
-      setOtp(newOtp);
-      startTimer(expiryTime);
-
+    if (!user) {
+      setError("❌ المستخدم غير موجود");
       setLoading(false);
-    } catch (err) {
-      setError("❌ حدث خطأ غير متوقع");
-      setLoading(false);
+      return;
     }
-  };
 
-  const goToReset = () => navigate("/reset-password");
-  const resendOtp = () => handleSubmit();
+    const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiryTime = Date.now() + 60 * 1000;
+
+    await supabase.from("users").update({
+      reset_token: newOtp,
+      reset_token_expiry: new Date(expiryTime).toISOString(),
+      reset_attempts: 0,
+    }).eq("id", user.id);
+
+    localStorage.setItem("reset_user", user.username);
+    localStorage.setItem("reset_otp", newOtp);
+    localStorage.setItem("reset_flow", "active");
+    localStorage.setItem("reset_expiry", String(expiryTime));
+
+    setOtp(newOtp);
+    startTimer(expiryTime);
+    setLoading(false);
+  };
 
   return (
     <>
-      {/* 💣 FORCE STYLE (يشتغل غصب عن CoreUI) */}
+      {/* 💎 STYLE SYSTEM */}
       <style>{`
         body {
-          margin: 0 !important;
-          overflow: hidden !important;
+          margin: 0;
+          font-family: "Tahoma", sans-serif;
         }
 
-        .forgot-force-page {
-          position: fixed !important;
-          top: 0;
-          left: 0;
-          width: 100vw !important;
-          height: 100vh !important;
-          z-index: 999999 !important;
-
+        .court-page {
+          position: fixed;
+          inset: 0;
           display: flex;
           justify-content: center;
           align-items: center;
           direction: rtl;
-          font-family: Tahoma;
+          overflow: hidden;
+        }
+
+        /* 🏛️ Tunisian Court Background */
+        .court-page::before {
+          content: "";
+          position: absolute;
+          inset: 0;
 
           background-image:
-            linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)),
-            url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80");
+            linear-gradient(rgba(255,255,255,0.75), rgba(255,255,255,0.92)),
+            url("https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=2000&q=80");
 
           background-size: cover;
           background-position: center;
+          filter: saturate(1.1) contrast(1.05);
+          transform: scale(1.05);
         }
 
-        .forgot-light {
+        /* soft golden light */
+        .court-page::after {
+          content: "";
           position: absolute;
-          width: 250%;
-          height: 250%;
-          background: radial-gradient(circle, rgba(59,130,246,0.25), transparent 60%);
-          animation: moveLight 8s infinite linear;
+          inset: 0;
+          background: radial-gradient(circle at top, rgba(212,175,55,0.25), transparent 60%);
         }
 
-        .forgot-crest {
-          position: absolute;
-          top: 25px;
-          color: white;
-          font-size: 20px;
-          font-weight: bold;
-          text-shadow: 0 0 15px rgba(255,255,255,0.6);
-        }
-
-        .forgot-card {
+        .court-card {
+          position: relative;
           width: 460px;
           padding: 35px;
-          border-radius: 22px;
-          background: rgba(255,255,255,0.95);
-          backdrop-filter: blur(20px);
+          border-radius: 20px;
+
+          background: rgba(255,255,255,0.96);
+          backdrop-filter: blur(18px);
+
+          box-shadow: 0 40px 120px rgba(0,0,0,0.25);
+          border: 1px solid rgba(212,175,55,0.4);
+
           text-align: center;
-          box-shadow: 0 40px 120px rgba(0,0,0,0.85);
-          animation: fadeSlide 0.8s ease;
-          z-index: 2;
+          animation: fadeIn 0.7s ease;
         }
 
-        .forgot-input {
+        .court-title {
+          font-size: 22px;
+          font-weight: bold;
+          color: #1e3a8a;
+        }
+
+        .court-sub {
+          font-size: 13px;
+          color: #555;
+          margin-bottom: 15px;
+        }
+
+        .court-input {
           width: 100%;
-          padding: 13px;
-          border-radius: 12px;
+          padding: 12px;
+          border-radius: 10px;
           border: 1px solid #ccc;
           margin-bottom: 12px;
+          outline: none;
         }
 
-        .forgot-btn {
+        .court-btn {
           width: 100%;
-          padding: 13px;
-          border-radius: 12px;
-          background: linear-gradient(135deg,#1e3a8a,#2563eb);
-          color: white;
+          padding: 12px;
+          border-radius: 10px;
           border: none;
-          font-weight: bold;
           cursor: pointer;
-        }
 
-        .forgot-otp-box {
-          margin-top: 18px;
-          padding: 18px;
-          border-radius: 14px;
-          background: #e0f2fe;
-        }
-
-        .forgot-otp {
-          font-size: 32px;
-          letter-spacing: 8px;
-          font-weight: bold;
-        }
-
-        .forgot-timer {
-          color: #1e3a8a;
-          font-weight: bold;
-        }
-
-        .forgot-expired {
-          color: red;
-          font-weight: bold;
-        }
-
-        .forgot-success-btn {
-          margin-top: 12px;
-          width: 100%;
-          padding: 13px;
-          border-radius: 12px;
-          background: #10b981;
+          background: linear-gradient(135deg, #1e3a8a, #2563eb);
           color: white;
-          border: none;
           font-weight: bold;
         }
 
-        .forgot-error {
-          color: red;
+        .court-error {
+          color: #dc2626;
           margin-bottom: 10px;
           font-weight: bold;
         }
 
-        @keyframes fadeSlide {
-          from { opacity: 0; transform: translateY(40px); }
-          to { opacity: 1; transform: translateY(0); }
+        .otp-box {
+          margin-top: 15px;
+          padding: 15px;
+          border-radius: 12px;
+          background: #f0f9ff;
+          border: 1px solid #bae6fd;
         }
 
-        @keyframes moveLight {
-          0% { transform: translate(-30%, -30%); }
-          50% { transform: translate(30%, 30%); }
-          100% { transform: translate(-30%, -30%); }
+        .otp {
+          font-size: 30px;
+          letter-spacing: 6px;
+          font-weight: bold;
+          color: #1e3a8a;
+        }
+
+        .timer {
+          color: #1e3a8a;
+          font-weight: bold;
+        }
+
+        .expired {
+          color: red;
+          font-weight: bold;
+        }
+
+        .success-btn {
+          margin-top: 10px;
+          width: 100%;
+          padding: 12px;
+          border-radius: 10px;
+          border: none;
+          cursor: pointer;
+          background: #10b981;
+          color: white;
+          font-weight: bold;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
 
-      <div className="forgot-force-page">
-        <div className="forgot-light"></div>
+      <div className="court-page">
+        <div className="court-card">
 
-        <div className="forgot-crest">🇹🇳 الجمهورية التونسية</div>
+          <div className="court-title">⚖️ الجمهورية التونسية</div>
+          <div className="court-sub">المحكمة / نظام استرجاع كلمة المرور</div>
 
-        <div className="forgot-card">
-          <h2>🔐 نسيت كلمة المرور</h2>
+          <h3>🔐 نسيت كلمة المرور</h3>
 
-          {error && <div className="forgot-error">{error}</div>}
+          {error && <div className="court-error">{error}</div>}
 
           <input
-            className="forgot-input"
+            className="court-input"
             placeholder="اسم المستخدم"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
 
-          <button className="forgot-btn" onClick={handleSubmit}>
-            {loading ? "جاري الإرسال..." : "إرسال الكود"}
+          <button className="court-btn" onClick={handleSubmit}>
+            {loading ? "جاري الإرسال..." : "إرسال رمز التحقق"}
           </button>
 
           {otp && (
-            <div className="forgot-otp-box">
-              <div className="forgot-otp">{otp}</div>
+            <div className="otp-box">
+              <div className="otp">{otp}</div>
 
               {active ? (
-                <p className="forgot-timer">⏱ {timer} ثانية</p>
+                <p className="timer">⏱ {timer} ثانية</p>
               ) : (
-                <p className="forgot-expired">⛔ انتهت</p>
+                <p className="expired">⛔ انتهت الصلاحية</p>
               )}
             </div>
           )}
 
           {otp && active && (
-            <button className="forgot-success-btn" onClick={goToReset}>
+            <button className="success-btn" onClick={() => navigate("/reset-password")}>
               الانتقال لإدخال الرمز
             </button>
           )}
 
-          {!active && otp && (
-            <button className="forgot-btn" onClick={resendOtp}>
-              🔁 إعادة إرسال
-            </button>
-          )}
         </div>
       </div>
     </>
   );
 }
+
 
 
 
