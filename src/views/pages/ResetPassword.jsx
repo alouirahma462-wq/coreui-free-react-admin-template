@@ -10,19 +10,7 @@ export default function ResetPassword() {
   const [newPassword, setNewPassword] = useState("");
 
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [showModal, setShowModal] = useState(false);
-
-  /* =========================
-     🎨 PAGE THEME CONTROL
-  ========================= */
-  useEffect(() => {
-    document.body.classList.add("reset-page");
-
-    return () => {
-      document.body.classList.remove("reset-page");
-    };
-  }, []);
 
   useEffect(() => {
     const user = localStorage.getItem("reset_user");
@@ -38,7 +26,6 @@ export default function ResetPassword() {
 
   const handleReset = async () => {
     setError("");
-    setSuccess("");
 
     const storedOtp = localStorage.getItem("reset_otp");
     const expiry = parseInt(localStorage.getItem("reset_expiry"));
@@ -90,6 +77,10 @@ export default function ResetPassword() {
 
   return (
     <div style={styles.page}>
+      <div style={styles.header}>
+        🇹🇳 الجمهورية التونسية - وزارة العدل
+      </div>
+
       <div style={styles.card}>
         <h2 style={styles.title}>🔐 تغيير كلمة المرور</h2>
 
@@ -130,22 +121,33 @@ export default function ResetPassword() {
 }
 
 /* =========================
-   🎨 STYLE (NO BACKGROUND HERE)
+   🎨 UNIFIED SYSTEM STYLE
 ========================= */
 
 const styles = {
   page: {
-    position: "fixed",
-    inset: 0,
-    width: "100vw",
     height: "100vh",
-
+    width: "100vw",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     direction: "rtl",
     fontFamily: "Tahoma",
     color: "white",
+
+    /* 🔥 unified background */
+    background: "linear-gradient(135deg, #0f172a, #1e3a8a)",
+  },
+
+  header: {
+    position: "absolute",
+    top: 0,
+    width: "100%",
+    background: "#b91c1c",
+    color: "white",
+    textAlign: "center",
+    padding: "12px",
+    fontWeight: "bold",
   },
 
   card: {
