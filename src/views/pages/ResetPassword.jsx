@@ -106,7 +106,6 @@ export default function ResetPassword() {
         </button>
       </div>
 
-      {/* 🎉 SUCCESS MODAL */}
       {showModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
@@ -121,7 +120,7 @@ export default function ResetPassword() {
 }
 
 /* =========================
-   🎨 UNIFIED SYSTEM STYLE
+   💎 PREMIUM GLASS DESIGN
 ========================= */
 
 const styles = {
@@ -135,30 +134,46 @@ const styles = {
     fontFamily: "Tahoma",
     color: "white",
 
-    /* 🔥 unified background */
-    background: "linear-gradient(135deg, #0f172a, #1e3a8a)",
+    background: `
+      radial-gradient(circle at 20% 20%, rgba(59,130,246,0.25), transparent 40%),
+      radial-gradient(circle at 80% 30%, rgba(16,185,129,0.20), transparent 45%),
+      radial-gradient(circle at 50% 80%, rgba(236,72,153,0.15), transparent 50%),
+      linear-gradient(135deg, #0b1220, #0f172a)
+    `,
   },
 
   header: {
     position: "absolute",
     top: 0,
     width: "100%",
-    background: "#b91c1c",
+    background: "rgba(185, 28, 28, 0.85)",
+    backdropFilter: "blur(10px)",
     color: "white",
     textAlign: "center",
     padding: "12px",
     fontWeight: "bold",
+    letterSpacing: "0.5px",
   },
 
   card: {
-    width: "420px",
+    width: "90%",
+    maxWidth: "420px",
+
     padding: "30px",
-    background: "rgba(255,255,255,0.12)",
-    backdropFilter: "blur(18px)",
-    borderRadius: "18px",
+
+    background: "rgba(255,255,255,0.08)",
+    backdropFilter: "blur(25px)",
+    WebkitBackdropFilter: "blur(25px)",
+
+    borderRadius: "22px",
     textAlign: "center",
-    boxShadow: "0 25px 60px rgba(0,0,0,0.4)",
-    border: "1px solid rgba(255,255,255,0.2)",
+
+    border: "1px solid rgba(255,255,255,0.15)",
+
+    boxShadow: `
+      0 20px 60px rgba(0,0,0,0.55),
+      inset 0 1px 0 rgba(255,255,255,0.08)
+    `,
   },
 
   title: {
@@ -170,18 +185,24 @@ const styles = {
     width: "100%",
     padding: "12px",
     marginBottom: "10px",
-    borderRadius: "10px",
-    border: "none",
+
+    borderRadius: "12px",
+    border: "1px solid rgba(255,255,255,0.2)",
+
     outline: "none",
+    background: "rgba(255,255,255,0.06)",
+    color: "white",
   },
 
   button: {
     width: "100%",
     padding: "12px",
-    background: "#1e3a8a",
+
+    background: "linear-gradient(135deg, #1e3a8a, #2563eb)",
     color: "white",
+
     border: "none",
-    borderRadius: "10px",
+    borderRadius: "12px",
     cursor: "pointer",
     fontWeight: "bold",
   },
@@ -197,7 +218,8 @@ const styles = {
     left: 0,
     width: "100%",
     height: "100%",
-    background: "rgba(0,0,0,0.6)",
+
+    background: "rgba(0,0,0,0.55)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -205,16 +227,20 @@ const styles = {
   },
 
   modal: {
-    background: "rgba(255,255,255,0.12)",
-    backdropFilter: "blur(20px)",
+    background: "rgba(255,255,255,0.08)",
+    backdropFilter: "blur(25px)",
+
     padding: "30px",
-    borderRadius: "15px",
+    borderRadius: "18px",
     textAlign: "center",
     color: "white",
+
+    border: "1px solid rgba(255,255,255,0.15)",
+    boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
   },
 
   check: {
-    fontSize: "40px",
+    fontSize: "42px",
     color: "#22c55e",
   },
 };
