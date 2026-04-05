@@ -11,6 +11,7 @@ export default function ResetPassword() {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const user = localStorage.getItem("reset_user");
@@ -31,13 +32,11 @@ export default function ResetPassword() {
     const storedOtp = localStorage.getItem("reset_otp");
     const expiry = parseInt(localStorage.getItem("reset_expiry"));
 
-    // ⛔ expiry check
     if (Date.now() > expiry) {
       setError("⛔ انتهت صلاحية الرمز");
       return;
     }
 
-    // ⛔ otp check
     if (otp.trim() !== String(storedOtp).trim()) {
       setError("❌ رمز غير صحيح");
       return;
@@ -68,20 +67,22 @@ export default function ResetPassword() {
       return;
     }
 
-    setSuccess("✔ تم تغيير كلمة المرور بنجاح");
-
     localStorage.clear();
 
-    setTimeout(() => navigate("/login"), 1200);
+    setShowModal(true);
+
+    setTimeout(() => {
+      setShowModal(false);
+      navigate("/login");
+    }, 2000);
   };
 
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        <h2>تغيير كلمة المرور</h2>
+        <h2 style={styles.title}>🔐 تغيير كلمة المرور</h2>
 
         {error && <div style={styles.error}>{error}</div>}
-        {success && <div style={styles.success}>{success}</div>}
 
         <input
           placeholder="OTP"
@@ -99,9 +100,20 @@ export default function ResetPassword() {
         />
 
         <button onClick={handleReset} style={styles.button}>
-          تغيير
+          تغيير كلمة المرور
         </button>
       </div>
+
+      {/* 🎉 مودال النجاح */}
+      {showModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <div style={styles.check}>✔</div>
+            <h3>تم التغيير بنجاح</h3>
+            <p>سيتم تحويلك لتسجيل الدخول</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -113,35 +125,85 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     direction: "rtl",
-    background: "#0f172a",
     fontFamily: "Tahoma",
+
+    // 🔥 خلفية محكمة فخمة فاتحة
+    background: `
+      linear-gradient(135deg, #f8fafc, #e2e8f0),
+      url("https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1800&q=80")
+    `,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
   },
 
   card: {
-    width: "400px",
-    padding: "25px",
-    background: "white",
-    borderRadius: "15px",
+    width: "420px",
+    padding: "30px",
+    background: "rgba(255,255,255,0.95)",
+    borderRadius: "18px",
     textAlign: "center",
+    boxShadow: "0 25px 60px rgba(0,0,0,0.15)",
+    backdropFilter: "blur(10px)",
+    border: "1px solid rgba(30,58,138,0.2)",
+  },
+
+  title: {
+    color: "#1e3a8a",
+    marginBottom: "15px",
   },
 
   input: {
     width: "100%",
-    padding: "10px",
+    padding: "12px",
     marginBottom: "10px",
+    borderRadius: "10px",
+    border: "1px solid #ccc",
+    outline: "none",
   },
 
   button: {
     width: "100%",
-    padding: "10px",
-    background: "#1e3a8a",
+    padding: "12px",
+    background: "linear-gradient(135deg, #1e3a8a, #2563eb)",
     color: "white",
     border: "none",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontWeight: "bold",
   },
 
-  error: { color: "red" },
-  success: { color: "green" },
+  error: {
+    color: "red",
+    marginBottom: "10px",
+  },
+
+  // 🎉 مودال
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    background: "rgba(0,0,0,0.4)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  modal: {
+    background: "white",
+    padding: "30px",
+    borderRadius: "15px",
+    textAlign: "center",
+    animation: "fadeIn 0.3s ease",
+  },
+
+  check: {
+    fontSize: "40px",
+    color: "green",
+  },
 };
+
 
 
 
