@@ -93,7 +93,7 @@ export default function ForgotPassword() {
       <h2 className={styles.title}>🔐 نسيت كلمة المرور</h2>
       <p className={styles.subtitle}>أدخل اسم المستخدم لإرسال رمز التحقق</p>
 
-      {error && <div className={styles.error}>{error}</div>}
+      {error && <div className={styles.subtitle}>{error}</div>}
 
       <input
         className={styles.input}
@@ -126,9 +126,9 @@ export default function ForgotPassword() {
           الانتقال لإدخال الرمز
         </button>
       )}
-          </div>
     </div>
-  );
+  </div>
+);
 }
 
 
