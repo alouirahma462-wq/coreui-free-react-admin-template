@@ -15,32 +15,25 @@ export default function Login() {
     setLoading(true);
 
     if (!username || !password) {
-      setMessage("❌ الرجاء إدخال اسم المستخدم وكلمة المرور");
+      setMessage("❌ الرجاء إدخال البيانات");
       setLoading(false);
       return;
     }
 
-    const cleanUsername = username.trim();
-    const cleanPassword = password.trim();
-
-    // 🔥 FIX: safe query (no .single)
     const { data, error } = await supabase
       .from("users")
-      .select(
-        "id, username, fullName, court_id, must_change_password, isActive"
-      )
-      .eq("username", cleanUsername)
-      .eq("password", cleanPassword);
+      .select("*")
+      .eq("username", username.trim())
+      .eq("password", password.trim());
 
     if (error) {
-      console.log("LOGIN ERROR:", error);
       setMessage("❌ خطأ في النظام");
       setLoading(false);
       return;
     }
 
     if (!data || data.length === 0) {
-      setMessage("❌ بيانات الدخول غير صحيحة");
+      setMessage("❌ بيانات غير صحيحة");
       setLoading(false);
       return;
     }
@@ -53,38 +46,35 @@ export default function Login() {
       return;
     }
 
-    const userData = {
-      id: user.id,
-      username: user.username,
-      fullName: user.fullName,
-      court_id: user.court_id,
-      must_change_password: user.must_change_password,
-      role: user.role || "user",
-    };
-
-    localStorage.setItem("user", JSON.stringify(userData));
+    // 💾 تخزين المستخدم
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        id: user.id,
+        username: user.username,
+        fullName: user.fullName,
+        court_id: user.court_id,
+        must_change_password: user.must_change_password,
+        role: user.role || "user",
+      })
+    );
 
     setLoading(false);
 
-    setTimeout(() => {
-      if (user.must_change_password) {
-        navigate("/change-password");
-      } else {
-        navigate("/dashboard");
-      }
-    }, 100);
+    // ⛳ التوجيه
+    if (user.must_change_password) {
+      navigate("/change-password");
+    } else {
+      navigate("/dashboard", { replace: true });
+    }
   };
 
   return (
     <div style={styles.page}>
-      <div style={styles.header}>
-        🇹🇳 الجمهورية التونسية - وزارة العدل
-      </div>
+      <div style={styles.header}>🇹🇳 وزارة العدل</div>
 
       <div style={styles.card}>
-        <h2 style={{ marginBottom: "15px" }}>
-          🏛️ منظومة النيابة العمومية
-        </h2>
+        <h2>🏛️ منظومة النيابة العمومية</h2>
 
         <input
           placeholder="اسم المستخدم"
@@ -108,10 +98,6 @@ export default function Login() {
     </div>
   );
 }
-
-/* =========================
-   🎨 SAME STYLE (UNCHANGED)
-========================= */
 
 const styles = {
   page: {
@@ -140,9 +126,7 @@ const styles = {
     borderRadius: "15px",
     background: "rgba(255,255,255,0.08)",
     backdropFilter: "blur(15px)",
-    WebkitBackdropFilter: "blur(15px)",
     border: "1px solid rgba(255,255,255,0.15)",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
     textAlign: "center",
   },
 
@@ -152,7 +136,6 @@ const styles = {
     margin: "8px 0",
     borderRadius: "8px",
     border: "none",
-    outline: "none",
   },
 
   button: {
@@ -163,8 +146,6 @@ const styles = {
     color: "white",
     border: "none",
     borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "bold",
   },
 
   message: {
@@ -172,6 +153,7 @@ const styles = {
     color: "#ffcccb",
   },
 };
+
 
 
 
