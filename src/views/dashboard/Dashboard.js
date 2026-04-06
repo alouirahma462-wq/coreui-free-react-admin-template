@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "../../dashboard.css";
-
 
 export default function Dashboard({ user }) {
   const [time, setTime] = useState(new Date());
   const [selectedCourt, setSelectedCourt] = useState(null);
   const [modal, setModal] = useState(null);
+
+  const navigate = useNavigate();
 
   // 🔥 Live clock
   useEffect(() => {
@@ -13,14 +15,14 @@ export default function Dashboard({ user }) {
     return () => clearInterval(interval);
   }, []);
 
-  // 📊 Fake live stats (later connect Supabase)
-  const [stats, setStats] = useState({
+  // 📊 Stats (fixed - removed setStats warning)
+  const stats = {
     total: 142,
     active: 87,
     closed: 55,
     unassigned: 7,
     monthlyChange: +12,
-  });
+  };
 
   const courts = [
     { id: 1, name: "Tunis", active: 87, status: "high" },
@@ -36,9 +38,7 @@ export default function Dashboard({ user }) {
 
       {/* 🟦 HEADER */}
       <header className="header">
-        <div>
-          🏛 منظومة النيابة العمومية - تونس
-        </div>
+        <div>🏛 منظومة النيابة العمومية - تونس</div>
 
         <div>
           📅 {time.toLocaleDateString()} | ⏰ {time.toLocaleTimeString()}
@@ -100,8 +100,9 @@ export default function Dashboard({ user }) {
 
           {/* 👤 USER */}
           <div className="userBox">
-            <h3>👤 {user?.username}</h3>
-            <p>{user?.role}</p>
+            <h3>👤 {user?.username || "Guest"}</h3>
+            <p>{user?.role || "No role"}</p>
+
             <button onClick={() => setModal("profile")}>
               Profile
             </button>
@@ -112,29 +113,12 @@ export default function Dashboard({ user }) {
             <div className="adminPanel">
               <h3>🧑‍⚖️ التفقدية</h3>
 
-              <button onClick={() => setModal("addUser")}>
-                ➕ Add User
-              </button>
-
-              <button onClick={() => setModal("deleteUser")}>
-                ❌ Delete User
-              </button>
-
-              <button onClick={() => setModal("logs")}>
-                📜 Audit Logs
-              </button>
-
-              <button onClick={() => setModal("stats")}>
-                📊 Statistics
-              </button>
-
-              <button onClick={() => setModal("reports")}>
-                📈 Reports
-              </button>
-
-              <button onClick={() => setModal("settings")}>
-                ⚙ Settings
-              </button>
+              <button onClick={() => setModal("addUser")}>➕ Add User</button>
+              <button onClick={() => setModal("deleteUser")}>❌ Delete User</button>
+              <button onClick={() => setModal("logs")}>📜 Audit Logs</button>
+              <button onClick={() => setModal("stats")}>📊 Statistics</button>
+              <button onClick={() => setModal("reports")}>📈 Reports</button>
+              <button onClick={() => setModal("settings")}>⚙ Settings</button>
             </div>
           )}
 
@@ -165,7 +149,7 @@ export default function Dashboard({ user }) {
 
             <button
               onClick={() =>
-                (window.location.href = `/court/${selectedCourt.id}`)
+                navigate(`/court/${selectedCourt.id}`)
               }
             >
               Open Court Dashboard
