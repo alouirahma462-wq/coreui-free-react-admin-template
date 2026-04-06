@@ -26,20 +26,28 @@ export default function App() {
     document.body.style.backgroundAttachment = "fixed";
   }, []);
 
-  // 🔐 جلب المستخدم من localStorage فقط (بدون Supabase Auth)
+  // 🔐 إصلاح نهائي: مزامنة user بشكل مباشر
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    const syncUser = () => {
+      const storedUser = localStorage.getItem("user");
 
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      setUser(null);
-    }
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      } else {
+        setUser(null);
+      }
 
-    setLoading(false);
+      setLoading(false);
+    };
+
+    syncUser();
+
+    // يحدث لو تغير localStorage من أي مكان
+    window.addEventListener("storage", syncUser);
+
+    return () => window.removeEventListener("storage", syncUser);
   }, []);
 
-  // ⏳ Loading
   if (loading) {
     return (
       <div style={{ color: "white", padding: 20 }}>
@@ -51,7 +59,7 @@ export default function App() {
   return (
     <Routes>
 
-      {/* 🔐 AUTH ROUTES */}
+      {/* 🔐 AUTH */}
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
