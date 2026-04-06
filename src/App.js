@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
+// صفحات
 import Login from "./views/pages/login/Login.jsx";
 import ChangePassword from "./views/pages/ChangePassword.jsx";
 import ForgotPassword from "./views/pages/ForgotPassword.jsx";
@@ -8,7 +9,6 @@ import ResetPassword from "./views/pages/ResetPassword.jsx";
 import Dashboard from "./views/dashboard/Dashboard";
 
 export default function App() {
-
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -20,15 +20,16 @@ export default function App() {
     `;
     document.body.style.backgroundSize = "cover";
     document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundRepeat = "no-repeat";
     document.body.style.backgroundAttachment = "fixed";
   }, []);
 
-  // 🔐 جلب المستخدم من localStorage (لأنك لا تستخدمي auth)
+  // 🔐 جلب المستخدم من localStorage (NOT supabase auth)
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
+    const storedUser = localStorage.getItem("user");
 
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
     } else {
       setUser(null);
     }
@@ -37,18 +38,13 @@ export default function App() {
   }, []);
 
   if (loading) {
-    return (
-      <div style={{ color: "white", padding: 20 }}>
-        Loading system...
-      </div>
-    );
+    return <div style={{ color: "white", padding: 20 }}>Loading...</div>;
   }
 
   return (
     <Routes>
-
       {/* AUTH */}
-      <Route path="/login" element={<Login setUser={setUser} />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/change-password" element={<ChangePassword />} />
@@ -57,23 +53,31 @@ export default function App() {
       <Route
         path="/dashboard"
         element={
-          user ? <Dashboard user={user} /> : <Navigate to="/login" />
+          user ? (
+            <Dashboard user={user} />
+          ) : (
+            <Navigate to="/login" replace />
+          )
         }
       />
 
-      {/* REDIRECT */}
+      {/* ROOT */}
       <Route
         path="/"
         element={
-          user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
+          user ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
         }
       />
 
-      <Route path="*" element={<Navigate to="/login" />} />
-
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }
+
 
 
 
