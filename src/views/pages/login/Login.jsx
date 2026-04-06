@@ -23,45 +23,56 @@ export default function Login() {
     const cleanUsername = username.trim();
     const cleanPassword = password.trim();
 
+    // 🔥 FIX: safe query (no .single)
     const { data, error } = await supabase
       .from("users")
       .select(
         "id, username, fullName, court_id, must_change_password, isActive"
       )
       .eq("username", cleanUsername)
-      .eq("password", cleanPassword)
-      .single();
+      .eq("password", cleanPassword);
 
-    if (error || !data) {
+    if (error) {
       console.log("LOGIN ERROR:", error);
+      setMessage("❌ خطأ في النظام");
+      setLoading(false);
+      return;
+    }
+
+    if (!data || data.length === 0) {
       setMessage("❌ بيانات الدخول غير صحيحة");
       setLoading(false);
       return;
     }
 
-    if (data.isActive === false) {
+    const user = data[0];
+
+    if (user.isActive === false) {
       setMessage("❌ الحساب غير مفعل");
       setLoading(false);
       return;
     }
 
     const userData = {
-      id: data.id,
-      username: data.username,
-      fullName: data.fullName,
-      court_id: data.court_id,
-      must_change_password: data.must_change_password,
+      id: user.id,
+      username: user.username,
+      fullName: user.fullName,
+      court_id: user.court_id,
+      must_change_password: user.must_change_password,
+      role: user.role || "user",
     };
 
     localStorage.setItem("user", JSON.stringify(userData));
 
     setLoading(false);
 
-    if (data.must_change_password) {
-      navigate("/change-password");
-    } else {
-      navigate("/dashboard");
-    }
+    setTimeout(() => {
+      if (user.must_change_password) {
+        navigate("/change-password");
+      } else {
+        navigate("/dashboard");
+      }
+    }, 100);
   };
 
   return (
@@ -99,7 +110,7 @@ export default function Login() {
 }
 
 /* =========================
-   🎨 ORIGINAL STYLES (FIXED)
+   🎨 SAME STYLE (UNCHANGED)
 ========================= */
 
 const styles = {
@@ -127,13 +138,10 @@ const styles = {
     width: "380px",
     padding: "25px",
     borderRadius: "15px",
-
-    /* 🔥 تحسين القلاص */
     background: "rgba(255,255,255,0.08)",
     backdropFilter: "blur(15px)",
     WebkitBackdropFilter: "blur(15px)",
     border: "1px solid rgba(255,255,255,0.15)",
-
     boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
     textAlign: "center",
   },
@@ -164,6 +172,7 @@ const styles = {
     color: "#ffcccb",
   },
 };
+
 
 
 
