@@ -6,25 +6,12 @@ import ChangePassword from "./views/pages/ChangePassword.jsx";
 import ForgotPassword from "./views/pages/ForgotPassword.jsx";
 import ResetPassword from "./views/pages/ResetPassword.jsx";
 
-function Dashboard() {
-  return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        color: "white",
-        fontSize: "24px",
-      }}
-    >
-      Dashboard
-    </div>
-  );
-}
+// ✅ الداشبورد الحقيقي
+import Dashboard from "./views/dashboard/Dashboard.js";
 
 export default function App() {
-  /* 🎨 GLOBAL BACKGROUND (احترافي + أوضح) */
+
+  // 🎨 خلفية عامة للنظام
   useEffect(() => {
     document.body.style.background = `
       linear-gradient(rgba(5,15,35,0.45), rgba(30,64,175,0.55)),
@@ -34,22 +21,38 @@ export default function App() {
     document.body.style.backgroundSize = "cover";
     document.body.style.backgroundPosition = "center";
     document.body.style.backgroundRepeat = "no-repeat";
-    document.body.style.backgroundAttachment = "fixed"; // 🔥 يعطي فخامة
+    document.body.style.backgroundAttachment = "fixed";
   }, []);
+
+  // 👤 مؤقت (لاحقًا يأتي من Supabase Auth)
+  const fakeUser = {
+    username: "admin",
+    role: "admin", // inspector / clerk
+  };
 
   return (
     <Routes>
+
+      {/* 🔐 AUTH */}
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/change-password" element={<ChangePassword />} />
-      <Route path="/dashboard" element={<Dashboard />} />
 
+      {/* 🧠 MAIN DASHBOARD (النظام الحقيقي) */}
+      <Route
+        path="/dashboard"
+        element={<Dashboard user={fakeUser} />}
+      />
+
+      {/* 🔁 REDIRECTS */}
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
+
     </Routes>
   );
 }
+
 
 
 
