@@ -61,11 +61,11 @@ export default function Login() {
 
     setLoading(false);
 
-    // ⛳ التوجيه
+    // ⛳ التوجيه النهائي
     if (user.must_change_password) {
       navigate("/change-password");
     } else {
-      navigate("/dashboard", { replace: true });
+      window.location.href = "/dashboard";
     }
   };
 
@@ -99,6 +99,7 @@ export default function Login() {
   );
 }
 
+// 🎨 نفس الستايل بدون أي تغيير
 const styles = {
   page: {
     height: "100vh",
@@ -153,6 +154,7 @@ const styles = {
     color: "#ffcccb",
   },
 };
+
 
 
 
