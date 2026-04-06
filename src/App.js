@@ -1,11 +1,13 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-// صفحات
+// صفحات auth
 import Login from "./views/pages/login/Login.jsx";
 import ChangePassword from "./views/pages/ChangePassword.jsx";
 import ForgotPassword from "./views/pages/ForgotPassword.jsx";
 import ResetPassword from "./views/pages/ResetPassword.jsx";
+
+// داشبورد
 import Dashboard from "./views/dashboard/Dashboard";
 
 export default function App() {
@@ -24,7 +26,7 @@ export default function App() {
     document.body.style.backgroundAttachment = "fixed";
   }, []);
 
-  // 🔐 جلب المستخدم من localStorage (NOT supabase auth)
+  // 🔐 جلب المستخدم من localStorage فقط (بدون Supabase Auth)
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
 
@@ -37,46 +39,47 @@ export default function App() {
     setLoading(false);
   }, []);
 
+  // ⏳ Loading
   if (loading) {
-    return <div style={{ color: "white", padding: 20 }}>Loading...</div>;
+    return (
+      <div style={{ color: "white", padding: 20 }}>
+        Loading system...
+      </div>
+    );
   }
 
   return (
     <Routes>
-      {/* AUTH */}
+
+      {/* 🔐 AUTH ROUTES */}
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/change-password" element={<ChangePassword />} />
 
-      {/* DASHBOARD */}
+      {/* 🧠 DASHBOARD (محمي) */}
       <Route
         path="/dashboard"
         element={
-          user ? (
-            <Dashboard user={user} />
-          ) : (
-            <Navigate to="/login" replace />
-          )
+          user ? <Dashboard user={user} /> : <Navigate to="/login" replace />
         }
       />
 
-      {/* ROOT */}
+      {/* 🔁 ROOT */}
       <Route
         path="/"
         element={
-          user ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <Navigate to="/login" replace />
-          )
+          user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
         }
       />
 
+      {/* ❌ fallback */}
       <Route path="*" element={<Navigate to="/login" replace />} />
+
     </Routes>
   );
 }
+
 
 
 
