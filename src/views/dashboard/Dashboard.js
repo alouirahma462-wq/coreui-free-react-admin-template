@@ -1,100 +1,184 @@
-import React, { useEffect, useState } from 'react'
-import {
-  CCard,
-  CCardBody,
-  CCardHeader,
-  CCol,
-  CRow,
-  CTable,
-  CTableBody,
-  CTableDataCell,
-  CTableHead,
-  CTableHeaderCell,
-  CTableRow,
-  CProgress,
-} from '@coreui/react'
+import React, { useState, useEffect } from "react";
+import "./dashboard.css";
 
-import { supabase } from '../../supabaseClient'
+export default function Dashboard({ user }) {
+  const [time, setTime] = useState(new Date());
+  const [selectedCourt, setSelectedCourt] = useState(null);
+  const [modal, setModal] = useState(null);
 
-const Dashboard = () => {
-  const [users, setUsers] = useState([])
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-  })
-
-  // 🔥 جلب المستخدمين
+  // 🔥 Live clock
   useEffect(() => {
-    const fetchData = async () => {
-      const { data, error } = await supabase.from('users').select('*')
+    const interval = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
-      if (error) {
-        console.log('ERROR:', error)
-        return
-      }
+  // 📊 Fake live stats (later connect Supabase)
+  const [stats, setStats] = useState({
+    total: 142,
+    active: 87,
+    closed: 55,
+    unassigned: 7,
+    monthlyChange: +12,
+  });
 
-      console.log('DATA:', data)
+  const courts = [
+    { id: 1, name: "Tunis", active: 87, status: "high" },
+    { id: 2, name: "Sfax", active: 55, status: "medium" },
+    { id: 3, name: "Sousse", active: 32, status: "low" },
+  ];
 
-      setUsers(data || [])
-      setStats({
-        totalUsers: data?.length || 0,
-      })
-    }
-
-    fetchData()
-  }, [])
+  const isAdmin =
+    user?.role === "admin" || user?.role === "inspector";
 
   return (
-    <>
-      {/* 🔥 TOP STATS */}
-      <CRow>
-        <CCol sm={6}>
-          <CCard className="mb-4">
-            <CCardBody>
-              <h4>Total Users</h4>
-              <h2>{stats.totalUsers}</h2>
-            </CCardBody>
-          </CCard>
-        </CCol>
-      </CRow>
+    <div className="dashboard">
 
-      {/* 🔥 USERS TABLE */}
-      <CRow>
-        <CCol>
-          <CCard className="mb-4">
-            <CCardHeader>Users Dashboard</CCardHeader>
-            <CCardBody>
-              <CTable hover responsive>
-                <CTableHead>
-                  <CTableRow>
-                    <CTableHeaderCell>Name</CTableHeaderCell>
-                    <CTableHeaderCell>Email</CTableHeaderCell>
-                    <CTableHeaderCell>Role</CTableHeaderCell>
-                    <CTableHeaderCell>Created At</CTableHeaderCell>
-                  </CTableRow>
-                </CTableHead>
+      {/* 🟦 HEADER */}
+      <header className="header">
+        <div>
+          🏛 منظومة النيابة العمومية - تونس
+        </div>
 
-                <CTableBody>
-                  {users.map((user, index) => (
-                    <CTableRow key={index}>
-                      <CTableDataCell>{user.name || 'No Name'}</CTableDataCell>
-                      <CTableDataCell>{user.email || '-'}</CTableDataCell>
-                      <CTableDataCell>{user.role || 'user'}</CTableDataCell>
-                      <CTableDataCell>
-                        {user.created_at
-                          ? new Date(user.created_at).toLocaleDateString()
-                          : '-'}
-                      </CTableDataCell>
-                    </CTableRow>
-                  ))}
-                </CTableBody>
-              </CTable>
-            </CCardBody>
-          </CCard>
-        </CCol>
-      </CRow>
-    </>
-  )
+        <div>
+          📅 {time.toLocaleDateString()} | ⏰ {time.toLocaleTimeString()}
+        </div>
+
+        <div className="status">
+          🟢 System Stable
+        </div>
+      </header>
+
+      <div className="layout">
+
+        {/* 🟪 SIDEBAR */}
+        <aside className="sidebar">
+          <h3>🏛 المحاكم</h3>
+
+          {courts.map((court) => (
+            <div
+              key={court.id}
+              className="courtCard"
+              onClick={() => setSelectedCourt(court)}
+            >
+              <strong>{court.name}</strong>
+              <p>Active: {court.active}</p>
+              <span className={court.status}>
+                {court.status.toUpperCase()}
+              </span>
+            </div>
+          ))}
+        </aside>
+
+        {/* 🟩 MAIN CONTENT */}
+        <main className="main">
+
+          {/* 📊 CARDS */}
+          <div className="cards">
+            <div className="card">Total: {stats.total}</div>
+            <div className="card">Active: {stats.active}</div>
+            <div className="card">Closed: {stats.closed}</div>
+            <div className="card">Unassigned: {stats.unassigned}</div>
+          </div>
+
+          {/* 📈 ANALYTICS */}
+          <div className="analytics">
+            <h3>📈 Monthly Comparison</h3>
+            <p>+{stats.monthlyChange}% more cases than last month</p>
+          </div>
+
+          {/* ⚠ ALERTS */}
+          <div className="alerts">
+            <p>⚠ Sfax Court increasing load</p>
+            <p>⚠ Tunis Court delay detected</p>
+          </div>
+
+        </main>
+
+        {/* 🟥 RIGHT PANEL */}
+        <aside className="rightPanel">
+
+          {/* 👤 USER */}
+          <div className="userBox">
+            <h3>👤 {user?.username}</h3>
+            <p>{user?.role}</p>
+            <button onClick={() => setModal("profile")}>
+              Profile
+            </button>
+          </div>
+
+          {/* 🧑‍⚖️ ADMIN PANEL */}
+          {isAdmin && (
+            <div className="adminPanel">
+              <h3>🧑‍⚖️ التفقدية</h3>
+
+              <button onClick={() => setModal("addUser")}>
+                ➕ Add User
+              </button>
+
+              <button onClick={() => setModal("deleteUser")}>
+                ❌ Delete User
+              </button>
+
+              <button onClick={() => setModal("logs")}>
+                📜 Audit Logs
+              </button>
+
+              <button onClick={() => setModal("stats")}>
+                📊 Statistics
+              </button>
+
+              <button onClick={() => setModal("reports")}>
+                📈 Reports
+              </button>
+
+              <button onClick={() => setModal("settings")}>
+                ⚙ Settings
+              </button>
+            </div>
+          )}
+
+        </aside>
+      </div>
+
+      {/* 🟣 MODAL SYSTEM */}
+      {modal && (
+        <div className="modalOverlay" onClick={() => setModal(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2>📌 {modal}</h2>
+            <p>Content for {modal} will be connected to Supabase later.</p>
+            <button onClick={() => setModal(null)}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {/* 🟡 COURT MODAL */}
+      {selectedCourt && (
+        <div
+          className="modalOverlay"
+          onClick={() => setSelectedCourt(null)}
+        >
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2>🏛 {selectedCourt.name}</h2>
+            <p>Active Cases: {selectedCourt.active}</p>
+            <p>Status: {selectedCourt.status}</p>
+
+            <button
+              onClick={() =>
+                (window.location.href = `/court/${selectedCourt.id}`)
+              }
+            >
+              Open Court Dashboard
+            </button>
+
+            <button onClick={() => setSelectedCourt(null)}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
 }
 
-export default Dashboard
 
