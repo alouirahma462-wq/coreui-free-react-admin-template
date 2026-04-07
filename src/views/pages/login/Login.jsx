@@ -21,24 +21,6 @@ export default function Login() {
     document.head.appendChild(style);
   }, []);
 
-  // 🧠 ROUTING SAFE
-  const goToDashboard = (user) => {
-    const access = user.access_level;
-
-    if (access === "court") {
-      navigate(`/court/${user.court_id}`);
-      return;
-    }
-
-    if (access === "global") {
-      navigate("/inspection-dashboard");
-      return;
-    }
-
-    // 🔥 FIX: بدل error → fallback آمن
-    navigate("/change-password");
-  };
-
   const handleLogin = async () => {
     setMessage("");
     setLoading(true);
@@ -49,7 +31,7 @@ export default function Login() {
       return;
     }
 
-    // 🔥 1. GET USER
+    // 🔥 GET USER (SOURCE OF TRUTH)
     const { data: user, error } = await supabase
       .from("users")
       .select(`
@@ -78,53 +60,49 @@ export default function Login() {
       return;
     }
 
-    // 🔥 2. GET ROLE (FIXED 100%)
+    // 🔥 GET ROLE
     const { data: role } = await supabase
       .from("roles")
-      .select("role_key, role_name, access_level")
+      .select("access_level, role_key, role_name")
       .eq("id", user.role_id)
       .maybeSingle();
 
-    setLoading(false);
-
-    // 🚨 FIX CRITICAL: لا توقف النظام إذا role ناقص
     const safeRole = role || {
+      access_level: null,
       role_key: "unknown",
       role_name: "غير محدد",
-      access_level: null,
     };
 
-    // 🧠 SESSION OBJECT (FULL SAFE)
-    const sessionUser = {
-      id: user.id,
-      username: user.username,
-      fullName: user.fullName,
-      court_id: user.court_id,
-      court_name: user.courts?.name || "التفقدية العامة",
+    // 🧠 SAVE ONLY ID (NO CACHE BUGS)
+    localStorage.setItem("user_id", user.id);
 
-      role_id: user.role_id,
-      role_key: safeRole.role_key,
-      role_name: safeRole.role_name,
-      access_level: safeRole.access_level,
-
-      must_change_password: user.must_change_password,
-    };
-
-    localStorage.setItem("user", JSON.stringify(sessionUser));
-
-    // 👋 MESSAGE
-    setMessage(`👋 مرحبا ${user.fullName} - ${sessionUser.court_name}`);
+    // 👋 WELCOME MESSAGE
+    setMessage(`👋 مرحبا ${user.fullName} - ${user.courts?.name || "التفقدية العامة"}`);
 
     setTimeout(() => {
-      // 🔴 FIRST LOGIN ALWAYS PRIORITY
+      // 🔴 FIRST LOGIN PRIORITY
       if (user.must_change_password === true) {
-        navigate("/change-password", { state: { user: sessionUser } });
+        navigate("/change-password", {
+          state: { userId: user.id },
+        });
         return;
       }
 
-      // 🟢 NORMAL FLOW
-      goToDashboard(sessionUser);
+      // 🟢 ROUTING CLEAN
+      if (safeRole.access_level === "court") {
+        navigate(`/court/${user.court_id}`);
+        return;
+      }
+
+      if (safeRole.access_level === "global") {
+        navigate("/inspection-dashboard");
+        return;
+      }
+
+      navigate("/login");
     }, 500);
+
+    setLoading(false);
   };
 
   return (
@@ -134,8 +112,6 @@ export default function Login() {
           🇹🇳 وزارة العدل الجمهورية التونسية - منظومة النيابة العمومية - 🇹🇳
         </div>
       </div>
-
-      <div style={styles.bgOverlay}></div>
 
       <div style={styles.card}>
         <h2>🏛️ منظومة النيابة العمومية</h2>
@@ -174,8 +150,6 @@ const styles = {
     flexDirection: "column",
     direction: "rtl",
     background: "linear-gradient(135deg, #0f172a, #1e293b)",
-    position: "relative",
-    overflow: "hidden",
     color: "white",
   },
 
@@ -187,7 +161,6 @@ const styles = {
     padding: "10px 0",
     overflow: "hidden",
     whiteSpace: "nowrap",
-    zIndex: 2,
   },
 
   marquee: {
@@ -197,27 +170,13 @@ const styles = {
     fontWeight: "bold",
   },
 
-  bgOverlay: {
-    position: "absolute",
-    width: "450px",
-    height: "450px",
-    backgroundImage:
-      "url('https://upload.wikimedia.org/wikipedia/commons/c/ce/Coat_of_arms_of_Tunisia.svg')",
-    backgroundRepeat: "no-repeat",
-    backgroundSize: "contain",
-    opacity: 0.08,
-    zIndex: 0,
-  },
-
   card: {
     width: "400px",
     padding: "30px",
     borderRadius: "16px",
     background: "rgba(255,255,255,0.08)",
     backdropFilter: "blur(18px)",
-    border: "1px solid rgba(255,255,255,0.15)",
     textAlign: "center",
-    zIndex: 2,
   },
 
   input: {
@@ -225,8 +184,6 @@ const styles = {
     padding: "12px",
     margin: "8px 0",
     borderRadius: "8px",
-    border: "none",
-    outline: "none",
   },
 
   button: {
@@ -237,16 +194,14 @@ const styles = {
     color: "white",
     border: "none",
     borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "bold",
   },
 
   message: {
     marginTop: "10px",
     color: "#fca5a5",
-    fontWeight: "bold",
   },
 };
+
 
 
 
