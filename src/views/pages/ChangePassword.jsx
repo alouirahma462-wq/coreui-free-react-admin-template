@@ -12,11 +12,11 @@ export default function ChangePassword() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  // 🔐 LOAD USER SAFE
+  // 🔐 LOAD USER
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("user"));
 
-    if (!stored) {
+    if (!stored?.id) {
       navigate("/login");
       return;
     }
@@ -24,29 +24,18 @@ export default function ChangePassword() {
     setUser(stored);
   }, [navigate]);
 
-  // 🔐 PASSWORD STRENGTH
-  const getStrength = (p) => {
-    if (p.length < 6) return "ضعيفة";
-    if (/[A-Z]/.test(p) && /[0-9]/.test(p) && p.length >= 8) return "قوية";
-    return "متوسطة";
-  };
-
-  // 🚀 DASHBOARD ROUTER
+  // 🚀 ROUTER
   const goToDashboard = (u) => {
-    if (u.access_level === "court") {
+    if (u?.access_level === "court") {
       navigate(`/court/${u.court_id}`);
-      return;
-    }
-
-    if (u.access_level === "global") {
+    } else if (u?.access_level === "global") {
       navigate("/inspection-dashboard");
-      return;
+    } else {
+      navigate("/login");
     }
-
-    navigate("/login");
   };
 
-  // 🚀 UPDATE PASSWORD (FINAL FIX)
+  // 🚀 FIXED UPDATE PASSWORD (FINAL VERSION)
   const handleUpdate = async () => {
     setError("");
 
@@ -57,7 +46,7 @@ export default function ChangePassword() {
 
     setLoading(true);
 
-    // 🔥 1. UPDATE PASSWORD + REMOVE FIRST LOGIN FLAG
+    // 1️⃣ UPDATE DB
     const { error: updateError } = await supabase
       .from("users")
       .update({
@@ -71,37 +60,49 @@ export default function ChangePassword() {
       return setError("❌ فشل تحديث كلمة المرور");
     }
 
-    // 🔥 2. BUILD UPDATED SESSION (IMPORTANT FIX)
-    const updatedUser = {
-      ...user,
-      password: newPass,
-      must_change_password: false,
+    // 2️⃣ 🔥 REFETCH USER FROM DB (IMPORTANT FIX)
+    const { data: freshUser, error: fetchError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (fetchError || !freshUser) {
+      setLoading(false);
+      return setError("❌ فشل إعادة تحميل البيانات");
+    }
+
+    // 3️⃣ BUILD CLEAN SESSION FROM DB ONLY
+    const sessionUser = {
+      id: freshUser.id,
+      username: freshUser.username,
+      fullName: freshUser.fullName,
+      court_id: freshUser.court_id,
+      role_id: freshUser.role_id,
+      access_level: freshUser.access_level,
+      must_change_password: freshUser.must_change_password,
     };
 
-    localStorage.setItem("user", JSON.stringify(updatedUser));
+    // 4️⃣ UPDATE LOCALSTORAGE CLEANLY
+    localStorage.setItem("user", JSON.stringify(sessionUser));
 
     setLoading(false);
     setSuccess(true);
 
-    // 🎯 SHORT DELAY THEN REDIRECT
+    // 5️⃣ REDIRECT
     setTimeout(() => {
-      goToDashboard(updatedUser);
+      goToDashboard(sessionUser);
     }, 1000);
   };
 
   if (!user) {
-    return (
-      <div style={styles.loading}>
-        جاري تحميل البيانات...
-      </div>
-    );
+    return <div style={styles.loading}>جاري التحميل...</div>;
   }
 
   return (
     <div style={styles.page}>
       <div style={styles.card}>
         <h2>🔐 تغيير كلمة المرور</h2>
-
         <p>مرحباً {user.fullName}</p>
 
         <input
@@ -119,10 +120,6 @@ export default function ChangePassword() {
           onChange={(e) => setConfirmPass(e.target.value)}
           style={styles.input}
         />
-
-        {newPass && (
-          <p>قوة كلمة المرور: {getStrength(newPass)}</p>
-        )}
 
         <button onClick={handleUpdate} disabled={loading} style={styles.btn}>
           {loading ? "جاري التحديث..." : "تحديث"}
@@ -143,7 +140,7 @@ export default function ChangePassword() {
   );
 }
 
-/* SIMPLE STYLES */
+/* STYLES */
 const styles = {
   page: {
     height: "100vh",
@@ -154,7 +151,6 @@ const styles = {
     color: "white",
     direction: "rtl",
   },
-
   card: {
     width: "400px",
     padding: "20px",
@@ -162,14 +158,12 @@ const styles = {
     background: "rgba(255,255,255,0.1)",
     textAlign: "center",
   },
-
   input: {
     width: "100%",
     padding: "10px",
     margin: "8px 0",
     borderRadius: "8px",
   },
-
   btn: {
     width: "100%",
     padding: "10px",
@@ -178,7 +172,6 @@ const styles = {
     border: "none",
     borderRadius: "8px",
   },
-
   modal: {
     position: "fixed",
     inset: 0,
@@ -187,14 +180,12 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
   },
-
   modalBox: {
     padding: "20px",
     background: "white",
     color: "black",
     borderRadius: "10px",
   },
-
   loading: {
     color: "white",
     display: "flex",
@@ -203,6 +194,7 @@ const styles = {
     height: "100vh",
   },
 };
+
 
 
 
