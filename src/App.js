@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 // AUTH
@@ -14,6 +14,7 @@ import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
   // 🎨 Background
   useEffect(() => {
@@ -26,39 +27,66 @@ export default function App() {
     document.body.style.backgroundAttachment = "fixed";
   }, []);
 
-  // 🔐 Load user
-  useEffect(() => {
+  // 🔐 Load user (IMPORTANT FIX)
+  const loadUser = () => {
     const stored = localStorage.getItem("user");
-    setUser(stored ? JSON.parse(stored) : null);
+    try {
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    setUser(loadUser());
     setLoading(false);
   }, []);
+
+  // 🔁 إعادة مزامنة user عند تغيير الصفحات (fix مهم جداً)
+  useEffect(() => {
+    setUser(loadUser());
+  }, [location.pathname]);
 
   if (loading) {
     return <div style={{ color: "white", padding: 20 }}>Loading...</div>;
   }
 
-  // 🧠 ROLE SYSTEM (صح 100% مع users table)
+  // 🧠 HOME LOGIC (FIXED)
   const getHome = () => {
-    if (!user) return "/login";
+    const currentUser = loadUser();
 
-    if (user.must_change_password) {
+    if (!currentUser) return "/login";
+
+    // ⚠️ must change password أولاً
+    if (currentUser.must_change_password === true) {
       return "/change-password";
     }
 
-    const roleKey = user.role_key;
-    const accessLevel = user.access_level;
+    const roleKey = currentUser.role_key;
+    const accessLevel = currentUser.access_level;
 
-    // 🏛 المحكمة
     if (roleKey === "case_clerk" || roleKey === "prosecutor_group") {
-      return `/court/${user.court_id}`;
+      return `/court/${currentUser.court_id}`;
     }
 
-    // 🔎 التفقدية
     if (roleKey === "inspection_general" || accessLevel === "global") {
       return "/inspection-dashboard";
     }
 
     return "/login";
+  };
+
+  // 🔐 Route guard helper
+  const ProtectedRoute = ({ children }) => {
+    const currentUser = loadUser();
+
+    if (!currentUser) return <Navigate to="/login" replace />;
+
+    if (currentUser.must_change_password) {
+      return <Navigate to="/change-password" replace />;
+    }
+
+    return children;
   };
 
   return (
@@ -68,17 +96,15 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/change-password" element={<ChangePassword />} />
+      <Route path="/change-password" element={<ChangePassword setUser={setUser} />} />
 
       {/* COURT DASHBOARD */}
       <Route
         path="/court/:id"
         element={
-          user ? (
+          <ProtectedRoute>
             <CourtDashboard user={user} />
-          ) : (
-            <Navigate to="/login" replace />
-          )
+          </ProtectedRoute>
         }
       />
 
@@ -86,11 +112,9 @@ export default function App() {
       <Route
         path="/inspection-dashboard"
         element={
-          user && user.role_key === "inspection_general" ? (
+          <ProtectedRoute>
             <InspectionDashboard user={user} />
-          ) : (
-            <Navigate to="/login" replace />
-          )
+          </ProtectedRoute>
         }
       />
 
@@ -103,6 +127,7 @@ export default function App() {
     </Routes>
   );
 }
+
 
 
 
