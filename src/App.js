@@ -7,7 +7,7 @@ import ChangePassword from "./views/pages/ChangePassword.jsx";
 import ForgotPassword from "./views/pages/ForgotPassword.jsx";
 import ResetPassword from "./views/pages/ResetPassword.jsx";
 
-// DASHBOARDS (ONLY 2)
+// DASHBOARDS
 import CourtDashboard from "./views/dashboard/CourtDashboard.jsx";
 import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
@@ -15,7 +15,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🌄 Background style
+  // 🎨 Background
   useEffect(() => {
     document.body.style.background = `
       linear-gradient(rgba(5,15,35,0.45), rgba(30,64,175,0.55)),
@@ -37,7 +37,7 @@ export default function App() {
     return <div style={{ color: "white", padding: 20 }}>Loading...</div>;
   }
 
-  // 🧠 ROLE LOGIC (FINAL)
+  // 🧠 ROLE SYSTEM (صح 100% مع users table)
   const getHome = () => {
     if (!user) return "/login";
 
@@ -45,15 +45,16 @@ export default function App() {
       return "/change-password";
     }
 
-    const role = user?.role?.role_key ?? user?.role;
+    const roleKey = user.role_key;
+    const accessLevel = user.access_level;
 
-    // 🏛 Court roles (CASE CLERK + PROSECUTOR GROUP)
-    if (role === "case_clerk" || role === "prosecutor_group") {
+    // 🏛 المحكمة
+    if (roleKey === "case_clerk" || roleKey === "prosecutor_group") {
       return `/court/${user.court_id}`;
     }
 
-    // 🔎 Inspection General
-    if (role === "inspection_general") {
+    // 🔎 التفقدية
+    if (roleKey === "inspection_general" || accessLevel === "global") {
       return "/inspection-dashboard";
     }
 
@@ -63,13 +64,13 @@ export default function App() {
   return (
     <Routes>
 
-      {/* ================= AUTH ================= */}
+      {/* AUTH */}
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/change-password" element={<ChangePassword />} />
 
-      {/* ================= COURT DASHBOARD ================= */}
+      {/* COURT DASHBOARD */}
       <Route
         path="/court/:id"
         element={
@@ -81,11 +82,11 @@ export default function App() {
         }
       />
 
-      {/* ================= INSPECTION DASHBOARD ================= */}
+      {/* INSPECTION DASHBOARD */}
       <Route
         path="/inspection-dashboard"
         element={
-          user && user.role?.role_key === "inspection_general" ? (
+          user && user.role_key === "inspection_general" ? (
             <InspectionDashboard user={user} />
           ) : (
             <Navigate to="/login" replace />
@@ -93,15 +94,16 @@ export default function App() {
         }
       />
 
-      {/* ================= ROOT ================= */}
+      {/* ROOT */}
       <Route path="/" element={<Navigate to={getHome()} replace />} />
 
-      {/* ================= FALLBACK ================= */}
+      {/* FALLBACK */}
       <Route path="*" element={<Navigate to={getHome()} replace />} />
 
     </Routes>
   );
 }
+
 
 
 
