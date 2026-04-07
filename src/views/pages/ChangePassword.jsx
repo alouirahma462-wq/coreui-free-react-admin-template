@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
 import { useNavigate } from "react-router-dom";
 
-export default function ChangePassword({ user, onSuccess }) {
+export default function ChangePassword({ user }) {
   const navigate = useNavigate();
 
   const [finalUser, setFinalUser] = useState(null);
@@ -19,14 +19,14 @@ export default function ChangePassword({ user, onSuccess }) {
 
   const fullName = finalUser?.fullName || "المستخدم";
 
-  /* 🔐 PASSWORD STRENGTH */
+  /* 🔐 password strength */
   const getStrength = (p) => {
     if (p.length < 6) return "ضعيفة";
     if (/[A-Z]/.test(p) && /[0-9]/.test(p) && p.length >= 8) return "قوية";
     return "متوسطة";
   };
 
-  /* 🚀 UPDATE PASSWORD */
+  /* 🚀 update password */
   const handleUpdate = async () => {
     setError("");
 
@@ -63,49 +63,55 @@ export default function ChangePassword({ user, onSuccess }) {
     setLoading(false);
 
     if (error) {
-      setError("❌ فشل التحديث");
+      setError("❌ فشل تحديث كلمة المرور");
       return;
     }
 
-    /* update localStorage */
-    localStorage.setItem(
-      "user",
-      JSON.stringify({
-        ...finalUser,
-        must_change_password: false,
-      })
-    );
+    /* تحديث localStorage */
+    const updatedUser = {
+      ...finalUser,
+      must_change_password: false,
+    };
+
+    localStorage.setItem("user", JSON.stringify(updatedUser));
 
     setSuccess(true);
 
     setTimeout(() => {
       setSuccess(false);
-      onSuccess?.();
 
-      const role = finalUser.role;
+      const accessLevel = finalUser.access_level;
 
-      if (role === "inspector" || role === "admin") {
-        navigate("/admin-dashboard");
-      } else {
-        navigate("/court-dashboard");
+      // 🏛️ COURT USERS
+      if (accessLevel === "court") {
+        navigate(`/court-dashboard/${finalUser.court_id}`);
+        return;
       }
-    }, 1600);
+
+      // 🕵️ INSPECTION USERS
+      if (accessLevel === "global") {
+        navigate("/inspection-dashboard");
+        return;
+      }
+
+      navigate("/");
+    }, 1500);
   };
 
   if (!finalUser) {
-    return <div style={styles.loading}>جاري تحميل بيانات المستخدم...</div>;
+    return <div style={styles.loading}>جاري تحميل البيانات...</div>;
   }
 
   return (
     <div style={styles.page}>
 
-      {/* 🇹🇳 BACKGROUND (COURT + FLAG WATERMARK) */}
+      {/* 🇹🇳 BACKGROUND */}
       <div style={styles.bg}></div>
 
-      {/* 🔴 TOP BAR */}
+      {/* TOP BAR */}
       <div style={styles.topBar}>
         <div style={styles.marquee}>
-          🇹🇳 وزارة العدل الجمهورية التونسية - نظام تغيير كلمة المرور - المحكمة الابتدائية 🇹🇳
+          🇹🇳 وزارة العدل الجمهورية التونسية - تغيير كلمة المرور - منظومة النيابة العمومية 🇹🇳
         </div>
       </div>
 
@@ -148,7 +154,7 @@ export default function ChangePassword({ user, onSuccess }) {
         {error && <p style={styles.error}>{error}</p>}
       </div>
 
-      {/* SUCCESS MODAL */}
+      {/* SUCCESS */}
       {success && (
         <div style={styles.modal}>
           <div style={styles.modalBox}>
@@ -162,7 +168,7 @@ export default function ChangePassword({ user, onSuccess }) {
 }
 
 /* =========================
-   🎨 STYLES (GOV STYLE)
+   🎨 FINAL STYLES
 ========================= */
 
 const styles = {
@@ -172,54 +178,48 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     direction: "rtl",
+    background: "linear-gradient(135deg, #0f172a, #1e293b)",
     color: "white",
     position: "relative",
     overflow: "hidden",
-    background: "linear-gradient(135deg, #0f172a, #1e293b)",
   },
 
-  /* 🇹🇳 COURT + FLAG WATERMARK */
   bg: {
     position: "absolute",
     inset: 0,
     backgroundImage:
-      "url('https://upload.wikimedia.org/wikipedia/commons/c/ce/Coat_of_arms_of_Tunisia.svg'), url('https://upload.wikimedia.org/wikipedia/commons/5/53/Tunis_Courthouse.jpg')",
+      "url('https://upload.wikimedia.org/wikipedia/commons/c/ce/Coat_of_arms_of_Tunisia.svg')",
     backgroundRepeat: "no-repeat",
     backgroundPosition: "center",
-    backgroundSize: "300px, cover",
+    backgroundSize: "320px",
     opacity: 0.08,
-    filter: "grayscale(100%)",
-    zIndex: 0,
   },
 
-  /* 🔴 TOP BAR */
   topBar: {
     position: "absolute",
     top: 0,
     width: "100%",
     background: "#b91c1c",
-    overflow: "hidden",
     padding: "10px 0",
-    zIndex: 2,
+    overflow: "hidden",
+    whiteSpace: "nowrap",
   },
 
   marquee: {
     display: "inline-block",
-    whiteSpace: "nowrap",
     paddingLeft: "100%",
     animation: "move 12s linear infinite",
     fontWeight: "bold",
   },
 
   card: {
-    width: "400px",
+    width: "420px",
     padding: "25px",
     borderRadius: "16px",
     background: "rgba(255,255,255,0.08)",
     backdropFilter: "blur(18px)",
     border: "1px solid rgba(255,255,255,0.15)",
     textAlign: "center",
-    zIndex: 2,
   },
 
   title: {
@@ -229,7 +229,6 @@ const styles = {
 
   welcome: {
     marginBottom: "10px",
-    fontSize: "14px",
   },
 
   info: {
@@ -257,13 +256,13 @@ const styles = {
     color: "white",
     border: "none",
     borderRadius: "10px",
-    cursor: "pointer",
     fontWeight: "bold",
+    cursor: "pointer",
   },
 
   strength: {
-    fontSize: "13px",
     color: "#fbbf24",
+    fontSize: "13px",
   },
 
   error: {
@@ -278,7 +277,6 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 999,
   },
 
   modalBox: {
@@ -299,7 +297,7 @@ const styles = {
   },
 };
 
-/* 🟡 ANIMATION */
+/* animation */
 const styleSheet = document.styleSheets[0];
 styleSheet.insertRule(`
 @keyframes move {
@@ -307,6 +305,7 @@ styleSheet.insertRule(`
   100% { transform: translateX(-100%); }
 }
 `, styleSheet.cssRules.length);
+
 
 
 
