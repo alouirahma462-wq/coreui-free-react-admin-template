@@ -12,30 +12,62 @@ export default function ChangePassword() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  // 🔐 LOAD USER
+  // 🔐 LOAD USER (FIXED ROOT)
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("user"));
+    const loadUser = async () => {
+      const userId = localStorage.getItem("user_id");
 
-    if (!stored?.id) {
-      navigate("/login");
+      if (!userId) {
+        navigate("/login");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("users")
+        .select(`
+          id,
+          username,
+          fullName,
+          must_change_password,
+          court_id,
+          role_id,
+          courts (id, name)
+        `)
+        .eq("id", userId)
+        .single();
+
+      if (error || !data) {
+        navigate("/login");
+        return;
+      }
+
+      setUser(data);
+
+      // 🔥 إذا ما عاد يحتاج تغيير كلمة المرور
+      if (!data.must_change_password) {
+        navigate("/login");
+      }
+    };
+
+    loadUser();
+  }, [navigate]);
+
+  // 🚀 ROUTING (SAFE + CONSISTENT WITH LOGIN)
+  const goToDashboard = (u, roleAccess) => {
+    if (roleAccess === "court") {
+      navigate(`/court/${u.court_id}`);
       return;
     }
 
-    setUser(stored);
-  }, [navigate]);
-
-  // 🚀 ROUTER
-  const goToDashboard = (u) => {
-    if (u?.access_level === "court") {
-      navigate(`/court/${u.court_id}`);
-    } else if (u?.access_level === "global") {
+    if (roleAccess === "global") {
       navigate("/inspection-dashboard");
-    } else {
-      navigate("/login");
+      return;
     }
+
+    navigate("/login");
   };
 
-  // 🚀 FIXED UPDATE PASSWORD (FINAL VERSION)
+  // 🚀 UPDATE PASSWORD (FIXED)
   const handleUpdate = async () => {
     setError("");
 
@@ -46,7 +78,7 @@ export default function ChangePassword() {
 
     setLoading(true);
 
-    // 1️⃣ UPDATE DB
+    // 1️⃣ UPDATE PASSWORD
     const { error: updateError } = await supabase
       .from("users")
       .update({
@@ -60,38 +92,23 @@ export default function ChangePassword() {
       return setError("❌ فشل تحديث كلمة المرور");
     }
 
-    // 2️⃣ 🔥 REFETCH USER FROM DB (IMPORTANT FIX)
-    const { data: freshUser, error: fetchError } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", user.id)
+    // 2️⃣ GET ROLE FROM DB (IMPORTANT)
+    const { data: role } = await supabase
+      .from("roles")
+      .select("access_level")
+      .eq("id", user.role_id)
       .single();
 
-    if (fetchError || !freshUser) {
-      setLoading(false);
-      return setError("❌ فشل إعادة تحميل البيانات");
-    }
+    const access = role?.access_level;
 
-    // 3️⃣ BUILD CLEAN SESSION FROM DB ONLY
-    const sessionUser = {
-      id: freshUser.id,
-      username: freshUser.username,
-      fullName: freshUser.fullName,
-      court_id: freshUser.court_id,
-      role_id: freshUser.role_id,
-      access_level: freshUser.access_level,
-      must_change_password: freshUser.must_change_password,
-    };
-
-    // 4️⃣ UPDATE LOCALSTORAGE CLEANLY
-    localStorage.setItem("user", JSON.stringify(sessionUser));
+    // 3️⃣ CLEAN SESSION (ONLY ID)
+    localStorage.setItem("user_id", user.id);
 
     setLoading(false);
     setSuccess(true);
 
-    // 5️⃣ REDIRECT
     setTimeout(() => {
-      goToDashboard(sessionUser);
+      goToDashboard(user, access);
     }, 1000);
   };
 
