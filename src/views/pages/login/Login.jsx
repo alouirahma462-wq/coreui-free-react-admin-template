@@ -10,7 +10,6 @@ export default function Login() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🎨 Marquee animation (كما هو)
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = `
@@ -50,30 +49,32 @@ export default function Login() {
 
     setLoading(false);
 
-    // ❌ LOGIN FAILED
+    // ❌ login failed
     if (error || !data) {
       setMessage("❌ بيانات غير صحيحة");
       return;
     }
 
-    // ❌ INACTIVE ACCOUNT
+    // ❌ inactive user
     if (!data.isActive) {
       setMessage("❌ الحساب غير مفعل");
       return;
     }
 
-    // 💥 FIX 1: roles validation (ROOT FIX)
-    if (!data.roles) {
-      setMessage("❌ الحساب بدون صلاحيات (roles غير موجود)");
+    // ================================
+    // 🔥 ROOT FIX: roles normalization
+    // ================================
+    const role =
+      Array.isArray(data.roles) ? data.roles[0] : data.roles || null;
+
+    if (!role?.role_key || !role?.access_level) {
+      setMessage("❌ الحساب بدون صلاحيات أو roles غير مرتبطة");
       return;
     }
 
-    if (!data.roles.role_key || !data.roles.access_level) {
-      setMessage("❌ صلاحيات الحساب غير مكتملة");
-      return;
-    }
-
-    // 🧠 SESSION BUILD (CLEAN)
+    // ================================
+    // 🧠 SESSION BUILD (SAFE)
+    // ================================
     const userSession = {
       id: data.id,
       username: data.username,
@@ -81,9 +82,9 @@ export default function Login() {
       court_id: data.court_id,
       court_name: data.courts?.name || null,
 
-      role_key: data.roles.role_key,
-      role_name: data.roles.role_name,
-      access_level: data.roles.access_level,
+      role_key: role.role_key,
+      role_name: role.role_name,
+      access_level: role.access_level,
 
       must_change_password: data.must_change_password,
     };
@@ -97,42 +98,38 @@ export default function Login() {
     );
 
     setTimeout(() => {
-      // 🔐 FIRST LOGIN FLOW
+      // 🔐 FIRST LOGIN
       if (data.must_change_password) {
         navigate("/change-password");
         return;
       }
 
       // 🏛️ COURT USERS
-      if (data.roles.access_level === "court") {
+      if (role.access_level === "court") {
         navigate(`/court/${data.court_id}`);
         return;
       }
 
       // 🔎 GLOBAL INSPECTION
-      if (data.roles.access_level === "global") {
+      if (role.access_level === "global") {
         navigate("/inspection-dashboard");
         return;
       }
 
-      // ❌ SAFE FALLBACK
       setMessage("❌ لا توجد صلاحيات لهذا الحساب");
     }, 500);
   };
 
   return (
     <div style={styles.page}>
-      {/* 🇹🇳 TOP BAR */}
       <div style={styles.header}>
         <div style={styles.marquee}>
           🇹🇳 وزارة العدل الجمهورية التونسية - منظومة النيابة العمومية - 🇹🇳
         </div>
       </div>
 
-      {/* BACKGROUND */}
       <div style={styles.bgOverlay}></div>
 
-      {/* LOGIN CARD */}
       <div style={styles.card}>
         <h2>🏛️ منظومة النيابة العمومية</h2>
 
@@ -161,7 +158,6 @@ export default function Login() {
   );
 }
 
-/* 🎨 SAME STYLE (NO CHANGES) */
 const styles = {
   page: {
     height: "100vh",
@@ -244,6 +240,7 @@ const styles = {
     fontWeight: "bold",
   },
 };
+
 
 
 
