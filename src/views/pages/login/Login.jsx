@@ -64,6 +64,7 @@ export default function Login() {
     const roleKey = data.roles?.role_key;
     const accessLevel = data.roles?.access_level;
 
+    // 🔥🔥🔥 هذا هو الإصلاح الحقيقي
     const userSession = {
       id: data.id,
       username: data.username,
@@ -73,6 +74,7 @@ export default function Login() {
       role_key: roleKey,
       role_name: data.roles?.role_name,
       access_level: accessLevel,
+      must_change_password: data.must_change_password, // ✅ مهم جدًا
     };
 
     localStorage.setItem("user", JSON.stringify(userSession));
@@ -84,19 +86,19 @@ export default function Login() {
     );
 
     setTimeout(() => {
-      // 🔐 FIRST LOGIN PASSWORD CHANGE
+      // 🔐 FIRST LOGIN
       if (data.must_change_password) {
         navigate("/change-password");
         return;
       }
 
-      // 🏛️ COURT DASHBOARD (case_clerk + prosecutor_group)
+      // 🏛 COURT
       if (accessLevel === "court") {
-        navigate(`/court-dashboard/${data.court_id}`);
+        navigate(`/court/${data.court_id}`);
         return;
       }
 
-      // 🕵️ INSPECTION DASHBOARD
+      // 🔎 INSPECTION
       if (accessLevel === "global") {
         navigate("/inspection-dashboard");
         return;
@@ -115,10 +117,10 @@ export default function Login() {
         </div>
       </div>
 
-      {/* BACKGROUND WATERMARK */}
+      {/* BACKGROUND */}
       <div style={styles.bgOverlay}></div>
 
-      {/* LOGIN CARD */}
+      {/* CARD */}
       <div style={styles.card}>
         <h2>🏛️ منظومة النيابة العمومية</h2>
 
@@ -147,7 +149,7 @@ export default function Login() {
   );
 }
 
-/* 🎨 STYLES FINAL CLEAN */
+/* 🎨 STYLES (كما هي بدون تغيير) */
 const styles = {
   page: {
     height: "100vh",
@@ -230,6 +232,7 @@ const styles = {
     fontWeight: "bold",
   },
 };
+
 
 
 
