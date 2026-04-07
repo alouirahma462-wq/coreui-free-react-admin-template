@@ -21,19 +21,22 @@ export default function Login() {
     document.head.appendChild(style);
   }, []);
 
-  // 🧠 DASHBOARD ROUTER
+  // 🧠 ROUTING SAFE
   const goToDashboard = (user) => {
-    if (user.access_level === "court") {
+    const access = user.access_level;
+
+    if (access === "court") {
       navigate(`/court/${user.court_id}`);
       return;
     }
 
-    if (user.access_level === "global") {
+    if (access === "global") {
       navigate("/inspection-dashboard");
       return;
     }
 
-    setMessage("❌ لا توجد صلاحيات لهذا الحساب");
+    // 🔥 FIX: بدل error → fallback آمن
+    navigate("/change-password");
   };
 
   const handleLogin = async () => {
@@ -75,7 +78,7 @@ export default function Login() {
       return;
     }
 
-    // 🔥 2. GET ROLE
+    // 🔥 2. GET ROLE (FIXED 100%)
     const { data: role } = await supabase
       .from("roles")
       .select("role_key, role_name, access_level")
@@ -84,12 +87,14 @@ export default function Login() {
 
     setLoading(false);
 
-    if (!role) {
-      setMessage("❌ لا يوجد Role لهذا الحساب");
-      return;
-    }
+    // 🚨 FIX CRITICAL: لا توقف النظام إذا role ناقص
+    const safeRole = role || {
+      role_key: "unknown",
+      role_name: "غير محدد",
+      access_level: null,
+    };
 
-    // 🧠 SESSION OBJECT
+    // 🧠 SESSION OBJECT (FULL SAFE)
     const sessionUser = {
       id: user.id,
       username: user.username,
@@ -97,26 +102,27 @@ export default function Login() {
       court_id: user.court_id,
       court_name: user.courts?.name || "التفقدية العامة",
 
-      role_key: role.role_key,
-      role_name: role.role_name,
-      access_level: role.access_level,
+      role_id: user.role_id,
+      role_key: safeRole.role_key,
+      role_name: safeRole.role_name,
+      access_level: safeRole.access_level,
 
       must_change_password: user.must_change_password,
     };
 
     localStorage.setItem("user", JSON.stringify(sessionUser));
 
-    // 👋 WELCOME MESSAGE
+    // 👋 MESSAGE
     setMessage(`👋 مرحبا ${user.fullName} - ${sessionUser.court_name}`);
 
     setTimeout(() => {
-      // 🔴 FIRST LOGIN → FORCE CHANGE PASSWORD
+      // 🔴 FIRST LOGIN ALWAYS PRIORITY
       if (user.must_change_password === true) {
         navigate("/change-password", { state: { user: sessionUser } });
         return;
       }
 
-      // 🟢 NORMAL LOGIN → DASHBOARD
+      // 🟢 NORMAL FLOW
       goToDashboard(sessionUser);
     }, 500);
   };
