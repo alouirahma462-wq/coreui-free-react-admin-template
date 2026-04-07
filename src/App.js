@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-// Auth
+// Auth Pages
 import Login from "./views/pages/login/Login.jsx";
 import ChangePassword from "./views/pages/ChangePassword.jsx";
 import ForgotPassword from "./views/pages/ForgotPassword.jsx";
@@ -16,7 +16,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🌄 الخلفية
+  // 🌄 Background
   useEffect(() => {
     document.body.style.background = `
       linear-gradient(rgba(5,15,35,0.45), rgba(30,64,175,0.55)),
@@ -28,7 +28,7 @@ export default function App() {
     document.body.style.backgroundAttachment = "fixed";
   }, []);
 
-  // 🔐 user sync
+  // 🔐 Sync user
   useEffect(() => {
     const syncUser = () => {
       const stored = localStorage.getItem("user");
@@ -42,10 +42,14 @@ export default function App() {
   }, []);
 
   if (loading) {
-    return <div style={{ color: "white", padding: 20 }}>Loading system...</div>;
+    return (
+      <div style={{ color: "white", padding: 20 }}>
+        Loading system...
+      </div>
+    );
   }
 
-  // 🧠 helper routing
+  // 🧠 ROLE ROUTING (جذري حسب نظامك)
   const getHome = () => {
     if (!user) return "/login";
 
@@ -55,9 +59,15 @@ export default function App() {
 
     const role = user.role?.role_key || user.role;
 
-    if (role === "inspection") return "/inspection-dashboard";
-    if (role === "prosecutor") return "/prosecutor-dashboard";
-    if (role === "court") return `/court/${user.court_id}`;
+    // 🏛 Court System (case clerk + prosecutor group)
+    if (role === "case_clerk" || role === "prosecutor_group") {
+      return `/court/${user.court_id}`;
+    }
+
+    // 🔎 Inspection
+    if (role === "inspection_general") {
+      return "/inspection-dashboard";
+    }
 
     return "/login";
   };
@@ -71,29 +81,43 @@ export default function App() {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/change-password" element={<ChangePassword />} />
 
-      {/* DASHBOARDS */}
+      {/* COURT DASHBOARD */}
       <Route
         path="/court/:id"
         element={
-          user ? <CourtDashboard user={user} /> : <Navigate to="/login" replace />
+          user ? (
+            <CourtDashboard user={user} />
+          ) : (
+            <Navigate to="/login" replace />
+          )
         }
       />
 
+      {/* PROSECUTOR DASHBOARD (optional separate view if needed) */}
       <Route
         path="/prosecutor-dashboard"
         element={
-          user ? <ProsecutorDashboard user={user} /> : <Navigate to="/login" replace />
+          user ? (
+            <ProsecutorDashboard user={user} />
+          ) : (
+            <Navigate to="/login" replace />
+          )
         }
       />
 
+      {/* INSPECTION */}
       <Route
         path="/inspection-dashboard"
         element={
-          user ? <InspectionDashboard user={user} /> : <Navigate to="/login" replace />
+          user ? (
+            <InspectionDashboard user={user} />
+          ) : (
+            <Navigate to="/login" replace />
+          )
         }
       />
 
-      {/* ROOT SMART ROUTING */}
+      {/* ROOT SMART ROUTE */}
       <Route path="/" element={<Navigate to={getHome()} replace />} />
 
       {/* FALLBACK */}
@@ -102,6 +126,7 @@ export default function App() {
     </Routes>
   );
 }
+
 
 
 
