@@ -1,22 +1,21 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-// Auth Pages
+// AUTH
 import Login from "./views/pages/login/Login.jsx";
 import ChangePassword from "./views/pages/ChangePassword.jsx";
 import ForgotPassword from "./views/pages/ForgotPassword.jsx";
 import ResetPassword from "./views/pages/ResetPassword.jsx";
 
-// Dashboards
-import CourtDashboard from "./views/dashboard/CourtDashboard";
-import ProsecutorDashboard from "./views/dashboard/ProsecutorDashboard";
-import InspectionDashboard from "./views/dashboard/InspectionDashboard";
+// DASHBOARDS (ONLY 2)
+import CourtDashboard from "./views/dashboard/CourtDashboard.jsx";
+import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🌄 Background
+  // 🌄 Background style
   useEffect(() => {
     document.body.style.background = `
       linear-gradient(rgba(5,15,35,0.45), rgba(30,64,175,0.55)),
@@ -24,32 +23,21 @@ export default function App() {
     `;
     document.body.style.backgroundSize = "cover";
     document.body.style.backgroundPosition = "center";
-    document.body.style.backgroundRepeat = "no-repeat";
     document.body.style.backgroundAttachment = "fixed";
   }, []);
 
-  // 🔐 Sync user from localStorage
+  // 🔐 Load user
   useEffect(() => {
-    const syncUser = () => {
-      const stored = localStorage.getItem("user");
-      setUser(stored ? JSON.parse(stored) : null);
-      setLoading(false);
-    };
-
-    syncUser();
-    window.addEventListener("storage", syncUser);
-    return () => window.removeEventListener("storage", syncUser);
+    const stored = localStorage.getItem("user");
+    setUser(stored ? JSON.parse(stored) : null);
+    setLoading(false);
   }, []);
 
   if (loading) {
-    return (
-      <div style={{ color: "white", padding: 20 }}>
-        Loading system...
-      </div>
-    );
+    return <div style={{ color: "white", padding: 20 }}>Loading...</div>;
   }
 
-  // 🧠 ROLE ROUTING (Final Logic)
+  // 🧠 ROLE LOGIC (FINAL)
   const getHome = () => {
     if (!user) return "/login";
 
@@ -59,13 +47,12 @@ export default function App() {
 
     const role = user?.role?.role_key ?? user?.role;
 
-    // 🏛 Court system
+    // 🏛 Court roles (CASE CLERK + PROSECUTOR GROUP)
     if (role === "case_clerk" || role === "prosecutor_group") {
-      if (!user.court_id) return "/login";
       return `/court/${user.court_id}`;
     }
 
-    // 🔎 Inspection system
+    // 🔎 Inspection General
     if (role === "inspection_general") {
       return "/inspection-dashboard";
     }
@@ -94,19 +81,7 @@ export default function App() {
         }
       />
 
-      {/* ================= PROSECUTOR DASHBOARD ================= */}
-      <Route
-        path="/prosecutor-dashboard"
-        element={
-          user && user.role?.role_key === "prosecutor_group" ? (
-            <ProsecutorDashboard user={user} />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-
-      {/* ================= INSPECTION ================= */}
+      {/* ================= INSPECTION DASHBOARD ================= */}
       <Route
         path="/inspection-dashboard"
         element={
