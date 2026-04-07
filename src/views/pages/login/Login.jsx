@@ -41,9 +41,8 @@ export default function Login() {
         isActive,
         must_change_password,
         court_id,
-        role_id,
-        courts ( id, name ),
-        roles ( id, role_key, role_name, access_level )
+        courts (id, name),
+        roles (id, role_key, role_name, access_level)
       `)
       .eq("username", username.trim())
       .eq("password", password.trim())
@@ -51,30 +50,42 @@ export default function Login() {
 
     setLoading(false);
 
+    // ❌ LOGIN FAILED
     if (error || !data) {
       setMessage("❌ بيانات غير صحيحة");
       return;
     }
 
+    // ❌ INACTIVE ACCOUNT
     if (!data.isActive) {
       setMessage("❌ الحساب غير مفعل");
       return;
     }
 
-    const roleKey = data.roles?.role_key;
-    const accessLevel = data.roles?.access_level;
+    // 💥 FIX 1: roles validation (ROOT FIX)
+    if (!data.roles) {
+      setMessage("❌ الحساب بدون صلاحيات (roles غير موجود)");
+      return;
+    }
 
-    // 🔥🔥🔥 الإصلاح الحقيقي
+    if (!data.roles.role_key || !data.roles.access_level) {
+      setMessage("❌ صلاحيات الحساب غير مكتملة");
+      return;
+    }
+
+    // 🧠 SESSION BUILD (CLEAN)
     const userSession = {
       id: data.id,
       username: data.username,
       fullName: data.fullName,
       court_id: data.court_id,
       court_name: data.courts?.name || null,
-      role_key: roleKey,
-      role_name: data.roles?.role_name,
-      access_level: accessLevel,
-      must_change_password: data.must_change_password, // ✅ أهم سطر
+
+      role_key: data.roles.role_key,
+      role_name: data.roles.role_name,
+      access_level: data.roles.access_level,
+
+      must_change_password: data.must_change_password,
     };
 
     localStorage.setItem("user", JSON.stringify(userSession));
@@ -86,26 +97,27 @@ export default function Login() {
     );
 
     setTimeout(() => {
-      // 🔐 أول دخول → تغيير كلمة المرور
+      // 🔐 FIRST LOGIN FLOW
       if (data.must_change_password) {
         navigate("/change-password");
         return;
       }
 
-      // 🏛️ Court
-      if (accessLevel === "court") {
-        navigate(`/court/${data.court_id}`); // ✅ توحيد الروت
+      // 🏛️ COURT USERS
+      if (data.roles.access_level === "court") {
+        navigate(`/court/${data.court_id}`);
         return;
       }
 
-      // 🔎 Inspection
-      if (accessLevel === "global") {
+      // 🔎 GLOBAL INSPECTION
+      if (data.roles.access_level === "global") {
         navigate("/inspection-dashboard");
         return;
       }
 
+      // ❌ SAFE FALLBACK
       setMessage("❌ لا توجد صلاحيات لهذا الحساب");
-    }, 700);
+    }, 500);
   };
 
   return (
@@ -120,7 +132,7 @@ export default function Login() {
       {/* BACKGROUND */}
       <div style={styles.bgOverlay}></div>
 
-      {/* CARD */}
+      {/* LOGIN CARD */}
       <div style={styles.card}>
         <h2>🏛️ منظومة النيابة العمومية</h2>
 
@@ -149,7 +161,7 @@ export default function Login() {
   );
 }
 
-/* 🎨 نفس الستايل بدون أي تغيير */
+/* 🎨 SAME STYLE (NO CHANGES) */
 const styles = {
   page: {
     height: "100vh",
@@ -232,6 +244,7 @@ const styles = {
     fontWeight: "bold",
   },
 };
+
 
 
 
