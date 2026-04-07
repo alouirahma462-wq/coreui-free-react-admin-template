@@ -16,7 +16,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
 
-  // 🎨 Background (نفسه)
+  // 🎨 Background (نفسه بدون تغيير)
   useEffect(() => {
     document.body.style.background = `
       linear-gradient(rgba(5,15,35,0.45), rgba(30,64,175,0.55)),
@@ -27,71 +27,79 @@ export default function App() {
     document.body.style.backgroundAttachment = "fixed";
   }, []);
 
-  // 🔐 قراءة آمنة من localStorage
-  const getStoredUser = () => {
+  // 🔐 قراءة user بشكل آمن 100%
+  const getUser = () => {
     try {
-      const data = localStorage.getItem("user");
-      return data ? JSON.parse(data) : null;
+      const stored = localStorage.getItem("user");
+      if (!stored) return null;
+
+      const parsed = JSON.parse(stored);
+
+      // حماية من البيانات الناقصة
+      if (!parsed) return null;
+
+      return parsed;
     } catch (e) {
-      localStorage.removeItem("user");
       return null;
     }
   };
 
-  // 🔄 تحميل المستخدم أول مرة
   useEffect(() => {
-    setUser(getStoredUser());
+    setUser(getUser());
     setLoading(false);
   }, []);
 
-  // 🔄 تحديث المستخدم عند تغيير الصفحة (مهم جدًا)
+  // 🔁 إعادة تحديث user عند تغيير الصفحة
   useEffect(() => {
-    setUser(getStoredUser());
+    setUser(getUser());
   }, [location.pathname]);
 
   if (loading) {
     return <div style={{ color: "white", padding: 20 }}>Loading...</div>;
   }
 
-  // 🧠 ROLE DECISION ENGINE (FIX جذري)
+  // 🧠 تحديد الصفحة الرئيسية (FIX قوي)
   const getHome = () => {
-    const u = getStoredUser();
+    const u = getUser();
 
     if (!u) return "/login";
 
+    // 🔴 أهم شرط: تغيير كلمة المرور أولاً
     if (u.must_change_password === true) {
       return "/change-password";
     }
 
-    // ⚠️ حماية: لو ما في role_key
-    if (!u.role_key) return "/login";
+    const roleKey = u.role_key || ""; // FIX: يمنع undefined crash
+    const accessLevel = u.access_level || "";
 
     // 🏛 المحكمة
-    if (["case_clerk", "prosecutor_group"].includes(u.role_key)) {
-      if (!u.court_id) return "/login";
+    if (roleKey === "case_clerk" || roleKey === "prosecutor_group") {
       return `/court/${u.court_id}`;
     }
 
     // 🔎 التفقدية
-    if (u.role_key === "inspection_general" || u.access_level === "global") {
+    if (roleKey === "inspection_general" || accessLevel === "global") {
       return "/inspection-dashboard";
     }
 
+    // ❌ أي حالة ناقصة
     return "/login";
   };
 
-  // 🔐 حماية عامة قوية
-  const ProtectedRoute = ({ children, allowRoles }) => {
-    const u = getStoredUser();
+  // 🔐 حماية الصفحات
+  const ProtectedRoute = ({ children }) => {
+    const u = getUser();
 
     if (!u) return <Navigate to="/login" replace />;
 
-    if (u.must_change_password) {
+    // 🚨 إجبار تغيير كلمة المرور أولاً
+    if (u.must_change_password === true) {
       return <Navigate to="/change-password" replace />;
     }
 
-    if (allowRoles && !allowRoles.includes(u.role_key)) {
-      return <Navigate to={getHome()} replace />;
+    // 🚨 FIX: منع خطأ "no role"
+    if (!u.role_key && !u.access_level) {
+      return <Navigate to="/login" replace />;
     }
 
     return children;
@@ -101,10 +109,11 @@ export default function App() {
     <Routes>
 
       {/* AUTH */}
-      <Route path="/login" element={<Login setUser={setUser} />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
+      {/* مهم: نمرر setUser */}
       <Route
         path="/change-password"
         element={<ChangePassword setUser={setUser} />}
@@ -114,7 +123,7 @@ export default function App() {
       <Route
         path="/court/:id"
         element={
-          <ProtectedRoute allowRoles={["case_clerk", "prosecutor_group"]}>
+          <ProtectedRoute>
             <CourtDashboard user={user} />
           </ProtectedRoute>
         }
@@ -124,7 +133,7 @@ export default function App() {
       <Route
         path="/inspection-dashboard"
         element={
-          <ProtectedRoute allowRoles={["inspection_general"]}>
+          <ProtectedRoute>
             <InspectionDashboard user={user} />
           </ProtectedRoute>
         }
@@ -139,6 +148,7 @@ export default function App() {
     </Routes>
   );
 }
+
 
 
 
