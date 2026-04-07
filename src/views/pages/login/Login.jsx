@@ -10,7 +10,7 @@ export default function Login() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🎨 Marquee animation
+  // 🎨 Marquee animation (كما هو)
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = `
@@ -64,7 +64,7 @@ export default function Login() {
     const roleKey = data.roles?.role_key;
     const accessLevel = data.roles?.access_level;
 
-    // 🔥🔥🔥 هذا هو الإصلاح الحقيقي
+    // 🔥🔥🔥 الإصلاح الحقيقي
     const userSession = {
       id: data.id,
       username: data.username,
@@ -74,7 +74,7 @@ export default function Login() {
       role_key: roleKey,
       role_name: data.roles?.role_name,
       access_level: accessLevel,
-      must_change_password: data.must_change_password, // ✅ مهم جدًا
+      must_change_password: data.must_change_password, // ✅ أهم سطر
     };
 
     localStorage.setItem("user", JSON.stringify(userSession));
@@ -86,19 +86,19 @@ export default function Login() {
     );
 
     setTimeout(() => {
-      // 🔐 FIRST LOGIN
+      // 🔐 أول دخول → تغيير كلمة المرور
       if (data.must_change_password) {
         navigate("/change-password");
         return;
       }
 
-      // 🏛 COURT
+      // 🏛️ Court
       if (accessLevel === "court") {
-        navigate(`/court/${data.court_id}`);
+        navigate(`/court/${data.court_id}`); // ✅ توحيد الروت
         return;
       }
 
-      // 🔎 INSPECTION
+      // 🔎 Inspection
       if (accessLevel === "global") {
         navigate("/inspection-dashboard");
         return;
@@ -149,7 +149,7 @@ export default function Login() {
   );
 }
 
-/* 🎨 STYLES (كما هي بدون تغيير) */
+/* 🎨 نفس الستايل بدون أي تغيير */
 const styles = {
   page: {
     height: "100vh",
@@ -232,6 +232,7 @@ const styles = {
     fontWeight: "bold",
   },
 };
+
 
 
 
