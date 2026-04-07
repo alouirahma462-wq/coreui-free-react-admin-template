@@ -21,6 +21,21 @@ export default function Login() {
     document.head.appendChild(style);
   }, []);
 
+  // 🧠 DASHBOARD ROUTER
+  const goToDashboard = (user) => {
+    if (user.access_level === "court") {
+      navigate(`/court/${user.court_id}`);
+      return;
+    }
+
+    if (user.access_level === "global") {
+      navigate("/inspection-dashboard");
+      return;
+    }
+
+    setMessage("❌ لا توجد صلاحيات لهذا الحساب");
+  };
+
   const handleLogin = async () => {
     setMessage("");
     setLoading(true);
@@ -31,7 +46,7 @@ export default function Login() {
       return;
     }
 
-    // 🔥 STEP 1: get user ONLY
+    // 🔥 1. GET USER
     const { data: user, error } = await supabase
       .from("users")
       .select(`
@@ -60,27 +75,27 @@ export default function Login() {
       return;
     }
 
-    // 🔥 STEP 2: get role manually (THIS IS THE FIX)
+    // 🔥 2. GET ROLE
     const { data: role } = await supabase
       .from("roles")
       .select("role_key, role_name, access_level")
       .eq("id", user.role_id)
-      .single();
+      .maybeSingle();
 
     setLoading(false);
 
     if (!role) {
-      setMessage("❌ الحساب بدون صلاحيات (role غير موجود)");
+      setMessage("❌ لا يوجد Role لهذا الحساب");
       return;
     }
 
-    // 🧠 SESSION
-    const userSession = {
+    // 🧠 SESSION OBJECT
+    const sessionUser = {
       id: user.id,
       username: user.username,
       fullName: user.fullName,
       court_id: user.court_id,
-      court_name: user.courts?.name || null,
+      court_name: user.courts?.name || "التفقدية العامة",
 
       role_key: role.role_key,
       role_name: role.role_name,
@@ -89,34 +104,20 @@ export default function Login() {
       must_change_password: user.must_change_password,
     };
 
-    localStorage.setItem("user", JSON.stringify(userSession));
+    localStorage.setItem("user", JSON.stringify(sessionUser));
 
-    setMessage(
-      `👋 مرحبا ${user.fullName} - ${
-        user.courts?.name || "التفقدية العامة"
-      }`
-    );
+    // 👋 WELCOME MESSAGE
+    setMessage(`👋 مرحبا ${user.fullName} - ${sessionUser.court_name}`);
 
     setTimeout(() => {
-      // 🔐 FIRST LOGIN
-      if (user.must_change_password) {
-        navigate("/change-password");
+      // 🔴 FIRST LOGIN → FORCE CHANGE PASSWORD
+      if (user.must_change_password === true) {
+        navigate("/change-password", { state: { user: sessionUser } });
         return;
       }
 
-      // 🏛️ COURT
-      if (role.access_level === "court") {
-        navigate(`/court/${user.court_id}`);
-        return;
-      }
-
-      // 🔎 GLOBAL
-      if (role.access_level === "global") {
-        navigate("/inspection-dashboard");
-        return;
-      }
-
-      setMessage("❌ لا توجد صلاحيات لهذا الحساب");
+      // 🟢 NORMAL LOGIN → DASHBOARD
+      goToDashboard(sessionUser);
     }, 500);
   };
 
@@ -240,6 +241,7 @@ const styles = {
     fontWeight: "bold",
   },
 };
+
 
 
 
