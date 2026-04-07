@@ -10,7 +10,7 @@ export default function Login() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🎨 KEYFRAME (مرة واحدة)
+  // 🎨 Marquee animation
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = `
@@ -27,7 +27,7 @@ export default function Login() {
     setLoading(true);
 
     if (!username || !password) {
-      setMessage("❌ الرجاء إدخال البيانات");
+      setMessage("❌ الرجاء إدخال اسم المستخدم وكلمة المرور");
       setLoading(false);
       return;
     }
@@ -43,83 +43,80 @@ export default function Login() {
         court_id,
         role_id,
         courts ( id, name ),
-        roles ( id, role_key, role_name )
+        roles ( id, role_key, role_name, access_level )
       `)
       .eq("username", username.trim())
       .eq("password", password.trim())
       .maybeSingle();
 
+    setLoading(false);
+
     if (error || !data) {
       setMessage("❌ بيانات غير صحيحة");
-      setLoading(false);
       return;
     }
 
     if (!data.isActive) {
       setMessage("❌ الحساب غير مفعل");
-      setLoading(false);
       return;
     }
 
-    const roleKey = data.roles?.role_key || "unknown";
+    const roleKey = data.roles?.role_key;
+    const accessLevel = data.roles?.access_level;
 
-    const userData = {
+    const userSession = {
       id: data.id,
       username: data.username,
       fullName: data.fullName,
       court_id: data.court_id,
       court_name: data.courts?.name || null,
-      role: roleKey,
+      role_key: roleKey,
       role_name: data.roles?.role_name,
-      must_change_password: data.must_change_password,
+      access_level: accessLevel,
     };
 
-    localStorage.setItem("user", JSON.stringify(userData));
-
-    setLoading(false);
+    localStorage.setItem("user", JSON.stringify(userSession));
 
     setMessage(
       `👋 مرحبا ${data.fullName} - ${
-        data.courts?.name || "التفقدية العامة - إشراف مركزي"
+        data.courts?.name || "التفقدية العامة"
       }`
     );
 
     setTimeout(() => {
+      // 🔐 FIRST LOGIN PASSWORD CHANGE
       if (data.must_change_password) {
         navigate("/change-password");
         return;
       }
 
-      switch (roleKey) {
-        case "court":
-          window.location.href = `/court/${data.court_id}`;
-          break;
-
-        case "prosecutor":
-          window.location.href = "/prosecutor-dashboard";
-          break;
-
-        case "inspection":
-          window.location.href = "/inspection-dashboard";
-          break;
-
-        default:
-          setMessage("❌ لا توجد صلاحيات لهذا الحساب");
+      // 🏛️ COURT DASHBOARD (case_clerk + prosecutor_group)
+      if (accessLevel === "court") {
+        navigate(`/court-dashboard/${data.court_id}`);
+        return;
       }
+
+      // 🕵️ INSPECTION DASHBOARD
+      if (accessLevel === "global") {
+        navigate("/inspection-dashboard");
+        return;
+      }
+
+      setMessage("❌ لا توجد صلاحيات لهذا الحساب");
     }, 700);
   };
 
   return (
     <div style={styles.page}>
-      {/* 🇹🇳 BACKGROUND OVERLAY */}
-      <div style={styles.bgOverlay}></div>
-
-      {/* 🔴 TOP BAR */}
+      {/* 🇹🇳 TOP BAR */}
       <div style={styles.header}>
         <div style={styles.marquee}>
           🇹🇳 وزارة العدل الجمهورية التونسية - منظومة النيابة العمومية - 🇹🇳
         </div>
       </div>
+
+      {/* BACKGROUND WATERMARK */}
+      <div style={styles.bgOverlay}></div>
 
       {/* LOGIN CARD */}
       <div style={styles.card}>
@@ -150,7 +147,7 @@ export default function Login() {
   );
 }
 
-/* 🎨 FULL STYLES */
+/* 🎨 STYLES FINAL CLEAN */
 const styles = {
   page: {
     height: "100vh",
@@ -159,25 +156,10 @@ const styles = {
     alignItems: "center",
     flexDirection: "column",
     direction: "rtl",
-    color: "white",
+    background: "linear-gradient(135deg, #0f172a, #1e293b)",
     position: "relative",
     overflow: "hidden",
-    background: "linear-gradient(135deg, #0f172a, #1e293b)",
-  },
-
-  bgOverlay: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: "420px",
-    height: "420px",
-    backgroundImage:
-      "url('https://upload.wikimedia.org/wikipedia/commons/c/ce/Coat_of_arms_of_Tunisia.svg')",
-    backgroundRepeat: "no-repeat",
-    backgroundSize: "contain",
-    opacity: 0.08,
-    zIndex: 0,
+    color: "white",
   },
 
   header: {
@@ -198,12 +180,24 @@ const styles = {
     fontWeight: "bold",
   },
 
+  bgOverlay: {
+    position: "absolute",
+    width: "450px",
+    height: "450px",
+    backgroundImage:
+      "url('https://upload.wikimedia.org/wikipedia/commons/c/ce/Coat_of_arms_of_Tunisia.svg')",
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "contain",
+    opacity: 0.08,
+    zIndex: 0,
+  },
+
   card: {
-    width: "390px",
-    padding: "28px",
+    width: "400px",
+    padding: "30px",
     borderRadius: "16px",
     background: "rgba(255,255,255,0.08)",
-    backdropFilter: "blur(16px)",
+    backdropFilter: "blur(18px)",
     border: "1px solid rgba(255,255,255,0.15)",
     textAlign: "center",
     zIndex: 2,
@@ -236,6 +230,7 @@ const styles = {
     fontWeight: "bold",
   },
 };
+
 
 
 
