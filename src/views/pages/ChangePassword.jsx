@@ -8,6 +8,8 @@ export default function ChangePassword({ user }) {
   const [finalUser, setFinalUser] = useState(null);
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -17,38 +19,26 @@ export default function ChangePassword({ user }) {
     setFinalUser(user || stored);
   }, [user]);
 
-  const fullName = finalUser?.fullName || "المستخدم";
+  const fullName = finalUser?.fullName;
 
-  /* 🔐 password strength */
+  const welcomeText = fullName
+    ? `مرحباً ${fullName}`
+    : "مرحباً التفقدية العامة - إشراف مركزي";
+
   const getStrength = (p) => {
     if (p.length < 6) return "ضعيفة";
     if (/[A-Z]/.test(p) && /[0-9]/.test(p) && p.length >= 8) return "قوية";
     return "متوسطة";
   };
 
-  /* 🚀 update password */
   const handleUpdate = async () => {
     setError("");
 
-    if (!finalUser?.id) {
-      setError("❌ لا يوجد مستخدم");
-      return;
-    }
-
-    if (newPass.length < 6) {
-      setError("❌ كلمة المرور قصيرة");
-      return;
-    }
-
-    if (newPass !== confirmPass) {
-      setError("❌ كلمة المرور غير متطابقة");
-      return;
-    }
-
-    if (getStrength(newPass) === "ضعيفة") {
-      setError("❌ كلمة المرور ضعيفة جداً");
-      return;
-    }
+    if (!finalUser?.id) return setError("❌ لا يوجد مستخدم");
+    if (newPass.length < 6) return setError("❌ كلمة المرور قصيرة");
+    if (newPass !== confirmPass) return setError("❌ غير متطابقة");
+    if (getStrength(newPass) === "ضعيفة")
+      return setError("❌ كلمة المرور ضعيفة جداً");
 
     setLoading(true);
 
@@ -62,12 +52,8 @@ export default function ChangePassword({ user }) {
 
     setLoading(false);
 
-    if (error) {
-      setError("❌ فشل تحديث كلمة المرور");
-      return;
-    }
+    if (error) return setError("❌ فشل تحديث كلمة المرور");
 
-    /* تحديث localStorage */
     const updatedUser = {
       ...finalUser,
       must_change_password: false,
@@ -78,23 +64,15 @@ export default function ChangePassword({ user }) {
     setSuccess(true);
 
     setTimeout(() => {
-      setSuccess(false);
-
       const accessLevel = finalUser.access_level;
 
-      // 🏛️ COURT USERS
       if (accessLevel === "court") {
         navigate(`/court-dashboard/${finalUser.court_id}`);
-        return;
-      }
-
-      // 🕵️ INSPECTION USERS
-      if (accessLevel === "global") {
+      } else if (accessLevel === "global") {
         navigate("/inspection-dashboard");
-        return;
+      } else {
+        navigate("/");
       }
-
-      navigate("/");
     }, 1500);
   };
 
@@ -104,14 +82,13 @@ export default function ChangePassword({ user }) {
 
   return (
     <div style={styles.page}>
-
-      {/* 🇹🇳 BACKGROUND */}
+      {/* BACKGROUND */}
       <div style={styles.bg}></div>
 
       {/* TOP BAR */}
       <div style={styles.topBar}>
         <div style={styles.marquee}>
-          🇹🇳 وزارة العدل الجمهورية التونسية - تغيير كلمة المرور - منظومة النيابة العمومية 🇹🇳
+          🇹🇳 وزارة العدل الجمهورية التونسية - منظومة النيابة العمومية - تغيير كلمة المرور 🇹🇳
         </div>
       </div>
 
@@ -119,7 +96,7 @@ export default function ChangePassword({ user }) {
       <div style={styles.card}>
         <h2 style={styles.title}>🔐 تغيير كلمة المرور</h2>
 
-        <p style={styles.welcome}>مرحباً {fullName}</p>
+        <p style={styles.welcome}>{welcomeText}</p>
 
         <div style={styles.info}>
           يجب تغيير كلمة المرور قبل الدخول للنظام
@@ -141,14 +118,35 @@ export default function ChangePassword({ user }) {
           style={styles.input}
         />
 
+        {/* Remember Me */}
+        <label style={styles.remember}>
+          <input
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+          />
+          تذكرني
+        </label>
+
         {newPass && (
           <p style={styles.strength}>
             قوة كلمة المرور: <b>{getStrength(newPass)}</b>
           </p>
         )}
 
-        <button onClick={handleUpdate} disabled={loading} style={styles.btn}>
+        <button
+          onClick={handleUpdate}
+          disabled={loading}
+          style={styles.btn}
+        >
           {loading ? "جاري الحفظ..." : "تحديث كلمة المرور"}
+        </button>
+
+        <button
+          onClick={() => navigate("/forgot-password")}
+          style={styles.forgot}
+        >
+          هل نسيت كلمة المرور؟
         </button>
 
         {error && <p style={styles.error}>{error}</p>}
@@ -163,12 +161,22 @@ export default function ChangePassword({ user }) {
           </div>
         </div>
       )}
+
+      {/* KEYFRAMES */}
+      <style>
+        {`
+          @keyframes move {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-100%); }
+          }
+        `}
+      </style>
     </div>
   );
 }
 
 /* =========================
-   🎨 FINAL STYLES
+   🎨 INLINE STYLES (FULL)
 ========================= */
 
 const styles = {
@@ -213,7 +221,7 @@ const styles = {
   },
 
   card: {
-    width: "420px",
+    width: "430px",
     padding: "25px",
     borderRadius: "16px",
     background: "rgba(255,255,255,0.08)",
@@ -260,6 +268,25 @@ const styles = {
     cursor: "pointer",
   },
 
+  forgot: {
+    width: "100%",
+    marginTop: "8px",
+    background: "transparent",
+    border: "none",
+    color: "#fbbf24",
+    cursor: "pointer",
+    fontSize: "13px",
+    textDecoration: "underline",
+  },
+
+  remember: {
+    display: "flex",
+    gap: "8px",
+    fontSize: "13px",
+    marginTop: "6px",
+    justifyContent: "flex-start",
+  },
+
   strength: {
     color: "#fbbf24",
     fontSize: "13px",
@@ -297,14 +324,6 @@ const styles = {
   },
 };
 
-/* animation */
-const styleSheet = document.styleSheets[0];
-styleSheet.insertRule(`
-@keyframes move {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-100%); }
-}
-`, styleSheet.cssRules.length);
 
 
 
