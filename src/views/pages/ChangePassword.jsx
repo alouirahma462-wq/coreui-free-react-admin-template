@@ -2,66 +2,65 @@ import { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
 import { useNavigate } from "react-router-dom";
 
-export default function ChangePassword({ user }) {
+export default function ChangePassword() {
   const navigate = useNavigate();
 
-  const [finalUser, setFinalUser] = useState(null);
+  const [user, setUser] = useState(null);
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  // 🔥 FIX: جلب user من localStorage بشكل آمن
+  // 🔥 LOAD USER (from login session)
   useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem("user"));
-      setFinalUser(user || stored);
-    } catch {
-      setFinalUser(null);
+    const stored = JSON.parse(localStorage.getItem("user"));
+    if (!stored) {
+      navigate("/login");
+      return;
     }
-  }, [user]);
+    setUser(stored);
+  }, [navigate]);
 
-  const fullName = finalUser?.fullName;
-
-  const welcomeText = fullName
-    ? `مرحباً ${fullName}`
+  // 👋 WELCOME TEXT (same logic as login)
+  const welcomeText = user?.fullName
+    ? `مرحباً ${user.fullName}`
     : "مرحباً التفقدية العامة - إشراف مركزي";
 
-  // 🔐 قوة كلمة المرور
+  // 🔐 PASSWORD STRENGTH
   const getStrength = (p) => {
     if (p.length < 6) return "ضعيفة";
     if (/[A-Z]/.test(p) && /[0-9]/.test(p) && p.length >= 8) return "قوية";
     return "متوسطة";
   };
 
-  // 🚀 UPDATE PASSWORD (FIXED FROM ROOT)
+  // 🚀 FINAL UPDATE PASSWORD
   const handleUpdate = async () => {
     setError("");
 
-    if (!finalUser?.id) return setError("❌ لا يوجد مستخدم");
+    if (!user?.id) return setError("❌ لا يوجد مستخدم");
     if (newPass.length < 6) return setError("❌ كلمة المرور قصيرة");
-    if (newPass !== confirmPass) return setError("❌ غير متطابقة");
+    if (newPass !== confirmPass) return setError("❌ كلمة المرور غير متطابقة");
     if (getStrength(newPass) === "ضعيفة")
       return setError("❌ كلمة المرور ضعيفة جداً");
 
     setLoading(true);
 
-    // 🔥 1. update password in DB
+    // 🔥 1. update password
     const { error: updateError } = await supabase
       .from("users")
       .update({
         password: newPass,
         must_change_password: false,
       })
-      .eq("id", finalUser.id);
+      .eq("id", user.id);
 
     if (updateError) {
       setLoading(false);
       return setError("❌ فشل تحديث كلمة المرور");
     }
 
-    // 🔥 2. IMPORTANT FIX: reload FULL USER from DB (roles included)
+    // 🔥 2. reload full user with role + court
     const { data: freshUser, error: fetchError } = await supabase
       .from("users")
       .select(`
@@ -73,22 +72,22 @@ export default function ChangePassword({ user }) {
         roles (id, role_key, role_name, access_level),
         must_change_password
       `)
-      .eq("id", finalUser.id)
+      .eq("id", user.id)
       .single();
 
     setLoading(false);
 
     if (fetchError || !freshUser) {
-      return setError("❌ فشل إعادة تحميل البيانات");
+      return setError("❌ خطأ في إعادة تحميل البيانات");
     }
 
-    // 🔥 3. Build CLEAN SESSION (IMPORTANT FIX)
-    const cleanSession = {
+    // 🔥 3. build session (same as login)
+    const sessionUser = {
       id: freshUser.id,
       username: freshUser.username,
       fullName: freshUser.fullName,
       court_id: freshUser.court_id,
-      court_name: freshUser.courts?.name || null,
+      court_name: freshUser.courts?.name || "التفقدية العامة",
 
       role_key: freshUser.roles?.role_key || null,
       role_name: freshUser.roles?.role_name || null,
@@ -97,20 +96,18 @@ export default function ChangePassword({ user }) {
       must_change_password: false,
     };
 
-    localStorage.setItem("user", JSON.stringify(cleanSession));
+    localStorage.setItem("user", JSON.stringify(sessionUser));
 
     setSuccess(true);
 
-    // 🚀 Redirect FIXED
+    // 🚀 REDIRECT (same logic as login)
     setTimeout(() => {
-      const accessLevel = cleanSession.access_level;
-
-      if (accessLevel === "court") {
-        navigate(`/court/${cleanSession.court_id}`);
+      if (sessionUser.access_level === "court") {
+        navigate(`/court/${sessionUser.court_id}`);
         return;
       }
 
-      if (accessLevel === "global") {
+      if (sessionUser.access_level === "global") {
         navigate("/inspection-dashboard");
         return;
       }
@@ -119,23 +116,24 @@ export default function ChangePassword({ user }) {
     }, 1200);
   };
 
-  if (!finalUser) {
-    return <div style={styles.loading}>جاري تحميل البيانات...</div>;
+  if (!user) {
+    return (
+      <div style={styles.loading}>
+        جاري تحميل البيانات...
+      </div>
+    );
   }
 
   return (
     <div style={styles.page}>
-      {/* BACKGROUND */}
       <div style={styles.bg}></div>
 
-      {/* TOP BAR */}
       <div style={styles.topBar}>
         <div style={styles.marquee}>
           🇹🇳 وزارة العدل الجمهورية التونسية - تغيير كلمة المرور
         </div>
       </div>
 
-      {/* CARD */}
       <div style={styles.card}>
         <h2 style={styles.title}>🔐 تغيير كلمة المرور</h2>
 
@@ -174,7 +172,6 @@ export default function ChangePassword({ user }) {
         {error && <p style={styles.error}>{error}</p>}
       </div>
 
-      {/* SUCCESS MODAL */}
       {success && (
         <div style={styles.modal}>
           <div style={styles.modalBox}>
