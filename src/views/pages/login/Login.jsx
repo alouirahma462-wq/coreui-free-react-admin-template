@@ -31,7 +31,8 @@ export default function Login() {
       return;
     }
 
-    const { data, error } = await supabase
+    // 🔥 STEP 1: get user ONLY
+    const { data: user, error } = await supabase
       .from("users")
       .select(`
         id,
@@ -40,77 +41,76 @@ export default function Login() {
         isActive,
         must_change_password,
         court_id,
-        courts (id, name),
-        roles (id, role_key, role_name, access_level)
+        role_id,
+        courts (id, name)
       `)
       .eq("username", username.trim())
       .eq("password", password.trim())
       .maybeSingle();
 
+    if (error || !user) {
+      setMessage("❌ بيانات غير صحيحة");
+      setLoading(false);
+      return;
+    }
+
+    if (!user.isActive) {
+      setMessage("❌ الحساب غير مفعل");
+      setLoading(false);
+      return;
+    }
+
+    // 🔥 STEP 2: get role manually (THIS IS THE FIX)
+    const { data: role } = await supabase
+      .from("roles")
+      .select("role_key, role_name, access_level")
+      .eq("id", user.role_id)
+      .single();
+
     setLoading(false);
 
-    // ❌ login failed
-    if (error || !data) {
-      setMessage("❌ بيانات غير صحيحة");
+    if (!role) {
+      setMessage("❌ الحساب بدون صلاحيات (role غير موجود)");
       return;
     }
 
-    // ❌ inactive user
-    if (!data.isActive) {
-      setMessage("❌ الحساب غير مفعل");
-      return;
-    }
-
-    // ================================
-    // 🔥 ROOT FIX: roles normalization
-    // ================================
-    const role =
-      Array.isArray(data.roles) ? data.roles[0] : data.roles || null;
-
-    if (!role?.role_key || !role?.access_level) {
-      setMessage("❌ الحساب بدون صلاحيات أو roles غير مرتبطة");
-      return;
-    }
-
-    // ================================
-    // 🧠 SESSION BUILD (SAFE)
-    // ================================
+    // 🧠 SESSION
     const userSession = {
-      id: data.id,
-      username: data.username,
-      fullName: data.fullName,
-      court_id: data.court_id,
-      court_name: data.courts?.name || null,
+      id: user.id,
+      username: user.username,
+      fullName: user.fullName,
+      court_id: user.court_id,
+      court_name: user.courts?.name || null,
 
       role_key: role.role_key,
       role_name: role.role_name,
       access_level: role.access_level,
 
-      must_change_password: data.must_change_password,
+      must_change_password: user.must_change_password,
     };
 
     localStorage.setItem("user", JSON.stringify(userSession));
 
     setMessage(
-      `👋 مرحبا ${data.fullName} - ${
-        data.courts?.name || "التفقدية العامة"
+      `👋 مرحبا ${user.fullName} - ${
+        user.courts?.name || "التفقدية العامة"
       }`
     );
 
     setTimeout(() => {
       // 🔐 FIRST LOGIN
-      if (data.must_change_password) {
+      if (user.must_change_password) {
         navigate("/change-password");
         return;
       }
 
-      // 🏛️ COURT USERS
+      // 🏛️ COURT
       if (role.access_level === "court") {
-        navigate(`/court/${data.court_id}`);
+        navigate(`/court/${user.court_id}`);
         return;
       }
 
-      // 🔎 GLOBAL INSPECTION
+      // 🔎 GLOBAL
       if (role.access_level === "global") {
         navigate("/inspection-dashboard");
         return;
@@ -240,6 +240,7 @@ const styles = {
     fontWeight: "bold",
   },
 };
+
 
 
 
