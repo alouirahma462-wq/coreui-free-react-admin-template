@@ -26,10 +26,11 @@ export default function App() {
     document.body.style.backgroundAttachment = "fixed";
   }, []);
 
-  // 🔐 SAFE USER
+  // 🔐 SAFE USER PARSER
   const getUser = () => {
     try {
-      return JSON.parse(localStorage.getItem("user"));
+      const u = JSON.parse(localStorage.getItem("user"));
+      return u || null;
     } catch {
       return null;
     }
@@ -39,33 +40,39 @@ export default function App() {
     setUser(getUser());
   }, [location.pathname]);
 
-  // 🧠 HOME LOGIC (FIXED 100%)
+  // 🧠 SAFE HOME ROUTE
   const getHome = () => {
     const u = getUser();
 
     if (!u) return "/login";
 
-    // 🔴 FORCE FIRST LOGIN FLOW
+    // 🔴 FIRST LOGIN RULE (PRIORITY 1)
     if (u.must_change_password === true) {
       return "/change-password";
     }
 
+    // 🔥 SAFE ACCESS CHECK
     const access = u.access_level;
 
-    if (access === "court") return `/court/${u.court_id}`;
-    if (access === "global") return "/inspection-dashboard";
+    if (access === "court") {
+      return `/court/${u.court_id}`;
+    }
 
-    // ❌ fallback آمن
-    return "/login";
+    if (access === "global") {
+      return "/inspection-dashboard";
+    }
+
+    // 🚨 fallback آمن (ما يطيّح النظام)
+    return "/change-password";
   };
 
-  // 🔐 PROTECTED ROUTE (FIXED)
+  // 🔐 PROTECTED ROUTE SAFE
   const ProtectedRoute = ({ children }) => {
     const u = getUser();
 
     if (!u) return <Navigate to="/login" replace />;
 
-    // 🚨 أول دخول دائمًا يروح تغيير كلمة المرور
+    // 🔴 force first login always
     if (u.must_change_password === true) {
       return <Navigate to="/change-password" replace />;
     }
@@ -81,13 +88,13 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* CHANGE PASSWORD */}
+      {/* CHANGE PASSWORD (NO PROTECTION) */}
       <Route
         path="/change-password"
         element={<ChangePassword setUser={setUser} />}
       />
 
-      {/* COURT */}
+      {/* COURT DASHBOARD */}
       <Route
         path="/court/:id"
         element={
@@ -97,7 +104,7 @@ export default function App() {
         }
       />
 
-      {/* INSPECTION */}
+      {/* INSPECTION DASHBOARD */}
       <Route
         path="/inspection-dashboard"
         element={
