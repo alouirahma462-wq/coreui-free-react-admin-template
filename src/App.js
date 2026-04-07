@@ -13,10 +13,9 @@ import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
 export default function App() {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
   const location = useLocation();
 
-  // 🎨 Background (نفسه بدون تغيير)
+  // 🎨 background
   useEffect(() => {
     document.body.style.background = `
       linear-gradient(rgba(5,15,35,0.45), rgba(30,64,175,0.55)),
@@ -27,80 +26,43 @@ export default function App() {
     document.body.style.backgroundAttachment = "fixed";
   }, []);
 
-  // 🔐 قراءة user بشكل آمن 100%
+  // 🔐 SINGLE SOURCE OF TRUTH
   const getUser = () => {
     try {
-      const stored = localStorage.getItem("user");
-      if (!stored) return null;
-
-      const parsed = JSON.parse(stored);
-
-      // حماية من البيانات الناقصة
-      if (!parsed) return null;
-
-      return parsed;
-    } catch (e) {
+      return JSON.parse(localStorage.getItem("user"));
+    } catch {
       return null;
     }
   };
 
-  useEffect(() => {
-    setUser(getUser());
-    setLoading(false);
-  }, []);
-
-  // 🔁 إعادة تحديث user عند تغيير الصفحة
+  // sync user
   useEffect(() => {
     setUser(getUser());
   }, [location.pathname]);
 
-  if (loading) {
-    return <div style={{ color: "white", padding: 20 }}>Loading...</div>;
-  }
-
-  // 🧠 تحديد الصفحة الرئيسية (FIX قوي)
+  // 🧠 HOME ROUTE
   const getHome = () => {
     const u = getUser();
-
     if (!u) return "/login";
 
-    // 🔴 أهم شرط: تغيير كلمة المرور أولاً
-    if (u.must_change_password === true) {
-      return "/change-password";
-    }
+    if (u.must_change_password) return "/change-password";
 
-    const roleKey = u.role_key || ""; // FIX: يمنع undefined crash
-    const accessLevel = u.access_level || "";
+    const access = u.access_level;
 
-    // 🏛 المحكمة
-    if (roleKey === "case_clerk" || roleKey === "prosecutor_group") {
-      return `/court/${u.court_id}`;
-    }
+    if (access === "court") return `/court/${u.court_id}`;
+    if (access === "global") return "/inspection-dashboard";
 
-    // 🔎 التفقدية
-    if (roleKey === "inspection_general" || accessLevel === "global") {
-      return "/inspection-dashboard";
-    }
-
-    // ❌ أي حالة ناقصة
     return "/login";
   };
 
-  // 🔐 حماية الصفحات
+  // 🔐 PROTECTED ROUTE
   const ProtectedRoute = ({ children }) => {
     const u = getUser();
 
     if (!u) return <Navigate to="/login" replace />;
 
-    // 🚨 إجبار تغيير كلمة المرور أولاً
-    if (u.must_change_password === true) {
+    if (u.must_change_password)
       return <Navigate to="/change-password" replace />;
-    }
-
-    // 🚨 FIX: منع خطأ "no role"
-    if (!u.role_key && !u.access_level) {
-      return <Navigate to="/login" replace />;
-    }
 
     return children;
   };
@@ -113,7 +75,7 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* مهم: نمرر setUser */}
+      {/* CHANGE PASSWORD */}
       <Route
         path="/change-password"
         element={<ChangePassword setUser={setUser} />}
@@ -148,6 +110,7 @@ export default function App() {
     </Routes>
   );
 }
+
 
 
 
