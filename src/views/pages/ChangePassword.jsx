@@ -14,6 +14,7 @@ export default function ChangePassword({ user }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
+  // 🔥 جلب المستخدم من localStorage (نفس اللوقن)
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("user"));
     setFinalUser(user || stored);
@@ -25,12 +26,14 @@ export default function ChangePassword({ user }) {
     ? `مرحباً ${fullName}`
     : "مرحباً التفقدية العامة - إشراف مركزي";
 
+  // 🔐 قوة كلمة المرور
   const getStrength = (p) => {
     if (p.length < 6) return "ضعيفة";
     if (/[A-Z]/.test(p) && /[0-9]/.test(p) && p.length >= 8) return "قوية";
     return "متوسطة";
   };
 
+  // 🚀 تحديث كلمة المرور
   const handleUpdate = async () => {
     setError("");
 
@@ -54,6 +57,7 @@ export default function ChangePassword({ user }) {
 
     if (error) return setError("❌ فشل تحديث كلمة المرور");
 
+    // 🔥🔥🔥 أهم إصلاح: تحديث user كامل مثل اللوقن
     const updatedUser = {
       ...finalUser,
       must_change_password: false,
@@ -63,16 +67,24 @@ export default function ChangePassword({ user }) {
 
     setSuccess(true);
 
+    // 🚀 توجيه صحيح (مهم جداً)
     setTimeout(() => {
-      const accessLevel = finalUser.access_level;
+      const accessLevel = updatedUser.access_level;
 
+      // 🏛️ COURT
       if (accessLevel === "court") {
-        navigate(`/court-dashboard/${finalUser.court_id}`);
-      } else if (accessLevel === "global") {
-        navigate("/inspection-dashboard");
-      } else {
-        navigate("/");
+        navigate(`/court/${updatedUser.court_id}`);
+        return;
       }
+
+      // 🔎 INSPECTION
+      if (accessLevel === "global") {
+        navigate("/inspection-dashboard");
+        return;
+      }
+
+      // fallback
+      navigate("/");
     }, 1500);
   };
 
@@ -175,10 +187,7 @@ export default function ChangePassword({ user }) {
   );
 }
 
-/* =========================
-   🎨 INLINE STYLES (FULL)
-========================= */
-
+/* 🎨 FULL STYLES */
 const styles = {
   page: {
     height: "100vh",
