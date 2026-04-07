@@ -28,7 +28,7 @@ export default function App() {
     document.body.style.backgroundAttachment = "fixed";
   }, []);
 
-  // 🔐 Sync user
+  // 🔐 Sync user from localStorage
   useEffect(() => {
     const syncUser = () => {
       const stored = localStorage.getItem("user");
@@ -49,7 +49,7 @@ export default function App() {
     );
   }
 
-  // 🧠 ROLE ROUTING (جذري حسب نظامك)
+  // 🧠 ROLE ROUTING (Final Logic)
   const getHome = () => {
     if (!user) return "/login";
 
@@ -57,14 +57,15 @@ export default function App() {
       return "/change-password";
     }
 
-    const role = user.role?.role_key || user.role;
+    const role = user?.role?.role_key ?? user?.role;
 
-    // 🏛 Court System (case clerk + prosecutor group)
+    // 🏛 Court system
     if (role === "case_clerk" || role === "prosecutor_group") {
+      if (!user.court_id) return "/login";
       return `/court/${user.court_id}`;
     }
 
-    // 🔎 Inspection
+    // 🔎 Inspection system
     if (role === "inspection_general") {
       return "/inspection-dashboard";
     }
@@ -75,13 +76,13 @@ export default function App() {
   return (
     <Routes>
 
-      {/* AUTH */}
+      {/* ================= AUTH ================= */}
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/change-password" element={<ChangePassword />} />
 
-      {/* COURT DASHBOARD */}
+      {/* ================= COURT DASHBOARD ================= */}
       <Route
         path="/court/:id"
         element={
@@ -93,11 +94,11 @@ export default function App() {
         }
       />
 
-      {/* PROSECUTOR DASHBOARD (optional separate view if needed) */}
+      {/* ================= PROSECUTOR DASHBOARD ================= */}
       <Route
         path="/prosecutor-dashboard"
         element={
-          user ? (
+          user && user.role?.role_key === "prosecutor_group" ? (
             <ProsecutorDashboard user={user} />
           ) : (
             <Navigate to="/login" replace />
@@ -105,11 +106,11 @@ export default function App() {
         }
       />
 
-      {/* INSPECTION */}
+      {/* ================= INSPECTION ================= */}
       <Route
         path="/inspection-dashboard"
         element={
-          user ? (
+          user && user.role?.role_key === "inspection_general" ? (
             <InspectionDashboard user={user} />
           ) : (
             <Navigate to="/login" replace />
@@ -117,10 +118,10 @@ export default function App() {
         }
       />
 
-      {/* ROOT SMART ROUTE */}
+      {/* ================= ROOT ================= */}
       <Route path="/" element={<Navigate to={getHome()} replace />} />
 
-      {/* FALLBACK */}
+      {/* ================= FALLBACK ================= */}
       <Route path="*" element={<Navigate to={getHome()} replace />} />
 
     </Routes>
