@@ -5,49 +5,48 @@ import { useNavigate } from "react-router-dom";
 export default function ChangePassword({ user, onSuccess }) {
   const navigate = useNavigate();
 
+  const [finalUser, setFinalUser] = useState(null);
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-
   const [loading, setLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [finalUser, setFinalUser] = useState(null);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    setFinalUser(user || storedUser);
+    const stored = JSON.parse(localStorage.getItem("user"));
+    setFinalUser(user || stored);
   }, [user]);
 
   const fullName = finalUser?.fullName || "المستخدم";
 
-  const getStrength = (pass) => {
-    if (pass.length < 6) return "ضعيفة";
-    if (pass.match(/[A-Z]/) && pass.match(/[0-9]/) && pass.length >= 8)
-      return "قوية";
+  /* 🔐 PASSWORD STRENGTH */
+  const getStrength = (p) => {
+    if (p.length < 6) return "ضعيفة";
+    if (/[A-Z]/.test(p) && /[0-9]/.test(p) && p.length >= 8) return "قوية";
     return "متوسطة";
   };
 
-  const handleChange = async () => {
-    setErrorMsg("");
+  /* 🚀 UPDATE PASSWORD */
+  const handleUpdate = async () => {
+    setError("");
 
     if (!finalUser?.id) {
-      setErrorMsg("❌ لا يوجد مستخدم");
+      setError("❌ لا يوجد مستخدم");
       return;
     }
 
-    if (!newPass || newPass.length < 4) {
-      setErrorMsg("❌ كلمة المرور قصيرة جداً");
+    if (newPass.length < 6) {
+      setError("❌ كلمة المرور قصيرة");
       return;
     }
 
     if (newPass !== confirmPass) {
-      setErrorMsg("❌ كلمة المرور غير متطابقة");
+      setError("❌ كلمة المرور غير متطابقة");
       return;
     }
 
     if (getStrength(newPass) === "ضعيفة") {
-      setErrorMsg("❌ كلمة المرور ضعيفة جداً");
+      setError("❌ كلمة المرور ضعيفة جداً");
       return;
     }
 
@@ -63,44 +62,61 @@ export default function ChangePassword({ user, onSuccess }) {
 
     setLoading(false);
 
-    if (!error) {
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          ...finalUser,
-          must_change_password: false,
-          rememberMe,
-        })
-      );
-
-      setShowModal(true);
-
-      setTimeout(() => {
-        setShowModal(false);
-        onSuccess?.();
-        navigate("/dashboard");
-      }, 1500);
-    } else {
-      setErrorMsg("❌ خطأ في تغيير كلمة المرور");
-      console.error(error);
+    if (error) {
+      setError("❌ فشل التحديث");
+      return;
     }
+
+    /* update localStorage */
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        ...finalUser,
+        must_change_password: false,
+      })
+    );
+
+    setSuccess(true);
+
+    setTimeout(() => {
+      setSuccess(false);
+      onSuccess?.();
+
+      const role = finalUser.role;
+
+      if (role === "inspector" || role === "admin") {
+        navigate("/admin-dashboard");
+      } else {
+        navigate("/court-dashboard");
+      }
+    }, 1600);
   };
 
   if (!finalUser) {
-    return <div style={styles.loadingPage}>جاري تحميل بيانات المستخدم...</div>;
+    return <div style={styles.loading}>جاري تحميل بيانات المستخدم...</div>;
   }
 
   return (
     <div style={styles.page}>
-      <div style={styles.header}>
-        🇹🇳 المحكمة / النيابة العامة - نظام تغيير كلمة المرور
+
+      {/* 🇹🇳 BACKGROUND (COURT + FLAG WATERMARK) */}
+      <div style={styles.bg}></div>
+
+      {/* 🔴 TOP BAR */}
+      <div style={styles.topBar}>
+        <div style={styles.marquee}>
+          🇹🇳 وزارة العدل الجمهورية التونسية - نظام تغيير كلمة المرور - المحكمة الابتدائية 🇹🇳
+        </div>
       </div>
 
+      {/* CARD */}
       <div style={styles.card}>
-        <h2 style={styles.title}>مرحباً {fullName}</h2>
+        <h2 style={styles.title}>🔐 تغيير كلمة المرور</h2>
 
-        <div style={styles.infoBox}>
-          يرجى تغيير كلمة المرور الخاصة بك أول مرة
+        <p style={styles.welcome}>مرحباً {fullName}</p>
+
+        <div style={styles.info}>
+          يجب تغيير كلمة المرور قبل الدخول للنظام
         </div>
 
         <input
@@ -120,51 +136,24 @@ export default function ChangePassword({ user, onSuccess }) {
         />
 
         {newPass && (
-          <p style={{ color: "#fbbf24", fontSize: "14px" }}>
+          <p style={styles.strength}>
             قوة كلمة المرور: <b>{getStrength(newPass)}</b>
           </p>
         )}
 
-        <label style={{ color: "white", fontSize: "14px" }}>
-          <input
-            type="checkbox"
-            onChange={(e) => setRememberMe(e.target.checked)}
-          />{" "}
-          تذكرني
-        </label>
-
-        <button
-          onClick={handleChange}
-          disabled={loading}
-          style={{
-            ...styles.button,
-            opacity: loading ? 0.6 : 1,
-            cursor: loading ? "not-allowed" : "pointer",
-          }}
-        >
-          {loading ? "جاري الحفظ..." : "تغيير كلمة المرور"}
+        <button onClick={handleUpdate} disabled={loading} style={styles.btn}>
+          {loading ? "جاري الحفظ..." : "تحديث كلمة المرور"}
         </button>
 
-        <button
-          type="button"
-          onClick={() => navigate("/forgot-password")}
-          style={styles.forgot}
-        >
-          هل نسيت كلمة المرور؟
-        </button>
-
-        {errorMsg && <p style={{ color: "#ff6b6b" }}>{errorMsg}</p>}
+        {error && <p style={styles.error}>{error}</p>}
       </div>
 
-      {showModal && (
-        <div style={styles.modalOverlay}>
+      {/* SUCCESS MODAL */}
+      {success && (
+        <div style={styles.modal}>
           <div style={styles.modalBox}>
-            <h2 style={{ color: "#22c55e" }}>تم بنجاح 🎉</h2>
-            <p>
-              مرحباً {fullName}
-              <br />
-              تم تحديث كلمة المرور بنجاح
-            </p>
+            <h2 style={{ color: "#22c55e" }}>✔ تم التحديث بنجاح</h2>
+            <p>سيتم تحويلك تلقائياً...</p>
           </div>
         </div>
       )}
@@ -173,129 +162,152 @@ export default function ChangePassword({ user, onSuccess }) {
 }
 
 /* =========================
-   🎨 FIXED STYLE
+   🎨 STYLES (GOV STYLE)
 ========================= */
 
 const styles = {
   page: {
     height: "100vh",
     display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
     direction: "rtl",
-    fontFamily: "Tahoma",
     color: "white",
+    position: "relative",
+    overflow: "hidden",
+    background: "linear-gradient(135deg, #0f172a, #1e293b)",
   },
 
-  header: {
+  /* 🇹🇳 COURT + FLAG WATERMARK */
+  bg: {
+    position: "absolute",
+    inset: 0,
+    backgroundImage:
+      "url('https://upload.wikimedia.org/wikipedia/commons/c/ce/Coat_of_arms_of_Tunisia.svg'), url('https://upload.wikimedia.org/wikipedia/commons/5/53/Tunis_Courthouse.jpg')",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "center",
+    backgroundSize: "300px, cover",
+    opacity: 0.08,
+    filter: "grayscale(100%)",
+    zIndex: 0,
+  },
+
+  /* 🔴 TOP BAR */
+  topBar: {
     position: "absolute",
     top: 0,
     width: "100%",
     background: "#b91c1c",
-    color: "white",
-    textAlign: "center",
-    padding: "12px",
+    overflow: "hidden",
+    padding: "10px 0",
+    zIndex: 2,
+  },
+
+  marquee: {
+    display: "inline-block",
+    whiteSpace: "nowrap",
+    paddingLeft: "100%",
+    animation: "move 12s linear infinite",
     fontWeight: "bold",
   },
 
   card: {
-    width: "90%",
-    maxWidth: "420px",
-
-    /* 🔥 GLASS */
-    background: "rgba(255,255,255,0.08)",
-    backdropFilter: "blur(15px)",
-    WebkitBackdropFilter: "blur(15px)",
-    border: "1px solid rgba(255,255,255,0.15)",
-
-    borderRadius: "18px",
+    width: "400px",
     padding: "25px",
+    borderRadius: "16px",
+    background: "rgba(255,255,255,0.08)",
+    backdropFilter: "blur(18px)",
+    border: "1px solid rgba(255,255,255,0.15)",
     textAlign: "center",
-    color: "white",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
+    zIndex: 2,
   },
 
   title: {
     color: "#fbbf24",
-    marginBottom: "15px",
+    marginBottom: "10px",
   },
 
-  infoBox: {
-    background: "rgba(255,255,255,0.15)",
+  welcome: {
+    marginBottom: "10px",
+    fontSize: "14px",
+  },
+
+  info: {
+    background: "rgba(255,255,255,0.12)",
     padding: "10px",
     borderRadius: "10px",
-    marginBottom: "12px",
+    marginBottom: "10px",
+    fontSize: "13px",
   },
 
   input: {
     width: "100%",
     padding: "12px",
-    margin: "8px 0",
+    margin: "6px 0",
     borderRadius: "10px",
     border: "none",
     outline: "none",
   },
 
-  button: {
+  btn: {
     width: "100%",
     padding: "12px",
     marginTop: "10px",
-    borderRadius: "10px",
     background: "#1e3a8a",
     color: "white",
-    fontWeight: "bold",
     border: "none",
-  },
-
-  forgot: {
-    marginTop: "10px",
-    color: "#fbbf24",
+    borderRadius: "10px",
     cursor: "pointer",
-    textDecoration: "underline",
-    background: "none",
-    border: "none",
-    fontSize: "13px",
+    fontWeight: "bold",
   },
 
-  modalOverlay: {
+  strength: {
+    fontSize: "13px",
+    color: "#fbbf24",
+  },
+
+  error: {
+    color: "#f87171",
+    marginTop: "10px",
+  },
+
+  modal: {
     position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
+    inset: 0,
     background: "rgba(0,0,0,0.75)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 9999,
+    zIndex: 999,
   },
 
   modalBox: {
-    width: "90%",
-    maxWidth: "400px",
-
-    /* 🔥 GLASS MODAL */
+    padding: "30px",
+    borderRadius: "16px",
     background: "rgba(255,255,255,0.08)",
     backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
-    border: "1px solid rgba(255,255,255,0.15)",
-
-    padding: "30px",
-    borderRadius: "18px",
+    border: "1px solid rgba(255,255,255,0.2)",
     textAlign: "center",
-    color: "white",
   },
 
-  loadingPage: {
+  loading: {
     height: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     color: "white",
-    fontSize: "18px",
   },
 };
+
+/* 🟡 ANIMATION */
+const styleSheet = document.styleSheets[0];
+styleSheet.insertRule(`
+@keyframes move {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-100%); }
+}
+`, styleSheet.cssRules.length);
+
 
 
 
