@@ -16,7 +16,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
 
-  // 🎨 Background
+  // 🎨 Background (نفسه)
   useEffect(() => {
     document.body.style.background = `
       linear-gradient(rgba(5,15,35,0.45), rgba(30,64,175,0.55)),
@@ -27,63 +27,71 @@ export default function App() {
     document.body.style.backgroundAttachment = "fixed";
   }, []);
 
-  // 🔐 Load user (IMPORTANT FIX)
-  const loadUser = () => {
-    const stored = localStorage.getItem("user");
+  // 🔐 قراءة آمنة من localStorage
+  const getStoredUser = () => {
     try {
-      return stored ? JSON.parse(stored) : null;
-    } catch {
+      const data = localStorage.getItem("user");
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      localStorage.removeItem("user");
       return null;
     }
   };
 
+  // 🔄 تحميل المستخدم أول مرة
   useEffect(() => {
-    setUser(loadUser());
+    setUser(getStoredUser());
     setLoading(false);
   }, []);
 
-  // 🔁 إعادة مزامنة user عند تغيير الصفحات (fix مهم جداً)
+  // 🔄 تحديث المستخدم عند تغيير الصفحة (مهم جدًا)
   useEffect(() => {
-    setUser(loadUser());
+    setUser(getStoredUser());
   }, [location.pathname]);
 
   if (loading) {
     return <div style={{ color: "white", padding: 20 }}>Loading...</div>;
   }
 
-  // 🧠 HOME LOGIC (FIXED)
+  // 🧠 ROLE DECISION ENGINE (FIX جذري)
   const getHome = () => {
-    const currentUser = loadUser();
+    const u = getStoredUser();
 
-    if (!currentUser) return "/login";
+    if (!u) return "/login";
 
-    // ⚠️ must change password أولاً
-    if (currentUser.must_change_password === true) {
+    if (u.must_change_password === true) {
       return "/change-password";
     }
 
-    const roleKey = currentUser.role_key;
-    const accessLevel = currentUser.access_level;
+    // ⚠️ حماية: لو ما في role_key
+    if (!u.role_key) return "/login";
 
-    if (roleKey === "case_clerk" || roleKey === "prosecutor_group") {
-      return `/court/${currentUser.court_id}`;
+    // 🏛 المحكمة
+    if (["case_clerk", "prosecutor_group"].includes(u.role_key)) {
+      if (!u.court_id) return "/login";
+      return `/court/${u.court_id}`;
     }
 
-    if (roleKey === "inspection_general" || accessLevel === "global") {
+    // 🔎 التفقدية
+    if (u.role_key === "inspection_general" || u.access_level === "global") {
       return "/inspection-dashboard";
     }
 
     return "/login";
   };
 
-  // 🔐 Route guard helper
-  const ProtectedRoute = ({ children }) => {
-    const currentUser = loadUser();
+  // 🔐 حماية عامة قوية
+  const ProtectedRoute = ({ children, allowRoles }) => {
+    const u = getStoredUser();
 
-    if (!currentUser) return <Navigate to="/login" replace />;
+    if (!u) return <Navigate to="/login" replace />;
 
-    if (currentUser.must_change_password) {
+    if (u.must_change_password) {
       return <Navigate to="/change-password" replace />;
+    }
+
+    if (allowRoles && !allowRoles.includes(u.role_key)) {
+      return <Navigate to={getHome()} replace />;
     }
 
     return children;
@@ -93,26 +101,30 @@ export default function App() {
     <Routes>
 
       {/* AUTH */}
-      <Route path="/login" element={<Login />} />
+      <Route path="/login" element={<Login setUser={setUser} />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/change-password" element={<ChangePassword setUser={setUser} />} />
 
-      {/* COURT DASHBOARD */}
+      <Route
+        path="/change-password"
+        element={<ChangePassword setUser={setUser} />}
+      />
+
+      {/* COURT */}
       <Route
         path="/court/:id"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowRoles={["case_clerk", "prosecutor_group"]}>
             <CourtDashboard user={user} />
           </ProtectedRoute>
         }
       />
 
-      {/* INSPECTION DASHBOARD */}
+      {/* INSPECTION */}
       <Route
         path="/inspection-dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowRoles={["inspection_general"]}>
             <InspectionDashboard user={user} />
           </ProtectedRoute>
         }
