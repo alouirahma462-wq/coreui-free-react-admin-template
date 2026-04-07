@@ -8,16 +8,18 @@ export default function ChangePassword({ user }) {
   const [finalUser, setFinalUser] = useState(null);
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  // 🔥 جلب المستخدم من localStorage (نفس اللوقن)
+  // 🔥 FIX: جلب user من localStorage بشكل آمن
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("user"));
-    setFinalUser(user || stored);
+    try {
+      const stored = JSON.parse(localStorage.getItem("user"));
+      setFinalUser(user || stored);
+    } catch {
+      setFinalUser(null);
+    }
   }, [user]);
 
   const fullName = finalUser?.fullName;
@@ -33,7 +35,7 @@ export default function ChangePassword({ user }) {
     return "متوسطة";
   };
 
-  // 🚀 تحديث كلمة المرور
+  // 🚀 UPDATE PASSWORD (FIXED FROM ROOT)
   const handleUpdate = async () => {
     setError("");
 
@@ -45,7 +47,8 @@ export default function ChangePassword({ user }) {
 
     setLoading(true);
 
-    const { error } = await supabase
+    // 🔥 1. update password in DB
+    const { error: updateError } = await supabase
       .from("users")
       .update({
         password: newPass,
@@ -53,39 +56,67 @@ export default function ChangePassword({ user }) {
       })
       .eq("id", finalUser.id);
 
+    if (updateError) {
+      setLoading(false);
+      return setError("❌ فشل تحديث كلمة المرور");
+    }
+
+    // 🔥 2. IMPORTANT FIX: reload FULL USER from DB (roles included)
+    const { data: freshUser, error: fetchError } = await supabase
+      .from("users")
+      .select(`
+        id,
+        username,
+        fullName,
+        court_id,
+        courts (id, name),
+        roles (id, role_key, role_name, access_level),
+        must_change_password
+      `)
+      .eq("id", finalUser.id)
+      .single();
+
     setLoading(false);
 
-    if (error) return setError("❌ فشل تحديث كلمة المرور");
+    if (fetchError || !freshUser) {
+      return setError("❌ فشل إعادة تحميل البيانات");
+    }
 
-    // 🔥🔥🔥 أهم إصلاح: تحديث user كامل مثل اللوقن
-    const updatedUser = {
-      ...finalUser,
+    // 🔥 3. Build CLEAN SESSION (IMPORTANT FIX)
+    const cleanSession = {
+      id: freshUser.id,
+      username: freshUser.username,
+      fullName: freshUser.fullName,
+      court_id: freshUser.court_id,
+      court_name: freshUser.courts?.name || null,
+
+      role_key: freshUser.roles?.role_key || null,
+      role_name: freshUser.roles?.role_name || null,
+      access_level: freshUser.roles?.access_level || null,
+
       must_change_password: false,
     };
 
-    localStorage.setItem("user", JSON.stringify(updatedUser));
+    localStorage.setItem("user", JSON.stringify(cleanSession));
 
     setSuccess(true);
 
-    // 🚀 توجيه صحيح (مهم جداً)
+    // 🚀 Redirect FIXED
     setTimeout(() => {
-      const accessLevel = updatedUser.access_level;
+      const accessLevel = cleanSession.access_level;
 
-      // 🏛️ COURT
       if (accessLevel === "court") {
-        navigate(`/court/${updatedUser.court_id}`);
+        navigate(`/court/${cleanSession.court_id}`);
         return;
       }
 
-      // 🔎 INSPECTION
       if (accessLevel === "global") {
         navigate("/inspection-dashboard");
         return;
       }
 
-      // fallback
-      navigate("/");
-    }, 1500);
+      navigate("/login");
+    }, 1200);
   };
 
   if (!finalUser) {
@@ -100,7 +131,7 @@ export default function ChangePassword({ user }) {
       {/* TOP BAR */}
       <div style={styles.topBar}>
         <div style={styles.marquee}>
-          🇹🇳 وزارة العدل الجمهورية التونسية - منظومة النيابة العمومية - تغيير كلمة المرور 🇹🇳
+          🇹🇳 وزارة العدل الجمهورية التونسية - تغيير كلمة المرور
         </div>
       </div>
 
@@ -130,41 +161,20 @@ export default function ChangePassword({ user }) {
           style={styles.input}
         />
 
-        {/* Remember Me */}
-        <label style={styles.remember}>
-          <input
-            type="checkbox"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-          />
-          تذكرني
-        </label>
-
         {newPass && (
           <p style={styles.strength}>
             قوة كلمة المرور: <b>{getStrength(newPass)}</b>
           </p>
         )}
 
-        <button
-          onClick={handleUpdate}
-          disabled={loading}
-          style={styles.btn}
-        >
+        <button onClick={handleUpdate} disabled={loading} style={styles.btn}>
           {loading ? "جاري الحفظ..." : "تحديث كلمة المرور"}
-        </button>
-
-        <button
-          onClick={() => navigate("/forgot-password")}
-          style={styles.forgot}
-        >
-          هل نسيت كلمة المرور؟
         </button>
 
         {error && <p style={styles.error}>{error}</p>}
       </div>
 
-      {/* SUCCESS */}
+      {/* SUCCESS MODAL */}
       {success && (
         <div style={styles.modal}>
           <div style={styles.modalBox}>
@@ -174,7 +184,6 @@ export default function ChangePassword({ user }) {
         </div>
       )}
 
-      {/* KEYFRAMES */}
       <style>
         {`
           @keyframes move {
