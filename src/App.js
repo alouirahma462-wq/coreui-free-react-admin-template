@@ -15,7 +15,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const location = useLocation();
 
-  // 🎨 background
+  // 🎨 Background
   useEffect(() => {
     document.body.style.background = `
       linear-gradient(rgba(5,15,35,0.45), rgba(30,64,175,0.55)),
@@ -26,7 +26,7 @@ export default function App() {
     document.body.style.backgroundAttachment = "fixed";
   }, []);
 
-  // 🔐 SINGLE SOURCE OF TRUTH
+  // 🔐 SAFE USER
   const getUser = () => {
     try {
       return JSON.parse(localStorage.getItem("user"));
@@ -35,34 +35,40 @@ export default function App() {
     }
   };
 
-  // sync user
   useEffect(() => {
     setUser(getUser());
   }, [location.pathname]);
 
-  // 🧠 HOME ROUTE
+  // 🧠 HOME LOGIC (FIXED 100%)
   const getHome = () => {
     const u = getUser();
+
     if (!u) return "/login";
 
-    if (u.must_change_password) return "/change-password";
+    // 🔴 FORCE FIRST LOGIN FLOW
+    if (u.must_change_password === true) {
+      return "/change-password";
+    }
 
     const access = u.access_level;
 
     if (access === "court") return `/court/${u.court_id}`;
     if (access === "global") return "/inspection-dashboard";
 
+    // ❌ fallback آمن
     return "/login";
   };
 
-  // 🔐 PROTECTED ROUTE
+  // 🔐 PROTECTED ROUTE (FIXED)
   const ProtectedRoute = ({ children }) => {
     const u = getUser();
 
     if (!u) return <Navigate to="/login" replace />;
 
-    if (u.must_change_password)
+    // 🚨 أول دخول دائمًا يروح تغيير كلمة المرور
+    if (u.must_change_password === true) {
       return <Navigate to="/change-password" replace />;
+    }
 
     return children;
   };
@@ -110,6 +116,7 @@ export default function App() {
     </Routes>
   );
 }
+
 
 
 
