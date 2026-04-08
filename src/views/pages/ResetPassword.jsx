@@ -66,7 +66,6 @@ export default function ResetPassword() {
     }
 
     localStorage.clear();
-
     setShowModal(true);
 
     setTimeout(() => {
@@ -118,56 +117,69 @@ export default function ResetPassword() {
     </div>
   );
 }
-
-/* =========================
-   🧊 GLASS RESET PASSWORD (NO BACKGROUND)
-   + uses global App background
-========================= */
-
 const styles = {
   page: {
     height: "100vh",
     width: "100vw",
+
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     direction: "rtl",
     fontFamily: "Tahoma",
     color: "white",
+
+    /* 🔥 FIX WHITE BACKGROUND (CoreUI override kill) */
+    backgroundColor: "#0f172a",
+
+    backgroundImage: `
+      radial-gradient(circle at top, rgba(185,28,28,0.25), transparent 60%),
+      linear-gradient(135deg, #0f172a, #1e293b)
+    `,
+
+    position: "fixed",
+    inset: 0,
+    overflow: "hidden",
   },
 
   header: {
     position: "absolute",
     top: 0,
+    left: 0,
     width: "100%",
-    background: "rgba(185, 28, 28, 0.85)",
-    backdropFilter: "blur(10px)",
+
+    background: "rgba(185, 28, 28, 0.9)",
+    backdropFilter: "blur(12px)",
+
     color: "white",
     textAlign: "center",
     padding: "12px",
     fontWeight: "bold",
-    letterSpacing: "0.5px",
+    zIndex: 1000,
   },
 
   card: {
     width: "90%",
     maxWidth: "420px",
-
     padding: "30px",
 
-    background: "rgba(255,255,255,0.08)",
-    backdropFilter: "blur(25px)",
-    WebkitBackdropFilter: "blur(25px)",
+    /* 🔥 FIX GLASS (no white anymore) */
+    backgroundColor: "rgba(2, 6, 23, 0.75)",
+
+    backdropFilter: "blur(30px)",
+    WebkitBackdropFilter: "blur(30px)",
 
     borderRadius: "22px",
     textAlign: "center",
 
-    border: "1px solid rgba(255,255,255,0.15)",
+    border: "1px solid rgba(255,255,255,0.12)",
 
-    boxShadow: `
-      0 20px 60px rgba(0,0,0,0.55),
-      inset 0 1px 0 rgba(255,255,255,0.08)
-    `,
+    boxShadow: "0 30px 80px rgba(0,0,0,0.75)",
+
+    color: "#fff",
+
+    position: "relative",
+    zIndex: 10,
   },
 
   title: {
@@ -184,8 +196,12 @@ const styles = {
     border: "1px solid rgba(255,255,255,0.2)",
 
     outline: "none",
-    background: "rgba(255,255,255,0.06)",
+
+    backgroundColor: "rgba(255,255,255,0.08)",
     color: "white",
+
+    position: "relative",
+    zIndex: 9999,
   },
 
   button: {
@@ -208,12 +224,9 @@ const styles = {
 
   modalOverlay: {
     position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
+    inset: 0,
 
-    background: "rgba(0,0,0,0.55)",
+    background: "rgba(0,0,0,0.6)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -221,7 +234,7 @@ const styles = {
   },
 
   modal: {
-    background: "rgba(255,255,255,0.08)",
+    background: "rgba(2, 6, 23, 0.85)",
     backdropFilter: "blur(25px)",
 
     padding: "30px",
@@ -238,6 +251,7 @@ const styles = {
     color: "#22c55e",
   },
 };
+
 
 
 
