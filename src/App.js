@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 
@@ -14,18 +14,20 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const location = useLocation();
+
   const loadUser = async () => {
     setLoading(true);
 
+    const userId = localStorage.getItem("user_id");
+
+    if (!userId || userId === "undefined" || userId === "null") {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
     try {
-      const userId = localStorage.getItem("user_id");
-
-      if (!userId || userId === "undefined" || userId === "null") {
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-
       const { data, error } = await supabase
         .from("users")
         .select("*")
@@ -33,62 +35,45 @@ export default function App() {
         .maybeSingle();
 
       if (error || !data) {
+        localStorage.removeItem("user_id");
         setUser(null);
         setLoading(false);
         return;
       }
 
       setUser(data);
-      setLoading(false);
 
-    } catch (err) {
+    } catch (e) {
       setUser(null);
-      setLoading(false);
+    } finally {
+      setLoading(false); // 🔥 FIX مهم جدًا (منع الصفحة البيضاء)
     }
   };
 
+  // 🔥 FIX 1: reload عند تغيير route
   useEffect(() => {
     loadUser();
-  }, []);
+  }, [location.pathname]);
 
-  // 🔥 FIX 1: storage sync
-  useEffect(() => {
-    const syncUser = () => {
-      loadUser();
-    };
-
-    window.addEventListener("storage", syncUser);
-
-    return () => {
-      window.removeEventListener("storage", syncUser);
-    };
-  }, []);
-
-  // 🔥 FIX 2: interval sync (prevents stuck old user)
+  // 🔥 FIX 2: مراقبة تغيير user_id الحقيقي
   useEffect(() => {
     const interval = setInterval(() => {
-      const storedId = localStorage.getItem("user_id");
+      const id = localStorage.getItem("user_id");
 
-      if (!storedId && user !== null) {
+      if (!id) {
         setUser(null);
       }
-    }, 1000);
+    }, 500);
 
     return () => clearInterval(interval);
-  }, [user]);
-
-  // 🔥 FIX 3: focus reload (switch tab fix)
-  useEffect(() => {
-    const handleFocus = () => {
-      loadUser();
-    };
-
-    window.addEventListener("focus", handleFocus);
-
-    return () => {
-      window.removeEventListener("focus", handleFocus);
-    };
   }, []);
+
+  const getHomeRoute = () => {
+    if (!user) return "/login";
+    if (user.must_change_password) return "/change-password";
+    if (user.court_id === null) return "/inspection-dashboard";
+    return `/court/${user.court_id}`;
+  };
 
   if (loading) {
     return (
@@ -97,13 +82,6 @@ export default function App() {
       </div>
     );
   }
-
-  const getHomeRoute = () => {
-    if (!user) return "/login";
-    if (user.must_change_password) return "/change-password";
-    if (user.court_id === null) return "/inspection-dashboard";
-    return `/court/${user.court_id}`;
-  };
 
   return (
     <Routes>
@@ -150,6 +128,7 @@ export default function App() {
     </Routes>
   );
 }
+
 
 
 
