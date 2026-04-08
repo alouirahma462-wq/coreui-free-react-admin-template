@@ -2,8 +2,13 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 
+// Pages
 import Login from "./views/pages/login/Login.jsx";
 import ChangePassword from "./views/pages/ChangePassword.jsx";
+import ForgotPassword from "./views/pages/ForgotPassword.jsx";
+import ResetPassword from "./views/pages/ResetPassword.jsx";
+
+// Dashboards
 import CourtDashboard from "./views/dashboard/CourtDashboard.jsx";
 import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
@@ -11,7 +16,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 LOAD USER (single source of truth)
+  // 🔥 Load user from DB
   const loadUser = async () => {
     const userId = localStorage.getItem("user_id");
 
@@ -21,19 +26,13 @@ export default function App() {
       return;
     }
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("users")
-      .select(`
-        id,
-        fullName,
-        must_change_password,
-        court_id,
-        isActive
-      `)
+      .select("*")
       .eq("id", userId)
       .single();
 
-    if (error || !data || !data.isActive) {
+    if (!data) {
       localStorage.removeItem("user_id");
       setUser(null);
     } else {
@@ -47,89 +46,95 @@ export default function App() {
     loadUser();
   }, []);
 
-  // 🔥 GUARD COMPONENT (clean logic)
-  const RequireAuth = ({ children }) => {
-    if (!user) return <Navigate to="/login" replace />;
-    return children;
-  };
+  if (loading) {
+    return <div style={{ color: "white" }}>Loading...</div>;
+  }
 
-  const RequirePasswordChange = ({ children }) => {
-    if (user?.must_change_password)
-      return <Navigate to="/change-password" replace />;
-    return children;
-  };
-
+  // 🎯 Central redirect logic
   const getHomeRoute = () => {
     if (!user) return "/login";
-    if (user.must_change_password) return "/change-password";
-    if (user.court_id === null) return "/inspection-dashboard";
+
+    if (user.must_change_password) {
+      return "/change-password";
+    }
+
+    if (user.court_id === null) {
+      return "/inspection-dashboard";
+    }
+
     return `/court/${user.court_id}`;
   };
-
-  if (loading) {
-    return (
-      <div style={{ color: "white", textAlign: "center", marginTop: 50 }}>
-        Loading...
-      </div>
-    );
-  }
 
   return (
     <Routes>
 
-      {/* LOGIN */}
-      <Route path="/login" element={<Login />} />
+      {/* ================= LOGIN ================= */}
+      <Route
+        path="/login"
+        element={
+          user ? <Navigate to={getHomeRoute()} replace /> : <Login />
+        }
+      />
 
-      {/* CHANGE PASSWORD */}
+      {/* ================= FORGOT ================= */}
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+
+      {/* ================= RESET ================= */}
+      <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* ================= CHANGE PASSWORD ================= */}
       <Route
         path="/change-password"
         element={
-          <RequireAuth>
-            <ChangePassword />
-          </RequireAuth>
+          !user ? (
+            <Navigate to="/login" replace />
+          ) : (
+            <ChangePassword user={user} />
+          )
         }
       />
 
-      {/* COURT DASHBOARD */}
+      {/* ================= COURT DASHBOARD ================= */}
       <Route
         path="/court/:id"
         element={
-          <RequireAuth>
-            <RequirePasswordChange>
-              {user?.court_id !== null ? (
-                <CourtDashboard user={user} />
-              ) : (
-                <Navigate to="/inspection-dashboard" replace />
-              )}
-            </RequirePasswordChange>
-          </RequireAuth>
+          !user ? (
+            <Navigate to="/login" replace />
+          ) : user.must_change_password ? (
+            <Navigate to="/change-password" replace />
+          ) : (
+            <CourtDashboard user={user} />
+          )
         }
       />
 
-      {/* INSPECTION DASHBOARD */}
+      {/* ================= INSPECTION DASHBOARD ================= */}
       <Route
         path="/inspection-dashboard"
         element={
-          <RequireAuth>
-            <RequirePasswordChange>
-              {user?.court_id === null ? (
-                <InspectionDashboard user={user} />
-              ) : (
-                <Navigate to={getHomeRoute()} replace />
-              )}
-            </RequirePasswordChange>
-          </RequireAuth>
+          !user ? (
+            <Navigate to="/login" replace />
+          ) : user.must_change_password ? (
+            <Navigate to="/change-password" replace />
+          ) : (
+            <InspectionDashboard user={user} />
+          )
         }
       />
 
-      {/* ROOT SMART REDIRECT */}
-      <Route path="/" element={<Navigate to={getHomeRoute()} replace />} />
+      {/* ================= ROOT ================= */}
+      <Route
+        path="/"
+        element={<Navigate to={getHomeRoute()} replace />}
+      />
 
-      {/* FALLBACK */}
+      {/* ================= FALLBACK ================= */}
       <Route path="*" element={<Navigate to="/" replace />} />
+
     </Routes>
   );
 }
+
 
 
 
