@@ -17,14 +17,14 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // 🧨 validation
+      // 🔹 1. check input
       if (!username || !password) {
         setMessage("❌ الرجاء إدخال اسم المستخدم وكلمة المرور");
         setLoading(false);
         return;
       }
 
-      // 🔍 fetch user from TABLE users ONLY
+      // 🔹 2. check user (ONLY users table)
       const { data: user, error } = await supabase
         .from("users")
         .select(`
@@ -32,34 +32,35 @@ export default function Login() {
           username,
           fullName,
           password,
-          isActive,
           must_change_password,
-          court_id
+          court_id,
+          isActive
         `)
         .eq("username", username.trim())
         .maybeSingle();
 
+      // 🔹 3. user not found
       if (error || !user) {
-        setMessage("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
+        setMessage("❌ بيانات غير صحيحة");
         setLoading(false);
         return;
       }
 
-      // 🚫 inactive user
+      // 🔹 4. active check
       if (!user.isActive) {
         setMessage("❌ الحساب غير مفعل");
         setLoading(false);
         return;
       }
 
-      // 🔐 password check (plain for now)
+      // 🔹 5. password correct?
       if (user.password !== password.trim()) {
-        setMessage("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
+        setMessage("❌ بيانات غير صحيحة");
         setLoading(false);
         return;
       }
 
-      // 💾 session
+      // 🔹 6. session
       localStorage.setItem("user_id", user.id);
 
       if (rememberMe) {
@@ -68,26 +69,28 @@ export default function Login() {
         localStorage.removeItem("remember_me");
       }
 
-      // 👋 welcome message
-      setMessage(`👋 مرحباً ${user.fullName}`);
+      // 🔥 ROUTING ACCORDING TO WORKFLOW
 
-      // ⏳ short delay so user sees welcome
-      setTimeout(() => {
-        // 🔁 FIRST LOGIN → change password
-        if (user.must_change_password) {
-          navigate("/change-password", { replace: true });
-          return;
-        }
+      // ┌──────────────┐
+      // ↓              ↓
 
-        // 🟡 inspection user (court_id = null)
-        if (user.court_id === null) {
-          navigate("/inspection-dashboard", { replace: true });
-          return;
-        }
+      if (user.must_change_password === true) {
+        // 🔴 CHANGE PASSWORD FIRST LOGIN
+        navigate("/change-password", {
+          state: { userId: user.id },
+          replace: true,
+        });
+        return;
+      }
 
-        // 🏛️ normal court user
-        navigate(`/court/${user.court_id}`, { replace: true });
-      }, 700);
+      // 🟡 inspection user
+      if (user.court_id === null) {
+        navigate("/inspection-dashboard", { replace: true });
+        return;
+      }
+
+      // 🟢 court user
+      navigate(`/court/${user.court_id}`, { replace: true });
 
     } catch (err) {
       console.error(err);
@@ -117,6 +120,7 @@ export default function Login() {
           style={styles.input}
         />
 
+        {/* 🔵 Remember me */}
         <label style={styles.checkbox}>
           <input
             type="checkbox"
@@ -130,11 +134,12 @@ export default function Login() {
           {loading ? "جاري الدخول..." : "دخول"}
         </button>
 
-        <div style={styles.links}>
+        {/* 🔵 Forgot password */}
+        <p style={styles.links}>
           <span onClick={() => navigate("/forgot-password")}>
             نسيت كلمة المرور؟
           </span>
-        </div>
+        </p>
 
         {message && <p style={styles.message}>{message}</p>}
       </div>
@@ -202,6 +207,7 @@ const styles = {
     color: "#fca5a5",
   },
 };
+
 
 
 
