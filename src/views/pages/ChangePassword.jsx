@@ -12,7 +12,7 @@ export default function ChangePassword() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  // 🔐 LOAD USER (FIXED ROOT)
+  // 🔐 LOAD USER
   useEffect(() => {
     const loadUser = async () => {
       const userId = localStorage.getItem("user_id");
@@ -26,12 +26,9 @@ export default function ChangePassword() {
         .from("users")
         .select(`
           id,
-          username,
           fullName,
           must_change_password,
-          court_id,
-          role_id,
-          courts (id, name)
+          court_id
         `)
         .eq("id", userId)
         .single();
@@ -43,7 +40,7 @@ export default function ChangePassword() {
 
       setUser(data);
 
-      // 🔥 إذا ما عاد يحتاج تغيير كلمة المرور
+      // ❌ منع الدخول هنا إذا مش أول مرة
       if (!data.must_change_password) {
         navigate("/login");
       }
@@ -52,33 +49,37 @@ export default function ChangePassword() {
     loadUser();
   }, [navigate]);
 
-  // 🚀 ROUTING (SAFE + CONSISTENT WITH LOGIN)
-  const goToDashboard = (u, roleAccess) => {
-    if (roleAccess === "court") {
-      navigate(`/court/${u.court_id}`);
+  // 🚀 FINAL ROUTING (ONLY HERE AFTER UPDATE)
+  const redirectUser = (u) => {
+    if (u.court_id === null) {
+      navigate("/inspection-dashboard", { replace: true });
       return;
     }
 
-    if (roleAccess === "global") {
-      navigate("/inspection-dashboard");
-      return;
-    }
-
-    navigate("/login");
+    navigate(`/court/${u.court_id}`, { replace: true });
   };
 
-  // 🚀 UPDATE PASSWORD (FIXED)
+  // 🔐 UPDATE PASSWORD
   const handleUpdate = async () => {
     setError("");
 
-    if (!user?.id) return setError("❌ لا يوجد مستخدم");
-    if (newPass.length < 6) return setError("❌ كلمة المرور قصيرة");
-    if (newPass !== confirmPass)
-      return setError("❌ كلمة المرور غير متطابقة");
+    if (!newPass || !confirmPass) {
+      setError("❌ الرجاء إدخال كلمة المرور");
+      return;
+    }
+
+    if (newPass.length < 6) {
+      setError("❌ كلمة المرور قصيرة");
+      return;
+    }
+
+    if (newPass !== confirmPass) {
+      setError("❌ كلمة المرور غير متطابقة");
+      return;
+    }
 
     setLoading(true);
 
-    // 1️⃣ UPDATE PASSWORD
     const { error: updateError } = await supabase
       .from("users")
       .update({
@@ -89,27 +90,19 @@ export default function ChangePassword() {
 
     if (updateError) {
       setLoading(false);
-      return setError("❌ فشل تحديث كلمة المرور");
+      setError("❌ فشل تحديث كلمة المرور");
+      return;
     }
 
-    // 2️⃣ GET ROLE FROM DB (IMPORTANT)
-    const { data: role } = await supabase
-      .from("roles")
-      .select("access_level")
-      .eq("id", user.role_id)
-      .single();
-
-    const access = role?.access_level;
-
-    // 3️⃣ CLEAN SESSION (ONLY ID)
+    // 💾 session clean
     localStorage.setItem("user_id", user.id);
 
     setLoading(false);
     setSuccess(true);
 
     setTimeout(() => {
-      goToDashboard(user, access);
-    }, 1000);
+      redirectUser(user);
+    }, 1200);
   };
 
   if (!user) {
@@ -157,7 +150,7 @@ export default function ChangePassword() {
   );
 }
 
-/* STYLES */
+/* 🎨 STYLES */
 const styles = {
   page: {
     height: "100vh",
@@ -168,6 +161,7 @@ const styles = {
     color: "white",
     direction: "rtl",
   },
+
   card: {
     width: "400px",
     padding: "20px",
@@ -175,12 +169,14 @@ const styles = {
     background: "rgba(255,255,255,0.1)",
     textAlign: "center",
   },
+
   input: {
     width: "100%",
     padding: "10px",
     margin: "8px 0",
     borderRadius: "8px",
   },
+
   btn: {
     width: "100%",
     padding: "10px",
@@ -189,6 +185,7 @@ const styles = {
     border: "none",
     borderRadius: "8px",
   },
+
   modal: {
     position: "fixed",
     inset: 0,
@@ -197,12 +194,14 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
   },
+
   modalBox: {
     padding: "20px",
     background: "white",
     color: "black",
     borderRadius: "10px",
   },
+
   loading: {
     color: "white",
     display: "flex",
