@@ -16,30 +16,35 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 Load user from DB
+  // 🔐 تحميل المستخدم من Supabase
   const loadUser = async () => {
-    const userId = localStorage.getItem("user_id");
+    try {
+      const userId = localStorage.getItem("user_id");
 
-    if (!userId) {
+      if (!userId) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      const { data } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (!data) {
+        localStorage.removeItem("user_id");
+        setUser(null);
+      } else {
+        setUser(data);
+      }
+    } catch (err) {
+      console.log("loadUser error:", err);
       setUser(null);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const { data } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", userId)
-      .single();
-
-    if (!data) {
-      localStorage.removeItem("user_id");
-      setUser(null);
-    } else {
-      setUser(data);
-    }
-
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -47,10 +52,14 @@ export default function App() {
   }, []);
 
   if (loading) {
-    return <div style={{ color: "white" }}>Loading...</div>;
+    return (
+      <div style={{ color: "white", textAlign: "center", marginTop: "50px" }}>
+        Loading...
+      </div>
+    );
   }
 
-  // 🎯 Central redirect logic
+  // 🎯 تحديد الصفحة الرئيسية حسب الحالة
   const getHomeRoute = () => {
     if (!user) return "/login";
 
@@ -76,10 +85,10 @@ export default function App() {
         }
       />
 
-      {/* ================= FORGOT ================= */}
+      {/* ================= FORGOT PASSWORD ================= */}
       <Route path="/forgot-password" element={<ForgotPassword />} />
 
-      {/* ================= RESET ================= */}
+      {/* ================= RESET PASSWORD ================= */}
       <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* ================= CHANGE PASSWORD ================= */}
@@ -89,7 +98,7 @@ export default function App() {
           !user ? (
             <Navigate to="/login" replace />
           ) : (
-            <ChangePassword user={user} />
+            <ChangePassword />
           )
         }
       />
@@ -123,10 +132,7 @@ export default function App() {
       />
 
       {/* ================= ROOT ================= */}
-      <Route
-        path="/"
-        element={<Navigate to={getHomeRoute()} replace />}
-      />
+      <Route path="/" element={<Navigate to={getHomeRoute()} replace />} />
 
       {/* ================= FALLBACK ================= */}
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -134,6 +140,7 @@ export default function App() {
     </Routes>
   );
 }
+
 
 
 
