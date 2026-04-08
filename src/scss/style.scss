@@ -115,7 +115,7 @@ body.change-password-page { ... }
   }
 }
 /* =========================
-   🔴 LOGIN TOP MARQUEE BAR
+   🔴 LOGIN TOP BAR FIXED
 ========================= */
 
 .top-bar {
@@ -131,34 +131,34 @@ body.change-password-page { ... }
   z-index: 9999;
 }
 
+/* 🔥 الحركة */
 .marquee-track {
   display: flex;
-  width: 200%;
-  animation: move 10s linear infinite;
-}
-
-.marquee-text {
-  width: 100%;
+  width: max-content;
   white-space: nowrap;
-  text-align: center;
-  font-weight: bold;
-  color: #ffffff;
-  font-size: 14px;
-  letter-spacing: 0.5px;
+  animation: move 12s linear infinite;
 }
 
-/* =========================
-   🔥 GLOBAL ANIMATION (IMPORTANT)
-========================= */
+/* 🔥 النص */
+.marquee-text {
+  display: inline-block;
+  padding-right: 80px;
+  white-space: nowrap;
+  font-weight: bold;
+  color: #fff;
+  font-size: 14px;
+}
 
+/* 🔥 الحركة */
 @keyframes move {
   0% {
-    transform: translateX(0%);
+    transform: translateX(100%);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translateX(-100%);
   }
 }
+
 
 
 
