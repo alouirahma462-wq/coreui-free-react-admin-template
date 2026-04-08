@@ -87,15 +87,15 @@ export default function Login() {
     <div style={styles.page}>
 
       {/* 🔴 TOP BAR (FIXED MARQUEE) */}
-     <div className="top-bar">
+    <div className="top-bar">
   <div className="marquee-track">
-    <div className="marquee-text">
+    <span className="marquee-text">
       🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
-    </div>
+    </span>
 
-    <div className="marquee-text">
+    <span className="marquee-text">
       🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
-    </div>
+    </span>
   </div>
 </div>
 
