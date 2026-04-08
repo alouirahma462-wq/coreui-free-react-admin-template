@@ -18,21 +18,27 @@ export default function ChangePassword() {
   const [score, setScore] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
-  // 🔥 FIX ONLY HERE
+  // 🔥 FIXED ONLY (prevent stale + stuck page)
   useEffect(() => {
     const userId = localStorage.getItem("user_id");
 
-    if (!userId) {
-      navigate("/login");
+    if (!userId || userId === "undefined" || userId === "null") {
+      navigate("/login", { replace: true });
       return;
     }
 
     const fetchUser = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("users")
         .select("*")
-        .eq("id", userId)
+        .eq("id", Number(userId)) // 🔥 FIX مهم جداً
         .maybeSingle();
+
+      if (error || !data) {
+        localStorage.removeItem("user_id");
+        navigate("/login", { replace: true });
+        return;
+      }
 
       setUser(data);
 
@@ -48,7 +54,7 @@ export default function ChangePassword() {
     };
 
     fetchUser();
-  }, []);
+  }, [navigate]);
 
   // 🔥 password strength
   useEffect(() => {
@@ -89,7 +95,7 @@ export default function ChangePassword() {
         password: newPass,
         must_change_password: false,
       })
-      .eq("id", userId);
+      .eq("id", Number(userId)); // 🔥 FIX مهم
 
     setLoading(false);
 
@@ -100,7 +106,7 @@ export default function ChangePassword() {
 
       setTimeout(() => {
         setShowModal(false);
-        navigate("/login", { replace: true });
+        navigate("/login", { replace: true }); // 🔥 FIX يمنع الرجوع للصفحة
       }, 2000);
     }
   };
@@ -284,6 +290,7 @@ const styles = {
     marginBottom: "10px",
   },
 };
+
 
 
 
