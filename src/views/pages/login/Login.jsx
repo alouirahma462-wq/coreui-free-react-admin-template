@@ -12,8 +12,15 @@ export default function Login() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    // 🔥 حفظ remember_user قبل المسح
     const savedUser = localStorage.getItem("remember_user");
+
+    // 🔥 تنظيف كامل للجلسة
+    localStorage.clear();
+
+    // 🔥 إعادة restore فقط للـ remember
     if (savedUser) {
+      localStorage.setItem("remember_user", savedUser);
       setUsername(savedUser);
       setRememberMe(true);
     }
@@ -86,13 +93,12 @@ export default function Login() {
   return (
     <div style={styles.page}>
 
-      {/* 🔴 TOP BAR (FIXED WORKING MARQUEE) */}
+      {/* 🔴 TOP BAR */}
       <div style={styles.topBar}>
         <div style={styles.marqueeTrack}>
           <div style={styles.marqueeText}>
             🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
           </div>
-
           <div style={styles.marqueeText}>
             🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
           </div>
@@ -101,9 +107,7 @@ export default function Login() {
 
       {/* LOGIN CARD */}
       <div style={styles.card}>
-
         <h2 style={styles.title}>🏛️ منظومة النيابة العمومية</h2>
-
         <p style={styles.subTitle}>تسجيل الدخول إلى النظام القضائي</p>
 
         <input
@@ -147,7 +151,7 @@ export default function Login() {
         {message && <p style={styles.error}>{message}</p>}
       </div>
 
-      {/* 🔥 FIX ANIMATION INSIDE REACT */}
+      {/* 🔥 ANIMATION */}
       <style>{`
         @keyframes move {
           0% { transform: translateX(0); }
@@ -264,6 +268,7 @@ const styles = {
     fontSize: "13px",
   },
 };
+
 
 
 
