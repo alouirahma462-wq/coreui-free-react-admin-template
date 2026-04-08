@@ -102,9 +102,8 @@ body {
     --cui-footer-bg: var(--cui-body-bg);
   }
 }
-
 /* =========================
-   🔴 LOGIN TOP BAR (FIXED MARQUEE)
+   🔴 TOP BAR FIX (COREUI SAFE)
 ========================= */
 
 .top-bar {
@@ -117,37 +116,37 @@ body {
   overflow: hidden;
   display: flex;
   align-items: center;
-  z-index: 9999;
+  z-index: 99999;
 }
 
-/* 🔥 TRACK (movement container) */
+/* 🔥 مهم: نخلي المحتوى inline-flex بدل flex */
 .marquee-track {
-  display: flex;
-  width: max-content;
+  display: inline-flex;
   white-space: nowrap;
-  animation: move 12s linear infinite;
+  will-change: transform;
+  animation: move 15s linear infinite;
 }
 
-/* 🔥 TEXT */
+/* 🔥 منع أي انحراف */
 .marquee-text {
   display: inline-block;
-  padding-right: 80px;
+  padding-right: 120px;
   white-space: nowrap;
   font-weight: bold;
-  color: #ffffff;
+  color: #fff;
   font-size: 14px;
-  letter-spacing: 0.5px;
 }
 
-/* 🔥 ANIMATION */
+/* 🔥 الحركة الصحيحة (FIXED CENTER LOOP) */
 @keyframes move {
   0% {
-    transform: translateX(100%);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translateX(-100%);
+    transform: translate3d(-50%, 0, 0);
   }
 }
+
 
 
 
