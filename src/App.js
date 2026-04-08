@@ -15,11 +15,14 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   const loadUser = async () => {
+    setLoading(true); // 🔥 مهم جداً لمنع تعليق الحالات
+
     try {
       const userId = localStorage.getItem("user_id");
 
       if (!userId) {
         setUser(null);
+        setLoading(false);
         return;
       }
 
@@ -30,36 +33,33 @@ export default function App() {
         .maybeSingle();
 
       if (error || !data) {
+        console.log("User load failed:", error);
         localStorage.removeItem("user_id");
         setUser(null);
-        return;
+      } else {
+        setUser(data);
       }
-
-      setUser(data);
-
     } catch (err) {
-      console.log(err);
+      console.log("Fatal error:", err);
       localStorage.removeItem("user_id");
       setUser(null);
     } finally {
-      // 🔥 FIX: يمنع التعليق 100%
-      setLoading(false);
+      setLoading(false); // 🔥 يمنع التعليق نهائياً
     }
   };
 
   useEffect(() => {
-    let isMounted = true;
+    let active = true;
 
     const init = async () => {
-      if (isMounted) {
-        await loadUser();
-      }
+      if (!active) return;
+      await loadUser();
     };
 
     init();
 
     return () => {
-      isMounted = false;
+      active = false;
     };
   }, []);
 
@@ -148,6 +148,7 @@ export default function App() {
     </Routes>
   );
 }
+
 
 
 
