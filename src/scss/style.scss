@@ -25,19 +25,7 @@ body {
 }
 
 /* =========================
-   ❌ REMOVED PAGE BACKGROUNDS SYSTEM
-   (تم حذف التحكم اللي كان يكسّر الخلفية)
-========================= */
-
-/*
-body.login-page { ... }
-body.reset-page { ... }
-body.forgot-page { ... }
-body.change-password-page { ... }
-*/
-
-/* =========================
-   📦 COREUI LAYOUT (KEEP AS IS)
+   📦 COREUI LAYOUT
 ========================= */
 
 .wrapper {
@@ -114,8 +102,9 @@ body.change-password-page { ... }
     --cui-footer-bg: var(--cui-body-bg);
   }
 }
+
 /* =========================
-   🔴 LOGIN TOP BAR FIXED
+   🔴 LOGIN TOP BAR (FIXED MARQUEE)
 ========================= */
 
 .top-bar {
@@ -131,7 +120,7 @@ body.change-password-page { ... }
   z-index: 9999;
 }
 
-/* 🔥 الحركة */
+/* 🔥 TRACK (movement container) */
 .marquee-track {
   display: flex;
   width: max-content;
@@ -139,17 +128,18 @@ body.change-password-page { ... }
   animation: move 12s linear infinite;
 }
 
-/* 🔥 النص */
+/* 🔥 TEXT */
 .marquee-text {
   display: inline-block;
   padding-right: 80px;
   white-space: nowrap;
   font-weight: bold;
-  color: #fff;
+  color: #ffffff;
   font-size: 14px;
+  letter-spacing: 0.5px;
 }
 
-/* 🔥 الحركة */
+/* 🔥 ANIMATION */
 @keyframes move {
   0% {
     transform: translateX(100%);
@@ -158,6 +148,7 @@ body.change-password-page { ... }
     transform: translateX(-100%);
   }
 }
+
 
 
 
