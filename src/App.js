@@ -30,9 +30,17 @@ export default function App() {
         .eq("id", userId)
         .maybeSingle();
 
-      setUser(data || null);
+      // 🔥 حماية إضافية ضد user قديم
+      if (!data) {
+        localStorage.clear();
+        setUser(null);
+        return;
+      }
+
+      setUser(data);
     } catch (err) {
       console.log(err);
+      localStorage.clear();
       setUser(null);
     } finally {
       setLoading(false);
@@ -41,8 +49,11 @@ export default function App() {
 
   useEffect(() => {
     loadUser();
-    const sync = setInterval(loadUser, 800);
-    return () => clearInterval(sync);
+
+    // ❌ تم حذف interval لأنه يسبب مشاكل session
+    // const sync = setInterval(loadUser, 800);
+    // return () => clearInterval(sync);
+
   }, []);
 
   if (loading) return <div style={{ color: "white" }}>Loading...</div>;
@@ -73,7 +84,7 @@ export default function App() {
         }
       />
 
-      {/* 🔥 FORGOT PASSWORD (FIXED) */}
+      {/* FORGOT PASSWORD */}
       <Route
         path="/forgot-password"
         element={
@@ -81,7 +92,7 @@ export default function App() {
         }
       />
 
-      {/* 🔥 RESET PASSWORD (FIXED) */}
+      {/* RESET PASSWORD */}
       <Route
         path="/reset-password"
         element={
@@ -89,7 +100,7 @@ export default function App() {
         }
       />
 
-      {/* DASHBOARDS */}
+      {/* COURT */}
       <Route
         path="/court/:id"
         element={
@@ -103,6 +114,7 @@ export default function App() {
         }
       />
 
+      {/* INSPECTION */}
       <Route
         path="/inspection-dashboard"
         element={
@@ -123,6 +135,7 @@ export default function App() {
     </Routes>
   );
 }
+
 
 
 
