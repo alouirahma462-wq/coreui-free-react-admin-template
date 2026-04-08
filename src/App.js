@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 
@@ -14,13 +14,15 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const location = useLocation();
+
   const loadUser = async () => {
     setLoading(true);
 
     try {
       const userId = localStorage.getItem("user_id");
 
-      // 🔥 حماية من القيم الفارغة
+      // حماية من القيم الفارغة
       if (!userId || userId === "undefined" || userId === "null") {
         setUser(null);
         setLoading(false);
@@ -30,7 +32,7 @@ export default function App() {
       const { data, error } = await supabase
         .from("users")
         .select("*")
-        .eq("id", Number(userId)) // ✅ FIX النهائي الحقيقي
+        .eq("id", Number(userId))
         .maybeSingle();
 
       if (error || !data) {
@@ -50,8 +52,20 @@ export default function App() {
     }
   };
 
+  // 🔥 FIX 1: تحميل المستخدم عند أول تشغيل + عند تغيير الروت
   useEffect(() => {
     loadUser();
+  }, [location.pathname]);
+
+  // 🔥 FIX 2: مراقبة تغيير localStorage (مهم جداً بعد login / logout / reset)
+  useEffect(() => {
+    const syncUser = () => loadUser();
+
+    window.addEventListener("storage", syncUser);
+
+    return () => {
+      window.removeEventListener("storage", syncUser);
+    };
   }, []);
 
   if (loading) {
