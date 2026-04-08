@@ -11,7 +11,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // 🧠 تحميل Remember Me
   useEffect(() => {
     const savedUser = localStorage.getItem("remember_user");
     if (savedUser) {
@@ -55,7 +54,6 @@ export default function Login() {
         return;
       }
 
-      // ☑️ Remember Me فعلي
       if (rememberMe) {
         localStorage.setItem("remember_user", username);
       } else {
@@ -88,10 +86,16 @@ export default function Login() {
   return (
     <div style={styles.page}>
 
-      {/* 🔴 TOP BAR (متحرك فعليًا) */}
+      {/* 🔴 TOP BAR (FIXED MARQUEE) */}
       <div style={styles.topBar}>
-        <div style={styles.marquee}>
-          🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية 🇹🇳
+        <div style={styles.marqueeTrack}>
+          <div style={styles.marqueeText}>
+            🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
+          </div>
+
+          <div style={styles.marqueeText}>
+            🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
+          </div>
         </div>
       </div>
 
@@ -117,7 +121,6 @@ export default function Login() {
           style={styles.input}
         />
 
-        {/* ☑️ Remember Me (يشتغل فعلياً) */}
         <div style={styles.row}>
           <label style={styles.remember}>
             <input
@@ -128,13 +131,14 @@ export default function Login() {
             تذكرني
           </label>
 
-          {/* 🔑 Forgot Password (يشتغل فعلياً) */}
-          <span
-            style={styles.forgot}
+          {/* 🔑 FIXED FORGOT PASSWORD */}
+          <button
+            type="button"
             onClick={() => navigate("/forgot-password")}
+            style={styles.forgotBtn}
           >
             نسيت كلمة المرور؟
-          </span>
+          </button>
         </div>
 
         <button onClick={handleLogin} style={styles.btn}>
@@ -146,6 +150,7 @@ export default function Login() {
     </div>
   );
 }
+
 const styles = {
   page: {
     height: "100vh",
@@ -159,23 +164,30 @@ const styles = {
     overflow: "hidden",
   },
 
-  /* 🔴 TOP BAR */
+  // 🔴 TOP BAR FIXED
   topBar: {
     position: "absolute",
     top: 0,
     width: "100%",
+    height: "40px",
     background: "#b91c1c",
-    padding: "10px 0",
     overflow: "hidden",
-    whiteSpace: "nowrap",
+    display: "flex",
+    alignItems: "center",
   },
 
-  /* 🔥 FIXED MARQUEE (متحرك فعلي 100%) */
-  marquee: {
-    display: "inline-block",
-    paddingLeft: "100%",
-    animation: "marquee 12s linear infinite",
+  marqueeTrack: {
+    display: "flex",
+    width: "200%",
+    animation: "move 10s linear infinite",
+  },
+
+  marqueeText: {
+    width: "100%",
+    whiteSpace: "nowrap",
+    textAlign: "center",
     fontWeight: "bold",
+    color: "white",
   },
 
   card: {
@@ -222,10 +234,14 @@ const styles = {
     gap: "6px",
   },
 
-  forgot: {
+  // 🔑 FIXED BUTTON
+  forgotBtn: {
+    background: "transparent",
+    border: "none",
     color: "#93c5fd",
     cursor: "pointer",
     textDecoration: "underline",
+    fontSize: "13px",
   },
 
   btn: {
@@ -246,6 +262,7 @@ const styles = {
     fontSize: "13px",
   },
 };
+
 
 
 
