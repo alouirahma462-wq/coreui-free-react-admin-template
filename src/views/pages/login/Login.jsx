@@ -86,10 +86,9 @@ export default function Login() {
   return (
     <div style={styles.page}>
 
-      {/* 🔴 TOP BAR (FIXED ONLY) */}
+      {/* 🔴 TOP BAR (FIXED WORKING MARQUEE) */}
       <div style={styles.topBar}>
         <div style={styles.marqueeTrack}>
-          
           <div style={styles.marqueeText}>
             🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
           </div>
@@ -97,7 +96,6 @@ export default function Login() {
           <div style={styles.marqueeText}>
             🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
           </div>
-
         </div>
       </div>
 
@@ -148,6 +146,15 @@ export default function Login() {
 
         {message && <p style={styles.error}>{message}</p>}
       </div>
+
+      {/* 🔥 FIX ANIMATION INSIDE REACT */}
+      <style>{`
+        @keyframes move {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
+
     </div>
   );
 }
@@ -163,10 +170,9 @@ const styles = {
     direction: "rtl",
     position: "relative",
     overflow: "hidden",
-    paddingTop: "40px", // 🔥 مهم حتى ما يغطي الشريط المحتوى
+    paddingTop: "40px",
   },
 
-  // 🔴 FIXED TOP BAR ONLY
   topBar: {
     position: "fixed",
     top: 0,
@@ -259,7 +265,6 @@ const styles = {
   },
 };
 
-/* 🔥 لازم يكون موجود في CSS global */
 
 
 
