@@ -14,9 +14,6 @@ export default function Login() {
   useEffect(() => {
     const savedUser = localStorage.getItem("remember_user");
 
-    // 🔥 FIX 1: لا نمسح user_id بشكل عشوائي داخل login mount
-    // localStorage.removeItem("user_id"); ❌ (هذا كان يسبب loop عندك)
-
     if (savedUser) {
       setUsername(savedUser);
       setRememberMe(true);
@@ -70,13 +67,13 @@ export default function Login() {
         localStorage.removeItem("remember_user");
       }
 
-      // 🔥 FIX 2: ضمان string + منع overwrite bugs
+      // 🔥 FIX: ضمان كتابة الـ storage قبل أي navigation
       localStorage.setItem("user_id", String(user.id));
 
       setLoading(false);
 
-      // 🔥 FIX 3: استبدال requestAnimationFrame (كان يسبب أحياناً freeze)
-      setTimeout(() => {
+      // 🔥 FIX: إزالة setTimeout واستبداله بـ microtask آمن
+      Promise.resolve().then(() => {
         if (user.must_change_password === true) {
           navigate("/change-password", { replace: true });
           return;
@@ -88,7 +85,7 @@ export default function Login() {
         }
 
         navigate(`/court/${user.court_id}`, { replace: true });
-      }, 0);
+      });
 
     } catch (err) {
       console.log(err);
