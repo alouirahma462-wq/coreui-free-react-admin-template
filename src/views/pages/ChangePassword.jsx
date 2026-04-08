@@ -20,7 +20,7 @@ export default function ChangePassword() {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    const userId = localStorage.getItem("user_id");
+    const userId = localStorage.clear();
 
     if (!userId) {
       navigate("/login");
