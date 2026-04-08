@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "../../../supabaseClient";
 import { useNavigate } from "react-router-dom";
 
@@ -10,6 +10,15 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  // 🧠 تحميل Remember Me
+  useEffect(() => {
+    const savedUser = localStorage.getItem("remember_user");
+    if (savedUser) {
+      setUsername(savedUser);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -46,6 +55,13 @@ export default function Login() {
         return;
       }
 
+      // ☑️ Remember Me فعلي
+      if (rememberMe) {
+        localStorage.setItem("remember_user", username);
+      } else {
+        localStorage.removeItem("remember_user");
+      }
+
       localStorage.setItem("user_id", user.id);
 
       setTimeout(() => {
@@ -72,10 +88,10 @@ export default function Login() {
   return (
     <div style={styles.page}>
 
-      {/* 🔴 TOP BAR */}
+      {/* 🔴 TOP BAR (متحرك فعليًا) */}
       <div style={styles.topBar}>
         <div style={styles.marquee}>
-          🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
+          🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية 🇹🇳
         </div>
       </div>
 
@@ -101,7 +117,7 @@ export default function Login() {
           style={styles.input}
         />
 
-        {/* ☑️ Remember Me */}
+        {/* ☑️ Remember Me (يشتغل فعلياً) */}
         <div style={styles.row}>
           <label style={styles.remember}>
             <input
@@ -112,6 +128,7 @@ export default function Login() {
             تذكرني
           </label>
 
+          {/* 🔑 Forgot Password (يشتغل فعلياً) */}
           <span
             style={styles.forgot}
             onClick={() => navigate("/forgot-password")}
@@ -149,17 +166,18 @@ const styles = {
     width: "100%",
     background: "#b91c1c",
     padding: "10px 0",
-    whiteSpace: "nowrap",
     overflow: "hidden",
+    whiteSpace: "nowrap",
   },
 
+  /* 🔥 FIXED MARQUEE (متحرك فعلي 100%) */
   marquee: {
     display: "inline-block",
-    fontWeight: "bold",
+    paddingLeft: "100%",
     animation: "marquee 12s linear infinite",
+    fontWeight: "bold",
   },
 
-  /* 🏛️ CARD (أعرض + احترافي) */
   card: {
     width: "480px",
     padding: "35px",
@@ -174,7 +192,6 @@ const styles = {
   title: {
     fontSize: "22px",
     fontWeight: "bold",
-    marginBottom: "5px",
   },
 
   subTitle: {
@@ -190,14 +207,11 @@ const styles = {
     borderRadius: "10px",
     border: "none",
     outline: "none",
-    fontSize: "14px",
   },
 
-  /* ☑️ ROW */
   row: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
     marginTop: "10px",
     fontSize: "13px",
   },
@@ -206,7 +220,6 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "6px",
-    cursor: "pointer",
   },
 
   forgot: {
@@ -233,6 +246,7 @@ const styles = {
     fontSize: "13px",
   },
 };
+
 
 
 
