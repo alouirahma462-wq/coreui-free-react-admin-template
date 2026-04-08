@@ -12,15 +12,12 @@ export default function Login() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    // 🔥 حفظ remember_user قبل المسح
     const savedUser = localStorage.getItem("remember_user");
 
-    // 🔥 تنظيف كامل للجلسة
-    localStorage.clear();
+    // ❌ ممنوع clear كامل لأنه يخرب App session
+    localStorage.removeItem("user_id");
 
-    // 🔥 إعادة restore فقط للـ remember
     if (savedUser) {
-      localStorage.setItem("remember_user", savedUser);
       setUsername(savedUser);
       setRememberMe(true);
     }
@@ -67,27 +64,28 @@ export default function Login() {
         localStorage.removeItem("remember_user");
       }
 
+      // 🔥 أهم نقطة: نكتب user_id قبل التنقل مباشرة
       localStorage.setItem("user_id", user.id);
 
-      setTimeout(() => {
-        if (user.must_change_password == true) {
-          navigate("/change-password", { replace: true });
-          return;
-        }
+      // ❌ حذف setTimeout لأنه يسبب race condition
+      if (user.must_change_password) {
+        navigate("/change-password", { replace: true });
+        return;
+      }
 
-        if (user.court_id === null) {
-          navigate("/inspection-dashboard", { replace: true });
-          return;
-        }
+      if (user.court_id === null) {
+        navigate("/inspection-dashboard", { replace: true });
+        return;
+      }
 
-        navigate(`/court/${user.court_id}`, { replace: true });
-      }, 100);
+      navigate(`/court/${user.court_id}`, { replace: true });
 
     } catch (err) {
+      console.log(err);
       setMessage("❌ خطأ في النظام");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -151,7 +149,6 @@ export default function Login() {
         {message && <p style={styles.error}>{message}</p>}
       </div>
 
-      {/* 🔥 ANIMATION */}
       <style>{`
         @keyframes move {
           0% { transform: translateX(0); }
