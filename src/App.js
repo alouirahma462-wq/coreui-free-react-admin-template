@@ -15,10 +15,13 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   const loadUser = async () => {
+    setLoading(true);
+
     try {
       const userId = localStorage.getItem("user_id");
 
-      if (!userId) {
+      // 🔥 حماية من القيم الفارغة
+      if (!userId || userId === "undefined" || userId === "null") {
         setUser(null);
         setLoading(false);
         return;
@@ -27,18 +30,11 @@ export default function App() {
       const { data, error } = await supabase
         .from("users")
         .select("*")
-        .eq("id", Number(userId)) // 🔥 FIX مهم جداً (string → number)
+        .eq("id", userId) // ✅ FIX النهائي (بدون Number)
         .maybeSingle();
 
-      if (error) {
-        console.log("DB error:", error);
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-
-      if (!data) {
-        console.log("User not found");
+      if (error || !data) {
+        console.log("User fetch failed:", error);
         setUser(null);
         setLoading(false);
         return;
@@ -143,6 +139,7 @@ export default function App() {
     </Routes>
   );
 }
+
 
 
 
