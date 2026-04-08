@@ -31,7 +31,7 @@ export default function Login() {
       return;
     }
 
-    // 🔥 GET USER (SOURCE OF TRUTH)
+    // 🔥 1. GET USER
     const { data: user, error } = await supabase
       .from("users")
       .select(`
@@ -60,48 +60,44 @@ export default function Login() {
       return;
     }
 
-    // 🔥 GET ROLE
+    // 🔥 2. GET ROLE
     const { data: role } = await supabase
       .from("roles")
-      .select("access_level, role_key, role_name")
+      .select("access_level")
       .eq("id", user.role_id)
       .maybeSingle();
 
-    const safeRole = role || {
-      access_level: null,
-      role_key: "unknown",
-      role_name: "غير محدد",
-    };
+    const access_level = role?.access_level || null;
 
-    // 🧠 SAVE ONLY ID (NO CACHE BUGS)
+    // 🔥 3. SAVE ONLY ID (المفتاح الحقيقي للحل)
     localStorage.setItem("user_id", user.id);
 
-    // 👋 WELCOME MESSAGE
-    setMessage(`👋 مرحبا ${user.fullName} - ${user.courts?.name || "التفقدية العامة"}`);
+    // 👋 MESSAGE
+    setMessage(`👋 مرحبا ${user.fullName}`);
 
-    setTimeout(() => {
-      // 🔴 FIRST LOGIN PRIORITY
-      if (user.must_change_password === true) {
-        navigate("/change-password", {
-          state: { userId: user.id },
-        });
-        return;
-      }
+    // 🚨 4. NO setTimeout — تنفيذ مباشر
+    // 🔴 FIRST LOGIN
+    if (user.must_change_password === true) {
+      navigate("/change-password", { replace: true });
+      setLoading(false);
+      return;
+    }
 
-      // 🟢 ROUTING CLEAN
-      if (safeRole.access_level === "court") {
-        navigate(`/court/${user.court_id}`);
-        return;
-      }
+    // 🟢 NORMAL LOGIN
+    if (access_level === "court") {
+      navigate(`/court/${user.court_id}`, { replace: true });
+      setLoading(false);
+      return;
+    }
 
-      if (safeRole.access_level === "global") {
-        navigate("/inspection-dashboard");
-        return;
-      }
+    if (access_level === "global") {
+      navigate("/inspection-dashboard", { replace: true });
+      setLoading(false);
+      return;
+    }
 
-      navigate("/login");
-    }, 500);
-
+    // 🔥 fallback آمن
+    navigate("/login", { replace: true });
     setLoading(false);
   };
 
@@ -141,6 +137,7 @@ export default function Login() {
   );
 }
 
+/* 🎨 SAME STYLE (بدون تغيير) */
 const styles = {
   page: {
     height: "100vh",
@@ -184,6 +181,8 @@ const styles = {
     padding: "12px",
     margin: "8px 0",
     borderRadius: "8px",
+    border: "none",
+    outline: "none",
   },
 
   button: {
@@ -194,6 +193,8 @@ const styles = {
     color: "white",
     border: "none",
     borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "bold",
   },
 
   message: {
@@ -201,6 +202,7 @@ const styles = {
     color: "#fca5a5",
   },
 };
+
 
 
 
