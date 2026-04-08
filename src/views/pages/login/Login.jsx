@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { supabase } from "../../../supabaseClient";
 import { useNavigate } from "react-router-dom";
 
@@ -8,6 +8,7 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -16,77 +17,88 @@ export default function Login() {
     setLoading(true);
 
     try {
+      // 🧨 validation
       if (!username || !password) {
-        setMessage("❌ الرجاء إدخال البيانات");
+        setMessage("❌ الرجاء إدخال اسم المستخدم وكلمة المرور");
+        setLoading(false);
         return;
       }
 
+      // 🔍 fetch user from TABLE users ONLY
       const { data: user, error } = await supabase
         .from("users")
         .select(`
           id,
           username,
           fullName,
+          password,
           isActive,
           must_change_password,
-          court_id,
-          password
+          court_id
         `)
         .eq("username", username.trim())
         .maybeSingle();
 
       if (error || !user) {
-        setMessage("❌ بيانات غير صحيحة");
+        setMessage("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
+        setLoading(false);
         return;
       }
 
+      // 🚫 inactive user
       if (!user.isActive) {
         setMessage("❌ الحساب غير مفعل");
+        setLoading(false);
         return;
       }
 
-      // 🔐 check password
+      // 🔐 password check (plain for now)
       if (user.password !== password.trim()) {
-        setMessage("❌ بيانات غير صحيحة");
+        setMessage("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
+        setLoading(false);
         return;
       }
 
       // 💾 session
       localStorage.setItem("user_id", user.id);
 
-      // 🧠 remember me (اختياري)
       if (rememberMe) {
         localStorage.setItem("remember_me", "true");
+      } else {
+        localStorage.removeItem("remember_me");
       }
 
-      // 🔥 routing decision (App will handle actually, but safe fallback)
-      setMessage(`👋 مرحبا ${user.fullName}`);
+      // 👋 welcome message
+      setMessage(`👋 مرحباً ${user.fullName}`);
 
-      if (user.must_change_password) {
-        navigate("/change-password", { replace: true });
-        return;
-      }
+      // ⏳ short delay so user sees welcome
+      setTimeout(() => {
+        // 🔁 FIRST LOGIN → change password
+        if (user.must_change_password) {
+          navigate("/change-password", { replace: true });
+          return;
+        }
 
-      if (user.court_id === null) {
-        navigate("/inspection-dashboard", { replace: true });
-        return;
-      }
+        // 🟡 inspection user (court_id = null)
+        if (user.court_id === null) {
+          navigate("/inspection-dashboard", { replace: true });
+          return;
+        }
 
-      navigate(`/court/${user.court_id}`, { replace: true });
+        // 🏛️ normal court user
+        navigate(`/court/${user.court_id}`, { replace: true });
+      }, 700);
 
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ خطأ في النظام");
     }
+
+    setLoading(false);
   };
 
   return (
     <div style={styles.page}>
-      <div style={styles.header}>
-        <div style={styles.marquee}>
-          🇹🇳 وزارة العدل الجمهورية التونسية - منظومة النيابة العمومية - 🇹🇳
-        </div>
-      </div>
-
       <div style={styles.card}>
         <h2>🏛️ منظومة النيابة العمومية</h2>
 
@@ -105,26 +117,24 @@ export default function Login() {
           style={styles.input}
         />
 
-        {/* 🟡 Remember me */}
-        <label style={{ fontSize: "14px", display: "block", marginTop: "8px" }}>
+        <label style={styles.checkbox}>
           <input
             type="checkbox"
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
-          />{" "}
+          />
           تذكرني
         </label>
 
-        <button onClick={handleLogin} style={styles.button}>
+        <button onClick={handleLogin} style={styles.button} disabled={loading}>
           {loading ? "جاري الدخول..." : "دخول"}
         </button>
 
-        {/* 🔵 Forgot password */}
-        <p style={styles.links}>
+        <div style={styles.links}>
           <span onClick={() => navigate("/forgot-password")}>
             نسيت كلمة المرور؟
           </span>
-        </p>
+        </div>
 
         {message && <p style={styles.message}>{message}</p>}
       </div>
@@ -132,34 +142,16 @@ export default function Login() {
   );
 }
 
-/* 🎨 STYLE (نفس ستايلك + تحسين بسيط) */
+/* 🎨 STYLE */
 const styles = {
   page: {
     height: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    flexDirection: "column",
-    direction: "rtl",
     background: "linear-gradient(135deg, #0f172a, #1e293b)",
     color: "white",
-  },
-
-  header: {
-    position: "absolute",
-    top: 0,
-    width: "100%",
-    background: "#b91c1c",
-    padding: "10px 0",
-    overflow: "hidden",
-    whiteSpace: "nowrap",
-  },
-
-  marquee: {
-    display: "inline-block",
-    paddingLeft: "100%",
-    animation: "marquee 12s linear infinite",
-    fontWeight: "bold",
+    direction: "rtl",
   },
 
   card: {
@@ -192,9 +184,10 @@ const styles = {
     fontWeight: "bold",
   },
 
-  message: {
-    marginTop: "10px",
-    color: "#fca5a5",
+  checkbox: {
+    display: "block",
+    marginTop: "8px",
+    fontSize: "14px",
   },
 
   links: {
@@ -202,6 +195,11 @@ const styles = {
     fontSize: "14px",
     color: "#93c5fd",
     cursor: "pointer",
+  },
+
+  message: {
+    marginTop: "10px",
+    color: "#fca5a5",
   },
 };
 
