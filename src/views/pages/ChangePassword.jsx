@@ -15,12 +15,12 @@ export default function ChangePassword() {
   const [strength, setStrength] = useState("");
   const [tips, setTips] = useState([]);
 
-  // 🔥 NEW
   const [score, setScore] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
+  // 🔥 FIX ONLY HERE
   useEffect(() => {
-    const userId = localStorage.clear();
+    const userId = localStorage.getItem("user_id");
 
     if (!userId) {
       navigate("/login");
@@ -50,7 +50,7 @@ export default function ChangePassword() {
     fetchUser();
   }, []);
 
-  // 🔥 تحليل القوة + BAR
+  // 🔥 password strength
   useEffect(() => {
     let s = 0;
     let newTips = [];
@@ -96,7 +96,6 @@ export default function ChangePassword() {
     if (!error) {
       localStorage.removeItem("user_id");
 
-      // 🔥 NEW: show modal
       setShowModal(true);
 
       setTimeout(() => {
@@ -108,12 +107,11 @@ export default function ChangePassword() {
 
   if (!user) return <div style={{ color: "white" }}>Loading...</div>;
 
-const welcomeMessage =
-  user.court_id === null
-    ? `مرحبا ${user.fullName} - التفقدية العامة - إشراف مركزي`
-    : `مرحبا ${user.fullName} - ${courtName}`;
+  const welcomeMessage =
+    user.court_id === null
+      ? `مرحبا ${user.fullName} - التفقدية العامة - إشراف مركزي`
+      : `مرحبا ${user.fullName} - ${courtName}`;
 
-  // 🔥 لون البار
   const getBarColor = () => {
     if (score <= 1) return "#ef4444";
     if (score <= 3) return "#fbbf24";
@@ -123,7 +121,6 @@ const welcomeMessage =
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        
         <h3 style={styles.welcome}>{welcomeMessage}</h3>
 
         <h2>🔐 تغيير كلمة المرور</h2>
@@ -144,7 +141,6 @@ const welcomeMessage =
           style={styles.input}
         />
 
-        {/* 🔥 BAR */}
         {newPass && (
           <div style={styles.barContainer}>
             <div
@@ -177,7 +173,6 @@ const welcomeMessage =
         </button>
       </div>
 
-      {/* 🔥 MODAL SUCCESS */}
       {showModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
