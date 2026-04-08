@@ -108,10 +108,10 @@ export default function ChangePassword() {
 
   if (!user) return <div style={{ color: "white" }}>Loading...</div>;
 
-  const welcomeMessage =
-    user.court_id === null
-      ? `مرحبا ${user.full_name} - التفقدية العامة - إشراف مركزي`
-      : `مرحبا ${user.full_name} - ${courtName}`;
+const welcomeMessage =
+  user.court_id === null
+    ? `مرحبا ${user.fullName} - التفقدية العامة - إشراف مركزي`
+    : `مرحبا ${user.fullName} - ${courtName}`;
 
   // 🔥 لون البار
   const getBarColor = () => {
