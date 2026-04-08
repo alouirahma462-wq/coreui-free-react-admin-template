@@ -41,10 +41,7 @@ export default function App() {
 
   useEffect(() => {
     loadUser();
-
-    // 🔥 يمنع الرجوع للوغن فجأة
     const sync = setInterval(loadUser, 800);
-
     return () => clearInterval(sync);
   }, []);
 
@@ -73,6 +70,22 @@ export default function App() {
         path="/change-password"
         element={
           !user ? <Navigate to="/login" replace /> : <ChangePassword />
+        }
+      />
+
+      {/* 🔥 FORGOT PASSWORD (FIXED) */}
+      <Route
+        path="/forgot-password"
+        element={
+          !user ? <ForgotPassword /> : <Navigate to={getHomeRoute()} replace />
+        }
+      />
+
+      {/* 🔥 RESET PASSWORD (FIXED) */}
+      <Route
+        path="/reset-password"
+        element={
+          !user ? <ResetPassword /> : <Navigate to={getHomeRoute()} replace />
         }
       />
 
@@ -105,12 +118,12 @@ export default function App() {
 
       {/* ROOT */}
       <Route path="/" element={<Navigate to={getHomeRoute()} replace />} />
-
       <Route path="*" element={<Navigate to="/" replace />} />
 
     </Routes>
   );
 }
+
 
 
 
