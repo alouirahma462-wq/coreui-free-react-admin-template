@@ -12,7 +12,7 @@ export default function ChangePassword() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  // 🔐 LOAD USER
+  // 🔐 Load user
   useEffect(() => {
     const loadUser = async () => {
       const userId = localStorage.getItem("user_id");
@@ -22,44 +22,36 @@ export default function ChangePassword() {
         return;
       }
 
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("users")
-        .select(`
-          id,
-          fullName,
-          must_change_password,
-          court_id
-        `)
+        .select("id, fullName, must_change_password, court_id")
         .eq("id", userId)
         .single();
 
-      if (error || !data) {
+      if (!data) {
         navigate("/login");
         return;
       }
 
-      setUser(data);
-
-      // ❌ منع الدخول هنا إذا مش أول مرة
+      // ❗ فقط أول مرة مسموح
       if (!data.must_change_password) {
-        navigate("/login");
+        navigate("/");
+        return;
       }
+
+      setUser(data);
     };
 
     loadUser();
   }, [navigate]);
 
-  // 🚀 FINAL ROUTING (ONLY HERE AFTER UPDATE)
-  const redirectUser = (u) => {
-    if (u.court_id === null) {
-      navigate("/inspection-dashboard", { replace: true });
-      return;
-    }
-
-    navigate(`/court/${u.court_id}`, { replace: true });
+  // 🎯 redirect logic بعد التحديث
+  const redirectToLogin = () => {
+    localStorage.removeItem("user_id");
+    navigate("/login", { replace: true });
   };
 
-  // 🔐 UPDATE PASSWORD
+  // 🔐 update password
   const handleUpdate = async () => {
     setError("");
 
@@ -68,19 +60,19 @@ export default function ChangePassword() {
       return;
     }
 
-    if (newPass.length < 6) {
-      setError("❌ كلمة المرور قصيرة");
-      return;
-    }
-
     if (newPass !== confirmPass) {
       setError("❌ كلمة المرور غير متطابقة");
       return;
     }
 
+    if (newPass.length < 6) {
+      setError("❌ كلمة المرور قصيرة جداً");
+      return;
+    }
+
     setLoading(true);
 
-    const { error: updateError } = await supabase
+    const { error } = await supabase
       .from("users")
       .update({
         password: newPass,
@@ -88,21 +80,19 @@ export default function ChangePassword() {
       })
       .eq("id", user.id);
 
-    if (updateError) {
-      setLoading(false);
+    if (error) {
       setError("❌ فشل تحديث كلمة المرور");
+      setLoading(false);
       return;
     }
-
-    // 💾 session clean
-    localStorage.setItem("user_id", user.id);
 
     setLoading(false);
     setSuccess(true);
 
+    // ⏳ بعد نجاح → رجوع للـ login
     setTimeout(() => {
-      redirectUser(user);
-    }, 1200);
+      redirectToLogin();
+    }, 1500);
   };
 
   if (!user) {
@@ -112,8 +102,10 @@ export default function ChangePassword() {
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        <h2>🔐 تغيير كلمة المرور</h2>
-        <p>مرحباً {user.fullName}</p>
+
+        {/* 🔥 Welcome message */}
+        <h2>🔐 مرحباً {user.fullName}</h2>
+        <p>يرجى تغيير كلمة المرور للدخول إلى النظام</p>
 
         <input
           type="password"
@@ -132,7 +124,7 @@ export default function ChangePassword() {
         />
 
         <button onClick={handleUpdate} disabled={loading} style={styles.btn}>
-          {loading ? "جاري التحديث..." : "تحديث"}
+          {loading ? "جاري التحديث..." : "تحديث كلمة المرور"}
         </button>
 
         {error && <p style={{ color: "red" }}>{error}</p>}
@@ -141,8 +133,8 @@ export default function ChangePassword() {
       {success && (
         <div style={styles.modal}>
           <div style={styles.modalBox}>
-            <h3>✔ تم التحديث بنجاح</h3>
-            <p>سيتم تحويلك الآن...</p>
+            <h3>✔ تم تحديث كلمة المرور</h3>
+            <p>سيتم تحويلك لتسجيل الدخول...</p>
           </div>
         </div>
       )}
