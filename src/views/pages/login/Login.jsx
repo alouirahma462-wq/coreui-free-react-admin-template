@@ -7,6 +7,7 @@ export default function Login() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -45,7 +46,6 @@ export default function Login() {
         return;
       }
 
-      // 🔥 حفظ الجلسة
       localStorage.setItem("user_id", user.id);
 
       setTimeout(() => {
@@ -63,7 +63,6 @@ export default function Login() {
       }, 100);
 
     } catch (err) {
-      console.log(err);
       setMessage("❌ خطأ في النظام");
     }
 
@@ -72,8 +71,20 @@ export default function Login() {
 
   return (
     <div style={styles.page}>
+
+      {/* 🔴 TOP BAR */}
+      <div style={styles.topBar}>
+        <div style={styles.marquee}>
+          🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
+        </div>
+      </div>
+
+      {/* LOGIN CARD */}
       <div style={styles.card}>
-        <h2>🔐 تسجيل الدخول</h2>
+
+        <h2 style={styles.title}>🏛️ منظومة النيابة العمومية</h2>
+
+        <p style={styles.subTitle}>تسجيل الدخول إلى النظام القضائي</p>
 
         <input
           placeholder="اسم المستخدم"
@@ -90,47 +101,139 @@ export default function Login() {
           style={styles.input}
         />
 
+        {/* ☑️ Remember Me */}
+        <div style={styles.row}>
+          <label style={styles.remember}>
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            تذكرني
+          </label>
+
+          <span
+            style={styles.forgot}
+            onClick={() => navigate("/forgot-password")}
+          >
+            نسيت كلمة المرور؟
+          </span>
+        </div>
+
         <button onClick={handleLogin} style={styles.btn}>
           {loading ? "جاري الدخول..." : "دخول"}
         </button>
 
-        {message && <p style={{ color: "red" }}>{message}</p>}
+        {message && <p style={styles.error}>{message}</p>}
       </div>
     </div>
   );
 }
-
 const styles = {
   page: {
     height: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "#0f172a",
+    background: "linear-gradient(135deg, #0b1220, #0f172a, #111c33)",
     color: "white",
+    direction: "rtl",
+    position: "relative",
+    overflow: "hidden",
   },
+
+  /* 🔴 TOP BAR */
+  topBar: {
+    position: "absolute",
+    top: 0,
+    width: "100%",
+    background: "#b91c1c",
+    padding: "10px 0",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+  },
+
+  marquee: {
+    display: "inline-block",
+    fontWeight: "bold",
+    animation: "marquee 12s linear infinite",
+  },
+
+  /* 🏛️ CARD (أعرض + احترافي) */
   card: {
-    width: "350px",
-    padding: "20px",
-    background: "rgba(255,255,255,0.1)",
-    borderRadius: "12px",
+    width: "480px",
+    padding: "35px",
+    borderRadius: "20px",
+    background: "rgba(255,255,255,0.08)",
+    backdropFilter: "blur(22px)",
+    border: "1px solid rgba(255,255,255,0.12)",
+    boxShadow: "0 25px 70px rgba(0,0,0,0.45)",
     textAlign: "center",
   },
+
+  title: {
+    fontSize: "22px",
+    fontWeight: "bold",
+    marginBottom: "5px",
+  },
+
+  subTitle: {
+    fontSize: "13px",
+    opacity: 0.8,
+    marginBottom: "20px",
+  },
+
   input: {
     width: "100%",
-    padding: "10px",
+    padding: "13px",
     margin: "8px 0",
-    borderRadius: "8px",
+    borderRadius: "10px",
+    border: "none",
+    outline: "none",
+    fontSize: "14px",
   },
+
+  /* ☑️ ROW */
+  row: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: "10px",
+    fontSize: "13px",
+  },
+
+  remember: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    cursor: "pointer",
+  },
+
+  forgot: {
+    color: "#93c5fd",
+    cursor: "pointer",
+    textDecoration: "underline",
+  },
+
   btn: {
     width: "100%",
-    padding: "10px",
-    background: "#1e3a8a",
-    color: "white",
+    padding: "13px",
+    marginTop: "15px",
+    background: "linear-gradient(90deg, #1e3a8a, #2563eb)",
     border: "none",
-    borderRadius: "8px",
+    borderRadius: "10px",
+    color: "white",
+    fontWeight: "bold",
+    cursor: "pointer",
+  },
+
+  error: {
+    marginTop: "10px",
+    color: "#fca5a5",
+    fontSize: "13px",
   },
 };
+
 
 
 
