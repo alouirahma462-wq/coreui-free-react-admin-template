@@ -15,8 +15,6 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   const loadUser = async () => {
-    setLoading(true); // 🔥 مهم جداً لمنع تعليق الحالات
-
     try {
       const userId = localStorage.getItem("user_id");
 
@@ -29,38 +27,35 @@ export default function App() {
       const { data, error } = await supabase
         .from("users")
         .select("*")
-        .eq("id", userId)
+        .eq("id", Number(userId)) // 🔥 FIX مهم جداً (string → number)
         .maybeSingle();
 
-      if (error || !data) {
-        console.log("User load failed:", error);
-        localStorage.removeItem("user_id");
+      if (error) {
+        console.log("DB error:", error);
         setUser(null);
-      } else {
-        setUser(data);
+        setLoading(false);
+        return;
       }
+
+      if (!data) {
+        console.log("User not found");
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      setUser(data);
+      setLoading(false);
+
     } catch (err) {
       console.log("Fatal error:", err);
-      localStorage.removeItem("user_id");
       setUser(null);
-    } finally {
-      setLoading(false); // 🔥 يمنع التعليق نهائياً
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    let active = true;
-
-    const init = async () => {
-      if (!active) return;
-      await loadUser();
-    };
-
-    init();
-
-    return () => {
-      active = false;
-    };
+    loadUser();
   }, []);
 
   if (loading) {
@@ -148,6 +143,7 @@ export default function App() {
     </Routes>
   );
 }
+
 
 
 
