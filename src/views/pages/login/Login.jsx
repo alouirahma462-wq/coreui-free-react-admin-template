@@ -86,18 +86,20 @@ export default function Login() {
   return (
     <div style={styles.page}>
 
-      {/* 🔴 TOP BAR (FIXED MARQUEE) */}
-   <div className="top-bar">
-  <div className="marquee-track">
-    <div className="marquee-text">
-      🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
-    </div>
+      {/* 🔴 TOP BAR (FIXED ONLY) */}
+      <div style={styles.topBar}>
+        <div style={styles.marqueeTrack}>
+          
+          <div style={styles.marqueeText}>
+            🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
+          </div>
 
-    <div className="marquee-text">
-      🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
-    </div>
-  </div>
-</div>
+          <div style={styles.marqueeText}>
+            🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
+          </div>
+
+        </div>
+      </div>
 
       {/* LOGIN CARD */}
       <div style={styles.card}>
@@ -131,7 +133,6 @@ export default function Login() {
             تذكرني
           </label>
 
-          {/* 🔑 FIXED FORGOT PASSWORD */}
           <button
             type="button"
             onClick={() => navigate("/forgot-password")}
@@ -162,32 +163,36 @@ const styles = {
     direction: "rtl",
     position: "relative",
     overflow: "hidden",
+    paddingTop: "40px", // 🔥 مهم حتى ما يغطي الشريط المحتوى
   },
 
-  // 🔴 TOP BAR FIXED
+  // 🔴 FIXED TOP BAR ONLY
   topBar: {
-    position: "absolute",
+    position: "fixed",
     top: 0,
+    left: 0,
     width: "100%",
     height: "40px",
     background: "#b91c1c",
     overflow: "hidden",
     display: "flex",
     alignItems: "center",
+    zIndex: 99999,
   },
 
   marqueeTrack: {
     display: "flex",
-    width: "200%",
-    animation: "move 10s linear infinite",
+    width: "max-content",
+    animation: "move 15s linear infinite",
   },
 
   marqueeText: {
-    width: "100%",
     whiteSpace: "nowrap",
-    textAlign: "center",
+    flexShrink: 0,
+    paddingRight: "120px",
     fontWeight: "bold",
-    color: "white",
+    color: "#fff",
+    fontSize: "14px",
   },
 
   card: {
@@ -201,16 +206,8 @@ const styles = {
     textAlign: "center",
   },
 
-  title: {
-    fontSize: "22px",
-    fontWeight: "bold",
-  },
-
-  subTitle: {
-    fontSize: "13px",
-    opacity: 0.8,
-    marginBottom: "20px",
-  },
+  title: { fontSize: "22px", fontWeight: "bold" },
+  subTitle: { fontSize: "13px", opacity: 0.8, marginBottom: "20px" },
 
   input: {
     width: "100%",
@@ -234,7 +231,6 @@ const styles = {
     gap: "6px",
   },
 
-  // 🔑 FIXED BUTTON
   forgotBtn: {
     background: "transparent",
     border: "none",
@@ -262,6 +258,9 @@ const styles = {
     fontSize: "13px",
   },
 };
+
+/* 🔥 لازم يكون موجود في CSS global */
+
 
 
 
