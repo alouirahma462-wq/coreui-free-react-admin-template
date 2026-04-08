@@ -2,13 +2,11 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 
-// Pages
 import Login from "./views/pages/login/Login.jsx";
 import ChangePassword from "./views/pages/ChangePassword.jsx";
 import ForgotPassword from "./views/pages/ForgotPassword.jsx";
 import ResetPassword from "./views/pages/ResetPassword.jsx";
 
-// Dashboards
 import CourtDashboard from "./views/dashboard/CourtDashboard.jsx";
 import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
@@ -16,7 +14,6 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔐 تحميل المستخدم من Supabase
   const loadUser = async () => {
     try {
       const userId = localStorage.getItem("user_id");
@@ -31,16 +28,11 @@ export default function App() {
         .from("users")
         .select("*")
         .eq("id", userId)
-        .single();
+        .maybeSingle();
 
-      if (!data) {
-        localStorage.removeItem("user_id");
-        setUser(null);
-      } else {
-        setUser(data);
-      }
+      setUser(data || null);
     } catch (err) {
-      console.log("loadUser error:", err);
+      console.log(err);
       setUser(null);
     } finally {
       setLoading(false);
@@ -49,35 +41,26 @@ export default function App() {
 
   useEffect(() => {
     loadUser();
+
+    // 🔥 يمنع الرجوع للوغن فجأة
+    const sync = setInterval(loadUser, 800);
+
+    return () => clearInterval(sync);
   }, []);
 
-  if (loading) {
-    return (
-      <div style={{ color: "white", textAlign: "center", marginTop: "50px" }}>
-        Loading...
-      </div>
-    );
-  }
+  if (loading) return <div style={{ color: "white" }}>Loading...</div>;
 
-  // 🎯 تحديد الصفحة الرئيسية حسب الحالة
   const getHomeRoute = () => {
     if (!user) return "/login";
-
-    if (user.must_change_password) {
-      return "/change-password";
-    }
-
-    if (user.court_id === null) {
-      return "/inspection-dashboard";
-    }
-
+    if (user.must_change_password) return "/change-password";
+    if (user.court_id === null) return "/inspection-dashboard";
     return `/court/${user.court_id}`;
   };
 
   return (
     <Routes>
 
-      {/* ================= LOGIN ================= */}
+      {/* LOGIN */}
       <Route
         path="/login"
         element={
@@ -85,25 +68,15 @@ export default function App() {
         }
       />
 
-      {/* ================= FORGOT PASSWORD ================= */}
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-
-      {/* ================= RESET PASSWORD ================= */}
-      <Route path="/reset-password" element={<ResetPassword />} />
-
-      {/* ================= CHANGE PASSWORD ================= */}
+      {/* CHANGE PASSWORD */}
       <Route
         path="/change-password"
         element={
-          !user ? (
-            <Navigate to="/login" replace />
-          ) : (
-            <ChangePassword />
-          )
+          !user ? <Navigate to="/login" replace /> : <ChangePassword />
         }
       />
 
-      {/* ================= COURT DASHBOARD ================= */}
+      {/* DASHBOARDS */}
       <Route
         path="/court/:id"
         element={
@@ -117,7 +90,6 @@ export default function App() {
         }
       />
 
-      {/* ================= INSPECTION DASHBOARD ================= */}
       <Route
         path="/inspection-dashboard"
         element={
@@ -131,15 +103,15 @@ export default function App() {
         }
       />
 
-      {/* ================= ROOT ================= */}
+      {/* ROOT */}
       <Route path="/" element={<Navigate to={getHomeRoute()} replace />} />
 
-      {/* ================= FALLBACK ================= */}
       <Route path="*" element={<Navigate to="/" replace />} />
 
     </Routes>
   );
 }
+
 
 
 
