@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 // AUTH
 import Login from "./views/pages/login/Login.jsx";
@@ -12,7 +12,6 @@ import CourtDashboard from "./views/dashboard/CourtDashboard.jsx";
 import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
 export default function App() {
-  const [user, setUser] = useState(null);
   const location = useLocation();
 
   // 🎨 Background
@@ -26,56 +25,33 @@ export default function App() {
     document.body.style.backgroundAttachment = "fixed";
   }, []);
 
-  // 🔐 SAFE USER PARSER
+  // 🔐 LOAD USER (ONLY SOURCE OF TRUTH)
   const getUser = () => {
     try {
-      const u = JSON.parse(localStorage.getItem("user"));
-      return u || null;
+      const userId = localStorage.getItem("user_id");
+      if (!userId) return null;
+
+      return { id: userId };
     } catch {
       return null;
     }
   };
 
-  useEffect(() => {
-    setUser(getUser());
-  }, [location.pathname]);
-
-  // 🧠 SAFE HOME ROUTE
+  // 🧠 HOME ROUTE FIXED
   const getHome = () => {
     const u = getUser();
 
     if (!u) return "/login";
 
-    // 🔴 FIRST LOGIN RULE (PRIORITY 1)
-    if (u.must_change_password === true) {
-      return "/change-password";
-    }
-
-    // 🔥 SAFE ACCESS CHECK
-    const access = u.access_level;
-
-    if (access === "court") {
-      return `/court/${u.court_id}`;
-    }
-
-    if (access === "global") {
-      return "/inspection-dashboard";
-    }
-
-    // 🚨 fallback آمن (ما يطيّح النظام)
-    return "/change-password";
+    // default safe
+    return "/inspection-dashboard";
   };
 
-  // 🔐 PROTECTED ROUTE SAFE
+  // 🔐 PROTECTED ROUTE (NO LOOP)
   const ProtectedRoute = ({ children }) => {
     const u = getUser();
 
     if (!u) return <Navigate to="/login" replace />;
-
-    // 🔴 force first login always
-    if (u.must_change_password === true) {
-      return <Navigate to="/change-password" replace />;
-    }
 
     return children;
   };
@@ -88,28 +64,25 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* CHANGE PASSWORD (NO PROTECTION) */}
-      <Route
-        path="/change-password"
-        element={<ChangePassword setUser={setUser} />}
-      />
+      {/* CHANGE PASSWORD (FREE ACCESS) */}
+      <Route path="/change-password" element={<ChangePassword />} />
 
-      {/* COURT DASHBOARD */}
+      {/* COURT */}
       <Route
         path="/court/:id"
         element={
           <ProtectedRoute>
-            <CourtDashboard user={user} />
+            <CourtDashboard />
           </ProtectedRoute>
         }
       />
 
-      {/* INSPECTION DASHBOARD */}
+      {/* INSPECTION */}
       <Route
         path="/inspection-dashboard"
         element={
           <ProtectedRoute>
-            <InspectionDashboard user={user} />
+            <InspectionDashboard />
           </ProtectedRoute>
         }
       />
@@ -123,6 +96,7 @@ export default function App() {
     </Routes>
   );
 }
+
 
 
 
