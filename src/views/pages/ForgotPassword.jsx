@@ -139,8 +139,7 @@ export default function ForgotPassword() {
 }
 
 /* =========================
-   🧊 GLASS CARD ONLY (NO BACKGROUND)
-   + depends on App global background
+   🎨 ONLY UI FIX (NO LOGIC CHANGE)
 ========================= */
 
 const styles = {
@@ -152,6 +151,14 @@ const styles = {
     justifyContent: "center",
     direction: "rtl",
     color: "white",
+
+    /* 🔥 FIX BACKGROUND */
+    background: "linear-gradient(135deg, #0f172a, #1e293b)",
+    backgroundImage:
+      "radial-gradient(circle at top, rgba(185,28,28,0.25), transparent 50%)",
+
+    position: "relative",
+    overflow: "hidden",
   },
 
   header: {
@@ -166,24 +173,27 @@ const styles = {
     fontWeight: "bold",
   },
 
+  /* 🔥 FIXED GLASS CARD */
   card: {
     width: "90%",
     maxWidth: "420px",
 
-    background: "rgba(255,255,255,0.08)",
-    backdropFilter: "blur(25px)",
-    WebkitBackdropFilter: "blur(25px)",
+    background: "rgba(255,255,255,0.07)",
+    backdropFilter: "blur(20px)",
+    WebkitBackdropFilter: "blur(20px)",
 
-    borderRadius: "22px",
+    borderRadius: "20px",
     padding: "28px",
     textAlign: "center",
 
     border: "1px solid rgba(255,255,255,0.15)",
 
     boxShadow: `
-      0 20px 60px rgba(0,0,0,0.55),
+      0 25px 70px rgba(0,0,0,0.6),
       inset 0 1px 0 rgba(255,255,255,0.08)
     `,
+
+    color: "white",
   },
 
   title: {
@@ -206,10 +216,8 @@ const styles = {
     width: "100%",
     padding: "12px",
     margin: "8px 0",
-
     borderRadius: "12px",
     border: "1px solid rgba(255,255,255,0.2)",
-
     outline: "none",
     background: "rgba(255,255,255,0.06)",
     color: "white",
@@ -219,11 +227,9 @@ const styles = {
     width: "100%",
     padding: "12px",
     marginTop: "10px",
-
     borderRadius: "12px",
     background: "linear-gradient(135deg, #1e3a8a, #2563eb)",
     color: "white",
-
     fontWeight: "bold",
     border: "none",
     cursor: "pointer",
@@ -233,11 +239,9 @@ const styles = {
     width: "100%",
     padding: "12px",
     marginTop: "10px",
-
     borderRadius: "12px",
     background: "rgba(255,255,255,0.12)",
     color: "white",
-
     fontWeight: "bold",
     border: "1px solid rgba(255,255,255,0.2)",
     cursor: "pointer",
@@ -246,10 +250,8 @@ const styles = {
   otpBox: {
     marginTop: "15px",
     padding: "15px",
-
     background: "rgba(255,255,255,0.06)",
     borderRadius: "14px",
-
     border: "1px solid rgba(255,255,255,0.1)",
   },
 
@@ -270,6 +272,7 @@ const styles = {
     marginTop: "5px",
   },
 };
+
 
 
 
