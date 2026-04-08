@@ -15,9 +15,27 @@ export default function ResetPassword() {
   useEffect(() => {
     const user = localStorage.getItem("reset_user");
     const flow = localStorage.getItem("reset_flow");
+    const expiry = localStorage.getItem("reset_expiry");
 
-    if (!user || flow !== "active") {
-      navigate("/login");
+    // ❌ حالة غير صالحة → رجوع لوجن
+    if (!user || flow !== "active" || !expiry) {
+      localStorage.removeItem("reset_user");
+      localStorage.removeItem("reset_otp");
+      localStorage.removeItem("reset_flow");
+      localStorage.removeItem("reset_expiry");
+
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    // ⛔ انتهاء الصلاحية
+    if (Date.now() > parseInt(expiry)) {
+      localStorage.removeItem("reset_user");
+      localStorage.removeItem("reset_otp");
+      localStorage.removeItem("reset_flow");
+      localStorage.removeItem("reset_expiry");
+
+      navigate("/forgot-password", { replace: true });
       return;
     }
 
@@ -117,6 +135,7 @@ export default function ResetPassword() {
     </div>
   );
 }
+
 const styles = {
   page: {
     height: "100vh",
@@ -129,7 +148,6 @@ const styles = {
     fontFamily: "Tahoma",
     color: "white",
 
-    /* 🔥 FIX WHITE BACKGROUND (CoreUI override kill) */
     backgroundColor: "#0f172a",
 
     backgroundImage: `
@@ -163,7 +181,6 @@ const styles = {
     maxWidth: "420px",
     padding: "30px",
 
-    /* 🔥 FIX GLASS (no white anymore) */
     backgroundColor: "rgba(2, 6, 23, 0.75)",
 
     backdropFilter: "blur(30px)",
@@ -199,9 +216,6 @@ const styles = {
 
     backgroundColor: "rgba(255,255,255,0.08)",
     color: "white",
-
-    position: "relative",
-    zIndex: 9999,
   },
 
   button: {
@@ -251,6 +265,7 @@ const styles = {
     color: "#22c55e",
   },
 };
+
 
 
 
