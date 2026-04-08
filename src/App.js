@@ -11,7 +11,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 SINGLE SOURCE OF TRUTH
+  // 🔥 LOAD USER (single source of truth)
   const loadUser = async () => {
     const userId = localStorage.getItem("user_id");
 
@@ -23,11 +23,17 @@ export default function App() {
 
     const { data, error } = await supabase
       .from("users")
-      .select("*")
+      .select(`
+        id,
+        fullName,
+        must_change_password,
+        court_id,
+        isActive
+      `)
       .eq("id", userId)
       .single();
 
-    if (error || !data) {
+    if (error || !data || !data.isActive) {
       localStorage.removeItem("user_id");
       setUser(null);
     } else {
@@ -41,8 +47,31 @@ export default function App() {
     loadUser();
   }, []);
 
+  // 🔥 GUARD COMPONENT (clean logic)
+  const RequireAuth = ({ children }) => {
+    if (!user) return <Navigate to="/login" replace />;
+    return children;
+  };
+
+  const RequirePasswordChange = ({ children }) => {
+    if (user?.must_change_password)
+      return <Navigate to="/change-password" replace />;
+    return children;
+  };
+
+  const getHomeRoute = () => {
+    if (!user) return "/login";
+    if (user.must_change_password) return "/change-password";
+    if (user.court_id === null) return "/inspection-dashboard";
+    return `/court/${user.court_id}`;
+  };
+
   if (loading) {
-    return <div style={{ color: "white" }}>Loading...</div>;
+    return (
+      <div style={{ color: "white", textAlign: "center", marginTop: 50 }}>
+        Loading...
+      </div>
+    );
   }
 
   return (
@@ -55,70 +84,53 @@ export default function App() {
       <Route
         path="/change-password"
         element={
-          !user ? (
-            <Navigate to="/login" replace />
-          ) : user.must_change_password ? (
+          <RequireAuth>
             <ChangePassword />
-          ) : (
-            <Navigate to="/" replace />
-          )
+          </RequireAuth>
         }
       />
 
-      {/* COURT */}
+      {/* COURT DASHBOARD */}
       <Route
         path="/court/:id"
         element={
-          !user ? (
-            <Navigate to="/login" replace />
-          ) : user.must_change_password ? (
-            <Navigate to="/change-password" replace />
-          ) : user.access_level === "court" ? (
-            <CourtDashboard user={user} />
-          ) : (
-            <Navigate to="/" replace />
-          )
+          <RequireAuth>
+            <RequirePasswordChange>
+              {user?.court_id !== null ? (
+                <CourtDashboard user={user} />
+              ) : (
+                <Navigate to="/inspection-dashboard" replace />
+              )}
+            </RequirePasswordChange>
+          </RequireAuth>
         }
       />
 
-      {/* INSPECTION */}
+      {/* INSPECTION DASHBOARD */}
       <Route
         path="/inspection-dashboard"
         element={
-          !user ? (
-            <Navigate to="/login" replace />
-          ) : user.must_change_password ? (
-            <Navigate to="/change-password" replace />
-          ) : user.access_level === "global" ? (
-            <InspectionDashboard user={user} />
-          ) : (
-            <Navigate to="/" replace />
-          )
+          <RequireAuth>
+            <RequirePasswordChange>
+              {user?.court_id === null ? (
+                <InspectionDashboard user={user} />
+              ) : (
+                <Navigate to={getHomeRoute()} replace />
+              )}
+            </RequirePasswordChange>
+          </RequireAuth>
         }
       />
 
-      {/* ROOT */}
-      <Route
-        path="/"
-        element={
-          !user ? (
-            <Navigate to="/login" replace />
-          ) : user.must_change_password ? (
-            <Navigate to="/change-password" replace />
-          ) : user.access_level === "court" ? (
-            <Navigate to={`/court/${user.court_id}`} replace />
-          ) : (
-            <Navigate to="/inspection-dashboard" replace />
-          )
-        }
-      />
+      {/* ROOT SMART REDIRECT */}
+      <Route path="/" element={<Navigate to={getHomeRoute()} replace />} />
 
       {/* FALLBACK */}
       <Route path="*" element={<Navigate to="/" replace />} />
-
     </Routes>
   );
 }
+
 
 
 
