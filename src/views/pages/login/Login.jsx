@@ -87,17 +87,17 @@ export default function Login() {
     <div style={styles.page}>
 
       {/* 🔴 TOP BAR (FIXED MARQUEE) */}
-      <div style={styles.topBar}>
-        <div style={styles.marqueeTrack}>
-          <div style={styles.marqueeText}>
-            🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
-          </div>
+     <div className="top-bar">
+  <div className="marquee-track">
+    <div className="marquee-text">
+      🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
+    </div>
 
-          <div style={styles.marqueeText}>
-            🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
-          </div>
-        </div>
-      </div>
+    <div className="marquee-text">
+      🇹🇳 وزارة العدل - الجمهورية التونسية - منظومة النيابة العمومية
+    </div>
+  </div>
+</div>
 
       {/* LOGIN CARD */}
       <div style={styles.card}>
