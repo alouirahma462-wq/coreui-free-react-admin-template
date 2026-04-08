@@ -31,7 +31,7 @@ export default function Login() {
       return;
     }
 
-    // 🔥 1. GET USER
+    // 🔥 جلب المستخدم فقط من جدول users
     const { data: user, error } = await supabase
       .from("users")
       .select(`
@@ -40,12 +40,9 @@ export default function Login() {
         fullName,
         isActive,
         must_change_password,
-        court_id,
-        role_id,
-        courts (id, name)
+        court_id
       `)
       .eq("username", username.trim())
-      .eq("password", password.trim())
       .maybeSingle();
 
     if (error || !user) {
@@ -60,44 +57,34 @@ export default function Login() {
       return;
     }
 
-    // 🔥 2. GET ROLE
-    const { data: role } = await supabase
-      .from("roles")
-      .select("access_level")
-      .eq("id", user.role_id)
-      .maybeSingle();
+    // ⚠️ مؤقت (بدون auth)
+    if (user.password && user.password !== password.trim()) {
+      setMessage("❌ بيانات غير صحيحة");
+      setLoading(false);
+      return;
+    }
 
-    const access_level = role?.access_level || null;
-
-    // 🔥 3. SAVE ONLY ID (المفتاح الحقيقي للحل)
+    // 💾 حفظ الجلسة
     localStorage.setItem("user_id", user.id);
 
-    // 👋 MESSAGE
     setMessage(`👋 مرحبا ${user.fullName}`);
 
-    // 🚨 4. NO setTimeout — تنفيذ مباشر
-    // 🔴 FIRST LOGIN
-    if (user.must_change_password === true) {
+    // 🔴 أول دخول → تغيير كلمة المرور
+    if (user.must_change_password) {
       navigate("/change-password", { replace: true });
       setLoading(false);
       return;
     }
 
-    // 🟢 NORMAL LOGIN
-    if (access_level === "court") {
-      navigate(`/court/${user.court_id}`, { replace: true });
-      setLoading(false);
-      return;
-    }
-
-    if (access_level === "global") {
+    // 🔵 inspection user (court_id = null)
+    if (user.court_id === null) {
       navigate("/inspection-dashboard", { replace: true });
       setLoading(false);
       return;
     }
 
-    // 🔥 fallback آمن
-    navigate("/login", { replace: true });
+    // 🟢 court user
+    navigate(`/court/${user.court_id}`, { replace: true });
     setLoading(false);
   };
 
@@ -131,13 +118,19 @@ export default function Login() {
           {loading ? "جاري الدخول..." : "دخول"}
         </button>
 
+        <p style={styles.links}>
+          <span onClick={() => navigate("/forgot-password")}>
+            نسيت كلمة المرور؟
+          </span>
+        </p>
+
         {message && <p style={styles.message}>{message}</p>}
       </div>
     </div>
   );
 }
 
-/* 🎨 SAME STYLE (بدون تغيير) */
+/* 🎨 STYLE (نفس ستايلك + تحسين بسيط) */
 const styles = {
   page: {
     height: "100vh",
@@ -200,6 +193,13 @@ const styles = {
   message: {
     marginTop: "10px",
     color: "#fca5a5",
+  },
+
+  links: {
+    marginTop: "10px",
+    fontSize: "14px",
+    color: "#93c5fd",
+    cursor: "pointer",
   },
 };
 
