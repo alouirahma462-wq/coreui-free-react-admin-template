@@ -14,7 +14,7 @@ export default function Login() {
   useEffect(() => {
     const savedUser = localStorage.getItem("remember_user");
 
-    // ❌ ممنوع clear كامل لأنه يخرب App session
+    // ❌ بدون clear (كان يسبب تعليق)
     localStorage.removeItem("user_id");
 
     if (savedUser) {
@@ -64,26 +64,29 @@ export default function Login() {
         localStorage.removeItem("remember_user");
       }
 
-      // 🔥 أهم نقطة: نكتب user_id قبل التنقل مباشرة
       localStorage.setItem("user_id", user.id);
 
-      // ❌ حذف setTimeout لأنه يسبب race condition
-      if (user.must_change_password) {
-        navigate("/change-password", { replace: true });
-        return;
-      }
+      // 🔥 FIX التعليق: نفصل التحميل عن التنقل
+      setLoading(false);
 
-      if (user.court_id === null) {
-        navigate("/inspection-dashboard", { replace: true });
-        return;
-      }
+      // 🔥 منع freeze في React navigation
+      requestAnimationFrame(() => {
+        if (user.must_change_password === true) {
+          navigate("/change-password", { replace: true });
+          return;
+        }
 
-      navigate(`/court/${user.court_id}`, { replace: true });
+        if (user.court_id === null) {
+          navigate("/inspection-dashboard", { replace: true });
+          return;
+        }
+
+        navigate(`/court/${user.court_id}`, { replace: true });
+      });
 
     } catch (err) {
       console.log(err);
       setMessage("❌ خطأ في النظام");
-    } finally {
       setLoading(false);
     }
   };
@@ -159,6 +162,7 @@ export default function Login() {
     </div>
   );
 }
+
 
 const styles = {
   page: {
