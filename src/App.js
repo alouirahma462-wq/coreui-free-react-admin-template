@@ -30,7 +30,7 @@ export default function App() {
       const { data, error } = await supabase
         .from("users")
         .select("*")
-        .eq("id", userId) // ✅ FIX النهائي (بدون Number)
+        .eq("id", Number(userId)) // ✅ FIX النهائي الحقيقي
         .maybeSingle();
 
       if (error || !data) {
@@ -139,6 +139,7 @@ export default function App() {
     </Routes>
   );
 }
+
 
 
 
