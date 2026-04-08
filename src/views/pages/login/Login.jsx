@@ -74,7 +74,7 @@ export default function Login() {
       // ┌──────────────┐
       // ↓              ↓
 
-      if (user.must_change_password === true) {
+      if (user.must_change_password == true) {
         // 🔴 CHANGE PASSWORD FIRST LOGIN
         navigate("/change-password", {
           state: { userId: user.id },
