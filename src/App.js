@@ -20,7 +20,6 @@ export default function App() {
 
       if (!userId) {
         setUser(null);
-        setLoading(false);
         return;
       }
 
@@ -33,21 +32,35 @@ export default function App() {
       if (error || !data) {
         localStorage.removeItem("user_id");
         setUser(null);
-      } else {
-        setUser(data);
+        return;
       }
+
+      setUser(data);
 
     } catch (err) {
       console.log(err);
       localStorage.removeItem("user_id");
       setUser(null);
     } finally {
-      setLoading(false); // 🔥 ضمان عدم التعليق
+      // 🔥 FIX: يمنع التعليق 100%
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadUser();
+    let isMounted = true;
+
+    const init = async () => {
+      if (isMounted) {
+        await loadUser();
+      }
+    };
+
+    init();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (loading) {
@@ -135,6 +148,7 @@ export default function App() {
     </Routes>
   );
 }
+
 
 
 
