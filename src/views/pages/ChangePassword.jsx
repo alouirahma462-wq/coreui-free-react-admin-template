@@ -18,7 +18,7 @@ export default function ChangePassword() {
       const userId = localStorage.getItem("user_id");
 
       if (!userId) {
-        navigate("/login");
+        navigate("/login", { replace: true });
         return;
       }
 
@@ -29,13 +29,13 @@ export default function ChangePassword() {
         .single();
 
       if (!data) {
-        navigate("/login");
+        navigate("/login", { replace: true });
         return;
       }
 
-      // ❗ فقط أول مرة مسموح
-      if (!data.must_change_password) {
-        navigate("/");
+      // ❗ يسمح فقط لأول مرة
+      if (data.must_change_password !== true) {
+        navigate("/login", { replace: true });
         return;
       }
 
@@ -45,10 +45,14 @@ export default function ChangePassword() {
     loadUser();
   }, [navigate]);
 
-  // 🎯 redirect logic بعد التحديث
-  const redirectToLogin = () => {
-    localStorage.removeItem("user_id");
-    navigate("/login", { replace: true });
+  // 🔥 redirect حسب الوركفلو بعد التحديث
+  const redirectAfterLogin = (u) => {
+    if (u.court_id === null) {
+      navigate("/inspection-dashboard", { replace: true });
+      return;
+    }
+
+    navigate(`/court/${u.court_id}`, { replace: true });
   };
 
   // 🔐 update password
@@ -89,10 +93,16 @@ export default function ChangePassword() {
     setLoading(false);
     setSuccess(true);
 
-    // ⏳ بعد نجاح → رجوع للـ login
+    // ⏳ بعد النجاح
     setTimeout(() => {
-      redirectToLogin();
-    }, 1500);
+      // تنظيف session
+      localStorage.removeItem("user_id");
+
+      // يرجع login
+      navigate("/login", { replace: true });
+
+      // (الوركفلو: بعد login يدخل ويذهب للداشبورد الصحيح)
+    }, 1200);
   };
 
   if (!user) {
@@ -103,8 +113,8 @@ export default function ChangePassword() {
     <div style={styles.page}>
       <div style={styles.card}>
 
-        {/* 🔥 Welcome message */}
-        <h2>🔐 مرحباً {user.fullName}</h2>
+        {/* 👋 Welcome */}
+        <h2>👋 مرحباً {user.fullName}</h2>
         <p>يرجى تغيير كلمة المرور للدخول إلى النظام</p>
 
         <input
@@ -133,7 +143,7 @@ export default function ChangePassword() {
       {success && (
         <div style={styles.modal}>
           <div style={styles.modalBox}>
-            <h3>✔ تم تحديث كلمة المرور</h3>
+            <h3>✔ تم تحديث كلمة المرور بنجاح</h3>
             <p>سيتم تحويلك لتسجيل الدخول...</p>
           </div>
         </div>
@@ -202,6 +212,7 @@ const styles = {
     height: "100vh",
   },
 };
+
 
 
 
