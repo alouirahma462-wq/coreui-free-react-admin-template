@@ -7,85 +7,76 @@ export default function Login() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const style = document.createElement("style");
-    style.innerHTML = `
-      @keyframes marquee {
-        0% { transform: translateX(0%); }
-        100% { transform: translateX(-100%); }
-      }
-    `;
-    document.head.appendChild(style);
-  }, []);
 
   const handleLogin = async () => {
     setMessage("");
     setLoading(true);
 
-    if (!username || !password) {
-      setMessage("❌ الرجاء إدخال اسم المستخدم وكلمة المرور");
+    try {
+      if (!username || !password) {
+        setMessage("❌ الرجاء إدخال البيانات");
+        return;
+      }
+
+      const { data: user, error } = await supabase
+        .from("users")
+        .select(`
+          id,
+          username,
+          fullName,
+          isActive,
+          must_change_password,
+          court_id,
+          password
+        `)
+        .eq("username", username.trim())
+        .maybeSingle();
+
+      if (error || !user) {
+        setMessage("❌ بيانات غير صحيحة");
+        return;
+      }
+
+      if (!user.isActive) {
+        setMessage("❌ الحساب غير مفعل");
+        return;
+      }
+
+      // 🔐 check password
+      if (user.password !== password.trim()) {
+        setMessage("❌ بيانات غير صحيحة");
+        return;
+      }
+
+      // 💾 session
+      localStorage.setItem("user_id", user.id);
+
+      // 🧠 remember me (اختياري)
+      if (rememberMe) {
+        localStorage.setItem("remember_me", "true");
+      }
+
+      // 🔥 routing decision (App will handle actually, but safe fallback)
+      setMessage(`👋 مرحبا ${user.fullName}`);
+
+      if (user.must_change_password) {
+        navigate("/change-password", { replace: true });
+        return;
+      }
+
+      if (user.court_id === null) {
+        navigate("/inspection-dashboard", { replace: true });
+        return;
+      }
+
+      navigate(`/court/${user.court_id}`, { replace: true });
+
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // 🔥 جلب المستخدم فقط من جدول users
-    const { data: user, error } = await supabase
-      .from("users")
-      .select(`
-        id,
-        username,
-        fullName,
-        isActive,
-        must_change_password,
-        court_id
-      `)
-      .eq("username", username.trim())
-      .maybeSingle();
-
-    if (error || !user) {
-      setMessage("❌ بيانات غير صحيحة");
-      setLoading(false);
-      return;
-    }
-
-    if (!user.isActive) {
-      setMessage("❌ الحساب غير مفعل");
-      setLoading(false);
-      return;
-    }
-
-    // ⚠️ مؤقت (بدون auth)
-    if (user.password && user.password !== password.trim()) {
-      setMessage("❌ بيانات غير صحيحة");
-      setLoading(false);
-      return;
-    }
-
-    // 💾 حفظ الجلسة
-    localStorage.setItem("user_id", user.id);
-
-    setMessage(`👋 مرحبا ${user.fullName}`);
-
-    // 🔴 أول دخول → تغيير كلمة المرور
-    if (user.must_change_password) {
-      navigate("/change-password", { replace: true });
-      setLoading(false);
-      return;
-    }
-
-    // 🔵 inspection user (court_id = null)
-    if (user.court_id === null) {
-      navigate("/inspection-dashboard", { replace: true });
-      setLoading(false);
-      return;
-    }
-
-    // 🟢 court user
-    navigate(`/court/${user.court_id}`, { replace: true });
-    setLoading(false);
   };
 
   return (
@@ -114,10 +105,21 @@ export default function Login() {
           style={styles.input}
         />
 
+        {/* 🟡 Remember me */}
+        <label style={{ fontSize: "14px", display: "block", marginTop: "8px" }}>
+          <input
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+          />{" "}
+          تذكرني
+        </label>
+
         <button onClick={handleLogin} style={styles.button}>
           {loading ? "جاري الدخول..." : "دخول"}
         </button>
 
+        {/* 🔵 Forgot password */}
         <p style={styles.links}>
           <span onClick={() => navigate("/forgot-password")}>
             نسيت كلمة المرور؟
