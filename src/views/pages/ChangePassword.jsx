@@ -9,72 +9,34 @@ export default function ChangePassword() {
   const [newPass, setNewPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
 
-  // 🔐 Load user
   useEffect(() => {
-    const loadUser = async () => {
-      const userId = localStorage.getItem("user_id");
+    const userId = localStorage.getItem("user_id");
 
-      if (!userId) {
-        navigate("/login", { replace: true });
-        return;
-      }
+    if (!userId) {
+      navigate("/login");
+      return;
+    }
 
+    const fetchUser = async () => {
       const { data } = await supabase
         .from("users")
-        .select("id, fullName, must_change_password, court_id")
+        .select("*")
         .eq("id", userId)
-        .single();
-
-      if (!data) {
-        navigate("/login", { replace: true });
-        return;
-      }
-
-      // ❗ يسمح فقط لأول مرة
-      if (data.must_change_password !== true) {
-        navigate("/login", { replace: true });
-        return;
-      }
+        .maybeSingle();
 
       setUser(data);
     };
 
-    loadUser();
-  }, [navigate]);
+    fetchUser();
+  }, []);
 
-  // 🔥 redirect حسب الوركفلو بعد التحديث
-  const redirectAfterLogin = (u) => {
-    if (u.court_id === null) {
-      navigate("/inspection-dashboard", { replace: true });
-      return;
-    }
-
-    navigate(`/court/${u.court_id}`, { replace: true });
-  };
-
-  // 🔐 update password
   const handleUpdate = async () => {
-    setError("");
-
-    if (!newPass || !confirmPass) {
-      setError("❌ الرجاء إدخال كلمة المرور");
-      return;
-    }
-
-    if (newPass !== confirmPass) {
-      setError("❌ كلمة المرور غير متطابقة");
-      return;
-    }
-
-    if (newPass.length < 6) {
-      setError("❌ كلمة المرور قصيرة جداً");
-      return;
-    }
+    if (newPass !== confirmPass) return;
 
     setLoading(true);
+
+    const userId = localStorage.getItem("user_id");
 
     const { error } = await supabase
       .from("users")
@@ -82,40 +44,22 @@ export default function ChangePassword() {
         password: newPass,
         must_change_password: false,
       })
-      .eq("id", user.id);
-
-    if (error) {
-      setError("❌ فشل تحديث كلمة المرور");
-      setLoading(false);
-      return;
-    }
+      .eq("id", userId);
 
     setLoading(false);
-    setSuccess(true);
 
-    // ⏳ بعد النجاح
-    setTimeout(() => {
-      // تنظيف session
+    if (!error) {
       localStorage.removeItem("user_id");
-
-      // يرجع login
       navigate("/login", { replace: true });
-
-      // (الوركفلو: بعد login يدخل ويذهب للداشبورد الصحيح)
-    }, 1200);
+    }
   };
 
-  if (!user) {
-    return <div style={styles.loading}>جاري التحميل...</div>;
-  }
+  if (!user) return <div style={{ color: "white" }}>Loading...</div>;
 
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-
-        {/* 👋 Welcome */}
-        <h2>👋 مرحباً {user.fullName}</h2>
-        <p>يرجى تغيير كلمة المرور للدخول إلى النظام</p>
+        <h2>🔐 تغيير كلمة المرور</h2>
 
         <input
           type="password"
@@ -133,26 +77,14 @@ export default function ChangePassword() {
           style={styles.input}
         />
 
-        <button onClick={handleUpdate} disabled={loading} style={styles.btn}>
-          {loading ? "جاري التحديث..." : "تحديث كلمة المرور"}
+        <button onClick={handleUpdate} style={styles.btn}>
+          {loading ? "جاري..." : "تحديث"}
         </button>
-
-        {error && <p style={{ color: "red" }}>{error}</p>}
       </div>
-
-      {success && (
-        <div style={styles.modal}>
-          <div style={styles.modalBox}>
-            <h3>✔ تم تحديث كلمة المرور بنجاح</h3>
-            <p>سيتم تحويلك لتسجيل الدخول...</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-/* 🎨 STYLES */
 const styles = {
   page: {
     height: "100vh",
@@ -161,24 +93,20 @@ const styles = {
     alignItems: "center",
     background: "#0f172a",
     color: "white",
-    direction: "rtl",
   },
-
   card: {
-    width: "400px",
+    width: "350px",
     padding: "20px",
-    borderRadius: "12px",
     background: "rgba(255,255,255,0.1)",
+    borderRadius: "12px",
     textAlign: "center",
   },
-
   input: {
     width: "100%",
     padding: "10px",
     margin: "8px 0",
     borderRadius: "8px",
   },
-
   btn: {
     width: "100%",
     padding: "10px",
@@ -187,31 +115,8 @@ const styles = {
     border: "none",
     borderRadius: "8px",
   },
-
-  modal: {
-    position: "fixed",
-    inset: 0,
-    background: "rgba(0,0,0,0.7)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  modalBox: {
-    padding: "20px",
-    background: "white",
-    color: "black",
-    borderRadius: "10px",
-  },
-
-  loading: {
-    color: "white",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100vh",
-  },
 };
+
 
 
 
