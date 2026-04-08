@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 
@@ -14,20 +14,20 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const location = useLocation();
-
   const loadUser = async () => {
     setLoading(true);
 
-    const userId = localStorage.getItem("user_id");
-
-    if (!userId || userId === "undefined" || userId === "null") {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
+    // 🔥 FIX مهم جدًا: امسح اليوزر القديم قبل أي تحميل
+    setUser(null);
 
     try {
+      const userId = localStorage.getItem("user_id");
+
+      if (!userId || userId === "undefined" || userId === "null") {
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("users")
         .select("*")
@@ -36,36 +36,48 @@ export default function App() {
 
       if (error || !data) {
         localStorage.removeItem("user_id");
-        setUser(null);
         setLoading(false);
         return;
       }
 
       setUser(data);
 
-    } catch (e) {
+    } catch (err) {
+      console.log(err);
       setUser(null);
     } finally {
-      setLoading(false); // 🔥 FIX مهم جدًا (منع الصفحة البيضاء)
+      setLoading(false); // 🔥 FIX منع الصفحة البيضاء
     }
   };
 
-  // 🔥 FIX 1: reload عند تغيير route
   useEffect(() => {
     loadUser();
-  }, [location.pathname]);
+  }, []);
 
-  // 🔥 FIX 2: مراقبة تغيير user_id الحقيقي
+  // 🔥 FIX 1: تحديث عند تغيير user_id
   useEffect(() => {
-    const interval = setInterval(() => {
-      const id = localStorage.getItem("user_id");
+    const syncUser = () => {
+      loadUser();
+    };
 
-      if (!id) {
-        setUser(null);
-      }
-    }, 500);
+    window.addEventListener("storage", syncUser);
 
-    return () => clearInterval(interval);
+    return () => {
+      window.removeEventListener("storage", syncUser);
+    };
+  }, []);
+
+  // 🔥 FIX 2: منع تعليق dashboard عند الرجوع
+  useEffect(() => {
+    const handleFocus = () => {
+      loadUser();
+    };
+
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
   }, []);
 
   const getHomeRoute = () => {
@@ -86,41 +98,59 @@ export default function App() {
   return (
     <Routes>
 
-      <Route path="/login" element={
-        user ? <Navigate to={getHomeRoute()} replace /> : <Login />
-      } />
+      <Route
+        path="/login"
+        element={
+          user ? <Navigate to={getHomeRoute()} replace /> : <Login />
+        }
+      />
 
-      <Route path="/change-password" element={
-        !user ? <Navigate to="/login" replace /> : <ChangePassword />
-      } />
+      <Route
+        path="/change-password"
+        element={
+          !user ? <Navigate to="/login" replace /> : <ChangePassword />
+        }
+      />
 
-      <Route path="/forgot-password" element={
-        !user ? <ForgotPassword /> : <Navigate to={getHomeRoute()} replace />
-      } />
+      <Route
+        path="/forgot-password"
+        element={
+          !user ? <ForgotPassword /> : <Navigate to={getHomeRoute()} replace />
+        }
+      />
 
-      <Route path="/reset-password" element={
-        !user ? <ResetPassword /> : <Navigate to={getHomeRoute()} replace />
-      } />
+      <Route
+        path="/reset-password"
+        element={
+          !user ? <ResetPassword /> : <Navigate to={getHomeRoute()} replace />
+        }
+      />
 
-      <Route path="/court/:id" element={
-        !user ? (
-          <Navigate to="/login" replace />
-        ) : user.must_change_password ? (
-          <Navigate to="/change-password" replace />
-        ) : (
-          <CourtDashboard user={user} />
-        )
-      } />
+      <Route
+        path="/court/:id"
+        element={
+          !user ? (
+            <Navigate to="/login" replace />
+          ) : user.must_change_password ? (
+            <Navigate to="/change-password" replace />
+          ) : (
+            <CourtDashboard user={user} />
+          )
+        }
+      />
 
-      <Route path="/inspection-dashboard" element={
-        !user ? (
-          <Navigate to="/login" replace />
-        ) : user.must_change_password ? (
-          <Navigate to="/change-password" replace />
-        ) : (
-          <InspectionDashboard user={user} />
-        )
-      } />
+      <Route
+        path="/inspection-dashboard"
+        element={
+          !user ? (
+            <Navigate to="/login" replace />
+          ) : user.must_change_password ? (
+            <Navigate to="/change-password" replace />
+          ) : (
+            <InspectionDashboard user={user} />
+          )
+        }
+      />
 
       <Route path="/" element={<Navigate to={getHomeRoute()} replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
