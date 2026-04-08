@@ -14,8 +14,8 @@ export default function Login() {
   useEffect(() => {
     const savedUser = localStorage.getItem("remember_user");
 
-    // ❌ بدون clear (كان يسبب تعليق)
-    localStorage.removeItem("user_id");
+    // 🔥 FIX 1: لا نمسح user_id بشكل عشوائي داخل login mount
+    // localStorage.removeItem("user_id"); ❌ (هذا كان يسبب loop عندك)
 
     if (savedUser) {
       setUsername(savedUser);
@@ -40,7 +40,13 @@ export default function Login() {
         .eq("username", username.trim())
         .maybeSingle();
 
-      if (error || !user) {
+      if (error) {
+        setMessage("❌ خطأ في النظام");
+        setLoading(false);
+        return;
+      }
+
+      if (!user) {
         setMessage("❌ بيانات غير صحيحة");
         setLoading(false);
         return;
@@ -64,13 +70,13 @@ export default function Login() {
         localStorage.removeItem("remember_user");
       }
 
-      localStorage.setItem("user_id", user.id);
+      // 🔥 FIX 2: ضمان string + منع overwrite bugs
+      localStorage.setItem("user_id", String(user.id));
 
-      // 🔥 FIX التعليق: نفصل التحميل عن التنقل
       setLoading(false);
 
-      // 🔥 منع freeze في React navigation
-      requestAnimationFrame(() => {
+      // 🔥 FIX 3: استبدال requestAnimationFrame (كان يسبب أحياناً freeze)
+      setTimeout(() => {
         if (user.must_change_password === true) {
           navigate("/change-password", { replace: true });
           return;
@@ -82,7 +88,7 @@ export default function Login() {
         }
 
         navigate(`/court/${user.court_id}`, { replace: true });
-      });
+      }, 0);
 
     } catch (err) {
       console.log(err);
@@ -94,7 +100,6 @@ export default function Login() {
   return (
     <div style={styles.page}>
 
-      {/* 🔴 TOP BAR */}
       <div style={styles.topBar}>
         <div style={styles.marqueeTrack}>
           <div style={styles.marqueeText}>
@@ -106,7 +111,6 @@ export default function Login() {
         </div>
       </div>
 
-      {/* LOGIN CARD */}
       <div style={styles.card}>
         <h2 style={styles.title}>🏛️ منظومة النيابة العمومية</h2>
         <p style={styles.subTitle}>تسجيل الدخول إلى النظام القضائي</p>
@@ -162,7 +166,6 @@ export default function Login() {
     </div>
   );
 }
-
 
 const styles = {
   page: {
