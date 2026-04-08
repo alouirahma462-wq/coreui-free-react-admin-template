@@ -24,39 +24,39 @@ export default function App() {
         return;
       }
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("users")
         .select("*")
         .eq("id", userId)
         .maybeSingle();
 
-      // 🔥 حماية إضافية ضد user قديم
-      if (!data) {
-        localStorage.clear();
+      if (error || !data) {
+        localStorage.removeItem("user_id");
         setUser(null);
-        return;
+      } else {
+        setUser(data);
       }
 
-      setUser(data);
     } catch (err) {
       console.log(err);
-      localStorage.clear();
+      localStorage.removeItem("user_id");
       setUser(null);
     } finally {
-      setLoading(false);
+      setLoading(false); // 🔥 ضمان عدم التعليق
     }
   };
 
   useEffect(() => {
     loadUser();
-
-    // ❌ تم حذف interval لأنه يسبب مشاكل session
-    // const sync = setInterval(loadUser, 800);
-    // return () => clearInterval(sync);
-
   }, []);
 
-  if (loading) return <div style={{ color: "white" }}>Loading...</div>;
+  if (loading) {
+    return (
+      <div style={{ color: "white", textAlign: "center", marginTop: 50 }}>
+        Loading...
+      </div>
+    );
+  }
 
   const getHomeRoute = () => {
     if (!user) return "/login";
@@ -100,7 +100,7 @@ export default function App() {
         }
       />
 
-      {/* COURT */}
+      {/* COURT DASHBOARD */}
       <Route
         path="/court/:id"
         element={
@@ -114,7 +114,7 @@ export default function App() {
         }
       />
 
-      {/* INSPECTION */}
+      {/* INSPECTION DASHBOARD */}
       <Route
         path="/inspection-dashboard"
         element={
@@ -135,6 +135,7 @@ export default function App() {
     </Routes>
   );
 }
+
 
 
 
