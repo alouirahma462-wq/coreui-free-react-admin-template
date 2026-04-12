@@ -18,7 +18,7 @@ body,
   padding: 0;
 }
 
-/* 🔥 رجوع للوضع الطبيعي */
+/* 🔥 Background */
 body {
   background-color: var(--cui-tertiary-bg);
   transition: background 0.3s ease;
@@ -102,8 +102,9 @@ body {
     --cui-footer-bg: var(--cui-body-bg);
   }
 }
+
 /* =========================
-   🔴 TOP BAR FIX (COREUI SAFE)
+   🔴 TOP BAR (SAFE FIXED VERSION)
 ========================= */
 
 .top-bar {
@@ -119,7 +120,7 @@ body {
   z-index: 99999;
 }
 
-/* 🔥 مهم: نخلي المحتوى inline-flex بدل flex */
+/* 🔥 Marquee */
 .marquee-track {
   display: inline-flex;
   white-space: nowrap;
@@ -127,7 +128,6 @@ body {
   animation: move 15s linear infinite;
 }
 
-/* 🔥 منع أي انحراف */
 .marquee-text {
   display: inline-block;
   padding-right: 120px;
@@ -137,12 +137,48 @@ body {
   font-size: 14px;
 }
 
-/* 🔥 الحركة الصحيحة (FIXED CENTER LOOP) */
-@keyframes move {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+/* =========================
+   🎬 LANDING PAGE ANIMATIONS
+   (NEW - IMPORTANT ADDITION)
+========================= */
+
+/* إصبع التحريك */
+@keyframes movePointer {
+  0% {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(0px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
 }
 
+/* ظهور السينمائي */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* =========================
+   🔄 MARQUEE ANIMATION (FIXED)
+========================= */
+
+@keyframes move {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 
