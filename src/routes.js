@@ -2,6 +2,7 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 
 import Login from "./views/auth/Login";
+import LandingPage from "./views/pages/LandingPage"; // ✅ NEW
 
 // Lazy pages
 const Dashboard = React.lazy(() =>
@@ -18,6 +19,14 @@ const ResetPassword = React.lazy(() =>
 );
 
 const routes = [
+  // 🆕 LANDING PAGE (NEW - SAFE ADDITION)
+  {
+    path: "/landing",
+    name: "Landing",
+    element: <LandingPage />,
+  },
+
+  // 🔁 KEEP SYSTEM AS IT IS (NO CHANGE)
   {
     path: "/",
     exact: true,
@@ -39,7 +48,7 @@ const routes = [
     element: <ChangePassword />,
   },
 
-  // 🚨 NEW: Reset password (forgot password flow)
+  // 🚨 Reset password
   {
     path: "/reset-password",
     name: "ResetPassword",
@@ -55,3 +64,4 @@ const routes = [
 ];
 
 export default routes;
+
