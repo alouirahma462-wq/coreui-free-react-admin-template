@@ -7,6 +7,9 @@ import ChangePassword from "./views/pages/ChangePassword.jsx";
 import ForgotPassword from "./views/pages/ForgotPassword.jsx";
 import ResetPassword from "./views/pages/ResetPassword.jsx";
 
+// 🆕 ADD ONLY THIS IMPORT
+import LandingPage from "./views/pages/LandingPage.jsx";
+
 import CourtDashboard from "./views/dashboard/CourtDashboard.jsx";
 import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
@@ -95,6 +98,12 @@ export default function App() {
   return (
     <Routes>
 
+      {/* 🆕 LANDING ROUTE */}
+      <Route
+        path="/landing"
+        element={<LandingPage />}
+      />
+
       <Route
         path="/login"
         element={
@@ -149,7 +158,7 @@ export default function App() {
         }
       />
 
-      {/* 🔥 ONLY CHANGE DONE HERE */}
+      {/* 🔥 CHANGE ONLY THIS LINE */}
       <Route path="/" element={<Navigate to="/landing" replace />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
