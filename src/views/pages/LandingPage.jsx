@@ -1,14 +1,40 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function LandingPage() {
   const [showUI, setShowUI] = useState(false);
   const navigate = useNavigate();
-  const clickSound = useRef(null);
+
+  const videoRef = useRef(null);
+  const voiceRef = useRef(null);
+  const clickRef = useRef(null);
+
+  useEffect(() => {
+    const start = async () => {
+      try {
+        // 🎬 تشغيل الفيديو (بدون صوت)
+        if (videoRef.current) {
+          videoRef.current.muted = true;
+          await videoRef.current.play();
+        }
+
+        // 🔊 تشغيل الصوت (نفس صوت الفيديو)
+        if (voiceRef.current) {
+          voiceRef.current.currentTime = 0;
+          await voiceRef.current.play();
+        }
+
+      } catch (err) {
+        console.log("Autoplay blocked");
+      }
+    };
+
+    start();
+  }, []);
 
   const handleClick = () => {
-    if (clickSound.current) {
-      clickSound.current.play();
+    if (clickRef.current) {
+      clickRef.current.play();
     }
 
     setTimeout(() => {
@@ -21,39 +47,40 @@ export default function LandingPage() {
 
       {/* 🎬 VIDEO */}
       <video
+        ref={videoRef}
         autoPlay
         muted
         playsInline
         style={styles.video}
-        onEnded={() => {
-          setTimeout(() => {
-            setShowUI(true);
-          }, 800);
-        }}
+        onEnded={() => setShowUI(true)}
       >
         <source src="/video.mp4" type="video/mp4" />
       </video>
 
-      {/* 🔊 CLICK SOUND */}
-      <audio ref={clickSound} src="/click.mp3" />
+      {/* 🔊 VOICE (نفس صوت الفيديو) */}
+      <audio ref={voiceRef}>
+        <source src="/voice.mp3" type="audio/mpeg" />
+      </audio>
 
-      {/* 🌫 UI AFTER VIDEO */}
+      {/* 🔊 CLICK SOUND */}
+      <audio ref={clickRef}>
+        <source src="/click.mp3" type="audio/mpeg" />
+      </audio>
+
+      {/* 🌫 UI */}
       {showUI && (
         <div style={styles.overlay}>
 
           <div style={styles.card}>
-
             <p style={styles.text}>
               نظام محمي ومراقب. الدخول مصرح للموظفين المخولين فقط
             </p>
 
-            {/* 👆 pointer animation */}
             <div style={styles.pointer}>👉</div>
 
             <button style={styles.button} onClick={handleClick}>
               تسجيل الدخول
             </button>
-
           </div>
 
         </div>
@@ -90,20 +117,17 @@ const styles = {
     alignItems: "center",
     backdropFilter: "blur(10px)",
     background: "rgba(0,0,0,0.55)",
-    animation: "fadeIn 1s ease",
   },
 
   card: {
     textAlign: "center",
     padding: "30px",
-    borderRadius: "15px",
   },
 
   text: {
     color: "white",
     fontSize: "18px",
     marginBottom: "20px",
-    opacity: 0.9,
   },
 
   pointer: {
@@ -120,7 +144,6 @@ const styles = {
     border: "1px solid rgba(255,255,255,0.6)",
     borderRadius: "12px",
     cursor: "pointer",
-    transition: "0.3s",
-    boxShadow: "0 0 20px rgba(255,255,255,0.2)",
   },
 };
+
