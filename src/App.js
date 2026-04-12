@@ -17,7 +17,6 @@ export default function App() {
   const loadUser = async () => {
     setLoading(true);
 
-    // 🔥 FIX مهم جدًا: امسح اليوزر القديم قبل أي تحميل
     setUser(null);
 
     try {
@@ -46,7 +45,7 @@ export default function App() {
       console.log(err);
       setUser(null);
     } finally {
-      setLoading(false); // 🔥 FIX منع الصفحة البيضاء
+      setLoading(false);
     }
   };
 
@@ -54,7 +53,6 @@ export default function App() {
     loadUser();
   }, []);
 
-  // 🔥 FIX 1: تحديث عند تغيير user_id
   useEffect(() => {
     const syncUser = () => {
       loadUser();
@@ -67,7 +65,6 @@ export default function App() {
     };
   }, []);
 
-  // 🔥 FIX 2: منع تعليق dashboard عند الرجوع
   useEffect(() => {
     const handleFocus = () => {
       loadUser();
@@ -152,12 +149,15 @@ export default function App() {
         }
       />
 
-      <Route path="/" element={<Navigate to={getHomeRoute()} replace />} />
+      {/* 🔥 ONLY CHANGE DONE HERE */}
+      <Route path="/" element={<Navigate to="/landing" replace />} />
+
       <Route path="*" element={<Navigate to="/" replace />} />
 
     </Routes>
   );
 }
+
 
 
 
