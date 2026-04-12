@@ -2,12 +2,15 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function LandingPage() {
-  const [ended, setEnded] = useState(false);
+  const [showUI, setShowUI] = useState(false);
   const navigate = useNavigate();
   const clickSound = useRef(null);
 
   const handleClick = () => {
-    clickSound.current.play();
+    if (clickSound.current) {
+      clickSound.current.play();
+    }
+
     setTimeout(() => {
       navigate("/login");
     }, 300);
@@ -16,40 +19,51 @@ export default function LandingPage() {
   return (
     <div style={styles.container}>
 
-      {/* 🎬 الفيديو */}
+      {/* 🎬 VIDEO */}
       <video
         autoPlay
         muted
-        onEnded={() => setEnded(true)}
+        playsInline
         style={styles.video}
+        onEnded={() => {
+          setTimeout(() => {
+            setShowUI(true);
+          }, 800);
+        }}
       >
         <source src="/video.mp4" type="video/mp4" />
       </video>
 
-      {/* 🔊 الصوت */}
+      {/* 🔊 CLICK SOUND */}
       <audio ref={clickSound} src="/click.mp3" />
 
-      {/* 🌫️ Overlay */}
-      {ended && (
+      {/* 🌫 UI AFTER VIDEO */}
+      {showUI && (
         <div style={styles.overlay}>
 
-          <p style={styles.text}>
-            نظام محمي ومراقب. الدخول مصرح للموظفين المخولين فقط
-          </p>
+          <div style={styles.card}>
 
-          {/* 👆 الإصبع */}
-          <div style={styles.pointer}>👉</div>
+            <p style={styles.text}>
+              نظام محمي ومراقب. الدخول مصرح للموظفين المخولين فقط
+            </p>
 
-          <button style={styles.button} onClick={handleClick}>
-            تسجيل الدخول
-          </button>
+            {/* 👆 pointer animation */}
+            <div style={styles.pointer}>👉</div>
+
+            <button style={styles.button} onClick={handleClick}>
+              تسجيل الدخول
+            </button>
+
+          </div>
 
         </div>
       )}
+
     </div>
   );
 }
 
+/* 🎨 STYLES */
 const styles = {
   container: {
     position: "relative",
@@ -71,34 +85,42 @@ const styles = {
     left: 0,
     width: "100%",
     height: "100%",
-    backdropFilter: "blur(6px)",
-    background: "rgba(0,0,0,0.5)",
     display: "flex",
-    flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    animation: "fadeIn 1.5s ease forwards",
+    backdropFilter: "blur(10px)",
+    background: "rgba(0,0,0,0.55)",
+    animation: "fadeIn 1s ease",
+  },
+
+  card: {
+    textAlign: "center",
+    padding: "30px",
+    borderRadius: "15px",
   },
 
   text: {
     color: "white",
     fontSize: "18px",
     marginBottom: "20px",
+    opacity: 0.9,
   },
 
   pointer: {
-    fontSize: "30px",
+    fontSize: "40px",
     marginBottom: "10px",
     animation: "movePointer 1.2s infinite",
   },
 
   button: {
-    padding: "16px 50px",
+    padding: "16px 55px",
     fontSize: "20px",
     color: "white",
-    background: "rgba(255,255,255,0.1)",
-    border: "1px solid rgba(255,255,255,0.5)",
+    background: "rgba(255,255,255,0.08)",
+    border: "1px solid rgba(255,255,255,0.6)",
     borderRadius: "12px",
     cursor: "pointer",
+    transition: "0.3s",
+    boxShadow: "0 0 20px rgba(255,255,255,0.2)",
   },
 };
