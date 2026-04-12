@@ -9,27 +9,35 @@ export default function LandingPage() {
   const voiceRef = useRef(null);
   const clickRef = useRef(null);
 
-  useEffect(() => {
-    const start = async () => {
-      try {
-        // 🎬 تشغيل الفيديو (بدون صوت)
-        if (videoRef.current) {
-          videoRef.current.muted = true;
-          await videoRef.current.play();
-        }
-
-        // 🔊 تشغيل الصوت (نفس صوت الفيديو)
-        if (voiceRef.current) {
-          voiceRef.current.currentTime = 0;
-          await voiceRef.current.play();
-        }
-
-      } catch (err) {
-        console.log("Autoplay blocked");
+  const startMedia = async () => {
+    try {
+      // 🎬 الفيديو
+      if (videoRef.current) {
+        videoRef.current.muted = true;
+        await videoRef.current.play();
       }
+
+      // 🔊 الصوت
+      if (voiceRef.current) {
+        voiceRef.current.currentTime = 0;
+        await voiceRef.current.play();
+      }
+
+    } catch (err) {
+      console.log("Autoplay blocked:", err);
+    }
+  };
+
+  useEffect(() => {
+    // 🔥 أهم سطر: لازم user interaction بسيط
+    const unlockAudio = () => {
+      startMedia();
+      window.removeEventListener("click", unlockAudio);
     };
 
-    start();
+    window.addEventListener("click", unlockAudio);
+
+    return () => window.removeEventListener("click", unlockAudio);
   }, []);
 
   const handleClick = () => {
@@ -57,12 +65,12 @@ export default function LandingPage() {
         <source src="/video.mp4" type="video/mp4" />
       </video>
 
-      {/* 🔊 VOICE (نفس صوت الفيديو) */}
+      {/* 🔊 VOICE */}
       <audio ref={voiceRef}>
         <source src="/voice.mp3" type="audio/mpeg" />
       </audio>
 
-      {/* 🔊 CLICK SOUND */}
+      {/* 🔊 CLICK */}
       <audio ref={clickRef}>
         <source src="/click.mp3" type="audio/mpeg" />
       </audio>
@@ -78,7 +86,7 @@ export default function LandingPage() {
 
             <div style={styles.pointer}>👉</div>
 
-            <button style={styles.button} onClick={handleClick}>
+            <button onClick={handleClick} style={styles.button}>
               تسجيل الدخول
             </button>
           </div>
