@@ -12,12 +12,14 @@ export default function LandingPage() {
   const voiceRef = useRef(null);
   const clickRef = useRef(null);
 
-  // 🔥 FIX ECHO ONLY
+  // 🔥 FIX AUDIO GLOBAL CONTROL
   const playedRef = useRef(false);
+  const voicePlayedRef = useRef(false);
+  const clickPlayedRef = useRef(false);
 
   const startMedia = async () => {
     try {
-      // ❌ يمنع الإعادة = حل الإيكو
+      // ❌ يمنع أي تشغيل مزدوج نهائي
       if (playedRef.current) return;
       playedRef.current = true;
 
@@ -28,9 +30,12 @@ export default function LandingPage() {
         await videoRef.current.play();
       }
 
-      if (voiceRef.current) {
+      if (voiceRef.current && !voicePlayedRef.current) {
+        voicePlayedRef.current = true;
+
         voiceRef.current.pause();
         voiceRef.current.currentTime = 0;
+        voiceRef.current.loop = false; // 🔥 مهم جداً
         await voiceRef.current.play();
       }
     } catch (err) {
@@ -38,7 +43,7 @@ export default function LandingPage() {
     }
   };
 
-  // ❌ FIX 1: منع التكرار
+  // ❌ FIX 1: منع التكرار من event listener
   useEffect(() => {
     const unlockAudio = () => {
       window.removeEventListener("click", unlockAudio);
@@ -59,8 +64,10 @@ export default function LandingPage() {
   };
 
   const handleClick = () => {
-    if (clickRef.current) {
-      clickRef.current.pause(); // 🔥 منع تداخل صوت النقر
+    if (clickRef.current && !clickPlayedRef.current) {
+      clickPlayedRef.current = true;
+
+      clickRef.current.pause();
       clickRef.current.currentTime = 0;
       clickRef.current.play();
     }
@@ -295,6 +302,7 @@ const styles = {
     transition: "1.2s ease-in-out",
   },
 };
+
 
 
 
