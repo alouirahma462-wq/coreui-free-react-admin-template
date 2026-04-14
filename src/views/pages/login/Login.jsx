@@ -69,6 +69,9 @@ export default function Login() {
 
       localStorage.setItem("user_id", String(user.id));
 
+      // 🔥 IMPORTANT FIX (THIS IS THE MISSING PIECE)
+      window.dispatchEvent(new Event("storage"));
+
       setLoading(false);
 
       // =========================
@@ -299,6 +302,7 @@ const styles = {
     fontSize: "13px",
   },
 };
+
 
 
 
