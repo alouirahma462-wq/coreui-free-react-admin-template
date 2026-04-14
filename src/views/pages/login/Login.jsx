@@ -71,26 +71,24 @@ export default function Login() {
 
       setLoading(false);
 
-      // 🔥 FIX ONLY (navigation fix)
-      setTimeout(() => {
-        const mustChange =
-          user.must_change_password === true ||
-          user.must_change_password === "true" ||
-          user.must_change_password === 1 ||
-          user.must_change_password === "1";
+      // 🔥 FIX ONLY (NO DELAY - DIRECT NAVIGATION)
+      const mustChange =
+        user.must_change_password === true ||
+        user.must_change_password === 1 ||
+        user.must_change_password === "1" ||
+        user.must_change_password === "true";
 
-        if (mustChange) {
-          navigate("/change-password", { replace: true });
-          return;
-        }
+      if (mustChange) {
+        navigate("/change-password", { replace: true });
+        return;
+      }
 
-        if (user.court_id === null) {
-          navigate("/inspection-dashboard", { replace: true });
-          return;
-        }
+      if (user.court_id === null) {
+        navigate("/inspection-dashboard", { replace: true });
+        return;
+      }
 
-        navigate(`/court/${user.court_id}`, { replace: true });
-      }, 0);
+      navigate(`/court/${user.court_id}`, { replace: true });
 
     } catch (err) {
       console.log(err);
@@ -302,6 +300,7 @@ const styles = {
     fontSize: "13px",
   },
 };
+
 
 
 
