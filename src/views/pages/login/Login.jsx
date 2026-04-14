@@ -67,12 +67,10 @@ export default function Login() {
         localStorage.removeItem("remember_user");
       }
 
-      // 🔥 FIX: ضمان كتابة الـ storage قبل أي navigation
       localStorage.setItem("user_id", String(user.id));
 
       setLoading(false);
 
-      // 🔥 FIX: إزالة setTimeout واستبداله بـ microtask آمن
       Promise.resolve().then(() => {
         if (user.must_change_password === true) {
           navigate("/change-password", { replace: true });
@@ -97,6 +95,15 @@ export default function Login() {
   return (
     <div style={styles.page}>
 
+      {/* 🎬 VIDEO BACKGROUND */}
+      <video autoPlay loop muted playsInline style={styles.video}>
+        <source src="/justice-bg.mp4" type="video/mp4" />
+      </video>
+
+      {/* 🌑 OVERLAY */}
+      <div style={styles.overlay}></div>
+
+      {/* 🔴 TOP BAR (يظهر فوق الفيديو) */}
       <div style={styles.topBar}>
         <div style={styles.marqueeTrack}>
           <div style={styles.marqueeText}>
@@ -108,6 +115,7 @@ export default function Login() {
         </div>
       </div>
 
+      {/* 🧾 CARD */}
       <div style={styles.card}>
         <h2 style={styles.title}>🏛️ منظومة النيابة العمومية</h2>
         <p style={styles.subTitle}>تسجيل الدخول إلى النظام القضائي</p>
@@ -164,18 +172,33 @@ export default function Login() {
   );
 }
 
+/* 🎨 STYLES */
 const styles = {
   page: {
     height: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "linear-gradient(135deg, #0b1220, #0f172a, #111c33)",
     color: "white",
     direction: "rtl",
     position: "relative",
     overflow: "hidden",
-    paddingTop: "40px",
+  },
+
+  video: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    zIndex: -3,
+  },
+
+  overlay: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    background: "rgba(0,0,0,0.55)",
+    zIndex: -2,
   },
 
   topBar: {
@@ -212,9 +235,10 @@ const styles = {
     borderRadius: "20px",
     background: "rgba(255,255,255,0.08)",
     backdropFilter: "blur(22px)",
-    border: "1px solid rgba(255,255,255,0.12)",
+    border: "1px solid rgba(255,255,255,0.15)",
     boxShadow: "0 25px 70px rgba(0,0,0,0.45)",
     textAlign: "center",
+    zIndex: 2,
   },
 
   title: { fontSize: "22px", fontWeight: "bold" },
@@ -222,11 +246,12 @@ const styles = {
 
   input: {
     width: "100%",
-    padding: "13px",
+    padding: "14px",
     margin: "8px 0",
     borderRadius: "10px",
     border: "none",
     outline: "none",
+    background: "rgba(255,255,255,0.9)",
   },
 
   row: {
@@ -253,7 +278,7 @@ const styles = {
 
   btn: {
     width: "100%",
-    padding: "13px",
+    padding: "14px",
     marginTop: "15px",
     background: "linear-gradient(90deg, #1e3a8a, #2563eb)",
     border: "none",
@@ -261,6 +286,7 @@ const styles = {
     color: "white",
     fontWeight: "bold",
     cursor: "pointer",
+    transition: "0.3s",
   },
 
   error: {
@@ -269,6 +295,7 @@ const styles = {
     fontSize: "13px",
   },
 };
+
 
 
 
