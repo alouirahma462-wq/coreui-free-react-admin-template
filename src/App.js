@@ -33,7 +33,6 @@ export default function App() {
 
   const loadUser = async () => {
     setLoading(true);
-
     setUser(null);
 
     try {
@@ -66,11 +65,22 @@ export default function App() {
     }
   };
 
+  // 🔥 FIX: reload user when storage changes (login/update)
   useEffect(() => {
     loadUser();
+
+    const handleStorageChange = () => {
+      loadUser();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, []);
 
-  // 🔥🔥🔥 FIX HERE ONLY
+  // 🔥 FIX must change password
   const isMustChange = (value) => {
     return (
       value === true ||
@@ -138,7 +148,7 @@ export default function App() {
         />
       )}
 
-      {/* 🌑 overlay (بدون Landing) */}
+      {/* 🌑 overlay */}
       {(isAuth || isDashboard) && !isLanding && (
         <div
           style={{
@@ -153,7 +163,7 @@ export default function App() {
 
       <Routes>
 
-        {/* 🟣 LANDING مستقل 100% */}
+        {/* 🟣 LANDING */}
         <Route path="/landing" element={<LandingPage />} />
 
         <Route
@@ -189,7 +199,7 @@ export default function App() {
           element={
             !user ? (
               <Navigate to="/login" replace />
-            ) : isMustChange(user.must_change_password) ? (  // 🔥 FIX
+            ) : isMustChange(user.must_change_password) ? (
               <Navigate to="/change-password" replace />
             ) : (
               <CourtDashboard user={user} />
@@ -202,7 +212,7 @@ export default function App() {
           element={
             !user ? (
               <Navigate to="/login" replace />
-            ) : isMustChange(user.must_change_password) ? ( // 🔥 FIX
+            ) : isMustChange(user.must_change_password) ? (
               <Navigate to="/change-password" replace />
             ) : (
               <InspectionDashboard user={user} />
@@ -217,6 +227,7 @@ export default function App() {
     </>
   );
 }
+
 
 
 
