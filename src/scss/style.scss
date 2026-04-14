@@ -104,7 +104,7 @@ body {
 }
 
 /* =========================
-   🔴 TOP BAR (SAFE FIXED VERSION)
+   🔴 TOP BAR
 ========================= */
 
 .top-bar {
@@ -120,7 +120,6 @@ body {
   z-index: 99999;
 }
 
-/* 🔥 Marquee */
 .marquee-track {
   display: inline-flex;
   white-space: nowrap;
@@ -138,27 +137,64 @@ body {
 }
 
 /* =========================
-   🎬 LANDING PAGE ANIMATIONS
-   (NEW - IMPORTANT ADDITION)
+   🎬 LANDING / CINEMATIC SYSTEM
 ========================= */
 
-/* إصبع التحريك */
-@keyframes movePointer {
+/* 🔥 إصبع ذهبي */
+@keyframes fingerMove {
   0% {
-    transform: translateX(30px);
-    opacity: 0;
+    transform: translateY(0);
   }
   50% {
-    transform: translateX(0px);
-    opacity: 1;
+    transform: translateY(12px);
   }
   100% {
-    transform: translateX(-30px);
-    opacity: 0;
+    transform: translateY(0);
   }
 }
 
-/* ظهور السينمائي */
+/* 🚪 باب المحكمة (فتح وهمي cinematic) */
+@keyframes gateOpen {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.05);
+    filter: brightness(0.6);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+/* 🎬 دخول سينمائي */
+@keyframes cinematicEnter {
+  0% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ✨ Glow effect للذهب */
+@keyframes goldGlow {
+  0% {
+    text-shadow: 0 0 5px gold;
+  }
+  50% {
+    text-shadow: 0 0 20px gold;
+  }
+  100% {
+    text-shadow: 0 0 5px gold;
+  }
+}
+
+/* 🌫 fade عام */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -169,7 +205,7 @@ body {
 }
 
 /* =========================
-   🔄 MARQUEE ANIMATION (FIXED)
+   🔄 MARQUEE
 ========================= */
 
 @keyframes move {
