@@ -71,12 +71,15 @@ export default function Login() {
 
       setLoading(false);
 
-      // 🔥 FIX ONLY (NO DELAY - DIRECT NAVIGATION)
+      // =========================
+      // 🔥 FIX ONLY HERE
+      // =========================
       const mustChange =
-        user.must_change_password === true ||
-        user.must_change_password === 1 ||
-        user.must_change_password === "1" ||
-        user.must_change_password === "true";
+        user?.must_change_password === true ||
+        user?.must_change_password === "true" ||
+        String(user?.must_change_password) === "true" ||
+        user?.must_change_password === 1 ||
+        String(user?.must_change_password) === "1";
 
       if (mustChange) {
         navigate("/change-password", { replace: true });
@@ -100,15 +103,12 @@ export default function Login() {
   return (
     <div style={styles.page}>
 
-      {/* 🎬 VIDEO BACKGROUND */}
       <video autoPlay loop muted playsInline style={styles.video}>
         <source src="/justice-bg.mp4" type="video/mp4" />
       </video>
 
-      {/* 🌑 OVERLAY */}
       <div style={styles.overlay}></div>
 
-      {/* 🔴 TOP BAR */}
       <div style={styles.topBar}>
         <div style={styles.marqueeTrack}>
           <div style={styles.marqueeText}>
@@ -120,7 +120,6 @@ export default function Login() {
         </div>
       </div>
 
-      {/* 🧾 CARD */}
       <div style={styles.card}>
         <h2 style={styles.title}>🏛️ منظومة النيابة العمومية</h2>
         <p style={styles.subTitle}>تسجيل الدخول إلى النظام القضائي</p>
@@ -300,6 +299,7 @@ const styles = {
     fontSize: "13px",
   },
 };
+
 
 
 
