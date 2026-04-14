@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 export default function LandingPage() {
   const [showUI, setShowUI] = useState(false);
   const [startGate, setStartGate] = useState(false);
+  const [openDoor, setOpenDoor] = useState(false);
 
   const navigate = useNavigate();
 
@@ -14,7 +15,7 @@ export default function LandingPage() {
   const startMedia = async () => {
     try {
       if (videoRef.current) {
-        videoRef.current.muted = true;
+        videoRef.current.muted = false;
         await videoRef.current.play();
       }
 
@@ -37,19 +38,17 @@ export default function LandingPage() {
     return () => window.removeEventListener("click", unlockAudio);
   }, []);
 
-  // 🚪 فتح البوابة
   const openGate = () => {
-    setStartGate(true);
+    setOpenDoor(true);
 
     setTimeout(() => {
-      setShowUI(true);
+      setStartGate(true);
+      startMedia();
     }, 1200);
   };
 
   const handleClick = () => {
-    if (clickRef.current) {
-      clickRef.current.play();
-    }
+    if (clickRef.current) clickRef.current.play();
 
     setTimeout(() => {
       navigate("/login");
@@ -60,16 +59,17 @@ export default function LandingPage() {
     <div style={styles.container}>
 
       {/* 🎬 VIDEO */}
-      <video
-        ref={videoRef}
-        autoPlay
-        muted
-        playsInline
-        style={styles.video}
-        onEnded={() => setShowUI(true)}
-      >
-        <source src="/video.mp4" type="video/mp4" />
-      </video>
+      {startGate && (
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          style={styles.video}
+          onEnded={() => setShowUI(true)}
+        >
+          <source src="/video.mp4" type="video/mp4" />
+        </video>
+      )}
 
       {/* 🔊 VOICE */}
       <audio ref={voiceRef}>
@@ -84,31 +84,45 @@ export default function LandingPage() {
       {/* 🏛️ GATE SCREEN */}
       {!startGate && (
         <div style={styles.gate}>
-          <div style={styles.gateCard}>
 
-            <h1 style={styles.title}>
-              🏛️ منظومة النيابة العمومية
-            </h1>
-
-            <p style={styles.sub}>👋 مرحبا بك</p>
-
-            <p style={styles.click}>👉 اضغط هنا للدخول</p>
-
-            {/* ✨ finger */}
-            <div style={styles.finger}>👇</div>
-
-            <button onClick={openGate} style={styles.gateBtn}>
-              دخول المحكمة
-            </button>
-
+          {/* 🚪 DOOR */}
+          <div style={styles.doorContainer}>
+            <div style={{
+              ...styles.doorLeft,
+              transform: openDoor ? "rotateY(-90deg)" : "rotateY(0deg)"
+            }} />
+            <div style={{
+              ...styles.doorRight,
+              transform: openDoor ? "rotateY(90deg)" : "rotateY(0deg)"
+            }} />
           </div>
+
+          {!openDoor && (
+            <div style={styles.gateCard}>
+
+              <h1 style={styles.title}>
+                🏛️ منظومة النيابة العمومية
+              </h1>
+
+              <p style={styles.sub}>👋 مرحبا بك</p>
+
+              <p style={styles.click}>اضغط هنا للدخول</p>
+
+              <div style={styles.finger}>👇</div>
+
+              <button onClick={openGate} style={styles.gateBtn}>
+                الدخول
+              </button>
+
+            </div>
+          )}
+
         </div>
       )}
 
-      {/* 🌫 MAIN UI */}
-      {showUI && startGate && (
+      {/* 🔒 FINAL UI */}
+      {showUI && (
         <div style={styles.overlay}>
-
           <div style={styles.card}>
             <p style={styles.text}>
               نظام محمي ومراقب. الدخول مصرح للموظفين المخولين فقط
@@ -120,13 +134,14 @@ export default function LandingPage() {
               تسجيل الدخول
             </button>
           </div>
-
         </div>
       )}
 
     </div>
   );
 }
+
+/* ================= STYLES ================= */
 
 const styles = {
 
@@ -182,26 +197,24 @@ const styles = {
     cursor: "pointer",
   },
 
-  // 🏛️ Gate
   gate: {
     position: "absolute",
     width: "100%",
     height: "100%",
-    background: "rgba(0,0,0,0.85)",
+    background: "#000",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 10,
   },
 
   gateCard: {
     textAlign: "center",
     color: "white",
+    zIndex: 5,
   },
 
   title: {
     fontSize: "32px",
-    fontWeight: "bold",
     marginBottom: "10px",
   },
 
@@ -212,7 +225,6 @@ const styles = {
 
   click: {
     fontSize: "16px",
-    marginBottom: "10px",
     opacity: 0.8,
   },
 
@@ -220,7 +232,7 @@ const styles = {
     fontSize: "50px",
     color: "#facc15",
     animation: "fingerMove 1s infinite",
-    marginBottom: "10px",
+    margin: "10px 0",
   },
 
   gateBtn: {
@@ -232,6 +244,38 @@ const styles = {
     color: "gold",
     cursor: "pointer",
   },
+
+  // 🚪 DOOR REAL IMAGE + 3D
+  doorContainer: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    display: "flex",
+    perspective: "1200px",
+  },
+
+  doorLeft: {
+    width: "50%",
+    height: "100%",
+    backgroundImage: "url('/court-door.png')",
+    backgroundSize: "200% 100%",
+    backgroundPosition: "left",
+    transformOrigin: "left",
+    transition: "1.2s ease-in-out",
+    boxShadow: "inset -5px 0 20px rgba(0,0,0,0.7)",
+  },
+
+  doorRight: {
+    width: "50%",
+    height: "100%",
+    backgroundImage: "url('/court-door.png')",
+    backgroundSize: "200% 100%",
+    backgroundPosition: "right",
+    transformOrigin: "right",
+    transition: "1.2s ease-in-out",
+    boxShadow: "inset 5px 0 20px rgba(0,0,0,0.7)",
+  },
 };
+
 
 
