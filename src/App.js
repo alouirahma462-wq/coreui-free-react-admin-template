@@ -100,11 +100,9 @@ export default function App() {
   return (
     <>
 
-      {/* 🎧 MUSIC (LOW VOLUME FIX) */}
+      {/* 🎧 MUSIC (ONLY FIXED LINE) */}
       {isAuth || isDashboard ? (
-        <div style={{ opacity: 0.35 }}>
-          <GlobalMusic key={location.pathname} />
-        </div>
+        <GlobalMusic key={location.pathname} />
       ) : null}
 
       {/* 🎬 AUTH BACKGROUND */}
@@ -142,7 +140,6 @@ export default function App() {
             }}
           />
 
-          {/* soft overlay فقط للداشبورد */}
           <div
             style={{
               position: "fixed",
@@ -233,6 +230,7 @@ export default function App() {
     </>
   );
 }
+
 
 
 
