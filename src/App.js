@@ -13,9 +13,23 @@ import LandingPage from "./views/pages/LandingPage.jsx";
 import CourtDashboard from "./views/dashboard/CourtDashboard.jsx";
 import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
+import GlobalMusic from "./GlobalMusic";
+import { useLocation } from "react-router-dom";
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const location = useLocation();
+
+  // 🎯 تحديد الصفحات
+  const isLanding = location.pathname === "/landing";
+  const isDashboard = location.pathname.includes("/dashboard");
+  const isAuth =
+    location.pathname === "/login" ||
+    location.pathname === "/forgot-password" ||
+    location.pathname === "/reset-password" ||
+    location.pathname === "/change-password";
 
   const loadUser = async () => {
     setLoading(true);
@@ -56,30 +70,6 @@ export default function App() {
     loadUser();
   }, []);
 
-  useEffect(() => {
-    const syncUser = () => {
-      loadUser();
-    };
-
-    window.addEventListener("storage", syncUser);
-
-    return () => {
-      window.removeEventListener("storage", syncUser);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleFocus = () => {
-      loadUser();
-    };
-
-    window.addEventListener("focus", handleFocus);
-
-    return () => {
-      window.removeEventListener("focus", handleFocus);
-    };
-  }, []);
-
   const getHomeRoute = () => {
     if (!user) return "/login";
     if (user.must_change_password) return "/change-password";
@@ -96,76 +86,125 @@ export default function App() {
   }
 
   return (
-    <Routes>
+    <>
 
-      {/* 🆕 LANDING ROUTE */}
-      <Route
-        path="/landing"
-        element={<LandingPage />}
-      />
+      {/* 🎧 MUSIC فقط للـ Auth + Dashboard */}
+      {isAuth || isDashboard ? <GlobalMusic /> : null}
 
-      <Route
-        path="/login"
-        element={
-          user ? <Navigate to={getHomeRoute()} replace /> : <Login />
-        }
-      />
+      {/* 🎬 BACKGROUND للـ AUTH فقط */}
+      {isAuth && !isLanding && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          style={{
+            position: "fixed",
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            zIndex: -2,
+          }}
+        >
+          <source src="/justice-bg.mp4" type="video/mp4" />
+        </video>
+      )}
 
-      <Route
-        path="/change-password"
-        element={
-          !user ? <Navigate to="/login" replace /> : <ChangePassword />
-        }
-      />
+      {/* 🖼 BACKGROUND للـ DASHBOARD فقط */}
+      {isDashboard && (
+        <div
+          style={{
+            position: "fixed",
+            width: "100%",
+            height: "100%",
+            backgroundImage: "url('/dashboard-bg.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            zIndex: -2,
+          }}
+        />
+      )}
 
-      <Route
-        path="/forgot-password"
-        element={
-          !user ? <ForgotPassword /> : <Navigate to={getHomeRoute()} replace />
-        }
-      />
+      {/* 🌑 overlay (بدون Landing) */}
+      {(isAuth || isDashboard) && !isLanding && (
+        <div
+          style={{
+            position: "fixed",
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.5)",
+            zIndex: -1,
+          }}
+        />
+      )}
 
-      <Route
-        path="/reset-password"
-        element={
-          !user ? <ResetPassword /> : <Navigate to={getHomeRoute()} replace />
-        }
-      />
+      <Routes>
 
-      <Route
-        path="/court/:id"
-        element={
-          !user ? (
-            <Navigate to="/login" replace />
-          ) : user.must_change_password ? (
-            <Navigate to="/change-password" replace />
-          ) : (
-            <CourtDashboard user={user} />
-          )
-        }
-      />
+        {/* 🟣 LANDING مستقل 100% (بدون أي تأثير) */}
+        <Route path="/landing" element={<LandingPage />} />
 
-      <Route
-        path="/inspection-dashboard"
-        element={
-          !user ? (
-            <Navigate to="/login" replace />
-          ) : user.must_change_password ? (
-            <Navigate to="/change-password" replace />
-          ) : (
-            <InspectionDashboard user={user} />
-          )
-        }
-      />
+        <Route
+          path="/login"
+          element={
+            user ? <Navigate to={getHomeRoute()} replace /> : <Login />
+          }
+        />
 
-      {/* 🔥 CHANGE ONLY THIS LINE */}
-      <Route path="/" element={<Navigate to="/landing" replace />} />
+        <Route
+          path="/change-password"
+          element={
+            !user ? <Navigate to="/login" replace /> : <ChangePassword />
+          }
+        />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+        <Route
+          path="/forgot-password"
+          element={
+            !user ? <ForgotPassword /> : <Navigate to={getHomeRoute()} replace />
+          }
+        />
 
-    </Routes>
+        <Route
+          path="/reset-password"
+          element={
+            !user ? <ResetPassword /> : <Navigate to={getHomeRoute()} replace />
+          }
+        />
+
+        <Route
+          path="/court/:id"
+          element={
+            !user ? (
+              <Navigate to="/login" replace />
+            ) : user.must_change_password ? (
+              <Navigate to="/change-password" replace />
+            ) : (
+              <CourtDashboard user={user} />
+            )
+          }
+        />
+
+        <Route
+          path="/inspection-dashboard"
+          element={
+            !user ? (
+              <Navigate to="/login" replace />
+            ) : user.must_change_password ? (
+              <Navigate to="/change-password" replace />
+            ) : (
+              <InspectionDashboard user={user} />
+            )
+          }
+        />
+
+        <Route path="/" element={<Navigate to="/landing" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+
+      </Routes>
+    </>
   );
 }
+
 
 
 
