@@ -12,16 +12,16 @@ export default function LandingPage() {
   const voiceRef = useRef(null);
   const clickRef = useRef(null);
 
-  // 🔥 HARD LOCK (IMPORTANT FIX)
-  const mediaStartedRef = useRef(false);
-  const voiceStartedRef = useRef(false);
+  // 🔥 HARD AUDIO LOCK (FINAL FIX)
+  const hasStartedRef = useRef(false);
 
   const startMedia = async () => {
     try {
-      // ❌ يمنع أي تشغيل نهائي متكرر
-      if (mediaStartedRef.current) return;
-      mediaStartedRef.current = true;
+      // ❌ يمنع أي تشغيل نهائي (StrictMode safe)
+      if (hasStartedRef.current) return;
+      hasStartedRef.current = true;
 
+      // 🎬 VIDEO FIX
       if (videoRef.current) {
         videoRef.current.pause();
         videoRef.current.currentTime = 0;
@@ -29,14 +29,18 @@ export default function LandingPage() {
         await videoRef.current.play();
       }
 
-      // 🔥 الصوت فقط مرة واحدة
-      if (voiceRef.current && !voiceStartedRef.current) {
-        voiceStartedRef.current = true;
+      // 🔊 VOICE FIX (NO ECHO)
+      if (voiceRef.current) {
+        voiceRef.current.pause();              // 🔥 stop any previous
+        voiceRef.current.currentTime = 0;     // 🔥 reset
+        voiceRef.current.volume = 1;          // 🔥 force clean volume
+        voiceRef.current.loop = false;        // ❌ prevent loop echo
+        voiceRef.current.muted = false;
 
-        voiceRef.current.pause();
-        voiceRef.current.currentTime = 0;
-        voiceRef.current.loop = false;
-        await voiceRef.current.play();
+        // 🔥 مهم جداً: small delay يمنع double trigger
+        setTimeout(() => {
+          voiceRef.current.play().catch(() => {});
+        }, 50);
       }
 
     } catch (err) {
@@ -50,9 +54,7 @@ export default function LandingPage() {
 
     setTimeout(() => {
       setStartGate(true);
-
-      // 🔥 مهم: تشغيل مرة واحدة فقط هنا
-      startMedia();
+      startMedia(); // ✅ مرة واحدة فقط
     }, 1200);
   };
 
