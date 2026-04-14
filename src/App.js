@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 
@@ -7,14 +7,12 @@ import ChangePassword from "./views/pages/ChangePassword.jsx";
 import ForgotPassword from "./views/pages/ForgotPassword.jsx";
 import ResetPassword from "./views/pages/ResetPassword.jsx";
 
-// 🆕 ADD ONLY THIS IMPORT
 import LandingPage from "./views/pages/LandingPage.jsx";
 
 import CourtDashboard from "./views/dashboard/CourtDashboard.jsx";
 import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
 import GlobalMusic from "./GlobalMusic";
-import { useLocation } from "react-router-dom";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -22,7 +20,6 @@ export default function App() {
 
   const location = useLocation();
 
-  // 🎯 تحديد الصفحات
   const isLanding = location.pathname === "/landing";
   const isDashboard = location.pathname.includes("/dashboard");
   const isAuth =
@@ -56,7 +53,6 @@ export default function App() {
       }
 
       setUser(data);
-
     } catch (err) {
       console.log(err);
       setUser(null);
@@ -65,42 +61,36 @@ export default function App() {
     }
   };
 
-  // 🔥 FIX: reload user when storage changes (login/update)
+  // 🔥 FIX 1: reload عند تغيير الصفحة (مهم جداً)
   useEffect(() => {
     loadUser();
+  }, [location.pathname]);
 
+  // 🔥 FIX 2: fallback لو localStorage تغير
+  useEffect(() => {
     const handleStorageChange = () => {
       loadUser();
     };
 
     window.addEventListener("storage", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // 🔥 FIX must change password
-  const isMustChange = (value) => {
-    return (
-      value === true ||
-      value === 1 ||
-      value === "1" ||
-      value === "true"
-    );
-  };
+  const isMustChange = (value) =>
+    value === true ||
+    value === 1 ||
+    value === "1" ||
+    value === "true";
 
   const getHomeRoute = () => {
     if (!user) return "/login";
-
     if (isMustChange(user.must_change_password)) return "/change-password";
-
     if (user.court_id === null) return "/inspection-dashboard";
-
     return `/court/${user.court_id}`;
   };
 
-  if (loading) {
+  // 🔥 FIX 3: لا تعرض Loading بشكل دائم
+  if (loading && location.pathname !== "/login") {
     return (
       <div style={{ color: "white", textAlign: "center", marginTop: 50 }}>
         Loading...
@@ -110,60 +100,44 @@ export default function App() {
 
   return (
     <>
-
-      {/* 🎧 MUSIC فقط للـ Auth + Dashboard */}
       {isAuth || isDashboard ? <GlobalMusic /> : null}
 
-      {/* 🎬 BACKGROUND للـ AUTH فقط */}
       {isAuth && !isLanding && (
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          style={{
-            position: "fixed",
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            zIndex: -2,
-          }}
-        >
+        <video autoPlay loop muted playsInline style={{
+          position: "fixed",
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          zIndex: -2,
+        }}>
           <source src="/justice-bg.mp4" type="video/mp4" />
         </video>
       )}
 
-      {/* 🖼 BACKGROUND للـ DASHBOARD فقط */}
       {isDashboard && (
-        <div
-          style={{
-            position: "fixed",
-            width: "100%",
-            height: "100%",
-            backgroundImage: "url('/dashboard-bg.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            zIndex: -2,
-          }}
-        />
+        <div style={{
+          position: "fixed",
+          width: "100%",
+          height: "100%",
+          backgroundImage: "url('/dashboard-bg.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          zIndex: -2,
+        }} />
       )}
 
-      {/* 🌑 overlay */}
       {(isAuth || isDashboard) && !isLanding && (
-        <div
-          style={{
-            position: "fixed",
-            width: "100%",
-            height: "100%",
-            background: "rgba(0,0,0,0.5)",
-            zIndex: -1,
-          }}
-        />
+        <div style={{
+          position: "fixed",
+          width: "100%",
+          height: "100%",
+          background: "rgba(0,0,0,0.5)",
+          zIndex: -1,
+        }} />
       )}
 
       <Routes>
 
-        {/* 🟣 LANDING */}
         <Route path="/landing" element={<LandingPage />} />
 
         <Route
@@ -227,6 +201,7 @@ export default function App() {
     </>
   );
 }
+
 
 
 
