@@ -137,71 +137,21 @@ body {
 }
 
 /* =========================
-   🎬 LANDING / CINEMATIC SYSTEM
+   🎬 LANDING ANIMATIONS (ONLY ADD THIS)
 ========================= */
 
-/* 🔥 إصبع ذهبي */
+/* 👇 إصبع ذهبي */
 @keyframes fingerMove {
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(12px);
-  }
-  100% {
-    transform: translateY(0);
-  }
+  0% { transform: translateY(0); }
+  50% { transform: translateY(12px); }
+  100% { transform: translateY(0); }
 }
 
-/* 🚪 باب المحكمة (فتح وهمي cinematic) */
-@keyframes gateOpen {
-  0% {
-    transform: scale(1);
-    filter: brightness(1);
-  }
-  50% {
-    transform: scale(1.05);
-    filter: brightness(0.6);
-  }
-  100% {
-    transform: scale(1);
-    filter: brightness(1);
-  }
-}
-
-/* 🎬 دخول سينمائي */
-@keyframes cinematicEnter {
-  0% {
-    opacity: 0;
-    transform: scale(1.1);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* ✨ Glow effect للذهب */
-@keyframes goldGlow {
-  0% {
-    text-shadow: 0 0 5px gold;
-  }
-  50% {
-    text-shadow: 0 0 20px gold;
-  }
-  100% {
-    text-shadow: 0 0 5px gold;
-  }
-}
-
-/* 🌫 fade عام */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+/* 👉 سهم التحريك */
+@keyframes movePointer {
+  0% { transform: translateX(30px); opacity: 0; }
+  50% { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(-30px); opacity: 0; }
 }
 
 /* =========================
@@ -216,6 +166,7 @@ body {
     transform: translateX(-50%);
   }
 }
+
 
 
 
