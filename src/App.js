@@ -21,7 +21,12 @@ export default function App() {
   const location = useLocation();
 
   const isLanding = location.pathname === "/landing";
-  const isDashboard = location.pathname.includes("/dashboard");
+
+  // 🔥 FIX: dashboard detection (IMPORTANT)
+  const isDashboard =
+    location.pathname.startsWith("/court") ||
+    location.pathname.startsWith("/inspection-dashboard");
+
   const isAuth =
     location.pathname === "/login" ||
     location.pathname === "/forgot-password" ||
@@ -61,17 +66,12 @@ export default function App() {
     }
   };
 
-  // 🔥 FIX 1: reload عند تغيير الصفحة (مهم جداً)
   useEffect(() => {
     loadUser();
   }, [location.pathname]);
 
-  // 🔥 FIX 2: fallback لو localStorage تغير
   useEffect(() => {
-    const handleStorageChange = () => {
-      loadUser();
-    };
-
+    const handleStorageChange = () => loadUser();
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
@@ -89,7 +89,6 @@ export default function App() {
     return `/court/${user.court_id}`;
   };
 
-  // 🔥 FIX 3: لا تعرض Loading بشكل دائم
   if (loading && location.pathname !== "/login") {
     return (
       <div style={{ color: "white", textAlign: "center", marginTop: 50 }}>
@@ -100,40 +99,73 @@ export default function App() {
 
   return (
     <>
-      {isAuth || isDashboard ? <GlobalMusic /> : null}
 
+      {/* 🎧 MUSIC (LOW VOLUME FIX) */}
+      {isAuth || isDashboard ? (
+        <div style={{ opacity: 0.35 }}>
+          <GlobalMusic key={location.pathname} />
+        </div>
+      ) : null}
+
+      {/* 🎬 AUTH BACKGROUND */}
       {isAuth && !isLanding && (
-        <video autoPlay loop muted playsInline style={{
-          position: "fixed",
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          zIndex: -2,
-        }}>
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          style={{
+            position: "fixed",
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            zIndex: -3,
+          }}
+        >
           <source src="/justice-bg.mp4" type="video/mp4" />
         </video>
       )}
 
+      {/* 🖼 DASHBOARD BACKGROUND (IMAGE + DARK OVERLAY FIX) */}
       {isDashboard && (
-        <div style={{
-          position: "fixed",
-          width: "100%",
-          height: "100%",
-          backgroundImage: "url('/dashboard-bg.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          zIndex: -2,
-        }} />
+        <>
+          <div
+            style={{
+              position: "fixed",
+              width: "100%",
+              height: "100%",
+              backgroundImage: "url('/dashboard-bg.jpg')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              filter: "brightness(0.55) blur(1px)",
+              zIndex: -3,
+            }}
+          />
+
+          {/* soft overlay فقط للداشبورد */}
+          <div
+            style={{
+              position: "fixed",
+              width: "100%",
+              height: "100%",
+              background: "rgba(0,0,0,0.25)",
+              zIndex: -2,
+            }}
+          />
+        </>
       )}
 
-      {(isAuth || isDashboard) && !isLanding && (
-        <div style={{
-          position: "fixed",
-          width: "100%",
-          height: "100%",
-          background: "rgba(0,0,0,0.5)",
-          zIndex: -1,
-        }} />
+      {/* 🔵 AUTH OVERLAY فقط */}
+      {isAuth && !isLanding && (
+        <div
+          style={{
+            position: "fixed",
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.5)",
+            zIndex: -1,
+          }}
+        />
       )}
 
       <Routes>
@@ -201,6 +233,7 @@ export default function App() {
     </>
   );
 }
+
 
 
 
