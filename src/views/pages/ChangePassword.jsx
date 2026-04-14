@@ -18,7 +18,9 @@ export default function ChangePassword() {
   const [score, setScore] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
-  // 🔥 FIXED ONLY (prevent stale + stuck page)
+  // =========================
+  // 🔐 LOAD USER (NO CHANGE)
+  // =========================
   useEffect(() => {
     const userId = localStorage.getItem("user_id");
 
@@ -31,7 +33,7 @@ export default function ChangePassword() {
       const { data, error } = await supabase
         .from("users")
         .select("*")
-        .eq("id", Number(userId)) // 🔥 FIX مهم جداً
+        .eq("id", Number(userId))
         .maybeSingle();
 
       if (error || !data) {
@@ -56,7 +58,9 @@ export default function ChangePassword() {
     fetchUser();
   }, [navigate]);
 
-  // 🔥 password strength
+  // =========================
+  // 🔐 PASSWORD STRENGTH
+  // =========================
   useEffect(() => {
     let s = 0;
     let newTips = [];
@@ -76,12 +80,15 @@ export default function ChangePassword() {
     setScore(s);
 
     if (s <= 1) setStrength("ضعيفة");
-    else if (s === 2 || s === 3) setStrength("متوسطة");
+    else if (s <= 3) setStrength("متوسطة");
     else setStrength("قوية");
 
     setTips(newTips);
   }, [newPass]);
 
+  // =========================
+  // 🔐 UPDATE PASSWORD
+  // =========================
   const handleUpdate = async () => {
     if (newPass !== confirmPass) return;
 
@@ -95,7 +102,7 @@ export default function ChangePassword() {
         password: newPass,
         must_change_password: false,
       })
-      .eq("id", Number(userId)); // 🔥 FIX مهم
+      .eq("id", Number(userId));
 
     setLoading(false);
 
@@ -106,7 +113,7 @@ export default function ChangePassword() {
 
       setTimeout(() => {
         setShowModal(false);
-        navigate("/login", { replace: true }); // 🔥 FIX يمنع الرجوع للصفحة
+        navigate("/login", { replace: true });
       }, 2000);
     }
   };
@@ -126,6 +133,16 @@ export default function ChangePassword() {
 
   return (
     <div style={styles.page}>
+
+      {/* 🎬 BACKGROUND VIDEO */}
+      <video autoPlay loop muted playsInline style={styles.video}>
+        <source src="/justice-bg.mp4" type="video/mp4" />
+      </video>
+
+      {/* 🌑 OVERLAY */}
+      <div style={styles.overlay} />
+
+      {/* 🧾 CARD */}
       <div style={styles.card}>
         <h3 style={styles.welcome}>{welcomeMessage}</h3>
 
@@ -179,6 +196,7 @@ export default function ChangePassword() {
         </button>
       </div>
 
+      {/* ✅ SUCCESS MODAL */}
       {showModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
@@ -192,14 +210,35 @@ export default function ChangePassword() {
   );
 }
 
+/* =========================
+   🎨 STYLES (FULL PACK)
+========================= */
 const styles = {
+
   page: {
     height: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "linear-gradient(135deg, #0f172a, #1e293b)",
+    position: "relative",
+    overflow: "hidden",
     color: "white",
+  },
+
+  video: {
+    position: "fixed",
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    zIndex: -2,
+  },
+
+  overlay: {
+    position: "fixed",
+    width: "100%",
+    height: "100%",
+    background: "rgba(0,0,0,0.55)",
+    zIndex: -1,
   },
 
   card: {
@@ -210,6 +249,7 @@ const styles = {
     borderRadius: "16px",
     textAlign: "center",
     border: "1px solid rgba(255,255,255,0.15)",
+    zIndex: 2,
   },
 
   welcome: {
@@ -290,6 +330,7 @@ const styles = {
     marginBottom: "10px",
   },
 };
+
 
 
 
