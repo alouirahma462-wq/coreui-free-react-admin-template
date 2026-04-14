@@ -12,14 +12,24 @@ export default function LandingPage() {
   const voiceRef = useRef(null);
   const clickRef = useRef(null);
 
+  // 🔥 FIX ECHO ONLY
+  const playedRef = useRef(false);
+
   const startMedia = async () => {
     try {
+      // ❌ يمنع الإعادة = حل الإيكو
+      if (playedRef.current) return;
+      playedRef.current = true;
+
       if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
         videoRef.current.muted = false;
         await videoRef.current.play();
       }
 
       if (voiceRef.current) {
+        voiceRef.current.pause();
         voiceRef.current.currentTime = 0;
         await voiceRef.current.play();
       }
@@ -28,10 +38,9 @@ export default function LandingPage() {
     }
   };
 
-  // ❌ FIX 1: منع تشغيل الصوت مرتين
+  // ❌ FIX 1: منع التكرار
   useEffect(() => {
     const unlockAudio = () => {
-      // ❌ removed startMedia from here (fix double sound)
       window.removeEventListener("click", unlockAudio);
     };
 
@@ -45,12 +54,16 @@ export default function LandingPage() {
 
     setTimeout(() => {
       setStartGate(true);
-      startMedia(); // ✅ الصوت هنا فقط
+      startMedia(); // ✅ مرة واحدة فقط
     }, 1200);
   };
 
   const handleClick = () => {
-    if (clickRef.current) clickRef.current.play();
+    if (clickRef.current) {
+      clickRef.current.pause(); // 🔥 منع تداخل صوت النقر
+      clickRef.current.currentTime = 0;
+      clickRef.current.play();
+    }
 
     setTimeout(() => {
       navigate("/login");
@@ -87,16 +100,19 @@ export default function LandingPage() {
       {!startGate && (
         <div style={styles.gate}>
 
-          {/* 🚪 DOOR */}
           <div style={styles.doorContainer}>
-            <div style={{
-              ...styles.doorLeft,
-              transform: openDoor ? "rotateY(-90deg)" : "rotateY(0deg)"
-            }} />
-            <div style={{
-              ...styles.doorRight,
-              transform: openDoor ? "rotateY(90deg)" : "rotateY(0deg)"
-            }} />
+            <div
+              style={{
+                ...styles.doorLeft,
+                transform: openDoor ? "rotateY(-90deg)" : "rotateY(0deg)",
+              }}
+            />
+            <div
+              style={{
+                ...styles.doorRight,
+                transform: openDoor ? "rotateY(90deg)" : "rotateY(0deg)",
+              }}
+            />
           </div>
 
           {!openDoor && (
@@ -211,8 +227,6 @@ const styles = {
 
   gateCard: {
     textAlign: "center",
-
-    // 🔥 FIX: وضوح الكتابة فوق الباب
     color: "white",
     zIndex: 5,
     padding: "25px 35px",
@@ -224,7 +238,6 @@ const styles = {
   title: {
     fontSize: "32px",
     marginBottom: "10px",
-    textShadow: "0 0 10px rgba(0,0,0,0.9)",
   },
 
   sub: {
@@ -270,7 +283,6 @@ const styles = {
     backgroundPosition: "left",
     transformOrigin: "left",
     transition: "1.2s ease-in-out",
-    boxShadow: "inset -5px 0 20px rgba(0,0,0,0.7)",
   },
 
   doorRight: {
@@ -281,9 +293,9 @@ const styles = {
     backgroundPosition: "right",
     transformOrigin: "right",
     transition: "1.2s ease-in-out",
-    boxShadow: "inset 5px 0 20px rgba(0,0,0,0.7)",
   },
 };
+
 
 
 
