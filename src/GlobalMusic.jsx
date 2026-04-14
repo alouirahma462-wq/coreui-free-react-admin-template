@@ -1,19 +1,22 @@
 import { useEffect, useRef } from "react";
 
-let isPlaying = false; // 🔥 يمنع التكرار عالميًا
-
 export default function GlobalMusic() {
   const musicRef = useRef(null);
+  const startedRef = useRef(false);
 
   useEffect(() => {
     const startMusic = () => {
-      if (isPlaying) return; // ❌ يمنع تشغيل مرتين
-      isPlaying = true;
+      if (startedRef.current) return;
+      startedRef.current = true;
 
       if (musicRef.current) {
         musicRef.current.volume = 0.35;
         musicRef.current.loop = true;
-        musicRef.current.play().catch(() => {});
+        musicRef.current.currentTime = 0;
+
+        musicRef.current.play().catch((err) => {
+          console.log("Audio blocked:", err);
+        });
       }
 
       window.removeEventListener("click", startMusic);
@@ -21,13 +24,16 @@ export default function GlobalMusic() {
 
     window.addEventListener("click", startMusic);
 
-    return () => window.removeEventListener("click", startMusic);
+    return () => {
+      window.removeEventListener("click", startMusic);
+    };
   }, []);
 
   return (
-    <audio ref={musicRef}>
+    <audio ref={musicRef} preload="auto">
       <source src="/gov-music.mp3" type="audio/mpeg" />
     </audio>
   );
 }
+
 
