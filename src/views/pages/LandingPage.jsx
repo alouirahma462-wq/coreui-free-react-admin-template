@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function LandingPage() {
@@ -12,16 +12,15 @@ export default function LandingPage() {
   const voiceRef = useRef(null);
   const clickRef = useRef(null);
 
-  // 🔥 FIX AUDIO GLOBAL CONTROL
-  const playedRef = useRef(false);
-  const voicePlayedRef = useRef(false);
-  const clickPlayedRef = useRef(false);
+  // 🔥 HARD LOCK (IMPORTANT FIX)
+  const mediaStartedRef = useRef(false);
+  const voiceStartedRef = useRef(false);
 
   const startMedia = async () => {
     try {
-      // ❌ يمنع أي تشغيل مزدوج نهائي
-      if (playedRef.current) return;
-      playedRef.current = true;
+      // ❌ يمنع أي تشغيل نهائي متكرر
+      if (mediaStartedRef.current) return;
+      mediaStartedRef.current = true;
 
       if (videoRef.current) {
         videoRef.current.pause();
@@ -30,28 +29,20 @@ export default function LandingPage() {
         await videoRef.current.play();
       }
 
-      if (voiceRef.current && !voicePlayedRef.current) {
-        voicePlayedRef.current = true;
+      // 🔥 الصوت فقط مرة واحدة
+      if (voiceRef.current && !voiceStartedRef.current) {
+        voiceStartedRef.current = true;
 
         voiceRef.current.pause();
         voiceRef.current.currentTime = 0;
-        voiceRef.current.loop = false; // 🔥 مهم جداً
+        voiceRef.current.loop = false;
         await voiceRef.current.play();
       }
+
     } catch (err) {
       console.log("Autoplay blocked:", err);
     }
   };
-
-  // ❌ FIX 1: منع التكرار من event listener
-  useEffect(() => {
-    const unlockAudio = () => {
-      window.removeEventListener("click", unlockAudio);
-    };
-
-    window.addEventListener("click", unlockAudio);
-    return () => window.removeEventListener("click", unlockAudio);
-  }, []);
 
   // 🚪 فتح الباب
   const openGate = () => {
@@ -59,14 +50,14 @@ export default function LandingPage() {
 
     setTimeout(() => {
       setStartGate(true);
-      startMedia(); // ✅ مرة واحدة فقط
+
+      // 🔥 مهم: تشغيل مرة واحدة فقط هنا
+      startMedia();
     }, 1200);
   };
 
   const handleClick = () => {
-    if (clickRef.current && !clickPlayedRef.current) {
-      clickPlayedRef.current = true;
-
+    if (clickRef.current) {
       clickRef.current.pause();
       clickRef.current.currentTime = 0;
       clickRef.current.play();
@@ -302,6 +293,7 @@ const styles = {
     transition: "1.2s ease-in-out",
   },
 };
+
 
 
 
