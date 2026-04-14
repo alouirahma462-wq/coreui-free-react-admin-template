@@ -9,40 +9,26 @@ export default function LandingPage() {
   const navigate = useNavigate();
 
   const videoRef = useRef(null);
-  const voiceRef = useRef(null);
   const clickRef = useRef(null);
 
-  // 🔥 HARD AUDIO LOCK (FINAL FIX)
+  // 🔥 LOCK (prevent double execution)
   const hasStartedRef = useRef(false);
 
   const startMedia = async () => {
     try {
-      // ❌ يمنع أي تشغيل نهائي (StrictMode safe)
       if (hasStartedRef.current) return;
       hasStartedRef.current = true;
 
-      // 🎬 VIDEO FIX
+      // 🎬 VIDEO ONLY (no extra audio → avoids echo)
       if (videoRef.current) {
         videoRef.current.pause();
         videoRef.current.currentTime = 0;
-        videoRef.current.muted = false;
+
+        videoRef.current.muted = false; // الفيديو فيه صوت أصلاً
+        videoRef.current.volume = 1;
+
         await videoRef.current.play();
       }
-
-      // 🔊 VOICE FIX (NO ECHO)
-      if (voiceRef.current) {
-        voiceRef.current.pause();              // 🔥 stop any previous
-        voiceRef.current.currentTime = 0;     // 🔥 reset
-        voiceRef.current.volume = 1;          // 🔥 force clean volume
-        voiceRef.current.loop = false;        // ❌ prevent loop echo
-        voiceRef.current.muted = false;
-
-        // 🔥 مهم جداً: small delay يمنع double trigger
-        setTimeout(() => {
-          voiceRef.current.play().catch(() => {});
-        }, 50);
-      }
-
     } catch (err) {
       console.log("Autoplay blocked:", err);
     }
@@ -54,7 +40,7 @@ export default function LandingPage() {
 
     setTimeout(() => {
       setStartGate(true);
-      startMedia(); // ✅ مرة واحدة فقط
+      startMedia(); // مرة واحدة فقط
     }, 1200);
   };
 
@@ -86,12 +72,7 @@ export default function LandingPage() {
         </video>
       )}
 
-      {/* 🔊 VOICE */}
-      <audio ref={voiceRef}>
-        <source src="/voice.mp3" type="audio/mpeg" />
-      </audio>
-
-      {/* 🔊 CLICK */}
+      {/* 🔊 CLICK ONLY */}
       <audio ref={clickRef}>
         <source src="/click.mp3" type="audio/mpeg" />
       </audio>
@@ -162,7 +143,6 @@ export default function LandingPage() {
 /* ================= STYLES ================= */
 
 const styles = {
-
   container: {
     position: "relative",
     height: "100vh",
