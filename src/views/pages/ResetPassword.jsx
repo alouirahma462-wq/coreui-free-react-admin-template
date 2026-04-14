@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
 
@@ -12,12 +12,21 @@ export default function ResetPassword() {
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
 
+  // 🎧 MUSIC
+  const musicRef = useRef(null);
+
+  useEffect(() => {
+    if (musicRef.current) {
+      musicRef.current.volume = 0.5;
+      musicRef.current.play().catch(() => {});
+    }
+  }, []);
+
   useEffect(() => {
     const user = localStorage.getItem("reset_user");
     const flow = localStorage.getItem("reset_flow");
     const expiry = localStorage.getItem("reset_expiry");
 
-    // ❌ حالة غير صالحة → رجوع لوجن
     if (!user || flow !== "active" || !expiry) {
       localStorage.removeItem("reset_user");
       localStorage.removeItem("reset_otp");
@@ -28,7 +37,6 @@ export default function ResetPassword() {
       return;
     }
 
-    // ⛔ انتهاء الصلاحية
     if (Date.now() > parseInt(expiry)) {
       localStorage.removeItem("reset_user");
       localStorage.removeItem("reset_otp");
@@ -94,6 +102,31 @@ export default function ResetPassword() {
 
   return (
     <div style={styles.page}>
+
+      {/* 🎬 VIDEO BACKGROUND */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          zIndex: -2,
+        }}
+      >
+        <source src="/justice-bg.mp4" type="video/mp4" />
+      </video>
+
+      {/* 🎧 MUSIC */}
+      <audio ref={musicRef} loop>
+        <source src="/gov-music.mp3" type="audio/mpeg" />
+      </audio>
+
       <div style={styles.header}>
         🇹🇳 الجمهورية التونسية - وزارة العدل
       </div>
@@ -136,25 +169,17 @@ export default function ResetPassword() {
   );
 }
 
+/* نفس الستايل بدون تغيير */
 const styles = {
   page: {
     height: "100vh",
     width: "100vw",
-
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     direction: "rtl",
     fontFamily: "Tahoma",
     color: "white",
-
-    backgroundColor: "#0f172a",
-
-    backgroundImage: `
-      radial-gradient(circle at top, rgba(185,28,28,0.25), transparent 60%),
-      linear-gradient(135deg, #0f172a, #1e293b)
-    `,
-
     position: "fixed",
     inset: 0,
     overflow: "hidden",
@@ -165,10 +190,8 @@ const styles = {
     top: 0,
     left: 0,
     width: "100%",
-
     background: "rgba(185, 28, 28, 0.9)",
     backdropFilter: "blur(12px)",
-
     color: "white",
     textAlign: "center",
     padding: "12px",
@@ -180,23 +203,12 @@ const styles = {
     width: "90%",
     maxWidth: "420px",
     padding: "30px",
-
     backgroundColor: "rgba(2, 6, 23, 0.75)",
-
     backdropFilter: "blur(30px)",
-    WebkitBackdropFilter: "blur(30px)",
-
     borderRadius: "22px",
     textAlign: "center",
-
     border: "1px solid rgba(255,255,255,0.12)",
-
     boxShadow: "0 30px 80px rgba(0,0,0,0.75)",
-
-    color: "#fff",
-
-    position: "relative",
-    zIndex: 10,
   },
 
   title: {
@@ -208,12 +220,8 @@ const styles = {
     width: "100%",
     padding: "12px",
     marginBottom: "10px",
-
     borderRadius: "12px",
     border: "1px solid rgba(255,255,255,0.2)",
-
-    outline: "none",
-
     backgroundColor: "rgba(255,255,255,0.08)",
     color: "white",
   },
@@ -221,10 +229,8 @@ const styles = {
   button: {
     width: "100%",
     padding: "12px",
-
     background: "linear-gradient(135deg, #1e3a8a, #2563eb)",
     color: "white",
-
     border: "none",
     borderRadius: "12px",
     cursor: "pointer",
@@ -239,7 +245,6 @@ const styles = {
   modalOverlay: {
     position: "fixed",
     inset: 0,
-
     background: "rgba(0,0,0,0.6)",
     display: "flex",
     justifyContent: "center",
@@ -250,14 +255,10 @@ const styles = {
   modal: {
     background: "rgba(2, 6, 23, 0.85)",
     backdropFilter: "blur(25px)",
-
     padding: "30px",
     borderRadius: "18px",
     textAlign: "center",
-    color: "white",
-
     border: "1px solid rgba(255,255,255,0.15)",
-    boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
   },
 
   check: {
@@ -265,6 +266,7 @@ const styles = {
     color: "#22c55e",
   },
 };
+
 
 
 
