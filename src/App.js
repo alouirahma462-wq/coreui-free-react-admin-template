@@ -70,10 +70,23 @@ export default function App() {
     loadUser();
   }, []);
 
+  // 🔥🔥🔥 FIX HERE ONLY
+  const isMustChange = (value) => {
+    return (
+      value === true ||
+      value === 1 ||
+      value === "1" ||
+      value === "true"
+    );
+  };
+
   const getHomeRoute = () => {
     if (!user) return "/login";
-    if (user.must_change_password) return "/change-password";
+
+    if (isMustChange(user.must_change_password)) return "/change-password";
+
     if (user.court_id === null) return "/inspection-dashboard";
+
     return `/court/${user.court_id}`;
   };
 
@@ -140,7 +153,7 @@ export default function App() {
 
       <Routes>
 
-        {/* 🟣 LANDING مستقل 100% (بدون أي تأثير) */}
+        {/* 🟣 LANDING مستقل 100% */}
         <Route path="/landing" element={<LandingPage />} />
 
         <Route
@@ -176,7 +189,7 @@ export default function App() {
           element={
             !user ? (
               <Navigate to="/login" replace />
-            ) : user.must_change_password ? (
+            ) : isMustChange(user.must_change_password) ? (  // 🔥 FIX
               <Navigate to="/change-password" replace />
             ) : (
               <CourtDashboard user={user} />
@@ -189,7 +202,7 @@ export default function App() {
           element={
             !user ? (
               <Navigate to="/login" replace />
-            ) : user.must_change_password ? (
+            ) : isMustChange(user.must_change_password) ? ( // 🔥 FIX
               <Navigate to="/change-password" replace />
             ) : (
               <InspectionDashboard user={user} />
@@ -204,6 +217,7 @@ export default function App() {
     </>
   );
 }
+
 
 
 
