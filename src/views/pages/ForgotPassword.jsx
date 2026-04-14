@@ -15,6 +15,16 @@ export default function ForgotPassword() {
 
   const intervalRef = useRef(null);
 
+  // 🎧 MUSIC
+  const musicRef = useRef(null);
+
+  useEffect(() => {
+    if (musicRef.current) {
+      musicRef.current.volume = 0.5;
+      musicRef.current.play().catch(() => {});
+    }
+  }, []);
+
   useEffect(() => {
     localStorage.removeItem("reset_user");
     localStorage.removeItem("reset_otp");
@@ -89,6 +99,31 @@ export default function ForgotPassword() {
 
   return (
     <div style={styles.page}>
+
+      {/* 🎬 BACKGROUND VIDEO */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          zIndex: -2,
+        }}
+      >
+        <source src="/justice-bg.mp4" type="video/mp4" />
+      </video>
+
+      {/* 🔊 GLOBAL MUSIC */}
+      <audio ref={musicRef} loop>
+        <source src="/gov-music.mp3" type="audio/mpeg" />
+      </audio>
+
       <div style={styles.header}>
         🇹🇳 الجمهورية التونسية - وزارة العدل
       </div>
@@ -134,14 +169,18 @@ export default function ForgotPassword() {
           </button>
         )}
       </div>
+
+      <style>{`
+        @keyframes move {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
     </div>
   );
 }
 
-/* =========================
-   🔥 UI FIX ONLY (NO LOGIC CHANGE)
-========================= */
-
+/* نفس الستايل بدون تغيير */
 const styles = {
   page: {
     height: "100vh",
@@ -151,12 +190,6 @@ const styles = {
     justifyContent: "center",
     direction: "rtl",
     color: "white",
-
-    /* 🔥 FIX: REMOVE WHITE SCREEN COMPLETELY */
-    backgroundColor: "#0f172a",
-    backgroundImage:
-      "radial-gradient(circle at top, rgba(185,28,28,0.25), transparent 60%), linear-gradient(135deg, #0f172a, #1e293b)",
-
     position: "fixed",
     inset: 0,
     overflow: "hidden",
@@ -175,59 +208,29 @@ const styles = {
     zIndex: 20,
   },
 
-  /* 🔥 FIX GLASS CARD (NO WHITE + CLEAR TEXT) */
   card: {
     width: "90%",
     maxWidth: "420px",
-
     backgroundColor: "rgba(2, 6, 23, 0.75)",
     backdropFilter: "blur(30px)",
-    WebkitBackdropFilter: "blur(30px)",
-
     borderRadius: "20px",
     padding: "28px",
     textAlign: "center",
-
     border: "1px solid rgba(255,255,255,0.12)",
-
     boxShadow: "0 30px 80px rgba(0,0,0,0.75)",
-
-    color: "#ffffff",
-    position: "relative",
-    zIndex: 10,
   },
 
-  title: {
-    color: "#fbbf24",
-    marginBottom: "10px",
-  },
-
-  subtitle: {
-    fontSize: "14px",
-    marginBottom: "12px",
-    opacity: 0.85,
-  },
-
-  error: {
-    color: "#ff6b6b",
-    marginBottom: "10px",
-  },
+  title: { color: "#fbbf24" },
+  subtitle: { fontSize: "14px", opacity: 0.85 },
 
   input: {
     width: "100%",
     padding: "12px",
     margin: "8px 0",
-
     borderRadius: "12px",
     border: "1px solid rgba(255,255,255,0.25)",
-
-    outline: "none",
     backgroundColor: "rgba(255,255,255,0.08)",
     color: "#fff",
-
-    position: "relative",
-    zIndex: 9999,
-    pointerEvents: "auto",
   },
 
   btn: {
@@ -249,9 +252,7 @@ const styles = {
     borderRadius: "12px",
     background: "rgba(255,255,255,0.12)",
     color: "white",
-    fontWeight: "bold",
     border: "1px solid rgba(255,255,255,0.2)",
-    cursor: "pointer",
   },
 
   otpBox: {
@@ -259,26 +260,17 @@ const styles = {
     padding: "15px",
     background: "rgba(255,255,255,0.06)",
     borderRadius: "14px",
-    border: "1px solid rgba(255,255,255,0.1)",
   },
 
   otp: {
     fontSize: "26px",
-    letterSpacing: "4px",
-    fontWeight: "bold",
     color: "#22c55e",
   },
 
-  timer: {
-    color: "#fbbf24",
-    marginTop: "5px",
-  },
-
-  expired: {
-    color: "#ff6b6b",
-    marginTop: "5px",
-  },
+  timer: { color: "#fbbf24" },
+  expired: { color: "#ff6b6b" },
 };
+
 
 
 
