@@ -22,15 +22,19 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "#0f172a",
+    
+    // 🔥 FIX: خليه شفاف بالكامل
+    background: "transparent",
     color: "white",
   },
 
   card: {
     padding: "30px",
     borderRadius: "15px",
-    background: "rgba(255,255,255,0.08)",
+    background: "rgba(255,255,255,0.10)",
+    backdropFilter: "blur(12px)",
     textAlign: "center",
     width: "400px",
   },
 };
+
