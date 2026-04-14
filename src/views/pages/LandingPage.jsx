@@ -28,9 +28,10 @@ export default function LandingPage() {
     }
   };
 
+  // ❌ FIX 1: منع تشغيل الصوت مرتين
   useEffect(() => {
     const unlockAudio = () => {
-      startMedia();
+      // ❌ removed startMedia from here (fix double sound)
       window.removeEventListener("click", unlockAudio);
     };
 
@@ -38,12 +39,13 @@ export default function LandingPage() {
     return () => window.removeEventListener("click", unlockAudio);
   }, []);
 
+  // 🚪 فتح الباب
   const openGate = () => {
     setOpenDoor(true);
 
     setTimeout(() => {
       setStartGate(true);
-      startMedia();
+      startMedia(); // ✅ الصوت هنا فقط
     }, 1200);
   };
 
@@ -209,13 +211,20 @@ const styles = {
 
   gateCard: {
     textAlign: "center",
+
+    // 🔥 FIX: وضوح الكتابة فوق الباب
     color: "white",
     zIndex: 5,
+    padding: "25px 35px",
+    background: "rgba(0,0,0,0.55)",
+    backdropFilter: "blur(8px)",
+    borderRadius: "12px",
   },
 
   title: {
     fontSize: "32px",
     marginBottom: "10px",
+    textShadow: "0 0 10px rgba(0,0,0,0.9)",
   },
 
   sub: {
@@ -225,7 +234,7 @@ const styles = {
 
   click: {
     fontSize: "16px",
-    opacity: 0.8,
+    opacity: 0.85,
   },
 
   finger: {
@@ -245,7 +254,6 @@ const styles = {
     cursor: "pointer",
   },
 
-  // 🚪 DOOR REAL IMAGE + 3D
   doorContainer: {
     position: "absolute",
     width: "100%",
@@ -276,6 +284,7 @@ const styles = {
     boxShadow: "inset 5px 0 20px rgba(0,0,0,0.7)",
   },
 };
+
 
 
 
