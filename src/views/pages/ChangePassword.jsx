@@ -19,13 +19,20 @@ export default function ChangePassword() {
   const [showModal, setShowModal] = useState(false);
 
   // =========================
-  // 🔐 LOAD USER (NO CHANGE)
+  // 🔐 LOAD USER (FIX ONLY)
   // =========================
   useEffect(() => {
     const userId = localStorage.getItem("user_id");
 
+    // 🔥 FIX: prevent instant redirect
     if (!userId || userId === "undefined" || userId === "null") {
-      navigate("/login", { replace: true });
+      setTimeout(() => {
+        const retry = localStorage.getItem("user_id");
+
+        if (!retry) {
+          navigate("/login", { replace: true });
+        }
+      }, 300);
       return;
     }
 
@@ -211,7 +218,7 @@ export default function ChangePassword() {
 }
 
 /* =========================
-   🎨 STYLES (FULL PACK)
+   🎨 STYLES (UNCHANGED)
 ========================= */
 const styles = {
 
@@ -330,6 +337,7 @@ const styles = {
     marginBottom: "10px",
   },
 };
+
 
 
 
