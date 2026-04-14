@@ -24,15 +24,19 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "#0b1220",
+
+    // 🔥 FIX مهم جداً
+    background: "transparent",
     color: "white",
   },
 
   card: {
     padding: "30px",
     borderRadius: "15px",
-    background: "rgba(255,255,255,0.06)",
+    background: "rgba(255,255,255,0.08)",
+    backdropFilter: "blur(12px)",
     textAlign: "center",
     width: "420px",
   },
 };
+
