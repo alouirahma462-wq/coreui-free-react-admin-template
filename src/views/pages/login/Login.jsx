@@ -71,8 +71,15 @@ export default function Login() {
 
       setLoading(false);
 
-      Promise.resolve().then(() => {
-        if (user.must_change_password === true) {
+      // 🔥 FIX ONLY (navigation fix)
+      setTimeout(() => {
+        const mustChange =
+          user.must_change_password === true ||
+          user.must_change_password === "true" ||
+          user.must_change_password === 1 ||
+          user.must_change_password === "1";
+
+        if (mustChange) {
           navigate("/change-password", { replace: true });
           return;
         }
@@ -83,7 +90,7 @@ export default function Login() {
         }
 
         navigate(`/court/${user.court_id}`, { replace: true });
-      });
+      }, 0);
 
     } catch (err) {
       console.log(err);
@@ -103,7 +110,7 @@ export default function Login() {
       {/* 🌑 OVERLAY */}
       <div style={styles.overlay}></div>
 
-      {/* 🔴 TOP BAR (يظهر فوق الفيديو) */}
+      {/* 🔴 TOP BAR */}
       <div style={styles.topBar}>
         <div style={styles.marqueeTrack}>
           <div style={styles.marqueeText}>
@@ -172,7 +179,7 @@ export default function Login() {
   );
 }
 
-/* 🎨 STYLES */
+/* 🎨 STYLES (UNCHANGED) */
 const styles = {
   page: {
     height: "100vh",
@@ -295,6 +302,7 @@ const styles = {
     fontSize: "13px",
   },
 };
+
 
 
 
