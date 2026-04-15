@@ -31,15 +31,10 @@ export default function Login() {
         return;
       }
 
-      // 🔥 FIXED JOIN (REAL + SAFE)
+      // 1️⃣ جلب المستخدم فقط (بدون join)
       const { data: user, error } = await supabase
         .from("users")
-        .select(`
-          *,
-          courts:court_id (
-            name
-          )
-        `)
+        .select("*")
         .eq("username", username.trim())
         .single();
 
@@ -74,13 +69,20 @@ export default function Login() {
         localStorage.removeItem("remember_user");
       }
 
-      // 🔥 FIX: court name (GUARANTEED FINAL)
-      const courtName =
-        user?.courts?.name ||
-        user?.courts?.[0]?.name ||
-        user?.court?.name ||
-        "غير محدد";
+      // 2️⃣ جلب المحكمة بشكل آمن (منفصل)
+      let courtName = "غير محدد";
 
+      if (user.court_id) {
+        const { data: court } = await supabase
+          .from("courts")
+          .select("name")
+          .eq("id", user.court_id)
+          .maybeSingle();
+
+        courtName = court?.name || "غير محدد";
+      }
+
+      // 3️⃣ التخزين الصحيح
       localStorage.setItem(
         "user",
         JSON.stringify({
@@ -319,6 +321,7 @@ const styles = {
     fontSize: "13px",
   },
 };
+
 
 
 
