@@ -3,16 +3,17 @@ import { supabase } from "../../supabaseClient";
 
 export default function CourtDashboard() {
   const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("user"))
+    JSON.parse(localStorage.getItem("user")) || {}
   );
 
   const [openDoor, setOpenDoor] = useState(false);
   const [enterDashboard, setEnterDashboard] = useState(false);
 
-  // 🔥 NEW: الوقت
   const [time, setTime] = useState("");
 
-  // 🔥 FIX: جلب اسم المحكمة إذا مش موجود
+  // 🔥 FIX 1: ضمان اسم المحكمة 100%
+  const courtName = user?.court_name || "المحكمة";
+
   useEffect(() => {
     const fetchCourt = async () => {
       if (!user?.court_name && user?.court_id) {
@@ -24,7 +25,7 @@ export default function CourtDashboard() {
 
         const updatedUser = {
           ...user,
-          court_name: data?.name,
+          court_name: data?.name || "المحكمة",
         };
 
         localStorage.setItem("user", JSON.stringify(updatedUser));
@@ -35,7 +36,6 @@ export default function CourtDashboard() {
     fetchCourt();
   }, []);
 
-  // 🔥 NEW: تحديث الوقت
   useEffect(() => {
     const interval = setInterval(() => {
       const now = new Date().toLocaleString("ar-TN", {
@@ -87,8 +87,9 @@ export default function CourtDashboard() {
           {!openDoor && (
             <div style={styles.gateCard}>
 
+              {/* 🔥 FIX HERE */}
               <h1 style={styles.title}>
-                🏛️ {user?.court_name || "..."}
+                🏛️ {courtName}
               </h1>
 
               <h2 style={styles.sub}>
@@ -110,30 +111,30 @@ export default function CourtDashboard() {
       {/* 🔥 DASHBOARD */}
       {enterDashboard && (
         <>
-          {/* 🔴 الشريط الأول */}
+          {/* 🔴 BAR */}
           <div style={styles.topBar}>
             <div style={styles.marqueeTrack}>
               <div style={styles.marqueeText}>
-                🇹🇳 وزارة العدل - {user?.court_name || "..."}
+                🇹🇳 وزارة العدل - {courtName}
               </div>
               <div style={styles.marqueeText}>
-                🇹🇳 وزارة العدل - {user?.court_name || "..."}
+                🇹🇳 وزارة العدل - {courtName}
               </div>
             </div>
           </div>
 
-          {/* 🔵 الشريط الثاني */}
+          {/* 🔵 TIME */}
           <div style={styles.timeBar}>
             ⏰ {time}
           </div>
 
-          {/* الكارد */}
+          {/* CARD */}
           <div style={styles.card}>
-            <h1>🏛️ {user?.court_name || "..."}</h1>
+            <h1>🏛️ {courtName}</h1>
 
             <h2>👋 مرحبا {user?.fullName}</h2>
 
-            <p>📍 {user?.court_name || "..."}</p>
+            <p>📍 {courtName}</p>
           </div>
         </>
       )}
@@ -161,7 +162,6 @@ const styles = {
     overflow: "hidden",
   },
 
-  /* 🔥 GATE */
   gate: {
     position: "absolute",
     width: "100%",
@@ -207,7 +207,6 @@ const styles = {
     cursor: "pointer",
   },
 
-  /* 🔥 DOOR */
   doorContainer: {
     position: "absolute",
     width: "100%",
@@ -236,7 +235,6 @@ const styles = {
     transition: "1.2s ease-in-out",
   },
 
-  /* 🔴 الشريط العلوي */
   topBar: {
     position: "fixed",
     top: 0,
@@ -262,7 +260,6 @@ const styles = {
     fontWeight: "bold",
   },
 
-  /* 🔵 الوقت */
   timeBar: {
     position: "fixed",
     top: "40px",
@@ -276,7 +273,6 @@ const styles = {
     zIndex: 9998,
   },
 
-  /* 🔥 CARD */
   card: {
     padding: "30px",
     borderRadius: "15px",
