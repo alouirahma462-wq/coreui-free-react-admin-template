@@ -67,6 +67,21 @@ export default function Login() {
         localStorage.removeItem("remember_user");
       }
 
+      // 🔥🔥🔥 الإضافة الجديدة فقط هنا
+      const { data: court } = await supabase
+        .from("courts")
+        .select("name")
+        .eq("id", user.court_id)
+        .single();
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          ...user,
+          court_name: court?.name,
+        })
+      );
+
       localStorage.setItem("user_id", String(user.id));
 
       // 🔥 IMPORTANT FIX (THIS IS THE MISSING PIECE)
