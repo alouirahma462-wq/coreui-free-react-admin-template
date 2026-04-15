@@ -67,24 +67,40 @@ export default function Login() {
         localStorage.removeItem("remember_user");
       }
 
-      // 🔥🔥🔥 الإضافة الجديدة فقط هنا
-      const { data: court } = await supabase
-        .from("courts")
-        .select("name")
-        .eq("id", user.court_id)
-        .single();
+      // =========================
+      // 🔥 FIX: COURT DETECTION (ONLY THIS PART ADDED)
+      // =========================
+
+      const courtMatch = user.fullName.match(/تونس|سوسة|نابل|بن عروس|منوبة|قفصة|مدنين/);
+
+      let court = null;
+
+      if (courtMatch) {
+        const courtKeyword = courtMatch[0];
+
+        const { data } = await supabase
+          .from("courts")
+          .select("name")
+          .ilike("name", `%${courtKeyword}%`)
+          .single();
+
+        court = data;
+      }
+
+      // =========================
+      // 🔥 FIX: STORAGE (ONLY THIS PART ADDED)
+      // =========================
 
       localStorage.setItem(
         "user",
         JSON.stringify({
           ...user,
-          court_name: court?.name,
+          court_name: court?.name || "غير محدد"
         })
       );
 
       localStorage.setItem("user_id", String(user.id));
 
-      // 🔥 IMPORTANT FIX (THIS IS THE MISSING PIECE)
       window.dispatchEvent(new Event("storage"));
 
       setLoading(false);
@@ -317,6 +333,7 @@ const styles = {
     fontSize: "13px",
   },
 };
+
 
 
 
