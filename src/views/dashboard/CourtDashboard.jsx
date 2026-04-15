@@ -1,11 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { supabase } from "../../../supabaseClient";
 
 export default function CourtDashboard() {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem("user"))
+  );
 
-  // 🔥 NEW STATE
   const [openDoor, setOpenDoor] = useState(false);
   const [enterDashboard, setEnterDashboard] = useState(false);
+
+  // 🔥 NEW: الوقت
+  const [time, setTime] = useState("");
+
+  // 🔥 FIX: جلب اسم المحكمة إذا مش موجود
+  useEffect(() => {
+    const fetchCourt = async () => {
+      if (!user?.court_name && user?.court_id) {
+        const { data } = await supabase
+          .from("courts")
+          .select("name")
+          .eq("id", user.court_id)
+          .single();
+
+        const updatedUser = {
+          ...user,
+          court_name: data?.name,
+        };
+
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setUser(updatedUser);
+      }
+    };
+
+    fetchCourt();
+  }, []);
+
+  // 🔥 NEW: تحديث الوقت
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date().toLocaleString("ar-TN", {
+        timeZone: "Africa/Tunis",
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+      setTime(now);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleEnter = () => {
     setOpenDoor(true);
@@ -41,7 +88,7 @@ export default function CourtDashboard() {
             <div style={styles.gateCard}>
 
               <h1 style={styles.title}>
-                🏛️ {user?.court_name || "المحكمة"}
+                🏛️ {user?.court_name || "..."}
               </h1>
 
               <h2 style={styles.sub}>
@@ -60,16 +107,43 @@ export default function CourtDashboard() {
         </div>
       )}
 
-      {/* 🔥 ORIGINAL DASHBOARD */}
+      {/* 🔥 DASHBOARD */}
       {enterDashboard && (
-        <div style={styles.card}>
-          <h1>🏛️ المحكمة الابتدائية</h1>
+        <>
+          {/* 🔴 الشريط الأول */}
+          <div style={styles.topBar}>
+            <div style={styles.marqueeTrack}>
+              <div style={styles.marqueeText}>
+                🇹🇳 وزارة العدل - {user?.court_name || "..."}
+              </div>
+              <div style={styles.marqueeText}>
+                🇹🇳 وزارة العدل - {user?.court_name || "..."}
+              </div>
+            </div>
+          </div>
 
-          <h2>👋 مرحبا {user?.fullName}</h2>
+          {/* 🔵 الشريط الثاني */}
+          <div style={styles.timeBar}>
+            ⏰ {time}
+          </div>
 
-          <p>📍 {user?.court_name || "غير محدد"}</p>
-        </div>
+          {/* الكارد */}
+          <div style={styles.card}>
+            <h1>🏛️ {user?.court_name || "..."}</h1>
+
+            <h2>👋 مرحبا {user?.fullName}</h2>
+
+            <p>📍 {user?.court_name || "..."}</p>
+          </div>
+        </>
       )}
+
+      <style>{`
+        @keyframes move {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
 
     </div>
   );
@@ -162,7 +236,47 @@ const styles = {
     transition: "1.2s ease-in-out",
   },
 
-  /* 🔥 ORIGINAL CARD */
+  /* 🔴 الشريط العلوي */
+  topBar: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "40px",
+    background: "#b91c1c",
+    overflow: "hidden",
+    display: "flex",
+    alignItems: "center",
+    zIndex: 9999,
+  },
+
+  marqueeTrack: {
+    display: "flex",
+    width: "max-content",
+    animation: "move 15s linear infinite",
+  },
+
+  marqueeText: {
+    whiteSpace: "nowrap",
+    paddingRight: "120px",
+    fontWeight: "bold",
+  },
+
+  /* 🔵 الوقت */
+  timeBar: {
+    position: "fixed",
+    top: "40px",
+    width: "100%",
+    height: "35px",
+    background: "#1e3a8a",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "14px",
+    zIndex: 9998,
+  },
+
+  /* 🔥 CARD */
   card: {
     padding: "30px",
     borderRadius: "15px",
@@ -172,4 +286,5 @@ const styles = {
     width: "400px",
   },
 };
+
 
