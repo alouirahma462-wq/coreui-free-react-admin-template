@@ -31,11 +31,15 @@ export default function Login() {
         return;
       }
 
+      // 🔥 JOIN مباشر (بدل الاستعلام القديم)
       const { data: user, error } = await supabase
         .from("users")
-        .select("*")
+        .select(`
+          *,
+          courts(name)
+        `)
         .eq("username", username.trim())
-        .maybeSingle();
+        .single();
 
       if (error) {
         setMessage("❌ خطأ في النظام");
@@ -67,35 +71,12 @@ export default function Login() {
         localStorage.removeItem("remember_user");
       }
 
-      // =========================
-      // 🔥 FIX: COURT DETECTION (ONLY THIS PART ADDED)
-      // =========================
-
-      const courtMatch = user.fullName.match(/تونس|سوسة|نابل|بن عروس|منوبة|قفصة|مدنين/);
-
-      let court = null;
-
-      if (courtMatch) {
-        const courtKeyword = courtMatch[0];
-
-        const { data } = await supabase
-          .from("courts")
-          .select("name")
-          .ilike("name", `%${courtKeyword}%`)
-          .single();
-
-        court = data;
-      }
-
-      // =========================
-      // 🔥 FIX: STORAGE (ONLY THIS PART ADDED)
-      // =========================
-
+      // 🔥 التخزين (JOIN result)
       localStorage.setItem(
         "user",
         JSON.stringify({
           ...user,
-          court_name: court?.name || "غير محدد"
+          court_name: user.courts?.name || "غير محدد"
         })
       );
 
@@ -105,9 +86,6 @@ export default function Login() {
 
       setLoading(false);
 
-      // =========================
-      // 🔥 FIX ONLY HERE
-      // =========================
       const mustChange =
         user?.must_change_password === true ||
         user?.must_change_password === "true" ||
@@ -333,6 +311,7 @@ const styles = {
     fontSize: "13px",
   },
 };
+
 
 
 
