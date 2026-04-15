@@ -31,17 +31,20 @@ export default function Login() {
         return;
       }
 
-      // 🔥 JOIN مباشر (بدل الاستعلام القديم)
+      // 🔥 FIXED JOIN (REAL + SAFE)
       const { data: user, error } = await supabase
         .from("users")
         .select(`
           *,
-          courts(name)
+          courts:court_id (
+            name
+          )
         `)
         .eq("username", username.trim())
         .single();
 
       if (error) {
+        console.log(error);
         setMessage("❌ خطأ في النظام");
         setLoading(false);
         return;
@@ -71,12 +74,17 @@ export default function Login() {
         localStorage.removeItem("remember_user");
       }
 
-      // 🔥 التخزين (JOIN result)
+      // 🔥 FIX: court name (GUARANTEED)
+      const courtName =
+        user.courts?.name ??
+        user.court?.name ??
+        "غير محدد";
+
       localStorage.setItem(
         "user",
         JSON.stringify({
           ...user,
-          court_name: user.courts?.name || "غير محدد"
+          court_name: courtName
         })
       );
 
@@ -302,7 +310,6 @@ const styles = {
     color: "white",
     fontWeight: "bold",
     cursor: "pointer",
-    transition: "0.3s",
   },
 
   error: {
@@ -311,6 +318,7 @@ const styles = {
     fontSize: "13px",
   },
 };
+
 
 
 
