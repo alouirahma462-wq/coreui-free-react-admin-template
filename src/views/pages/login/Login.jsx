@@ -74,10 +74,11 @@ export default function Login() {
         localStorage.removeItem("remember_user");
       }
 
-      // 🔥 FIX: court name (GUARANTEED)
+      // 🔥 FIX: court name (GUARANTEED FINAL)
       const courtName =
-        user.courts?.name ??
-        user.court?.name ??
+        user?.courts?.name ||
+        user?.courts?.[0]?.name ||
+        user?.court?.name ||
         "غير محدد";
 
       localStorage.setItem(
@@ -318,6 +319,7 @@ const styles = {
     fontSize: "13px",
   },
 };
+
 
 
 
