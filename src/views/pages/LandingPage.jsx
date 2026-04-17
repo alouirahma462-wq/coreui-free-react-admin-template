@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function LandingPage() {
@@ -11,36 +11,58 @@ export default function LandingPage() {
   const videoRef = useRef(null);
   const clickRef = useRef(null);
 
-  // 🔥 LOCK (prevent double execution)
   const hasStartedRef = useRef(false);
+
+  // ✅ FIX 1: تثبيت الفيديو ومنع إعادة التشغيل
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.preload = "auto";
+    video.playsInline = true;
+    video.muted = false;
+
+    // يمنع أي restart بسبب re-render
+    video.disablePictureInPicture = true;
+
+    return () => {
+      video.pause();
+    };
+  }, []);
 
   const startMedia = async () => {
     try {
       if (hasStartedRef.current) return;
       hasStartedRef.current = true;
 
-      // 🎬 VIDEO ONLY (no extra audio → avoids echo)
       if (videoRef.current) {
-        videoRef.current.pause();
-        videoRef.current.currentTime = 0;
+        const video = videoRef.current;
 
-        videoRef.current.muted = false; // الفيديو فيه صوت أصلاً
-        videoRef.current.volume = 1;
+        // ✅ FIX 2: لا إعادة reset للفيديو (هذا سبب التقطيع)
+        video.muted = false;
+        video.volume = 1;
 
-        await videoRef.current.play();
+        const playPromise = video.play();
+
+        if (playPromise !== undefined) {
+          await playPromise.catch(() => {
+            // fallback لو autoplay blocked
+            video.muted = true;
+            video.play();
+          });
+        }
       }
     } catch (err) {
       console.log("Autoplay blocked:", err);
     }
   };
 
-  // 🚪 فتح الباب
   const openGate = () => {
     setOpenDoor(true);
 
     setTimeout(() => {
       setStartGate(true);
-      startMedia(); // مرة واحدة فقط
+      startMedia();
     }, 1200);
   };
 
@@ -59,18 +81,22 @@ export default function LandingPage() {
   return (
     <div style={styles.container}>
 
-      {/* 🎬 VIDEO */}
-      {startGate && (
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          style={styles.video}
-          onEnded={() => setShowUI(true)}
-        >
-          <source src="/video.mp4" type="video/mp4" />
-        </video>
-      )}
+      {/* 🎬 VIDEO (FIXED — no remount, no restart) */}
+      <video
+        ref={videoRef}
+        autoPlay
+        loop
+        playsInline
+        preload="auto"
+        style={{
+          ...styles.video,
+          willChange: "transform",
+          backfaceVisibility: "hidden",
+        }}
+        onEnded={() => setShowUI(true)}
+      >
+        <source src="/video.mp4" type="video/mp4" />
+      </video>
 
       {/* 🔊 CLICK ONLY */}
       <audio ref={clickRef}>
@@ -151,10 +177,13 @@ const styles = {
   },
 
   video: {
-    position: "absolute",
+    position: "fixed",   // ✅ FIX 3: يمنع أي jitter من re-render
+    top: 0,
+    left: 0,
     width: "100%",
     height: "100%",
     objectFit: "cover",
+    zIndex: 0,
   },
 
   overlay: {
@@ -166,6 +195,7 @@ const styles = {
     alignItems: "center",
     backdropFilter: "blur(10px)",
     background: "rgba(0,0,0,0.55)",
+    zIndex: 2,
   },
 
   card: {
@@ -275,6 +305,7 @@ const styles = {
     transition: "1.2s ease-in-out",
   },
 };
+
 
 
 
