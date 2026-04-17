@@ -9,6 +9,11 @@ export default defineConfig(() => {
 
     plugins: [react()],
 
+    // ✅ أضف هذا هنا
+    optimizeDeps: {
+      include: ['react', 'react-dom'],
+    },
+
     build: {
       outDir: 'dist',
       emptyOutDir: true,
@@ -40,4 +45,5 @@ export default defineConfig(() => {
     },
   }
 })
+
 
