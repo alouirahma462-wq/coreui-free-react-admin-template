@@ -26,7 +26,6 @@ import {
   cilBell,
   cilContrast,
   cilEnvelopeOpen,
-  cilList,
   cilMenu,
   cilMoon,
   cilSun,
@@ -35,9 +34,8 @@ import {
 } from '@coreui/icons'
 
 import { AppBreadcrumb } from './index'
-import { AppHeaderDropdown } from './header/index'
 
-const AppHeader = () => {
+const AppHeader = ({ type }) => {
   const headerRef = useRef()
   const navigate = useNavigate()
 
@@ -48,7 +46,9 @@ const AppHeader = () => {
 
   // 🔥 USER DATA
   const user = JSON.parse(localStorage.getItem("user")) || {}
+
   const courtName = user?.court_name || "المحكمة"
+  const fullName = user?.full_name || "المستخدم"
 
   // 🔥 MODAL STATE
   const [visible, setVisible] = useState(false)
@@ -82,16 +82,26 @@ const AppHeader = () => {
             <CIcon icon={cilMenu} size="lg" />
           </CHeaderToggler>
 
-          {/* 🔥 NAV LINKS */}
+          {/* 🔥 NAV حسب النوع */}
           <CHeaderNav className="d-none d-md-flex">
-            <CNavItem>
-              <CNavLink to="/dashboard" as={NavLink}>
-                🏠 الرئيسية
-              </CNavLink>
-            </CNavItem>
+            {type === "court" && (
+              <CNavItem>
+                <CNavLink to="/dashboard" as={NavLink}>
+                  🏠 المحكمة
+                </CNavLink>
+              </CNavItem>
+            )}
+
+            {type === "inspection" && (
+              <CNavItem>
+                <CNavLink to="/inspection-dashboard" as={NavLink}>
+                  🔍 التفقد
+                </CNavLink>
+              </CNavItem>
+            )}
           </CHeaderNav>
 
-          {/* 🔥 CENTER TITLE */}
+          {/* 🔥 TITLE */}
           <div style={{
             flex: 1,
             textAlign: "center",
@@ -101,8 +111,9 @@ const AppHeader = () => {
             🇹🇳 وزارة العدل — {courtName}
           </div>
 
-          {/* 🔥 RIGHT ICONS */}
+          {/* 🔥 RIGHT SIDE */}
           <CHeaderNav className="ms-auto">
+
             <CNavItem>
               <CNavLink href="#">
                 <CIcon icon={cilBell} size="lg" />
@@ -115,7 +126,12 @@ const AppHeader = () => {
               </CNavLink>
             </CNavItem>
 
-            {/* 🔥 ADD USER BUTTON */}
+            {/* 🔥 USER NAME */}
+            <CNavItem style={{ display: "flex", alignItems: "center", marginInline: "10px" }}>
+              👤 {fullName}
+            </CNavItem>
+
+            {/* 🔥 ADD USER */}
             <CNavItem>
               <CButton
                 color="primary"
@@ -139,7 +155,7 @@ const AppHeader = () => {
             </CNavItem>
           </CHeaderNav>
 
-          {/* 🔥 THEME SWITCHER */}
+          {/* 🔥 THEME */}
           <CHeaderNav>
             <CDropdown variant="nav-item" placement="bottom-end">
               <CDropdownToggle caret={false}>
@@ -175,7 +191,7 @@ const AppHeader = () => {
         </CContainer>
       </CHeader>
 
-      {/* 🔥 MODAL: ADD USER */}
+      {/* 🔥 MODAL */}
       <CModal visible={visible} onClose={() => setVisible(false)}>
         <CModalHeader>
           <CModalTitle>إضافة مستخدم جديد</CModalTitle>
@@ -202,4 +218,5 @@ const AppHeader = () => {
 }
 
 export default AppHeader
+
 
