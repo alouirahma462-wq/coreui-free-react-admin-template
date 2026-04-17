@@ -15,7 +15,7 @@ const ChangePassword = React.lazy(() =>
 
 // 🔐 NEW: Reset Password page
 const ResetPassword = React.lazy(() =>
-  import("./views/auth/pages/ResetPassword")
+  import("./views/pages/ResetPassword")
 );
 
 const routes = [
