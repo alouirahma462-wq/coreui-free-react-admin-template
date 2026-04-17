@@ -14,6 +14,10 @@ import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
 import GlobalMusic from "./GlobalMusic";
 
+// 🔥 ADD LAYOUTS ONLY (NO CHANGES ELSEWHERE)
+import CourtLayout from "./layout/CourtLayout"
+import InspectionLayout from "./layout/InspectionLayout"
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -166,7 +170,7 @@ export default function App() {
 
       <Routes>
 
-        {/* 🔥 LANDING (ISOLATED — NO CHANGE IN WORKFLOW) */}
+        {/* 🔥 LANDING */}
         <Route
           path="/landing"
           element={
@@ -204,6 +208,7 @@ export default function App() {
           }
         />
 
+        {/* 🔥 COURT DASHBOARD + LAYOUT */}
         <Route
           path="/court/:id"
           element={
@@ -212,11 +217,14 @@ export default function App() {
             ) : isMustChange(user.must_change_password) ? (
               <Navigate to="/change-password" replace />
             ) : (
-              <CourtDashboard user={user} />
+              <CourtLayout>
+                <CourtDashboard user={user} />
+              </CourtLayout>
             )
           }
         />
 
+        {/* 🔥 INSPECTION DASHBOARD + LAYOUT */}
         <Route
           path="/inspection-dashboard"
           element={
@@ -225,7 +233,9 @@ export default function App() {
             ) : isMustChange(user.must_change_password) ? (
               <Navigate to="/change-password" replace />
             ) : (
-              <InspectionDashboard user={user} />
+              <InspectionLayout>
+                <InspectionDashboard user={user} />
+              </InspectionLayout>
             )
           }
         />
@@ -237,6 +247,7 @@ export default function App() {
     </>
   );
 }
+
 
 
 
