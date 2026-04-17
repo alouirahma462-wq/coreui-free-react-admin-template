@@ -13,19 +13,36 @@ export default function LandingPage() {
 
   const hasStartedRef = useRef(false);
 
-  // ✅ FIX 1: تثبيت الفيديو ومنع إعادة التشغيل
+  // ✅ FIX 1: منع React من إعادة تشغيل الفيديو عند re-render
+  const isMountedRef = useRef(false);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
+    // 🔥 مهم جدًا: يمنع reset عند كل render
+    if (isMountedRef.current) return;
+    isMountedRef.current = true;
+
     video.preload = "auto";
     video.playsInline = true;
     video.muted = false;
+    video.loop = false; // ❌ FIX جذري: إلغاء أي loop فعلي
 
-    // يمنع أي restart بسبب re-render
     video.disablePictureInPicture = true;
 
+    // يمنع أي restart غير مقصود
+    const handleRestartBlock = () => {
+      if (!hasStartedRef.current) return;
+      if (video.currentTime < 0.1) {
+        video.currentTime = 0.1; // يمنع الرجوع للبداية فجأة
+      }
+    };
+
+    video.addEventListener("timeupdate", handleRestartBlock);
+
     return () => {
+      video.removeEventListener("timeupdate", handleRestartBlock);
       video.pause();
     };
   }, []);
@@ -38,15 +55,14 @@ export default function LandingPage() {
       if (videoRef.current) {
         const video = videoRef.current;
 
-        // ✅ FIX 2: لا إعادة reset للفيديو (هذا سبب التقطيع)
         video.muted = false;
         video.volume = 1;
 
+        // 🔥 FIX 2: لا reset للفيديو إطلاقًا
         const playPromise = video.play();
 
         if (playPromise !== undefined) {
           await playPromise.catch(() => {
-            // fallback لو autoplay blocked
             video.muted = true;
             video.play();
           });
@@ -81,11 +97,10 @@ export default function LandingPage() {
   return (
     <div style={styles.container}>
 
-      {/* 🎬 VIDEO (FIXED — no remount, no restart) */}
+      {/* 🎬 VIDEO (FIXED — no restart, no loop, no re-mount reset) */}
       <video
         ref={videoRef}
         autoPlay
-        loop
         playsInline
         preload="auto"
         style={{
@@ -177,7 +192,7 @@ const styles = {
   },
 
   video: {
-    position: "fixed",   // ✅ FIX 3: يمنع أي jitter من re-render
+    position: "fixed",
     top: 0,
     left: 0,
     width: "100%",
@@ -305,6 +320,7 @@ const styles = {
     transition: "1.2s ease-in-out",
   },
 };
+
 
 
 
