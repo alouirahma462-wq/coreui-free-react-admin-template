@@ -22,7 +22,6 @@ export default function App() {
 
   const isLanding = location.pathname === "/landing";
 
-  // 🔥 FIX: dashboard detection (IMPORTANT)
   const isDashboard =
     location.pathname.startsWith("/court") ||
     location.pathname.startsWith("/inspection-dashboard");
@@ -100,7 +99,7 @@ export default function App() {
   return (
     <>
 
-      {/* 🎧 MUSIC (ONLY FIXED LINE) */}
+      {/* 🎧 MUSIC (UNCHANGED) */}
       {isAuth || isDashboard ? (
         <GlobalMusic key={location.pathname} />
       ) : null}
@@ -124,7 +123,7 @@ export default function App() {
         </video>
       )}
 
-      {/* 🖼 DASHBOARD BACKGROUND (IMAGE + DARK OVERLAY FIX) */}
+      {/* 🖼 DASHBOARD BACKGROUND */}
       {isDashboard && (
         <>
           <div
@@ -152,7 +151,7 @@ export default function App() {
         </>
       )}
 
-      {/* 🔵 AUTH OVERLAY فقط */}
+      {/* 🔵 AUTH OVERLAY */}
       {isAuth && !isLanding && (
         <div
           style={{
@@ -167,7 +166,15 @@ export default function App() {
 
       <Routes>
 
-        <Route path="/landing" element={<LandingPage />} />
+        {/* 🔥 LANDING (ISOLATED — NO CHANGE IN WORKFLOW) */}
+        <Route
+          path="/landing"
+          element={
+            <div style={{ width: "100%", height: "100%", position: "relative" }}>
+              <LandingPage />
+            </div>
+          }
+        />
 
         <Route
           path="/login"
@@ -230,6 +237,7 @@ export default function App() {
     </>
   );
 }
+
 
 
 
