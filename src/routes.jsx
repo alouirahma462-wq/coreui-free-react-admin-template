@@ -4,18 +4,11 @@ import { Navigate } from "react-router-dom";
 import Login from "./views/auth/Login";
 import LandingPage from "./views/pages/LandingPage";
 
-// Lazy pages
-const Dashboard = React.lazy(() =>
-  import("./views/dashboard/Dashboard")
-);
+import CourtDashboard from "./views/dashboard/CourtDashboard.jsx";
+import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
-const ChangePassword = React.lazy(() =>
-  import("./views/pages/ChangePassword")
-);
-
-const ResetPassword = React.lazy(() =>
-  import("./views/pages/ResetPassword")
-);
+import ChangePassword from "./views/pages/ChangePassword";
+import ResetPassword from "./views/pages/ResetPassword";
 
 const routes = [
   {
@@ -26,7 +19,6 @@ const routes = [
 
   {
     path: "/",
-    exact: true,
     name: "Home",
     element: <Navigate to="/login" />,
   },
@@ -50,9 +42,15 @@ const routes = [
   },
 
   {
-    path: "/dashboard",
-    name: "Dashboard",
-    element: <Dashboard />,
+    path: "/court/:id",
+    name: "CourtDashboard",
+    element: <CourtDashboard />,
+  },
+
+  {
+    path: "/inspection-dashboard",
+    name: "InspectionDashboard",
+    element: <InspectionDashboard />,
   },
 ];
 
