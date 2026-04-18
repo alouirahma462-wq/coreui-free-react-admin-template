@@ -5,11 +5,8 @@ import autoprefixer from 'autoprefixer'
 
 export default defineConfig(() => {
   return {
-    base: './',
-
     plugins: [react()],
 
-    // ✅ أضف هذا هنا
     optimizeDeps: {
       include: ['react', 'react-dom'],
     },
@@ -45,5 +42,6 @@ export default defineConfig(() => {
     },
   }
 })
+
 
 
