@@ -1,14 +1,14 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 
-import Login from "./views/auth/Login";
-import LandingPage from "./views/pages/LandingPage";
+import Login from "./views/auth/Login.jsx";
+import LandingPage from "./views/pages/LandingPage.jsx";
 
 import CourtDashboard from "./views/dashboard/CourtDashboard.jsx";
 import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
-import ChangePassword from "./views/pages/ChangePassword";
-import ResetPassword from "./views/pages/ResetPassword";
+import ChangePassword from "./views/pages/ChangePassword.jsx";
+import ResetPassword from "./views/pages/ResetPassword.jsx";
 
 const routes = [
   {
@@ -20,7 +20,7 @@ const routes = [
   {
     path: "/",
     name: "Home",
-    element: <Navigate to="/login" />,
+    element: <Navigate to="/login" replace />,
   },
 
   {
@@ -55,5 +55,6 @@ const routes = [
 ];
 
 export default routes;
+
 
 
