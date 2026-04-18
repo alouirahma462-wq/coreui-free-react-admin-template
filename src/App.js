@@ -15,8 +15,8 @@ import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 import GlobalMusic from "./GlobalMusic";
 
 // 🔥 ADD LAYOUTS ONLY (NO CHANGES ELSEWHERE)
-import CourtLayout from "./layout/CourtLayout"
-import InspectionLayout from "./layout/InspectionLayout"
+import CourtLayout from "./layout/CourtLayout";
+import InspectionLayout from "./layout/InspectionLayout";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -102,11 +102,10 @@ export default function App() {
 
   return (
     <>
-
-      {/* 🎧 MUSIC (UNCHANGED) */}
-      {isAuth || isDashboard ? (
+      {/* 🎧 MUSIC (FIXED ONLY HERE) */}
+      {(isAuth || isDashboard) && (
         <GlobalMusic key={location.pathname} />
-      ) : null}
+      )}
 
       {/* 🎬 AUTH BACKGROUND */}
       {isAuth && !isLanding && (
@@ -169,7 +168,6 @@ export default function App() {
       )}
 
       <Routes>
-
         {/* 🔥 LANDING */}
         <Route
           path="/landing"
@@ -242,11 +240,11 @@ export default function App() {
 
         <Route path="/" element={<Navigate to="/landing" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
-
       </Routes>
     </>
   );
 }
+
 
 
 
