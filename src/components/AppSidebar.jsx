@@ -1,13 +1,32 @@
+import React from "react"
+import { useDispatch, useSelector } from "react-redux"
+
+import {
+  CSidebar,
+  CSidebarBrand,
+  CSidebarFooter,
+  CSidebarHeader,
+  CSidebarToggler,
+  CCloseButton
+} from "@coreui/react"
+
+import CIcon from "@coreui/icons-react"
+import { logo, sygnet } from "../assets/brand"
+
+import AppSidebarNav from "./AppSidebarNav"
+
+import navCourt from "../_navCourt"
+import navInspection from "../_navInspection"
+
 const AppSidebar = ({ type }) => {
   const dispatch = useDispatch()
+
   const unfoldable = useSelector((state) => state.sidebarUnfoldable)
   const sidebarShow = useSelector((state) => state.sidebarShow)
 
   // 🔥 اختيار الناف حسب النوع
   const navigation =
-    type === "inspection"
-      ? require('../_navInspection').default
-      : require('../_navCourt').default
+    type === "inspection" ? navInspection : navCourt
 
   return (
     <CSidebar
@@ -16,9 +35,9 @@ const AppSidebar = ({ type }) => {
       position="fixed"
       unfoldable={unfoldable}
       visible={sidebarShow}
-      onVisibleChange={(visible) => {
-        dispatch({ type: 'set', sidebarShow: visible })
-      }}
+      onVisibleChange={(visible) =>
+        dispatch({ type: "set", sidebarShow: visible })
+      }
     >
       <CSidebarHeader className="border-bottom">
         <CSidebarBrand to="/">
@@ -29,16 +48,23 @@ const AppSidebar = ({ type }) => {
         <CCloseButton
           className="d-lg-none"
           dark
-          onClick={() => dispatch({ type: 'set', sidebarShow: false })}
+          onClick={() =>
+            dispatch({ type: "set", sidebarShow: false })
+          }
         />
       </CSidebarHeader>
 
-      {/* 🔥 هنا السر */}
+      {/* NAV */}
       <AppSidebarNav items={navigation} />
 
       <CSidebarFooter className="border-top d-none d-lg-flex">
         <CSidebarToggler
-          onClick={() => dispatch({ type: 'set', sidebarUnfoldable: !unfoldable })}
+          onClick={() =>
+            dispatch({
+              type: "set",
+              sidebarUnfoldable: !unfoldable
+            })
+          }
         />
       </CSidebarFooter>
     </CSidebar>
@@ -46,4 +72,5 @@ const AppSidebar = ({ type }) => {
 }
 
 export default React.memo(AppSidebar)
+
 
