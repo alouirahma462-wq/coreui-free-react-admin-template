@@ -33,7 +33,8 @@ import {
   cilAccountLogout,
 } from '@coreui/icons'
 
-import { AppBreadcrumb } from './index'
+// ✅ FIX: استدعاء مباشر بدل index
+import AppBreadcrumb from './AppBreadcrumb'
 
 const AppHeader = ({ type }) => {
   const headerRef = useRef()
@@ -44,26 +45,26 @@ const AppHeader = ({ type }) => {
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
 
-  // 🔥 USER DATA
   const user = JSON.parse(localStorage.getItem("user")) || {}
 
   const courtName = user?.court_name || "المحكمة"
   const fullName = user?.full_name || "المستخدم"
 
-  // 🔥 MODAL STATE
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
       headerRef.current &&
-        headerRef.current.classList.toggle('shadow-sm', document.documentElement.scrollTop > 0)
+        headerRef.current.classList.toggle(
+          'shadow-sm',
+          document.documentElement.scrollTop > 0
+        )
     }
 
     document.addEventListener('scroll', handleScroll)
     return () => document.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // 🔥 LOGOUT
   const handleLogout = () => {
     localStorage.clear()
     navigate("/", { replace: true })
@@ -74,7 +75,6 @@ const AppHeader = ({ type }) => {
       <CHeader position="sticky" className="mb-4 p-0" ref={headerRef}>
         <CContainer className="border-bottom px-4" fluid>
 
-          {/* 🔥 SIDEBAR TOGGLE */}
           <CHeaderToggler
             onClick={() => dispatch({ type: 'set', sidebarShow: !sidebarShow })}
             style={{ marginInlineStart: '-14px' }}
@@ -82,7 +82,6 @@ const AppHeader = ({ type }) => {
             <CIcon icon={cilMenu} size="lg" />
           </CHeaderToggler>
 
-          {/* 🔥 NAV حسب النوع */}
           <CHeaderNav className="d-none d-md-flex">
             {type === "court" && (
               <CNavItem>
@@ -101,7 +100,6 @@ const AppHeader = ({ type }) => {
             )}
           </CHeaderNav>
 
-          {/* 🔥 TITLE */}
           <div style={{
             flex: 1,
             textAlign: "center",
@@ -111,7 +109,6 @@ const AppHeader = ({ type }) => {
             🇹🇳 وزارة العدل — {courtName}
           </div>
 
-          {/* 🔥 RIGHT SIDE */}
           <CHeaderNav className="ms-auto">
 
             <CNavItem>
@@ -126,12 +123,10 @@ const AppHeader = ({ type }) => {
               </CNavLink>
             </CNavItem>
 
-            {/* 🔥 USER NAME */}
             <CNavItem style={{ display: "flex", alignItems: "center", marginInline: "10px" }}>
               👤 {fullName}
             </CNavItem>
 
-            {/* 🔥 ADD USER */}
             <CNavItem>
               <CButton
                 color="primary"
@@ -143,7 +138,6 @@ const AppHeader = ({ type }) => {
               </CButton>
             </CNavItem>
 
-            {/* 🔥 LOGOUT */}
             <CNavItem>
               <CButton
                 color="danger"
@@ -155,7 +149,6 @@ const AppHeader = ({ type }) => {
             </CNavItem>
           </CHeaderNav>
 
-          {/* 🔥 THEME */}
           <CHeaderNav>
             <CDropdown variant="nav-item" placement="bottom-end">
               <CDropdownToggle caret={false}>
@@ -191,7 +184,6 @@ const AppHeader = ({ type }) => {
         </CContainer>
       </CHeader>
 
-      {/* 🔥 MODAL */}
       <CModal visible={visible} onClose={() => setVisible(false)}>
         <CModalHeader>
           <CModalTitle>إضافة مستخدم جديد</CModalTitle>
@@ -218,5 +210,6 @@ const AppHeader = ({ type }) => {
 }
 
 export default AppHeader
+
 
 
