@@ -14,7 +14,6 @@ import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
 import GlobalMusic from "./GlobalMusic";
 
-// 🔥 ADD LAYOUTS ONLY (NO CHANGES ELSEWHERE)
 import CourtLayout from "./layout/CourtLayout";
 import InspectionLayout from "./layout/InspectionLayout";
 
@@ -102,7 +101,7 @@ export default function App() {
 
   return (
     <>
-    {/* 🎧 MUSIC (FIXED ONLY HERE) */}
+      {/* 🎧 MUSIC */}
       {(isAuth || isDashboard) ? (
         <GlobalMusic key={location.pathname} />
       ) : null}
@@ -168,28 +167,17 @@ export default function App() {
       )}
 
       <Routes>
-        {/* 🔥 LANDING */}
-        <Route
-          path="/landing"
-          element={
-            <div style={{ width: "100%", height: "100%", position: "relative" }}>
-              <LandingPage />
-            </div>
-          }
-        />
+        {/* LANDING */}
+        <Route path="/landing" element={<LandingPage />} />
 
         <Route
           path="/login"
-          element={
-            user ? <Navigate to={getHomeRoute()} replace /> : <Login />
-          }
+          element={user ? <Navigate to={getHomeRoute()} replace /> : <Login />}
         />
 
         <Route
           path="/change-password"
-          element={
-            !user ? <Navigate to="/login" replace /> : <ChangePassword />
-          }
+          element={!user ? <Navigate to="/login" replace /> : <ChangePassword />}
         />
 
         <Route
@@ -206,7 +194,7 @@ export default function App() {
           }
         />
 
-        {/* 🔥 COURT DASHBOARD + LAYOUT */}
+        {/* COURT */}
         <Route
           path="/court/:id"
           element={
@@ -222,7 +210,7 @@ export default function App() {
           }
         />
 
-        {/* 🔥 INSPECTION DASHBOARD + LAYOUT */}
+        {/* INSPECTION */}
         <Route
           path="/inspection-dashboard"
           element={
@@ -244,6 +232,7 @@ export default function App() {
     </>
   );
 }
+
 
 
 
