@@ -102,10 +102,10 @@ export default function App() {
 
   return (
     <>
-      {/* 🎧 MUSIC (FIXED ONLY HERE) */}
-      {(isAuth || isDashboard) && (
+    {/* 🎧 MUSIC (FIXED ONLY HERE) */}
+      {(isAuth || isDashboard) ? (
         <GlobalMusic key={location.pathname} />
-      )}
+      ) : null}
 
       {/* 🎬 AUTH BACKGROUND */}
       {isAuth && !isLanding && (
