@@ -1,5 +1,5 @@
-import React from "react"
-import { useDispatch, useSelector } from "react-redux"
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import {
   CSidebar,
@@ -7,27 +7,28 @@ import {
   CSidebarFooter,
   CSidebarHeader,
   CSidebarToggler,
-  CCloseButton
-} from "@coreui/react"
+  CCloseButton,
+} from "@coreui/react";
 
-import CIcon from "@coreui/icons-react"
-import logo from "../assets/brand/logo.js"
-import sygnet from "../assets/brand/sygnet.js"
+import CIcon from "@coreui/icons-react";
 
-import AppSidebarNav from "./AppSidebarNav"
+// ✔️ تأكد أن هذول موجودين فعلاً في assets/brand
+import logo from "../assets/brand/logo.js";
+import sygnet from "../assets/brand/sygnet.js";
 
-import navCourt from "../_navCourt"
-import navInspection from "../_navInspection"
+// ✔️ الـ navigation files
+import AppSidebarNav from "./AppSidebarNav";
+import navCourt from "../_navCourt";
+import navInspection from "../_navInspection";
 
 const AppSidebar = ({ type }) => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
-  const unfoldable = useSelector((state) => state.sidebarUnfoldable)
-  const sidebarShow = useSelector((state) => state.sidebarShow)
+  const unfoldable = useSelector((state) => state.sidebarUnfoldable);
+  const sidebarShow = useSelector((state) => state.sidebarShow);
 
-  // 🔥 اختيار الناف حسب النوع
-  const navigation =
-    type === "inspection" ? navInspection : navCourt
+  // ✔️ اختيار القائمة حسب النوع
+  const navigation = type === "inspection" ? navInspection : navCourt;
 
   return (
     <CSidebar
@@ -42,8 +43,8 @@ const AppSidebar = ({ type }) => {
     >
       <CSidebarHeader className="border-bottom">
         <CSidebarBrand to="/">
-          <CIcon customClassName="sidebar-brand-full" icon={logo} height={32} />
-          <CIcon customClassName="sidebar-brand-narrow" icon={sygnet} height={32} />
+          <CIcon icon={logo} height={32} />
+          <CIcon icon={sygnet} height={32} />
         </CSidebarBrand>
 
         <CCloseButton
@@ -55,7 +56,7 @@ const AppSidebar = ({ type }) => {
         />
       </CSidebarHeader>
 
-      {/* NAV */}
+      {/* NAVIGATION */}
       <AppSidebarNav items={navigation} />
 
       <CSidebarFooter className="border-top d-none d-lg-flex">
@@ -63,15 +64,16 @@ const AppSidebar = ({ type }) => {
           onClick={() =>
             dispatch({
               type: "set",
-              sidebarUnfoldable: !unfoldable
+              sidebarUnfoldable: !unfoldable,
             })
           }
         />
       </CSidebarFooter>
     </CSidebar>
-  )
-}
+  );
+};
 
-export default React.memo(AppSidebar)
+export default React.memo(AppSidebar);
+
 
 
