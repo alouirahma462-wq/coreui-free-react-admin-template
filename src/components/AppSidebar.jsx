@@ -1,5 +1,5 @@
-import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React from "react"
+import { useDispatch, useSelector } from "react-redux"
 
 import {
   CSidebar,
@@ -7,22 +7,21 @@ import {
   CSidebarFooter,
   CSidebarHeader,
   CSidebarToggler,
-  CCloseButton,
-} from "@coreui/react";
+  CCloseButton
+} from "@coreui/react"
 
-import CIcon from "@coreui/icons-react";
+import CIcon from "@coreui/icons-react"
+import logo from "../assets/brand/logo.js"
+import sygnet from "../assets/brand/sygnet.js"
 
-import logo from "../assets/brand/logo.js";
-import sygnet from "../assets/brand/sygnet.js";
-
-import AppSidebarNav from "./AppSidebarNav";
-import navigation from "../_nav.js";
+import AppSidebarNav from "./AppSidebarNav"
+import navigation from "../_nav"
 
 const AppSidebar = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
 
-  const unfoldable = useSelector((state) => state.sidebarUnfoldable);
-  const sidebarShow = useSelector((state) => state.sidebarShow);
+  const unfoldable = useSelector((state) => state.sidebarUnfoldable)
+  const sidebarShow = useSelector((state) => state.sidebarShow)
 
   return (
     <CSidebar
@@ -37,8 +36,8 @@ const AppSidebar = () => {
     >
       <CSidebarHeader className="border-bottom">
         <CSidebarBrand to="/">
-          <CIcon icon={logo} height={32} />
-          <CIcon icon={sygnet} height={32} />
+          <CIcon customClassName="sidebar-brand-full" icon={logo} height={32} />
+          <CIcon customClassName="sidebar-brand-narrow" icon={sygnet} height={32} />
         </CSidebarBrand>
 
         <CCloseButton
@@ -57,16 +56,17 @@ const AppSidebar = () => {
           onClick={() =>
             dispatch({
               type: "set",
-              sidebarUnfoldable: !unfoldable,
+              sidebarUnfoldable: !unfoldable
             })
           }
         />
       </CSidebarFooter>
     </CSidebar>
-  );
-};
+  )
+}
 
-export default React.memo(AppSidebar);
+export default React.memo(AppSidebar)
+
 
 
 
