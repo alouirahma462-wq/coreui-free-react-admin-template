@@ -167,7 +167,6 @@ export default function App() {
       )}
 
       <Routes>
-        {/* LANDING */}
         <Route path="/landing" element={<LandingPage />} />
 
         <Route
@@ -194,7 +193,6 @@ export default function App() {
           }
         />
 
-        {/* COURT */}
         <Route
           path="/court/:id"
           element={
@@ -210,7 +208,6 @@ export default function App() {
           }
         />
 
-        {/* INSPECTION */}
         <Route
           path="/inspection-dashboard"
           element={
@@ -232,6 +229,7 @@ export default function App() {
     </>
   );
 }
+
 
 
 
