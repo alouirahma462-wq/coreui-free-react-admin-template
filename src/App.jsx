@@ -37,29 +37,23 @@ export default function App() {
 
   const loadUser = async () => {
     setLoading(true);
-    setUser(null);
 
     try {
       const userId = localStorage.getItem("user_id");
 
       if (!userId || userId === "undefined" || userId === "null") {
+        setUser(null);
         setLoading(false);
         return;
       }
 
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("users")
         .select("*")
         .eq("id", Number(userId))
         .maybeSingle();
 
-      if (error || !data) {
-        localStorage.removeItem("user_id");
-        setLoading(false);
-        return;
-      }
-
-      setUser(data);
+      setUser(data || null);
     } catch (err) {
       console.log(err);
       setUser(null);
@@ -72,12 +66,6 @@ export default function App() {
     loadUser();
   }, [location.pathname]);
 
-  useEffect(() => {
-    const handleStorageChange = () => loadUser();
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
-
   const isMustChange = (value) =>
     value === true ||
     value === 1 ||
@@ -86,9 +74,9 @@ export default function App() {
 
   const getHomeRoute = () => {
     if (!user) return "/login";
-    if (isMustChange(user.must_change_password)) return "/change-password";
-    if (user.court_id === null) return "/inspection-dashboard";
-    return `/court/${user.court_id}`;
+    if (isMustChange(user?.must_change_password)) return "/change-password";
+    if (user?.court_id === null) return "/inspection-dashboard";
+    return `/court/${user?.court_id}`;
   };
 
   if (loading && location.pathname !== "/login") {
@@ -105,92 +93,27 @@ export default function App() {
         <GlobalMusic key={location.pathname} />
       )}
 
-      {isAuth && !isLanding && (
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          style={{
-            position: "fixed",
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            zIndex: -3,
-          }}
-        >
-          <source src="/justice-bg.mp4" type="video/mp4" />
-        </video>
-      )}
-
-      {isDashboard && (
-        <>
-          <div
-            style={{
-              position: "fixed",
-              width: "100%",
-              height: "100%",
-              backgroundImage: "url('/dashboard-bg.jpg')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              filter: "brightness(0.55) blur(1px)",
-              zIndex: -3,
-            }}
-          />
-
-          <div
-            style={{
-              position: "fixed",
-              width: "100%",
-              height: "100%",
-              background: "rgba(0,0,0,0.25)",
-              zIndex: -2,
-            }}
-          />
-        </>
-      )}
-
-      {isAuth && !isLanding && (
-        <div
-          style={{
-            position: "fixed",
-            width: "100%",
-            height: "100%",
-            background: "rgba(0,0,0,0.5)",
-            zIndex: -1,
-          }}
-        />
-      )}
-
       <Routes>
         <Route path="/landing" element={<LandingPage />} />
 
         <Route
           path="/login"
-          element={
-            user ? <Navigate to={getHomeRoute()} replace /> : <Login />
-          }
+          element={user ? <Navigate to={getHomeRoute()} replace /> : <Login />}
         />
 
         <Route
           path="/change-password"
-          element={
-            !user ? <Navigate to="/login" replace /> : <ChangePassword />
-          }
+          element={!user ? <Navigate to="/login" replace /> : <ChangePassword />}
         />
 
         <Route
           path="/forgot-password"
-          element={
-            !user ? <ForgotPassword /> : <Navigate to={getHomeRoute()} replace />
-          }
+          element={!user ? <ForgotPassword /> : <Navigate to={getHomeRoute()} replace />}
         />
 
         <Route
           path="/reset-password"
-          element={
-            !user ? <ResetPassword /> : <Navigate to={getHomeRoute()} replace />
-          }
+          element={!user ? <ResetPassword /> : <Navigate to={getHomeRoute()} replace />}
         />
 
         <Route
@@ -198,7 +121,7 @@ export default function App() {
           element={
             !user ? (
               <Navigate to="/login" replace />
-            ) : isMustChange(user.must_change_password) ? (
+            ) : isMustChange(user?.must_change_password) ? (
               <Navigate to="/change-password" replace />
             ) : (
               <CourtLayout>
@@ -213,7 +136,7 @@ export default function App() {
           element={
             !user ? (
               <Navigate to="/login" replace />
-            ) : isMustChange(user.must_change_password) ? (
+            ) : isMustChange(user?.must_change_password) ? (
               <Navigate to="/change-password" replace />
             ) : (
               <InspectionLayout>
