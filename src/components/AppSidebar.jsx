@@ -12,14 +12,13 @@ import {
 
 import CIcon from "@coreui/icons-react"
 
-// ✔️ أهم إصلاح: تأكد المسار صحيح 100%
-import logo from "../assets/brand/logo"
-import sygnet from "../assets/brand/sygnet"
-
-// ✔️ navigation (لازم يكون موجود في src/_nav.js)
-import navigation from "../_nav"
+import logo from "../assets/brand/logo.js"
+import sygnet from "../assets/brand/sygnet.js"
 
 import AppSidebarNav from "./AppSidebarNav"
+
+// 🔥 IMPORT صحيح (ملف واحد فقط)
+import navigation from "../_nav.jsx"
 
 const AppSidebar = () => {
   const dispatch = useDispatch()
@@ -53,7 +52,6 @@ const AppSidebar = () => {
         />
       </CSidebarHeader>
 
-      {/* NAVIGATION */}
       <AppSidebarNav items={navigation} />
 
       <CSidebarFooter className="border-top d-none d-lg-flex">
