@@ -11,9 +11,8 @@ import {
 } from "@coreui/react"
 
 import CIcon from "@coreui/icons-react"
-
-import logo from "../assets/brand/logo.js"
-import sygnet from "../assets/brand/sygnet.js"
+import { logo } from "../assets/brand/logo"
+import { sygnet } from "../assets/brand/sygnet"
 
 import AppSidebarNav from "./AppSidebarNav"
 
