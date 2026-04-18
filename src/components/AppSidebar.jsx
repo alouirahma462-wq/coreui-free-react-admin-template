@@ -11,17 +11,15 @@ import {
 } from "@coreui/react"
 
 import CIcon from "@coreui/icons-react"
-import { logo } from "../assets/brand/logo"
-import { sygnet } from "../assets/brand/sygnet"
+
+import logo from "../assets/brand/logo"
+import sygnet from "../assets/brand/sygnet"
 
 import AppSidebarNav from "./AppSidebarNav"
-
-// 🔥 IMPORT صحيح (ملف واحد فقط)
 import navigation from "../_nav.jsx"
 
 const AppSidebar = () => {
   const dispatch = useDispatch()
-
   const unfoldable = useSelector((state) => state.sidebarUnfoldable)
   const sidebarShow = useSelector((state) => state.sidebarShow)
 
@@ -38,8 +36,8 @@ const AppSidebar = () => {
     >
       <CSidebarHeader className="border-bottom">
         <CSidebarBrand to="/">
-          <CIcon customClassName="sidebar-brand-full" icon={logo} height={32} />
-          <CIcon customClassName="sidebar-brand-narrow" icon={sygnet} height={32} />
+          <CIcon icon={logo} height={32} />
+          <CIcon icon={sygnet} height={32} />
         </CSidebarBrand>
 
         <CCloseButton
@@ -68,6 +66,7 @@ const AppSidebar = () => {
 }
 
 export default React.memo(AppSidebar)
+
 
 
 
