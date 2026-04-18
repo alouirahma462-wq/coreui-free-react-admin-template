@@ -78,9 +78,13 @@ export default function App() {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // ✅ SAFE FIX (no parsing issues)
-  const isMustChange = (value) => {
-    return value === true || value === 1 || value === "1" || value === "true";
+  const isMustChange = function (value) {
+    return (
+      value === true ||
+      value === 1 ||
+      value === "1" ||
+      value === "true"
+    );
   };
 
   const getHomeRoute = () => {
@@ -100,7 +104,9 @@ export default function App() {
 
   return (
     <>
-      {(isAuth || isDashboard) && <GlobalMusic key={location.pathname} />}
+      {isAuth || isDashboard ? (
+        <GlobalMusic key={location.pathname} />
+      ) : null}
 
       {isAuth && !isLanding && (
         <video
@@ -218,6 +224,7 @@ export default function App() {
     </>
   );
 }
+
 
 
 
