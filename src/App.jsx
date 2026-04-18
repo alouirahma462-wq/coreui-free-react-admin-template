@@ -78,14 +78,11 @@ export default function App() {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  const isMustChange = function (value) {
-    return (
-      value === true ||
-      value === 1 ||
-      value === "1" ||
-      value === "true"
-    );
-  };
+  const isMustChange = (value) =>
+    value === true ||
+    value === 1 ||
+    value === "1" ||
+    value === "true";
 
   const getHomeRoute = () => {
     if (!user) return "/login";
@@ -104,9 +101,9 @@ export default function App() {
 
   return (
     <>
-      {isAuth || isDashboard ? (
+      {(isAuth || isDashboard) && (
         <GlobalMusic key={location.pathname} />
-      ) : null}
+      )}
 
       {isAuth && !isLanding && (
         <video
@@ -170,22 +167,30 @@ export default function App() {
 
         <Route
           path="/login"
-          element={user ? <Navigate to={getHomeRoute()} replace /> : <Login />}
+          element={
+            user ? <Navigate to={getHomeRoute()} replace /> : <Login />
+          }
         />
 
         <Route
           path="/change-password"
-          element={!user ? <Navigate to="/login" replace /> : <ChangePassword />}
+          element={
+            !user ? <Navigate to="/login" replace /> : <ChangePassword />
+          }
         />
 
         <Route
           path="/forgot-password"
-          element={!user ? <ForgotPassword /> : <Navigate to={getHomeRoute()} replace />}
+          element={
+            !user ? <ForgotPassword /> : <Navigate to={getHomeRoute()} replace />
+          }
         />
 
         <Route
           path="/reset-password"
-          element={!user ? <ResetPassword /> : <Navigate to={getHomeRoute()} replace />}
+          element={
+            !user ? <ResetPassword /> : <Navigate to={getHomeRoute()} replace />
+          }
         />
 
         <Route
@@ -224,6 +229,7 @@ export default function App() {
     </>
   );
 }
+
 
 
 
