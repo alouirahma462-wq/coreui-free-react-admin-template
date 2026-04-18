@@ -12,23 +12,17 @@ import {
 
 import CIcon from "@coreui/icons-react";
 
-// ✔️ تأكد أن هذول موجودين فعلاً في assets/brand
 import logo from "../assets/brand/logo.js";
 import sygnet from "../assets/brand/sygnet.js";
 
-// ✔️ الـ navigation files
 import AppSidebarNav from "./AppSidebarNav";
-import navCourt from "../_navCourt";
-import navInspection from "../_navInspection";
+import navigation from "../_nav.js";
 
-const AppSidebar = ({ type }) => {
+const AppSidebar = () => {
   const dispatch = useDispatch();
 
   const unfoldable = useSelector((state) => state.sidebarUnfoldable);
   const sidebarShow = useSelector((state) => state.sidebarShow);
-
-  // ✔️ اختيار القائمة حسب النوع
-  const navigation = type === "inspection" ? navInspection : navCourt;
 
   return (
     <CSidebar
@@ -56,7 +50,6 @@ const AppSidebar = ({ type }) => {
         />
       </CSidebarHeader>
 
-      {/* NAVIGATION */}
       <AppSidebarNav items={navigation} />
 
       <CSidebarFooter className="border-top d-none d-lg-flex">
@@ -74,6 +67,7 @@ const AppSidebar = ({ type }) => {
 };
 
 export default React.memo(AppSidebar);
+
 
 
 
