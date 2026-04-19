@@ -7,7 +7,7 @@ import 'simplebar-react/dist/simplebar.min.css'
 
 import { CBadge, CNavLink, CSidebarNav } from '@coreui/react'
 
-export const AppSidebarNav = ({ items }) => {
+const AppSidebarNav = ({ items }) => {
   const navLink = (name, icon, badge, indent = false) => {
     return (
       <>
@@ -31,6 +31,7 @@ export const AppSidebarNav = ({ items }) => {
   const navItem = (item, index, indent = false) => {
     const { component, name, badge, icon, ...rest } = item
     const Component = component
+
     return (
       <Component as="div" key={index}>
         {rest.to || rest.href ? (
@@ -49,8 +50,9 @@ export const AppSidebarNav = ({ items }) => {
   }
 
   const navGroup = (item, index) => {
-    const { component, name, icon, items, to, ...rest } = item
+    const { component, name, icon, items, ...rest } = item
     const Component = component
+
     return (
       <Component compact as="div" key={index} toggler={navLink(name, icon)} {...rest}>
         {items?.map((item, index) =>
@@ -63,7 +65,9 @@ export const AppSidebarNav = ({ items }) => {
   return (
     <CSidebarNav as={SimpleBar}>
       {items &&
-        items.map((item, index) => (item.items ? navGroup(item, index) : navItem(item, index)))}
+        items.map((item, index) =>
+          item.items ? navGroup(item, index) : navItem(item, index)
+        )}
     </CSidebarNav>
   )
 }
@@ -71,3 +75,5 @@ export const AppSidebarNav = ({ items }) => {
 AppSidebarNav.propTypes = {
   items: PropTypes.arrayOf(PropTypes.any).isRequired,
 }
+
+export default AppSidebarNav
