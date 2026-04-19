@@ -1,94 +1,231 @@
 const inspectionNav = [
+  // ================= HEADER =================
   {
-    title: "لوحة التفقد والإشراف العام على المحاكم",
-    sections: [
-      {
-        number: "1",
-        title: "الرقابة على القضايا",
-        items: [
-          "فلترة القضايا حسب المعطيات",
-          "الاطلاع على الوثائق",
-          "متابعة مسار القضايا عبر المحاكم"
-        ]
-      },
+    component: "CNavTitle",
+    name: "🏛️ لوحة التفقد والإشراف العام"
+  },
 
+  // =========================================================
+  // 1️⃣ الرقابة على القضايا
+  // =========================================================
+  {
+    component: "CNavGroup",
+    name: "📊 الرقابة على القضايا",
+    items: [
       {
-        number: "2",
-        title: "المراسيم والمكاتيب والتوجيهات",
-        items: [
-          "إصدار المراسيم الرسمية",
-          "إصدار المكاتيب الإدارية",
-          "إصدار التوجيهات العامة"
-        ]
+        component: "CNavItem",
+        name: "فلترة القضايا حسب المعطيات",
+        to: "/inspection/cases/filter"
       },
-
       {
-        number: "3",
-        title: "إدارة المستخدمين والصلاحيات",
-        items: [
-          "إضافة مستخدم جديد",
-          "تعديل بيانات المستخدمين",
-          "حذف مستخدم",
-          "تحديد الأدوار والصلاحيات"
-        ]
+        component: "CNavItem",
+        name: "الاطلاع على الوثائق",
+        to: "/inspection/documents"
       },
-
       {
-        number: "4",
-        title: "مراقبة النظام",
-        items: [
-          "مراقبة سجلات النظام (Logs)",
-          "تتبع العمليات والتعديلات",
-          "مراجعة نشاط المستخدمين"
-        ]
+        component: "CNavItem",
+        name: "متابعة مسار القضايا",
+        to: "/inspection/cases/tracking"
+      }
+    ]
+  },
+
+  // =========================================================
+  // 2️⃣ المراسيم والمكاتيب
+  // =========================================================
+  {
+    component: "CNavGroup",
+    name: "📜 المراسيم والمكاتيب والتوجيهات",
+    items: [
+      {
+        component: "CNavItem",
+        name: "إصدار المراسيم",
+        to: "/inspection/decrees"
       },
-
       {
-        number: "5",
-        title: "التدخل القضائي",
-        items: [
-          "تعديل القضايا",
-          "إعادة فتح القضايا",
-          "قفل القضايا",
-          "التدخل الإداري في الملفات"
-        ]
+        component: "CNavItem",
+        name: "إصدار المكاتيب",
+        to: "/inspection/circulars"
       },
-
       {
-        number: "6",
-        title: "الإشعارات والتواصل",
-        items: [
-          "إرسال إشعارات عامة",
-          "إشعارات للقضاة والنيابة",
-          "استقبال الردود"
-        ]
+        component: "CNavItem",
+        name: "إصدار التوجيهات",
+        to: "/inspection/directives"
+      }
+    ]
+  },
+
+  // =========================================================
+  // 3️⃣ إدارة المستخدمين
+  // =========================================================
+  {
+    component: "CNavGroup",
+    name: "👤 إدارة المستخدمين والصلاحيات",
+    items: [
+      {
+        component: "CNavItem",
+        name: "إضافة مستخدم",
+        to: "/inspection/users/create"
       },
-
       {
-        number: "7",
-        title: "التقارير والتحليل الذكي",
-        items: [
-          "تصدير تقارير PDF / Excel",
-          "تحليل القضايا حسب المحكمة",
-          "تحليل القضايا حسب القضاة",
-          "متوسط مدة المعالجة",
-          "حجم العمل لكل محكمة",
-          "حجم العمل لكل قاضي",
-          "تحليل شهري لحركة القضايا"
-        ]
+        component: "CNavItem",
+        name: "تعديل المستخدمين",
+        to: "/inspection/users/edit"
       },
-
       {
-        number: "8",
-        title: "الذكاء الاصطناعي والتحليل المتقدم",
-        items: [
-          "تحويل البيانات إلى Excel تلقائي",
-          "Data Pipeline للقضايا",
-          "كشف الأنماط (Pattern Detection)",
-          "مراقبة تدفق القضايا",
-          "تحليل زمني للحالات",
-          "لوحة خرائط حسب المحاكم"
-        ]
+        component: "CNavItem",
+        name: "حذف مستخدم",
+        to: "/inspection/users/delete"
+      },
+      {
+        component: "CNavItem",
+        name: "إدارة الأدوار والصلاحيات",
+        to: "/inspection/roles"
+      }
+    ]
+  },
+
+  // =========================================================
+  // 4️⃣ مراقبة النظام
+  // =========================================================
+  {
+    component: "CNavGroup",
+    name: "🧾 مراقبة النظام (Logs)",
+    items: [
+      {
+        component: "CNavItem",
+        name: "سجلات النظام",
+        to: "/inspection/logs"
+      },
+      {
+        component: "CNavItem",
+        name: "تتبع العمليات",
+        to: "/inspection/activity"
+      },
+      {
+        component: "CNavItem",
+        name: "نشاط المستخدمين",
+        to: "/inspection/users/activity"
+      }
+    ]
+  },
+
+  // =========================================================
+  // 5️⃣ التدخل القضائي
+  // =========================================================
+  {
+    component: "CNavGroup",
+    name: "⚖️ التدخل القضائي",
+    items: [
+      {
+        component: "CNavItem",
+        name: "تعديل القضايا",
+        to: "/inspection/cases/edit"
+      },
+      {
+        component: "CNavItem",
+        name: "إعادة فتح القضايا",
+        to: "/inspection/cases/reopen"
+      },
+      {
+        component: "CNavItem",
+        name: "قفل القضايا",
+        to: "/inspection/cases/close"
+      }
+    ]
+  },
+
+  // =========================================================
+  // 6️⃣ الإشعارات
+  // =========================================================
+  {
+    component: "CNavGroup",
+    name: "🔔 الإشعارات والتواصل",
+    items: [
+      {
+        component: "CNavItem",
+        name: "إرسال إشعارات عامة",
+        to: "/inspection/notifications"
+      },
+      {
+        component: "CNavItem",
+        name: "إشعارات القضاة والنيابة",
+        to: "/inspection/notifications/judges"
+      },
+      {
+        component: "CNavItem",
+        name: "استقبال الردود",
+        to: "/inspection/notifications/responses"
+      }
+    ]
+  },
+
+  // =========================================================
+  // 7️⃣ التقارير والتحليل
+  // =========================================================
+  {
+    component: "CNavGroup",
+    name: "📈 التقارير والتحليل الذكي",
+    items: [
+      {
+        component: "CNavItem",
+        name: "تصدير PDF / Excel",
+        to: "/inspection/reports/export"
+      },
+      {
+        component: "CNavItem",
+        name: "تحليل حسب المحاكم",
+        to: "/inspection/reports/courts"
+      },
+      {
+        component: "CNavItem",
+        name: "تحليل حسب القضاة",
+        to: "/inspection/reports/judges"
+      },
+      {
+        component: "CNavItem",
+        name: "متوسط مدة المعالجة",
+        to: "/inspection/reports/avg-time"
+      },
+      {
+        component: "CNavItem",
+        name: "حجم العمل",
+        to: "/inspection/reports/workload"
+      },
+      {
+        component: "CNavItem",
+        name: "تحليل شهري للقضايا",
+        to: "/inspection/reports/monthly"
+      }
+    ]
+  },
+
+  // =========================================================
+  // 8️⃣ الذكاء الاصطناعي
+  // =========================================================
+  {
+    component: "CNavGroup",
+    name: "🤖 الذكاء الاصطناعي والتحليل المتقدم",
+    items: [
+      {
+        component: "CNavItem",
+        name: "Data Pipeline",
+        to: "/inspection/ai/pipeline"
+      },
+      {
+        component: "CNavItem",
+        name: "كشف الأنماط",
+        to: "/inspection/ai/patterns"
+      },
+      {
+        component: "CNavItem",
+        name: "تحليل زمني",
+        to: "/inspection/ai/timeline"
+      },
+      {
+        component: "CNavItem",
+        name: "خريطة المحاكم",
+        to: "/inspection/ai/map"
       }
     ]
   }
