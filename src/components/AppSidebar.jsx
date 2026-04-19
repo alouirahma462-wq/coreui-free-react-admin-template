@@ -5,8 +5,6 @@ import inspectionNav from "../navigation/inspectionNav";
 import AppSidebarNav from "./AppSidebarNav";
 
 const AppSidebar = ({ type }) => {
-
-  // ✅ DECLARE ONCE فقط
   const sidebarShow = useSelector(
     (state) => state.sidebarShow ?? true
   );
@@ -27,10 +25,6 @@ const AppSidebar = ({ type }) => {
         background: "#0f172a",
         color: "white",
         minHeight: "100vh",
-        position: "fixed",
-        left: 0,
-        top: 0,
-        overflowY: "auto",
       }}
     >
       <AppSidebarNav items={navigation} />
