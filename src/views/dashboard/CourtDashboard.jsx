@@ -11,7 +11,6 @@ export default function CourtDashboard() {
 
   const [time, setTime] = useState("");
 
-  // 🔥 FIX 1: ضمان اسم المحكمة 100%
   const courtName = user?.court_name || "المحكمة";
 
   useEffect(() => {
@@ -87,7 +86,6 @@ export default function CourtDashboard() {
           {!openDoor && (
             <div style={styles.gateCard}>
 
-              {/* 🔥 FIX HERE */}
               <h1 style={styles.title}>
                 🏛️ {courtName}
               </h1>
@@ -111,7 +109,6 @@ export default function CourtDashboard() {
       {/* 🔥 DASHBOARD */}
       {enterDashboard && (
         <>
-          {/* 🔴 BAR */}
           <div style={styles.topBar}>
             <div style={styles.marqueeTrack}>
               <div style={styles.marqueeText}>
@@ -123,17 +120,13 @@ export default function CourtDashboard() {
             </div>
           </div>
 
-          {/* 🔵 TIME */}
           <div style={styles.timeBar}>
             ⏰ {time}
           </div>
 
-          {/* CARD */}
           <div style={styles.card}>
             <h1>🏛️ {courtName}</h1>
-
             <h2>👋 مرحبا {user?.fullName}</h2>
-
             <p>📍 {courtName}</p>
           </div>
         </>
@@ -152,7 +145,7 @@ export default function CourtDashboard() {
 
 const styles = {
   page: {
-    height: "100vh",
+    minHeight: "calc(100vh - 140px)", // ✅ FIX 1 (بدل 100vh)
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -236,16 +229,15 @@ const styles = {
   },
 
   topBar: {
-    position: "fixed",
+    position: "sticky", // ✅ FIX 2
     top: 0,
-    left: 0,
     width: "100%",
     height: "40px",
     background: "#b91c1c",
     overflow: "hidden",
     display: "flex",
     alignItems: "center",
-    zIndex: 9999,
+    zIndex: 10,
   },
 
   marqueeTrack: {
@@ -261,7 +253,7 @@ const styles = {
   },
 
   timeBar: {
-    position: "fixed",
+    position: "sticky", // ✅ FIX 2
     top: "40px",
     width: "100%",
     height: "35px",
@@ -270,7 +262,7 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     fontSize: "14px",
-    zIndex: 9998,
+    zIndex: 9,
   },
 
   card: {
