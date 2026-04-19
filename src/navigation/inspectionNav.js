@@ -1,7 +1,13 @@
+import {
+  CNavItem,
+  CNavGroup,
+  CNavTitle
+} from '@coreui/react'
+
 const inspectionNav = [
   // ================= HEADER =================
   {
-    component: "CNavTitle",
+    component: CNavTitle,
     name: "🏛️ لوحة التفقد والإشراف العام"
   },
 
@@ -9,21 +15,21 @@ const inspectionNav = [
   // 1️⃣ الرقابة على القضايا
   // =========================================================
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "📊 الرقابة على القضايا",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "فلترة القضايا حسب المعطيات",
         to: "/inspection/cases/filter"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "الاطلاع على الوثائق",
         to: "/inspection/documents"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "متابعة مسار القضايا",
         to: "/inspection/cases/tracking"
       }
@@ -34,21 +40,21 @@ const inspectionNav = [
   // 2️⃣ المراسيم والمكاتيب
   // =========================================================
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "📜 المراسيم والمكاتيب والتوجيهات",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "إصدار المراسيم",
         to: "/inspection/decrees"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "إصدار المكاتيب",
         to: "/inspection/circulars"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "إصدار التوجيهات",
         to: "/inspection/directives"
       }
@@ -59,26 +65,26 @@ const inspectionNav = [
   // 3️⃣ إدارة المستخدمين
   // =========================================================
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "👤 إدارة المستخدمين والصلاحيات",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "إضافة مستخدم",
         to: "/inspection/users/create"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "تعديل المستخدمين",
         to: "/inspection/users/edit"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "حذف مستخدم",
         to: "/inspection/users/delete"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "إدارة الأدوار والصلاحيات",
         to: "/inspection/roles"
       }
@@ -89,21 +95,21 @@ const inspectionNav = [
   // 4️⃣ مراقبة النظام
   // =========================================================
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "🧾 مراقبة النظام (Logs)",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "سجلات النظام",
         to: "/inspection/logs"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "تتبع العمليات",
         to: "/inspection/activity"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "نشاط المستخدمين",
         to: "/inspection/users/activity"
       }
@@ -114,21 +120,21 @@ const inspectionNav = [
   // 5️⃣ التدخل القضائي
   // =========================================================
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "⚖️ التدخل القضائي",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "تعديل القضايا",
         to: "/inspection/cases/edit"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "إعادة فتح القضايا",
         to: "/inspection/cases/reopen"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "قفل القضايا",
         to: "/inspection/cases/close"
       }
@@ -139,21 +145,21 @@ const inspectionNav = [
   // 6️⃣ الإشعارات
   // =========================================================
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "🔔 الإشعارات والتواصل",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "إرسال إشعارات عامة",
         to: "/inspection/notifications"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "إشعارات القضاة والنيابة",
         to: "/inspection/notifications/judges"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "استقبال الردود",
         to: "/inspection/notifications/responses"
       }
@@ -164,36 +170,36 @@ const inspectionNav = [
   // 7️⃣ التقارير والتحليل
   // =========================================================
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "📈 التقارير والتحليل الذكي",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "تصدير PDF / Excel",
         to: "/inspection/reports/export"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "تحليل حسب المحاكم",
         to: "/inspection/reports/courts"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "تحليل حسب القضاة",
         to: "/inspection/reports/judges"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "متوسط مدة المعالجة",
         to: "/inspection/reports/avg-time"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "حجم العمل",
         to: "/inspection/reports/workload"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "تحليل شهري للقضايا",
         to: "/inspection/reports/monthly"
       }
@@ -204,26 +210,26 @@ const inspectionNav = [
   // 8️⃣ الذكاء الاصطناعي
   // =========================================================
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "🤖 الذكاء الاصطناعي والتحليل المتقدم",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "Data Pipeline",
         to: "/inspection/ai/pipeline"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "كشف الأنماط",
         to: "/inspection/ai/patterns"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "تحليل زمني",
         to: "/inspection/ai/timeline"
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "خريطة المحاكم",
         to: "/inspection/ai/map"
       }
@@ -232,3 +238,4 @@ const inspectionNav = [
 ]
 
 export default inspectionNav
+
