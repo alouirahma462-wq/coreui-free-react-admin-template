@@ -1,24 +1,17 @@
-import React from "react";
-import AppSidebar from "../components/AppSidebar";
-import AppHeader from "../components/AppHeader";
-import AppFooter from "../components/AppFooter";
-
 const CourtLayout = ({ children }) => {
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <div className="app-layout" style={{ display: "flex", minHeight: "100vh" }}>
       
-      {/* Sidebar */}
       <AppSidebar type="court" />
 
-      {/* Main Content */}
       <div
+        className="wrapper"
         style={{
           flex: 1,
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(135deg, #0f172a, #1e293b)",
-          color: "white",
           minHeight: "100vh",
+          overflow: "hidden",
         }}
       >
         <AppHeader type="court" />
@@ -26,8 +19,10 @@ const CourtLayout = ({ children }) => {
         <main
           style={{
             flex: 1,
-            padding: "20px",
-            backdropFilter: "blur(6px)",
+            overflowY: "auto",
+            padding: "16px",
+            background: "linear-gradient(135deg, #0f172a, #1e293b)",
+            color: "white",
           }}
         >
           {children}
@@ -40,5 +35,6 @@ const CourtLayout = ({ children }) => {
 };
 
 export default CourtLayout;
+
 
 
