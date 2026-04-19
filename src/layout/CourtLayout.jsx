@@ -5,24 +5,33 @@ import AppFooter from "../components/AppFooter";
 
 const CourtLayout = ({ children }) => {
   return (
-    <div className="app-layout">
+    <div style={{ display: "flex", minHeight: "100vh" }}>
+      
+      {/* Sidebar */}
       <AppSidebar type="court" />
 
+      {/* Main Content */}
       <div
-        className="wrapper d-flex flex-column min-vh-100"
         style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
           background: "linear-gradient(135deg, #0f172a, #1e293b)",
           color: "white",
+          minHeight: "100vh",
         }}
       >
         <AppHeader type="court" />
 
-        <div
-          className="body flex-grow-1 px-4 py-3"
-          style={{ backdropFilter: "blur(6px)" }}
+        <main
+          style={{
+            flex: 1,
+            padding: "20px",
+            backdropFilter: "blur(6px)",
+          }}
         >
           {children}
-        </div>
+        </main>
 
         <AppFooter />
       </div>
@@ -31,4 +40,5 @@ const CourtLayout = ({ children }) => {
 };
 
 export default CourtLayout;
+
 
