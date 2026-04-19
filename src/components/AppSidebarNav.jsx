@@ -1,50 +1,77 @@
-import React from "react"
-import { NavLink } from "react-router-dom"
-import {
-  CSidebarNav,
-  CNavItem,
-  CNavGroup,
-  CNavTitle
-} from "@coreui/react"
+import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 const AppSidebarNav = ({ items }) => {
-  const renderItem = (item, index) => {
+  return (
+    <div style={{ padding: "10px" }}>
+      {items.map((group, i) => (
+        <SidebarGroup key={i} group={group} />
+      ))}
+    </div>
+  )
+}
 
-    // 🔥 تحديد نوع العنصر
-    const Component =
-      item.component === "CNavTitle"
-        ? CNavTitle
-        : item.component === "CNavGroup"
-        ? CNavGroup
-        : CNavItem
+const SidebarGroup = ({ group }) => {
+  return (
+    <div style={{ marginBottom: "20px" }}>
+      <div style={{
+        fontWeight: "bold",
+        color: "#fff",
+        marginBottom: "10px"
+      }}>
+        {group.title}
+      </div>
 
-    // 🔥 إذا Group
-    if (item.component === "CNavGroup") {
-      return (
-        <CNavGroup key={index} toggler={item.name}>
-          {item.items?.map((subItem, i) => renderItem(subItem, i))}
-        </CNavGroup>
-      )
-    }
+      {group.sections.map((section, i) => (
+        <SidebarSection key={i} section={section} />
+      ))}
+    </div>
+  )
+}
 
-    // 🔥 إذا Item أو Title
-    return (
-      <Component
-        key={index}
-        as={item.to ? NavLink : "div"}
-        to={item.to}
-      >
-        {item.name}
-      </Component>
-    )
-  }
+const SidebarSection = ({ section }) => {
+  const [open, setOpen] = useState(false)
+  const navigate = useNavigate()
 
   return (
-    <CSidebarNav>
-      {items?.map((item, index) => renderItem(item, index))}
-    </CSidebarNav>
+    <div style={{ marginBottom: "10px" }}>
+
+      {/* عنوان القسم */}
+      <div
+        onClick={() => setOpen(!open)}
+        style={{
+          cursor: "pointer",
+          padding: "8px",
+          background: "#1e293b",
+          borderRadius: "6px",
+          color: "#fff"
+        }}
+      >
+        {section.number} - {section.title}
+      </div>
+
+      {/* العناصر */}
+      {open && (
+        <div style={{ marginTop: "5px", paddingLeft: "10px" }}>
+          {section.items.map((item, i) => (
+            <div
+              key={i}
+              onClick={() => navigate(item.to)}
+              style={{
+                padding: "6px",
+                cursor: "pointer",
+                color: "#ccc"
+              }}
+            >
+              • {item.name}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
 export default AppSidebarNav
+
 
