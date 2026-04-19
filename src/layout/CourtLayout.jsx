@@ -7,12 +7,9 @@ const CourtLayout = ({ children }) => {
   return (
     <div style={{ display: "flex" }}>
 
-      {/* SIDEBAR */}
       <AppSidebar type="court" />
 
-      {/* MAIN */}
-      <div style={{ flex: 1, minHeight: "100vh" }}>
-
+      <div style={{ flex: 1 }}>
         <AppHeader type="court" />
 
         <div style={{ padding: "20px" }}>
@@ -20,7 +17,6 @@ const CourtLayout = ({ children }) => {
         </div>
 
         <AppFooter />
-
       </div>
 
     </div>
@@ -28,6 +24,7 @@ const CourtLayout = ({ children }) => {
 };
 
 export default CourtLayout;
+
 
 
 
