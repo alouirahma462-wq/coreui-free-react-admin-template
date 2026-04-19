@@ -9,7 +9,7 @@ const AppSidebar = ({ type }) => {
     (state) => state.sidebarShow ?? true
   );
 
-  if (!sidebarShow) return null;
+  const sidebarShow = useSelector((state) => state.sidebarShow ?? true);
 
   const navigation =
     type === "court"
