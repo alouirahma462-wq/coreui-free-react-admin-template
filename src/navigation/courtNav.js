@@ -1,174 +1,181 @@
+import {
+  CNavItem,
+  CNavGroup,
+  CNavTitle
+} from '@coreui/react'
+
 const courtNav = [
   // ================= SYSTEM HEADER =================
   {
-    component: "CNavTitle",
-    name: "🏛️ النظام القضائي الموحد"
+    component: CNavTitle,
+    name: "🏛️ النظام القضائي الموحد",
   },
 
   // =========================================================
   // 🏛️ ROLE 1: كاتب ضبط النيابة
   // =========================================================
   {
-    component: "CNavTitle",
-    name: "📌 كاتب ضبط النيابة"
+    component: CNavTitle,
+    name: "📌 كاتب ضبط النيابة",
   },
 
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "1️⃣ التسجيل الإداري للقضايا",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "تسجيل القضايا الواردة",
-        to: "/court/registry/create"
+        to: "/court/registry/create",
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "تحديث وتعديل القضايا",
-        to: "/court/registry/edit"
-      }
-    ]
+        to: "/court/registry/edit",
+      },
+    ],
   },
 
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "2️⃣ تتبع القضايا",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "عرض مسار القضايا",
-        to: "/court/cases/tracking"
+        to: "/court/cases/tracking",
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "تحديث مراحل القضية",
-        to: "/court/cases/update"
-      }
-    ]
+        to: "/court/cases/update",
+      },
+    ],
   },
 
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "3️⃣ الأرشيف والوثائق",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "رفع الوثائق",
-        to: "/court/archive/upload"
+        to: "/court/archive/upload",
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "عرض الوثائق",
-        to: "/court/archive"
+        to: "/court/archive",
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "فلترة الأرشيف",
-        to: "/court/archive/filter"
-      }
-    ]
+        to: "/court/archive/filter",
+      },
+    ],
   },
 
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "4️⃣ الإشعارات",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "إدارة الإشعارات",
-        to: "/court/notifications"
+        to: "/court/notifications",
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "إرسال إشعارات",
-        to: "/court/notifications/send"
-      }
-    ]
+        to: "/court/notifications/send",
+      },
+    ],
   },
 
   // =========================================================
   // ⚖️ ROLE 2: وكيل الجمهورية
   // =========================================================
   {
-    component: "CNavTitle",
-    name: "⚖️ وكيل الجمهورية (القضاة + النيابة)"
+    component: CNavTitle,
+    name: "⚖️ وكيل الجمهورية (القضاة + النيابة)",
   },
 
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "1️⃣ متابعة القضايا",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "تتبع مسار القضايا",
-        to: "/prosecutor/cases/tracking"
+        to: "/prosecutor/cases/tracking",
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "فلترة القضايا",
-        to: "/prosecutor/cases/filter"
-      }
-    ]
+        to: "/prosecutor/cases/filter",
+      },
+    ],
   },
 
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "2️⃣ الأرشيف",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "عرض الأرشيف",
-        to: "/prosecutor/archive"
-      }
-    ]
+        to: "/prosecutor/archive",
+      },
+    ],
   },
 
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "3️⃣ القرارات والإجراءات",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "إصدار قرارات قضائية",
-        to: "/prosecutor/decisions/create"
+        to: "/prosecutor/decisions/create",
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "مراجعة الإجراءات",
-        to: "/prosecutor/procedures"
-      }
-    ]
+        to: "/prosecutor/procedures",
+      },
+    ],
   },
 
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "4️⃣ الإشعارات",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "التفاعل مع الإشعارات",
-        to: "/prosecutor/notifications"
-      }
-    ]
+        to: "/prosecutor/notifications",
+      },
+    ],
   },
 
   {
-    component: "CNavGroup",
+    component: CNavGroup,
     name: "5️⃣ المراسلات الرسمية",
     items: [
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "استقبال المكاتيب",
-        to: "/prosecutor/correspondence/inbox"
+        to: "/prosecutor/correspondence/inbox",
       },
       {
-        component: "CNavItem",
+        component: CNavItem,
         name: "تنفيذ الأوامر",
-        to: "/prosecutor/correspondence/execution"
-      }
-    ]
-  }
+        to: "/prosecutor/correspondence/execution",
+      },
+    ],
+  },
 ]
 
 export default courtNav
+
 
