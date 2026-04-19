@@ -8,11 +8,11 @@ export default function CourtDashboard() {
 
   const [openDoor, setOpenDoor] = useState(false);
   const [enterDashboard, setEnterDashboard] = useState(false);
-
   const [time, setTime] = useState("");
 
   const courtName = user?.court_name || "المحكمة";
 
+  // ================= FETCH COURT =================
   useEffect(() => {
     const fetchCourt = async () => {
       if (!user?.court_name && user?.court_id) {
@@ -35,6 +35,7 @@ export default function CourtDashboard() {
     fetchCourt();
   }, []);
 
+  // ================= CLOCK =================
   useEffect(() => {
     const interval = setInterval(() => {
       const now = new Date().toLocaleString("ar-TN", {
@@ -55,16 +56,13 @@ export default function CourtDashboard() {
 
   const handleEnter = () => {
     setOpenDoor(true);
-
-    setTimeout(() => {
-      setEnterDashboard(true);
-    }, 1200);
+    setTimeout(() => setEnterDashboard(true), 1200);
   };
 
   return (
     <div style={styles.page}>
 
-      {/* 🔥 GATE */}
+      {/* ================= GATE ================= */}
       {!enterDashboard && (
         <div style={styles.gate}>
 
@@ -94,22 +92,19 @@ export default function CourtDashboard() {
               </button>
             </div>
           )}
-
         </div>
       )}
 
-      {/* 🔥 DASHBOARD (inside layout safe) */}
+      {/* ================= DASHBOARD ================= */}
       {enterDashboard && (
-        <div style={styles.dashboardWrapper}>
+        <div style={styles.dashboard}>
 
           <div style={styles.topBar}>
-            <div style={styles.marqueeTrack}>
-              <div style={styles.marqueeText}>
+            <div style={styles.marquee}>
+              🇹🇳 وزارة العدل - {courtName}
+              <span style={{ marginLeft: 80 }}>
                 🇹🇳 وزارة العدل - {courtName}
-              </div>
-              <div style={styles.marqueeText}>
-                🇹🇳 وزارة العدل - {courtName}
-              </div>
+              </span>
             </div>
           </div>
 
@@ -128,6 +123,7 @@ export default function CourtDashboard() {
         </div>
       )}
 
+      {/* animation */}
       <style>{`
         @keyframes move {
           0% { transform: translateX(0); }
@@ -139,11 +135,13 @@ export default function CourtDashboard() {
   );
 }
 
+/* ================= STYLES (FIXED FINAL) ================= */
 const styles = {
-  /* 🔥 IMPORTANT: يمنع كسر الـ layout */
+
+  // 🔥 مهم جداً: لا يكسر layout
   page: {
-    minHeight: "100%",
     width: "100%",
+    minHeight: "100%",
     position: "relative",
     color: "white",
   },
@@ -152,7 +150,7 @@ const styles = {
   gate: {
     position: "absolute",
     inset: 0,
-    background: "black",
+    background: "#000",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -160,7 +158,6 @@ const styles = {
 
   gateCard: {
     textAlign: "center",
-    zIndex: 5,
     padding: "30px",
     background: "rgba(0,0,0,0.55)",
     backdropFilter: "blur(10px)",
@@ -169,7 +166,7 @@ const styles = {
 
   title: { fontSize: "28px", marginBottom: "10px" },
   sub: { fontSize: "20px", marginBottom: "10px" },
-  text: { fontSize: "16px", marginBottom: "15px", opacity: 0.8 },
+  text: { opacity: 0.8, marginBottom: "15px" },
 
   btn: {
     padding: "14px 40px",
@@ -183,8 +180,7 @@ const styles = {
 
   doorContainer: {
     position: "absolute",
-    width: "100%",
-    height: "100%",
+    inset: 0,
     display: "flex",
     perspective: "1200px",
   },
@@ -207,8 +203,8 @@ const styles = {
     transition: "1.2s ease-in-out",
   },
 
-  /* ===== DASHBOARD SAFE WRAPPER ===== */
-  dashboardWrapper: {
+  /* ===== DASHBOARD SAFE AREA ===== */
+  dashboard: {
     width: "100%",
     minHeight: "100%",
   },
@@ -224,6 +220,14 @@ const styles = {
     zIndex: 10,
   },
 
+  marquee: {
+    display: "flex",
+    whiteSpace: "nowrap",
+    fontWeight: "bold",
+    animation: "move 15s linear infinite",
+    paddingLeft: "20px",
+  },
+
   timeBar: {
     position: "sticky",
     top: "40px",
@@ -233,17 +237,6 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     zIndex: 9,
-  },
-
-  marqueeTrack: {
-    display: "flex",
-    animation: "move 15s linear infinite",
-  },
-
-  marqueeText: {
-    whiteSpace: "nowrap",
-    paddingRight: "120px",
-    fontWeight: "bold",
   },
 
   content: {
@@ -259,5 +252,6 @@ const styles = {
     width: "400px",
   },
 };
+
 
 
