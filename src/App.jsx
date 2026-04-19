@@ -23,8 +23,6 @@ export default function App() {
 
   const location = useLocation();
 
-  const isLanding = location.pathname === "/landing";
-
   const isDashboard =
     location.pathname.startsWith("/court") ||
     location.pathname.startsWith("/inspection-dashboard");
@@ -94,6 +92,7 @@ export default function App() {
       )}
 
       <Routes>
+
         <Route path="/landing" element={<LandingPage />} />
 
         <Route
@@ -103,19 +102,38 @@ export default function App() {
 
         <Route
           path="/change-password"
-          element={!user ? <Navigate to="/login" replace /> : <ChangePassword />}
+          element={
+            !user ? (
+              <Navigate to="/login" replace />
+            ) : (
+              <ChangePassword />
+            )
+          }
         />
 
         <Route
           path="/forgot-password"
-          element={!user ? <ForgotPassword /> : <Navigate to={getHomeRoute()} replace />}
+          element={
+            !user ? (
+              <ForgotPassword />
+            ) : (
+              <Navigate to={getHomeRoute()} replace />
+            )
+          }
         />
 
         <Route
           path="/reset-password"
-          element={!user ? <ResetPassword /> : <Navigate to={getHomeRoute()} replace />}
+          element={
+            !user ? (
+              <ResetPassword />
+            ) : (
+              <Navigate to={getHomeRoute()} replace />
+            )
+          }
         />
 
+        {/* ================= COURT ================= */}
         <Route
           path="/court/:id"
           element={
@@ -125,12 +143,16 @@ export default function App() {
               <Navigate to="/change-password" replace />
             ) : (
               <CourtLayout>
-                <CourtDashboard user={user} />
+                {/* ✅ FIX: منع الـ dashboard من كسر layout */}
+                <div style={{ width: "100%", minHeight: "100%" }}>
+                  <CourtDashboard user={user} />
+                </div>
               </CourtLayout>
             )
           }
         />
 
+        {/* ================= INSPECTION ================= */}
         <Route
           path="/inspection-dashboard"
           element={
@@ -140,7 +162,10 @@ export default function App() {
               <Navigate to="/change-password" replace />
             ) : (
               <InspectionLayout>
-                <InspectionDashboard user={user} />
+                {/* ✅ FIX: نفس الحل */}
+                <div style={{ width: "100%", minHeight: "100%" }}>
+                  <InspectionDashboard user={user} />
+                </div>
               </InspectionLayout>
             )
           }
@@ -148,10 +173,12 @@ export default function App() {
 
         <Route path="/" element={<Navigate to="/landing" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
+
       </Routes>
     </>
   );
 }
+
 
 
 
