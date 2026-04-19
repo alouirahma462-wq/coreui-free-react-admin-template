@@ -2,76 +2,76 @@ import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 const AppSidebarNav = ({ items }) => {
+  if (!items || !Array.isArray(items)) return null
+
   return (
     <div style={{ padding: "10px" }}>
-      {items.map((group, i) => (
-        <SidebarGroup key={i} group={group} />
+      {items.map((item, i) => (
+        <SidebarItem key={i} item={item} />
       ))}
     </div>
   )
 }
 
-const SidebarGroup = ({ group }) => {
-  return (
-    <div style={{ marginBottom: "20px" }}>
-      <div style={{
-        fontWeight: "bold",
-        color: "#fff",
-        marginBottom: "10px"
-      }}>
-        {group.title}
-      </div>
-
-      {group.sections.map((section, i) => (
-        <SidebarSection key={i} section={section} />
-      ))}
-    </div>
-  )
-}
-
-const SidebarSection = ({ section }) => {
+const SidebarItem = ({ item }) => {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
 
-  return (
-    <div style={{ marginBottom: "10px" }}>
-
-      {/* عنوان القسم */}
-      <div
-        onClick={() => setOpen(!open)}
-        style={{
-          cursor: "pointer",
-          padding: "8px",
-          background: "#1e293b",
-          borderRadius: "6px",
-          color: "#fff"
-        }}
-      >
-        {section.number} - {section.title}
+  // 🔹 TITLE
+  if (item.component?.name === "CNavTitle") {
+    return (
+      <div style={{
+        color: "#9ca3af",
+        margin: "10px 0",
+        fontWeight: "bold"
+      }}>
+        {item.name}
       </div>
+    )
+  }
 
-      {/* العناصر */}
-      {open && (
-        <div style={{ marginTop: "5px", paddingLeft: "10px" }}>
-          {section.items.map((item, i) => (
-            <div
-              key={i}
-              onClick={() => navigate(item.to)}
-              style={{
-                padding: "6px",
-                cursor: "pointer",
-                color: "#ccc"
-              }}
-            >
-              • {item.name}
-            </div>
-          ))}
+  // 🔹 GROUP
+  if (item.items && Array.isArray(item.items)) {
+    return (
+      <div style={{ marginBottom: "10px" }}>
+        <div
+          onClick={() => setOpen(!open)}
+          style={{
+            cursor: "pointer",
+            padding: "8px",
+            background: "#1e293b",
+            borderRadius: "6px",
+            color: "#fff"
+          }}
+        >
+          {item.name}
         </div>
-      )}
-    </div>
-  )
+
+        {open && (
+          <div style={{ marginTop: "5px", paddingLeft: "10px" }}>
+            {item.items.map((sub, i) => (
+              <div
+                key={i}
+                onClick={() => navigate(sub.to)}
+                style={{
+                  padding: "6px",
+                  cursor: "pointer",
+                  color: "#ccc"
+                }}
+              >
+                • {sub.name}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return null
 }
 
 export default AppSidebarNav
+
 
 
