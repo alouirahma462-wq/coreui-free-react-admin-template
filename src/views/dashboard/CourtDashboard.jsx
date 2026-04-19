@@ -2,36 +2,43 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
 
 export default function CourtDashboard() {
-  const [user, setUser] = useState({});
-  const [enter, setEnter] = useState(false);
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem("user")) || {}
+  );
+
+  const [openDoor, setOpenDoor] = useState(false);
+  const [enterDashboard, setEnterDashboard] = useState(false);
   const [time, setTime] = useState("");
 
   const courtName = user?.court_name || "المحكمة";
 
-  // ================= LOAD USER SAFE =================
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("user");
-      if (stored) {
-        setUser(JSON.parse(stored));
+    const fetchCourt = async () => {
+      if (!user?.court_name && user?.court_id) {
+        const { data } = await supabase
+          .from("courts")
+          .select("name")
+          .eq("id", user.court_id)
+          .single();
+
+        const updatedUser = {
+          ...user,
+          court_name: data?.name || "المحكمة",
+        };
+
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setUser(updatedUser);
       }
-    } catch (e) {
-      setUser({});
-    }
+    };
+
+    fetchCourt();
   }, []);
 
-  // ================= TIME =================
   useEffect(() => {
     const interval = setInterval(() => {
       setTime(
         new Date().toLocaleString("ar-TN", {
           timeZone: "Africa/Tunis",
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
         })
       );
     }, 1000);
@@ -39,39 +46,64 @@ export default function CourtDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  return (
-    <div style={styles.page}>
+  const handleEnter = () => {
+    setOpenDoor(true);
+    setTimeout(() => setEnterDashboard(true), 1200);
+  };
 
-      {/* ================= GATE ================= */}
-      {!enter && (
-        <div style={styles.gate}>
-          <div style={styles.card}>
+  return (
+    <div style={{ width: "100%" }}>
+
+      {/* 🔵 GATE (Full overlay only here) */}
+      {!enterDashboard && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "black",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 9999
+        }}>
+          <div style={{ textAlign: "center", color: "white" }}>
             <h1>🏛️ {courtName}</h1>
-            <h2>👋 مرحبا {user?.fullName || "مستخدم"}</h2>
-            <button onClick={() => setEnter(true)} style={styles.btn}>
+            <h2>👋 {user?.fullName}</h2>
+            <button onClick={handleEnter}>
               الدخول
             </button>
           </div>
         </div>
       )}
 
-      {/* ================= DASHBOARD ================= */}
-      {enter && (
-        <div style={styles.dashboard}>
+      {/* 🔵 DASHBOARD (inside layout طبيعي) */}
+      {enterDashboard && (
+        <div style={{ padding: "20px" }}>
 
-          <div style={styles.topBar}>
+          <div style={{
+            background: "#b91c1c",
+            color: "white",
+            padding: "10px"
+          }}>
             🇹🇳 وزارة العدل - {courtName}
           </div>
 
-          <div style={styles.timeBar}>
+          <div style={{
+            background: "#1e3a8a",
+            color: "white",
+            padding: "8px",
+            textAlign: "center"
+          }}>
             ⏰ {time}
           </div>
 
-          <div style={styles.content}>
-            <div style={styles.cardBox}>
-              <h1>🏛️ {courtName}</h1>
-              <h2>👤 {user?.fullName || "مستخدم"}</h2>
-            </div>
+          <div style={{
+            marginTop: "20px",
+            background: "rgba(255,255,255,0.1)",
+            padding: "20px",
+            borderRadius: "12px"
+          }}>
+            <h1>🏛️ {courtName}</h1>
+            <h2>👋 {user?.fullName}</h2>
           </div>
 
         </div>
@@ -81,70 +113,6 @@ export default function CourtDashboard() {
   );
 }
 
-/* ================= SAFE STYLES ================= */
-const styles = {
-  page: {
-    width: "100%",
-    minHeight: "100%",
-    color: "white",
-  },
-
-  gate: {
-    position: "fixed",
-    inset: 0,
-    background: "#000",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  dashboard: {
-    width: "100%",
-    minHeight: "100%",
-  },
-
-  topBar: {
-    position: "sticky",
-    top: 0,
-    background: "#b91c1c",
-    padding: "10px",
-    zIndex: 10,
-  },
-
-  timeBar: {
-    position: "sticky",
-    top: "40px",
-    background: "#1e3a8a",
-    padding: "8px",
-    textAlign: "center",
-  },
-
-  content: {
-    padding: "20px",
-  },
-
-  card: {
-    textAlign: "center",
-    padding: "30px",
-    background: "rgba(0,0,0,0.6)",
-    borderRadius: "12px",
-  },
-
-  cardBox: {
-    padding: "30px",
-    background: "rgba(255,255,255,0.1)",
-    borderRadius: "12px",
-  },
-
-  btn: {
-    marginTop: "10px",
-    padding: "12px 30px",
-    borderRadius: "8px",
-    background: "gold",
-    border: "none",
-    cursor: "pointer",
-  },
-};
 
 
 
