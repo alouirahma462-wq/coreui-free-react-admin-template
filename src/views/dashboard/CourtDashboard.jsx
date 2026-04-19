@@ -64,7 +64,7 @@ export default function CourtDashboard() {
   return (
     <div style={styles.page}>
 
-      {/* 🔥 GATE SCREEN */}
+      {/* 🔥 GATE */}
       {!enterDashboard && (
         <div style={styles.gate}>
 
@@ -85,30 +85,23 @@ export default function CourtDashboard() {
 
           {!openDoor && (
             <div style={styles.gateCard}>
-
-              <h1 style={styles.title}>
-                🏛️ {courtName}
-              </h1>
-
-              <h2 style={styles.sub}>
-                👋 مرحبا {user?.fullName}
-              </h2>
-
+              <h1 style={styles.title}>🏛️ {courtName}</h1>
+              <h2 style={styles.sub}>👋 مرحبا {user?.fullName}</h2>
               <p style={styles.text}>اضغط هنا للدخول</p>
 
               <button onClick={handleEnter} style={styles.btn}>
                 الدخول
               </button>
-
             </div>
           )}
 
         </div>
       )}
 
-      {/* 🔥 DASHBOARD */}
+      {/* 🔥 DASHBOARD (inside layout safe) */}
       {enterDashboard && (
-        <>
+        <div style={styles.dashboardWrapper}>
+
           <div style={styles.topBar}>
             <div style={styles.marqueeTrack}>
               <div style={styles.marqueeText}>
@@ -124,12 +117,15 @@ export default function CourtDashboard() {
             ⏰ {time}
           </div>
 
-          <div style={styles.card}>
-            <h1>🏛️ {courtName}</h1>
-            <h2>👋 مرحبا {user?.fullName}</h2>
-            <p>📍 {courtName}</p>
+          <div style={styles.content}>
+            <div style={styles.card}>
+              <h1>🏛️ {courtName}</h1>
+              <h2>👋 مرحبا {user?.fullName}</h2>
+              <p>📍 {courtName}</p>
+            </div>
           </div>
-        </>
+
+        </div>
       )}
 
       <style>{`
@@ -144,21 +140,18 @@ export default function CourtDashboard() {
 }
 
 const styles = {
+  /* 🔥 IMPORTANT: يمنع كسر الـ layout */
   page: {
-    minHeight: "calc(100vh - 140px)", // ✅ FIX 1 (بدل 100vh)
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "transparent",
-    color: "white",
+    minHeight: "100%",
+    width: "100%",
     position: "relative",
-    overflow: "hidden",
+    color: "white",
   },
 
+  /* ===== GATE ===== */
   gate: {
     position: "absolute",
-    width: "100%",
-    height: "100%",
+    inset: 0,
     background: "black",
     display: "flex",
     justifyContent: "center",
@@ -174,21 +167,9 @@ const styles = {
     borderRadius: "12px",
   },
 
-  title: {
-    fontSize: "28px",
-    marginBottom: "10px",
-  },
-
-  sub: {
-    fontSize: "20px",
-    marginBottom: "10px",
-  },
-
-  text: {
-    fontSize: "16px",
-    marginBottom: "15px",
-    opacity: 0.8,
-  },
+  title: { fontSize: "28px", marginBottom: "10px" },
+  sub: { fontSize: "20px", marginBottom: "10px" },
+  text: { fontSize: "16px", marginBottom: "15px", opacity: 0.8 },
 
   btn: {
     padding: "14px 40px",
@@ -210,7 +191,6 @@ const styles = {
 
   doorLeft: {
     width: "50%",
-    height: "100%",
     backgroundImage: "url('/court-door.png')",
     backgroundSize: "200% 100%",
     backgroundPosition: "left",
@@ -220,7 +200,6 @@ const styles = {
 
   doorRight: {
     width: "50%",
-    height: "100%",
     backgroundImage: "url('/court-door.png')",
     backgroundSize: "200% 100%",
     backgroundPosition: "right",
@@ -228,21 +207,36 @@ const styles = {
     transition: "1.2s ease-in-out",
   },
 
-  topBar: {
-    position: "sticky", // ✅ FIX 2
-    top: 0,
+  /* ===== DASHBOARD SAFE WRAPPER ===== */
+  dashboardWrapper: {
     width: "100%",
+    minHeight: "100%",
+  },
+
+  topBar: {
+    position: "sticky",
+    top: 0,
     height: "40px",
     background: "#b91c1c",
-    overflow: "hidden",
     display: "flex",
     alignItems: "center",
+    overflow: "hidden",
     zIndex: 10,
+  },
+
+  timeBar: {
+    position: "sticky",
+    top: "40px",
+    height: "35px",
+    background: "#1e3a8a",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 9,
   },
 
   marqueeTrack: {
     display: "flex",
-    width: "max-content",
     animation: "move 15s linear infinite",
   },
 
@@ -252,17 +246,8 @@ const styles = {
     fontWeight: "bold",
   },
 
-  timeBar: {
-    position: "sticky", // ✅ FIX 2
-    top: "40px",
-    width: "100%",
-    height: "35px",
-    background: "#1e3a8a",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "14px",
-    zIndex: 9,
+  content: {
+    padding: "20px",
   },
 
   card: {
