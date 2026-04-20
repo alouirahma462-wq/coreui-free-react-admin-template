@@ -92,10 +92,10 @@ export default function App() {
 
       <Routes>
 
-        {/* 🔥 LANDING = أول صفحة مستقلة */}
+        {/* 🔥 LANDING */}
         <Route path="/landing" element={<LandingPage />} />
 
-        {/* 🔥 ROOT يودّي للاندنج */}
+        {/* 🔥 ROOT */}
         <Route path="/" element={<Navigate to="/landing" replace />} />
 
         <Route
@@ -136,7 +136,7 @@ export default function App() {
           }
         />
 
-        {/* 🔥 APP LAYOUT (بدون ما يأثر على landing/login) */}
+        {/* 🔥 APP LAYOUT FIX (IMPORTANT) */}
         <Route element={<AppLayout />}>
           <Route
             path="/court/:id"
@@ -149,13 +149,14 @@ export default function App() {
           />
         </Route>
 
-        {/* 🔥 fallback */}
+        {/* fallback */}
         <Route path="*" element={<Navigate to="/landing" replace />} />
 
       </Routes>
     </>
   );
 }
+
 
 
 
