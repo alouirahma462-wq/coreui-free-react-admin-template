@@ -166,12 +166,13 @@ body {
 }
 
 /* =====================================================
-   🔥🔥🔥 FIX LAYOUT (المهم جداً) 🔥🔥🔥
+   🔥🔥🔥 FIX LAYOUT (CLEAN VERSION) 🔥🔥🔥
 ===================================================== */
 
 .app-layout {
-  display: flex !important;
+  display: flex;
   height: 100vh;
+  width: 100%;
   overflow: hidden;
 }
 
@@ -182,33 +183,23 @@ body {
   overflow: hidden;
 }
 
+/* ✅ content area ثابت وسكرول فقط */
 .content {
   flex: 1;
   overflow-y: auto;
   background: #f8f9fa;
+  position: relative;
+  z-index: 0;
 }
 
-/* ✅ منع تداخل الهيدر مع المحتوى */
-.main-area > .header {
-  flex-shrink: 0;
-}
-
-/* ✅ تحسين sidebar */
+/* ✅ sidebar ما ينكمش */
 aside {
   flex-shrink: 0;
 }
 
-/* ✅ منع أي overlay غريب من CoreUI */
-.c-sidebar,
+/* ⚠️ إزالة تعارض CoreUI بدون كسر النظام */
 .sidebar {
-  position: relative !important;
   z-index: 1;
-}
-
-/* ✅ المحتوى ما يطلع فوق الهيدر */
-.content {
-  position: relative;
-  z-index: 0;
 }
 
 
