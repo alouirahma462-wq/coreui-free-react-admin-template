@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { supabase } from "../../supabaseClient";
+import dashboardBg from "../../assets/dashboard-bg.jpg";
 
 export default function InspectionDashboard() {
   const [user, setUser] = useState(
     JSON.parse(localStorage.getItem("user")) || {}
   );
-
-  const [openDoor, setOpenDoor] = useState(false);
-  const [enterDashboard, setEnterDashboard] = useState(false);
 
   const [time, setTime] = useState("");
 
@@ -14,253 +13,103 @@ export default function InspectionDashboard() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const now = new Date().toLocaleString("ar-TN", {
-        timeZone: "Africa/Tunis",
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      });
-
-      setTime(now);
+      setTime(
+        new Date().toLocaleString("ar-TN", {
+          timeZone: "Africa/Tunis",
+        })
+      );
     }, 1000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const handleEnter = () => {
-    setOpenDoor(true);
-
-    setTimeout(() => {
-      setEnterDashboard(true);
-    }, 1200);
-  };
-
   return (
-    <div style={styles.page}>
+    <div
+      style={{
+        width: "100%",
+        height: "100vh",
+        backgroundImage: `url(${dashboardBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
 
-      {/* 🔥 GATE SCREEN */}
-      {!enterDashboard && (
-        <div style={styles.gate}>
-
-          <div style={styles.doorContainer}>
-            <div
-              style={{
-                ...styles.doorLeft,
-                transform: openDoor ? "rotateY(-90deg)" : "rotateY(0deg)",
-              }}
-            />
-
-            <div
-              style={{
-                ...styles.doorRight,
-                transform: openDoor ? "rotateY(90deg)" : "rotateY(0deg)",
-              }}
-            />
-          </div>
-
-          {!openDoor && (
-            <div style={styles.gateCard}>
-
-              <h1 style={styles.title}>
-                🕵️ التفقدية العامة
-              </h1>
-
-              <h2 style={styles.sub}>
-                👋 مرحبا {userName}
-              </h2>
-
-              <p style={styles.text}>
-                اضغط للدخول إلى لوحة المراقبة
-              </p>
-
-              <button onClick={handleEnter} style={styles.btn}>
-                الدخول
-              </button>
-
-            </div>
-          )}
-
+      {/* 🔴 RED BAR */}
+      <div style={styles.redBar}>
+        <div style={styles.marquee}>
+          🇹🇳 وزارة العدل - التفقدية العامة • 🇹🇳 وزارة العدل - التفقدية العامة •
         </div>
-      )}
+      </div>
 
-      {/* 🔥 DASHBOARD */}
-      {enterDashboard && (
-        <>
-          {/* 🔴 TOP BAR */}
-          <div style={styles.topBar}>
-            <div style={styles.marqueeTrack}>
-              <div style={styles.marqueeText}>
-                🇹🇳 وزارة العدل - التفقدية العامة - إشراف مركزي
-              </div>
-              <div style={styles.marqueeText}>
-                🇹🇳 وزارة العدل - التفقدية العامة - إشراف مركزي
-              </div>
-            </div>
-          </div>
+      {/* 🔵 BLUE BAR */}
+      <div style={styles.blueBar}>
+        <div style={styles.marquee}>
+          ⏰ {time} • ⏰ {time} • ⏰ {time}
+        </div>
+      </div>
 
-          {/* 🔵 TIME BAR */}
-          <div style={styles.timeBar}>
-            ⏰ {time}
-          </div>
+      {/* CONTENT */}
+      <div style={styles.content}>
+        <h1>🕵️ التفقدية العامة</h1>
+        <h2>👋 مرحبا {userName}</h2>
 
-          {/* CARD */}
-          <div style={styles.card}>
-            <h1>🕵️ التفقدية العامة</h1>
-
-            <h2>👋 مرحبا {userName}</h2>
-
-            <p>📊 لوحة مراقبة جميع المحاكم</p>
-
-            <p>⚖️ نظام التفقدية - إدارة مركزية</p>
-          </div>
-        </>
-      )}
-
-      <style>{`
-        @keyframes move {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-      `}</style>
+        <p>📊 لوحة مراقبة جميع المحاكم</p>
+        <p>⚖️ نظام التفقدية - إدارة مركزية</p>
+      </div>
 
     </div>
   );
 }
 
+/* =========================
+   STYLE (SAME COURT DASHBOARD)
+========================= */
+
 const styles = {
-  page: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "transparent",
-    color: "white",
+  content: {
     position: "relative",
-    overflow: "hidden",
-  },
-
-  gate: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    background: "black",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  gateCard: {
-    textAlign: "center",
-    zIndex: 5,
+    zIndex: 2,
+    color: "white",
     padding: "30px",
-    background: "rgba(0,0,0,0.55)",
-    backdropFilter: "blur(10px)",
-    borderRadius: "12px",
+    top: "100px",
   },
 
-  title: {
-    fontSize: "28px",
-    marginBottom: "10px",
+  marquee: {
+    whiteSpace: "nowrap",
+    display: "inline-block",
+    paddingLeft: "100%",
+    animation: "move 15s linear infinite",
+    fontWeight: "bold",
   },
 
-  sub: {
-    fontSize: "20px",
-    marginBottom: "10px",
-  },
-
-  text: {
-    fontSize: "16px",
-    marginBottom: "15px",
-    opacity: 0.8,
-  },
-
-  btn: {
-    padding: "14px 40px",
-    fontSize: "18px",
-    borderRadius: "10px",
-    border: "1px solid gold",
-    background: "rgba(255,215,0,0.12)",
-    color: "gold",
-    cursor: "pointer",
-  },
-
-  doorContainer: {
+  redBar: {
     position: "absolute",
-    width: "100%",
-    height: "100%",
-    display: "flex",
-    perspective: "1200px",
-  },
-
-  doorLeft: {
-    width: "50%",
-    height: "100%",
-    backgroundImage: "url('/court-door.png')",
-    backgroundSize: "200% 100%",
-    backgroundPosition: "left",
-    transformOrigin: "left",
-    transition: "1.2s ease-in-out",
-  },
-
-  doorRight: {
-    width: "50%",
-    height: "100%",
-    backgroundImage: "url('/court-door.png')",
-    backgroundSize: "200% 100%",
-    backgroundPosition: "right",
-    transformOrigin: "right",
-    transition: "1.2s ease-in-out",
-  },
-
-  topBar: {
-    position: "fixed",
     top: 0,
     left: 0,
     width: "100%",
     height: "40px",
     background: "#b91c1c",
+    color: "white",
+    display: "flex",
+    alignItems: "center",
     overflow: "hidden",
-    display: "flex",
-    alignItems: "center",
-    zIndex: 9999,
+    zIndex: 10,
   },
 
-  marqueeTrack: {
-    display: "flex",
-    width: "max-content",
-    animation: "move 15s linear infinite",
-  },
-
-  marqueeText: {
-    whiteSpace: "nowrap",
-    paddingRight: "120px",
-    fontWeight: "bold",
-  },
-
-  timeBar: {
-    position: "fixed",
+  blueBar: {
+    position: "absolute",
     top: "40px",
+    left: 0,
     width: "100%",
-    height: "35px",
+    height: "40px",
     background: "#1e3a8a",
+    color: "white",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
-    fontSize: "14px",
-    zIndex: 9998,
-  },
-
-  card: {
-    padding: "30px",
-    borderRadius: "15px",
-    background: "rgba(255,255,255,0.10)",
-    backdropFilter: "blur(12px)",
-    textAlign: "center",
-    width: "420px",
+    overflow: "hidden",
+    zIndex: 10,
   },
 };
 
