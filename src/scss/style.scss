@@ -137,17 +137,15 @@ body {
 }
 
 /* =========================
-   🎬 LANDING ANIMATIONS (ONLY ADD THIS)
+   🎬 LANDING ANIMATIONS
 ========================= */
 
-/* 👇 إصبع ذهبي */
 @keyframes fingerMove {
   0% { transform: translateY(0); }
   50% { transform: translateY(12px); }
   100% { transform: translateY(0); }
 }
 
-/* 👉 سهم التحريك */
 @keyframes movePointer {
   0% { transform: translateX(30px); opacity: 0; }
   50% { transform: translateX(0); opacity: 1; }
@@ -166,6 +164,53 @@ body {
     transform: translateX(-50%);
   }
 }
+
+/* =====================================================
+   🔥🔥🔥 FIX LAYOUT (المهم جداً) 🔥🔥🔥
+===================================================== */
+
+.app-layout {
+  display: flex !important;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  background: #f8f9fa;
+}
+
+/* ✅ منع تداخل الهيدر مع المحتوى */
+.main-area > .header {
+  flex-shrink: 0;
+}
+
+/* ✅ تحسين sidebar */
+aside {
+  flex-shrink: 0;
+}
+
+/* ✅ منع أي overlay غريب من CoreUI */
+.c-sidebar,
+.sidebar {
+  position: relative !important;
+  z-index: 1;
+}
+
+/* ✅ المحتوى ما يطلع فوق الهيدر */
+.content {
+  position: relative;
+  z-index: 0;
+}
+
 
 
 
