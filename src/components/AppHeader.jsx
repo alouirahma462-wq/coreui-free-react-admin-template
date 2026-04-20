@@ -1,13 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
   CContainer,
   CHeader,
   CHeaderNav,
   CHeaderToggler,
-  CNavItem,
-  CNavLink,
   CDropdown,
   CDropdownToggle,
   CDropdownMenu,
@@ -33,7 +31,7 @@ const AppHeader = ({ type }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const sidebarShow = useSelector((state) => state.sidebarShow);
+  const sidebarShow = useSelector((state) => state.sidebarShow ?? true);
 
   const { colorMode, setColorMode } = useColorModes(
     "coreui-free-react-admin-template-theme"
@@ -81,14 +79,14 @@ const AppHeader = ({ type }) => {
   return (
     <>
       <CHeader
-        className="p-0"
+        className="p-0 header"
         ref={headerRef}
         style={{
           position: "sticky",
           top: 0,
           zIndex: 1000,
           backdropFilter: "blur(10px)",
-          background: "rgba(255,255,255,0.85)",
+          background: "rgba(255,255,255,0.9)",
         }}
       >
         <CContainer className="border-bottom px-4" fluid>
@@ -114,7 +112,13 @@ const AppHeader = ({ type }) => {
               </div>
 
               <CHeaderNav className="ms-auto d-flex align-items-center gap-2">
-                <div style={{ padding: "6px 10px", background: "#f1f3f5", borderRadius: 20 }}>
+                <div
+                  style={{
+                    padding: "6px 10px",
+                    background: "#f1f3f5",
+                    borderRadius: 20,
+                  }}
+                >
                   👤 {fullName}
                 </div>
 
@@ -123,6 +127,13 @@ const AppHeader = ({ type }) => {
                 </CButton>
               </CHeaderNav>
             </>
+          )}
+
+          {/* 🔥 نفس الشي للـ inspection لو بدك */}
+          {type === "inspection" && (
+            <div className="flex-grow-1 text-center fw-bold">
+              🔍 لوحة التفقد
+            </div>
           )}
 
           <CHeaderNav>
