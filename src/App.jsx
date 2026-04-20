@@ -14,7 +14,8 @@ import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
 import GlobalMusic from "./GlobalMusic";
 
-import AppLayout from "./layout/AppLayout";
+// ✅ CoreUI Layout (IMPORTANT)
+import DefaultLayout from "./layout/DefaultLayout";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -86,18 +87,20 @@ export default function App() {
 
   return (
     <>
+      {/* 🔥 Global Music */}
       {(isAuth || isDashboard) && (
         <GlobalMusic key={location.pathname} />
       )}
 
       <Routes>
 
-        {/* 🔥 LANDING */}
+        {/* 🔥 LANDING (OUTSIDE LAYOUT) */}
         <Route path="/landing" element={<LandingPage />} />
 
         {/* 🔥 ROOT */}
         <Route path="/" element={<Navigate to="/landing" replace />} />
 
+        {/* 🔥 AUTH ROUTES */}
         <Route
           path="/login"
           element={user ? <Navigate to={getHomeRoute()} replace /> : <Login />}
@@ -136,8 +139,9 @@ export default function App() {
           }
         />
 
-        {/* 🔥 APP LAYOUT FIX (IMPORTANT) */}
-        <Route element={<AppLayout />}>
+        {/* 🔥 COREUI LAYOUT WRAPPER */}
+        <Route element={<DefaultLayout />}>
+          
           <Route
             path="/court/:id"
             element={<CourtDashboard user={user} />}
@@ -147,15 +151,17 @@ export default function App() {
             path="/inspection-dashboard"
             element={<InspectionDashboard user={user} />}
           />
+
         </Route>
 
-        {/* fallback */}
+        {/* 🔥 FALLBACK */}
         <Route path="*" element={<Navigate to="/landing" replace />} />
 
       </Routes>
     </>
   );
 }
+
 
 
 
