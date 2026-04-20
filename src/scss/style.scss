@@ -26,6 +26,7 @@ body {
    📦 COREUI WRAPPER FIX
 ========================= */
 
+/* 🔥 FIX 1 (مهم جداً): CoreUI يحتاج flex direction */
 .wrapper {
   display: flex;
   width: 100%;
@@ -42,11 +43,12 @@ body {
 }
 
 /* =========================
-   📌 SIDEBAR (لا نكسر CoreUI)
+   📌 SIDEBAR
 ========================= */
 
 .sidebar {
   flex-shrink: 0;
+  height: 100vh; /* 🔥 FIX 2: تثبيت الارتفاع */
 }
 
 /* =========================
