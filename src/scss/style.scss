@@ -18,41 +18,36 @@ body,
   padding: 0;
 }
 
+/* 🔥 مهم: يمنع أي overlay غريب */
 body {
   background-color: var(--cui-tertiary-bg);
+  overflow: hidden;
 }
 
 /* =========================
-   📦 COREUI WRAPPER FIX
+   📦 COREUI WRAPPER (FIX ROOT STRUCTURE)
 ========================= */
 
-/* 🔥 FIX 1 (مهم جداً): CoreUI يحتاج flex direction */
 .wrapper {
   display: flex;
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* =========================
-   🧭 HEADER
-========================= */
-
-.header > .container-fluid,
-.sidebar-header {
-  min-height: calc(4rem + 1px);
-}
-
-/* =========================
-   📌 SIDEBAR
+   📌 SIDEBAR (CoreUI safe)
 ========================= */
 
 .sidebar {
   flex-shrink: 0;
-  height: 100vh; /* 🔥 FIX 2: تثبيت الارتفاع */
+  height: 100vh;
+  position: relative;
+  z-index: 2;
 }
 
 /* =========================
-   🧱 MAIN STRUCTURE
+   🧱 MAIN AREA (IMPORTANT FIX)
 ========================= */
 
 .main-area {
@@ -60,26 +55,31 @@ body {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* =========================
-   🧭 HEADER FIX
+   🧭 HEADER FIX (NO OVERLAY)
 ========================= */
 
 .header {
   flex-shrink: 0;
-  z-index: 1000;
+  position: relative;
+  z-index: 10;
 }
 
 /* =========================
-   📄 CONTENT AREA
+   📄 CONTENT AREA (FIX OVERLAY BUG)
 ========================= */
 
 .content {
   flex: 1;
   overflow-y: auto;
   position: relative;
-  background: transparent;
+
+  /* 🔥 أهم سطر: يمنع اللون الأزرق الشفاف */
+  background: var(--cui-body-bg, #f8f9fa);
 }
 
 /* =========================
@@ -93,7 +93,7 @@ body {
 }
 
 /* =========================
-   🔴 TOP BAR
+   🔴 TOP BAR (SAFE)
 ========================= */
 
 .top-bar {
@@ -130,6 +130,16 @@ body {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+
+/* =========================
+   🚫 FIX OVERLAY BUGS (IMPORTANT)
+========================= */
+
+body::before,
+body::after {
+  display: none !important;
+}
+
 
 
 
