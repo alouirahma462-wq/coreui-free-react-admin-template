@@ -28,8 +28,11 @@ body {
    📦 COREUI LAYOUT
 ========================= */
 
+/* 🔥 FIX: لازم flex (مهم جداً) */
 .wrapper {
   width: 100%;
+  display: flex;
+  min-height: 100vh;
   padding-inline: var(--cui-sidebar-occupy-start, 0)
     var(--cui-sidebar-occupy-end, 0);
   will-change: auto;
@@ -175,7 +178,7 @@ body {
   overflow: hidden;
 }
 
-/* Sidebar ثابت */
+/* Sidebar */
 .sidebar {
   width: 260px;
   flex-shrink: 0;
@@ -193,37 +196,28 @@ body {
   position: relative;
 }
 
-/* Header ثابت فوق */
+/* Header */
 .header {
   flex-shrink: 0;
   z-index: 50;
   position: relative;
 }
 
-/* Content فقط هذا اللي يسكرول */
+/* Content */
 .content {
   flex: 1;
   overflow-y: auto;
   position: relative;
   z-index: 1;
-
-  /* 🔥 مهم جداً: يمنع الطبقة الشفافة */
   background: transparent !important;
 }
 
-/* ❌ منع طبقات CoreUI الغريبة */
-body::before,
-body::after {
-  display: none !important;
+/* ❌ ONLY SAFE CLEANUP (بدون كسر CoreUI) */
+.c-sidebar,
+.c-header {
+  backdrop-filter: none !important;
 }
 
-/* ❌ منع overlay sidebar القديم */
-.c-sidebar,
-.c-header,
-.sidebar {
-  backdrop-filter: none !important;
-  box-shadow: none;
-}
 
 
 
