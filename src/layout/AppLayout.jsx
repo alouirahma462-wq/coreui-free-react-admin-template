@@ -6,14 +6,22 @@ export default function AppLayout() {
   return (
     <div className="wrapper d-flex flex-column min-vh-100">
 
-      <AppSidebar />
+      <div className="body d-flex flex-grow-1">
 
-      <div className="body flex-grow-1">
+        {/* SIDEBAR */}
+        <AppSidebar />
 
-        <AppHeader />
+        {/* MAIN */}
+        <div className="main d-flex flex-column flex-grow-1">
 
-        <div className="container-lg px-4">
-          <Outlet />
+          {/* HEADER */}
+          <AppHeader />
+
+          {/* CONTENT */}
+          <main className="content px-3 py-2">
+            <Outlet />
+          </main>
+
         </div>
 
       </div>
@@ -21,5 +29,6 @@ export default function AppLayout() {
     </div>
   );
 }
+
 
 
