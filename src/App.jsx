@@ -14,8 +14,12 @@ import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
 import GlobalMusic from "./GlobalMusic";
 
-import CourtLayout from "./layout/CourtLayout";
-import InspectionLayout from "./layout/InspectionLayout";
+// ❌ احذف هذول
+// import CourtLayout from "./layout/CourtLayout";
+// import InspectionLayout from "./layout/InspectionLayout";
+
+// ✅ استبدال بـ Layout واحد
+import AppLayout from "./layout/AppLayout";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -133,43 +137,29 @@ export default function App() {
           }
         />
 
-        {/* ================= COURT ================= */}
+        {/* 🔥🔥🔥 التعديل الوحيد هنا 🔥🔥🔥 */}
         <Route
-          path="/court/:id"
+          path="/"
           element={
             !user ? (
               <Navigate to="/login" replace />
             ) : isMustChange(user?.must_change_password) ? (
               <Navigate to="/change-password" replace />
             ) : (
-              <CourtLayout>
-                {/* ✅ FIX: منع الـ dashboard من كسر layout */}
-                <div style={{ width: "100%", minHeight: "100%" }}>
-                  <CourtDashboard user={user} />
-                </div>
-              </CourtLayout>
+              <AppLayout />
             )
           }
-        />
+        >
+          <Route
+            path="court/:id"
+            element={<CourtDashboard user={user} />}
+          />
 
-        {/* ================= INSPECTION ================= */}
-        <Route
-          path="/inspection-dashboard"
-          element={
-            !user ? (
-              <Navigate to="/login" replace />
-            ) : isMustChange(user?.must_change_password) ? (
-              <Navigate to="/change-password" replace />
-            ) : (
-              <InspectionLayout>
-                {/* ✅ FIX: نفس الحل */}
-                <div style={{ width: "100%", minHeight: "100%" }}>
-                  <InspectionDashboard user={user} />
-                </div>
-              </InspectionLayout>
-            )
-          }
-        />
+          <Route
+            path="inspection-dashboard"
+            element={<InspectionDashboard user={user} />}
+          />
+        </Route>
 
         <Route path="/" element={<Navigate to="/landing" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
@@ -178,6 +168,7 @@ export default function App() {
     </>
   );
 }
+
 
 
 
