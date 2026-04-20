@@ -14,8 +14,9 @@ import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
 import GlobalMusic from "./GlobalMusic";
 
-// ✅ CoreUI Layout (IMPORTANT)
-import DefaultLayout from "./layout/DefaultLayout.jsx";
+// 🔥 مهم: استخدم DefaultLayout فقط
+import DefaultLayout from "./layout/DefaultLayout";
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -52,7 +53,6 @@ export default function App() {
 
       setUser(data || null);
     } catch (err) {
-      console.log(err);
       setUser(null);
     } finally {
       setLoading(false);
@@ -63,11 +63,8 @@ export default function App() {
     loadUser();
   }, [location.pathname]);
 
-  const isMustChange = (value) =>
-    value === true ||
-    value === 1 ||
-    value === "1" ||
-    value === "true";
+  const isMustChange = (v) =>
+    v === true || v === 1 || v === "1" || v === "true";
 
   const getHomeRoute = () => {
     if (!user) return "/login";
@@ -86,75 +83,51 @@ export default function App() {
 
   return (
     <>
-      {/* 🔥 Global Music */}
       {(isAuth || isDashboard) && (
         <GlobalMusic key={location.pathname} />
       )}
 
       <Routes>
 
-        {/* 🔥 LANDING (OUTSIDE LAYOUT) */}
+        {/* 🔥 LANDING أول صفحة */}
         <Route path="/landing" element={<LandingPage />} />
 
         {/* 🔥 ROOT */}
         <Route path="/" element={<Navigate to="/landing" replace />} />
 
-        {/* 🔥 AUTH ROUTES */}
         <Route
           path="/login"
-          element={user ? <Navigate to={getHomeRoute()} replace /> : <Login />}
+          element={user ? <Navigate to={getHomeRoute()} /> : <Login />}
         />
 
         <Route
           path="/change-password"
-          element={
-            !user ? (
-              <Navigate to="/login" replace />
-            ) : (
-              <ChangePassword />
-            )
-          }
+          element={!user ? <Navigate to="/login" /> : <ChangePassword />}
         />
 
         <Route
           path="/forgot-password"
-          element={
-            !user ? (
-              <ForgotPassword />
-            ) : (
-              <Navigate to={getHomeRoute()} replace />
-            )
-          }
+          element={!user ? <ForgotPassword /> : <Navigate to={getHomeRoute()} />}
         />
 
         <Route
           path="/reset-password"
-          element={
-            !user ? (
-              <ResetPassword />
-            ) : (
-              <Navigate to={getHomeRoute()} replace />
-            )
-          }
+          element={!user ? <ResetPassword /> : <Navigate to={getHomeRoute()} />}
         />
 
-        {/* 🔥 COREUI LAYOUT WRAPPER */}
+        {/* 🔥 أهم نقطة: DefaultLayout فقط */}
         <Route element={<DefaultLayout />}>
-          
           <Route
             path="/court/:id"
             element={<CourtDashboard user={user} />}
           />
-
           <Route
             path="/inspection-dashboard"
             element={<InspectionDashboard user={user} />}
           />
-
         </Route>
 
-        {/* 🔥 FALLBACK */}
-        <Route path="*" element={<Navigate to="/landing" replace />} />
+        <Route path="*" element={<Navigate to="/landing" />} />
 
       </Routes>
     </>
