@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../supabaseClient";
-import dashboardBg from "../../assets/dashboard-bg.jpg";
 
 export default function CourtDashboard() {
   const [user, setUser] = useState(
@@ -52,7 +51,7 @@ export default function CourtDashboard() {
         style={{
           width: "100%",
           height: "100vh",
-          backgroundImage: `url(${dashboardBg})`,
+          backgroundImage: "url('/dashboard-bg.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           position: "relative",
