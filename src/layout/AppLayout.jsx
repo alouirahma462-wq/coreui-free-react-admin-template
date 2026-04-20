@@ -1,32 +1,25 @@
-import React from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import AppSidebar from "../components/AppSidebar";
 import AppHeader from "../components/AppHeader";
 
-const AppLayout = () => {
-  const location = useLocation();
-
-  const type = location.pathname.startsWith("/court")
-    ? "court"
-    : location.pathname.startsWith("/inspection-dashboard")
-    ? "inspection"
-    : "";
-
+export default function AppLayout() {
   return (
-    <div className="app-layout">
-      <AppSidebar type={type} />
+    <div className="wrapper d-flex flex-column min-vh-100">
 
-      <div className="main-area">
-        <AppHeader type={type} />
+      <AppSidebar />
 
-        <main className="content">
+      <div className="body flex-grow-1">
+
+        <AppHeader />
+
+        <div className="container-lg px-4">
           <Outlet />
-        </main>
+        </div>
+
       </div>
+
     </div>
   );
-};
-
-export default AppLayout;
+}
 
 
