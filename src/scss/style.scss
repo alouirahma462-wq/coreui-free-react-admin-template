@@ -18,67 +18,60 @@ body,
   padding: 0;
 }
 
-/* 🔥 مهم: يمنع أي overlay غريب */
+/* ❌ مهم: لا تستخدم overflow hidden */
 body {
   background-color: var(--cui-tertiary-bg);
-  overflow: hidden;
 }
 
 /* =========================
-   📦 COREUI WRAPPER (FIX ROOT STRUCTURE)
+   📦 COREUI WRAPPER (IMPORTANT)
 ========================= */
 
 .wrapper {
   display: flex;
   width: 100%;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
 }
 
 /* =========================
-   📌 SIDEBAR (CoreUI safe)
+   📌 SIDEBAR (SAFE)
 ========================= */
 
 .sidebar {
   flex-shrink: 0;
   height: 100vh;
-  position: relative;
   z-index: 2;
 }
 
 /* =========================
-   🧱 MAIN AREA (IMPORTANT FIX)
+   🧱 MAIN AREA (CoreUI uses .body)
 ========================= */
 
-.main-area {
+.body {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
 }
 
 /* =========================
-   🧭 HEADER FIX (NO OVERLAY)
+   🧭 HEADER FIX
 ========================= */
 
 .header {
   flex-shrink: 0;
-  position: relative;
   z-index: 10;
+  position: relative;
 }
 
 /* =========================
-   📄 CONTENT AREA (FIX OVERLAY BUG)
+   📄 CONTENT AREA (IMPORTANT FIX)
 ========================= */
 
-.content {
+.body > .flex-grow-1 {
   flex: 1;
   overflow-y: auto;
-  position: relative;
-
-  /* 🔥 أهم سطر: يمنع اللون الأزرق الشفاف */
   background: var(--cui-body-bg, #f8f9fa);
 }
 
@@ -132,7 +125,7 @@ body {
 }
 
 /* =========================
-   🚫 FIX OVERLAY BUGS (IMPORTANT)
+   🚫 REMOVE GHOST OVERLAYS
 ========================= */
 
 body::before,
