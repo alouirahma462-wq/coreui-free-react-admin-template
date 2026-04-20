@@ -1,3 +1,8 @@
+import React from "react";
+import { Outlet, useLocation } from "react-router-dom";
+import AppSidebar from "../components/AppSidebar";
+import AppHeader from "../components/AppHeader";
+
 const AppLayout = () => {
   const location = useLocation();
 
@@ -9,27 +14,19 @@ const AppLayout = () => {
 
   return (
     <div className="app-layout">
+      <AppSidebar type={type} />
 
-      {/* Sidebar */}
-      <div className="sidebar">
-        <AppSidebar type={type} />
-      </div>
-
-      {/* Main */}
       <div className="main-area">
+        <AppHeader type={type} />
 
-        <div className="header">
-          <AppHeader type={type} />
-        </div>
-
-        <div className="content">
+        <main className="content">
           <Outlet />
-        </div>
-
+        </main>
       </div>
-
     </div>
   );
 };
+
+export default AppLayout;
 
 
