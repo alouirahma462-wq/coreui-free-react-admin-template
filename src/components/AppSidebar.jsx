@@ -9,8 +9,6 @@ const AppSidebar = ({ type }) => {
     (state) => state.sidebarShow ?? true
   );
 
-  if (!sidebarShow) return null;
-
   const navigation =
     type === "court"
       ? courtNav
@@ -21,18 +19,33 @@ const AppSidebar = ({ type }) => {
   return (
     <aside
       style={{
-        width: "260px",
+        width: sidebarShow ? "260px" : "0px",
+        minWidth: sidebarShow ? "260px" : "0px",
+        transition: "all 0.3s ease",
+        overflow: "hidden",
         background: "#0f172a",
         color: "white",
         minHeight: "100vh",
+        flexShrink: 0,
+        position: "relative",
+        zIndex: 10,
       }}
     >
-      <AppSidebarNav items={navigation} />
+      {/* 🔥 مهم: نخفي المحتوى لما يكون مغلق */}
+      <div
+        style={{
+          opacity: sidebarShow ? 1 : 0,
+          transition: "opacity 0.2s ease",
+        }}
+      >
+        <AppSidebarNav items={navigation} />
+      </div>
     </aside>
   );
 };
 
 export default AppSidebar;
+
 
 
 
