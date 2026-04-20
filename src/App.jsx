@@ -15,8 +15,7 @@ import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 import GlobalMusic from "./GlobalMusic";
 
 // ✅ CoreUI Layout (IMPORTANT)
-import DefaultLayout from "./layout/DefaultLayout";
-
+import DefaultLayout from "./layout/DefaultLayout.jsx";
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
