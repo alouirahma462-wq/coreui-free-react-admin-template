@@ -14,11 +14,6 @@ import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 
 import GlobalMusic from "./GlobalMusic";
 
-// ❌ احذف هذول
-// import CourtLayout from "./layout/CourtLayout";
-// import InspectionLayout from "./layout/InspectionLayout";
-
-// ✅ استبدال بـ Layout واحد
 import AppLayout from "./layout/AppLayout";
 
 export default function App() {
@@ -97,7 +92,11 @@ export default function App() {
 
       <Routes>
 
+        {/* 🔥 LANDING = أول صفحة مستقلة */}
         <Route path="/landing" element={<LandingPage />} />
+
+        {/* 🔥 ROOT يودّي للاندنج */}
+        <Route path="/" element={<Navigate to="/landing" replace />} />
 
         <Route
           path="/login"
@@ -137,37 +136,27 @@ export default function App() {
           }
         />
 
-        {/* 🔥🔥🔥 التعديل الوحيد هنا 🔥🔥🔥 */}
-        <Route
-          path="/"
-          element={
-            !user ? (
-              <Navigate to="/login" replace />
-            ) : isMustChange(user?.must_change_password) ? (
-              <Navigate to="/change-password" replace />
-            ) : (
-              <AppLayout />
-            )
-          }
-        >
+        {/* 🔥 APP LAYOUT (بدون ما يأثر على landing/login) */}
+        <Route element={<AppLayout />}>
           <Route
-            path="court/:id"
+            path="/court/:id"
             element={<CourtDashboard user={user} />}
           />
 
           <Route
-            path="inspection-dashboard"
+            path="/inspection-dashboard"
             element={<InspectionDashboard user={user} />}
           />
         </Route>
 
-        <Route path="/" element={<Navigate to="/landing" replace />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* 🔥 fallback */}
+        <Route path="*" element={<Navigate to="/landing" replace />} />
 
       </Routes>
     </>
   );
 }
+
 
 
 
