@@ -7,8 +7,8 @@ import routes from '../routes'
 const AppContent = () => {
   return (
     <Suspense fallback={<CSpinner color="primary" />}>
-
       <Routes>
+
         {routes.map((route, idx) => {
           return (
             route.element && (
@@ -16,17 +16,18 @@ const AppContent = () => {
                 key={idx}
                 path={route.path}
                 element={route.element}
-
               />
             )
           )
         })}
 
         {/* 🔥 REDIRECT */}
-        <Route path="/" element={<Navigate to="dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+        {/* 🔥 fallback route */}
+        <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>
-
     </Suspense>
   )
 }
