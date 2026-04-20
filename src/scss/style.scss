@@ -166,40 +166,63 @@ body {
 }
 
 /* =====================================================
-   🔥🔥🔥 FIX LAYOUT (CLEAN VERSION) 🔥🔥🔥
+   🔥 FIX LAYOUT FINAL (IMPORTANT)
 ===================================================== */
 
 .app-layout {
   display: flex;
   height: 100vh;
-  width: 100%;
   overflow: hidden;
 }
 
+/* Sidebar ثابت */
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  height: 100vh;
+  background: #0f172a;
+  z-index: 2;
+}
+
+/* Main area */
 .main-area {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
-/* ✅ content area ثابت وسكرول فقط */
+/* Header ثابت فوق */
+.header {
+  flex-shrink: 0;
+  z-index: 50;
+  position: relative;
+}
+
+/* Content فقط هذا اللي يسكرول */
 .content {
   flex: 1;
   overflow-y: auto;
-  background: #f8f9fa;
   position: relative;
-  z-index: 0;
-}
-
-/* ✅ sidebar ما ينكمش */
-aside {
-  flex-shrink: 0;
-}
-
-/* ⚠️ إزالة تعارض CoreUI بدون كسر النظام */
-.sidebar {
   z-index: 1;
+
+  /* 🔥 مهم جداً: يمنع الطبقة الشفافة */
+  background: transparent !important;
+}
+
+/* ❌ منع طبقات CoreUI الغريبة */
+body::before,
+body::after {
+  display: none !important;
+}
+
+/* ❌ منع overlay sidebar القديم */
+.c-sidebar,
+.c-header,
+.sidebar {
+  backdrop-filter: none !important;
+  box-shadow: none;
 }
 
 
