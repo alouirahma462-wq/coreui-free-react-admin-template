@@ -5,7 +5,6 @@ import AppHeader from "../components/AppHeader";
 const AppLayout = () => {
   const location = useLocation();
 
-  // تحديد نوع الداشبورد
   const type = location.pathname.startsWith("/court")
     ? "court"
     : location.pathname.startsWith("/inspection-dashboard")
@@ -19,12 +18,14 @@ const AppLayout = () => {
       <div className="main-area">
         <AppHeader type={type} />
 
-        <div className="content">
+        {/* 🔥 مهم: لف المحتوى */}
+        <main className="content">
           <Outlet />
-        </div>
+        </main>
       </div>
     </div>
   );
 };
 
 export default AppLayout;
+
