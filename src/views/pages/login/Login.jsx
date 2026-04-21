@@ -31,21 +31,13 @@ export default function Login() {
         return;
       }
 
-      // 1️⃣ جلب المستخدم فقط (بدون join)
       const { data: user, error } = await supabase
         .from("users")
         .select("*")
         .eq("username", username.trim())
         .single();
 
-      if (error) {
-        console.log(error);
-        setMessage("❌ خطأ في النظام");
-        setLoading(false);
-        return;
-      }
-
-      if (!user) {
+      if (error || !user) {
         setMessage("❌ بيانات غير صحيحة");
         setLoading(false);
         return;
@@ -69,7 +61,6 @@ export default function Login() {
         localStorage.removeItem("remember_user");
       }
 
-      // 2️⃣ جلب المحكمة بشكل آمن (منفصل)
       let courtName = "غير محدد";
 
       if (user.court_id) {
@@ -82,7 +73,6 @@ export default function Login() {
         courtName = court?.name || "غير محدد";
       }
 
-      // 3️⃣ التخزين الصحيح
       localStorage.setItem(
         "user",
         JSON.stringify({
@@ -95,14 +85,12 @@ export default function Login() {
 
       window.dispatchEvent(new Event("storage"));
 
-      setLoading(false);
-
+      // ✅ تصحيح الفلو
       const mustChange =
         user?.must_change_password === true ||
-        user?.must_change_password === "true" ||
-        String(user?.must_change_password) === "true" ||
-        user?.must_change_password === 1 ||
-        String(user?.must_change_password) === "1";
+        user?.must_change_password === 1;
+
+      setLoading(false);
 
       if (mustChange) {
         navigate("/change-password", { replace: true });
@@ -172,9 +160,14 @@ export default function Login() {
             تذكرني
           </label>
 
+          {/* ✅ إصلاح زر forgot password */}
           <button
             type="button"
-            onClick={() => navigate("/forgot-password")}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              navigate("/forgot-password", { replace: true });
+            }}
             style={styles.forgotBtn}
           >
             نسيت كلمة المرور؟
@@ -199,7 +192,7 @@ export default function Login() {
   );
 }
 
-/* 🎨 STYLES (UNCHANGED) */
+/* 🎨 STYLES (كما هي بدون تغيير) */
 const styles = {
   page: {
     height: "100vh",
@@ -321,6 +314,7 @@ const styles = {
     fontSize: "13px",
   },
 };
+
 
 
 
