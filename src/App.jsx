@@ -66,12 +66,8 @@ export default function App() {
   const isMustChange = (v) =>
     v === true || v === 1 || v === "1" || v === "true";
 
-  const getHomeRoute = () => {
-    if (!user) return "/login";
-    if (isMustChange(user?.must_change_password)) return "/change-password";
-    if (user?.court_id === null) return "/inspection-dashboard";
-    return `/court/${user?.court_id}`;
-  };
+  // 🔥 تم تعطيله مؤقتًا (حتى نرجع الفلو الطبيعي من Login)
+  const getHomeRoute = () => "/landing";
 
   if (loading && location.pathname !== "/login") {
     return (
@@ -95,10 +91,8 @@ export default function App() {
         {/* 🔥 ROOT */}
         <Route path="/" element={<Navigate to="/landing" replace />} />
 
-        <Route
-          path="/login"
-          element={user ? <Navigate to={getHomeRoute()} /> : <Login />}
-        />
+        {/* ✅ LOGIN (بدون أي redirect تلقائي) */}
+        <Route path="/login" element={<Login />} />
 
         <Route
           path="/change-password"
@@ -107,15 +101,15 @@ export default function App() {
 
         <Route
           path="/forgot-password"
-          element={!user ? <ForgotPassword /> : <Navigate to={getHomeRoute()} />}
+          element={!user ? <ForgotPassword /> : <Navigate to="/login" />}
         />
 
         <Route
           path="/reset-password"
-          element={!user ? <ResetPassword /> : <Navigate to={getHomeRoute()} />}
+          element={!user ? <ResetPassword /> : <Navigate to="/login" />}
         />
 
-        {/* 🔥 أهم نقطة: DefaultLayout فقط */}
+        {/* 🔥 DASHBOARD (كما هو) */}
         <Route element={<DefaultLayout />}>
           <Route
             path="/court/:id"
