@@ -9,23 +9,21 @@ const AppContent = () => {
     <Suspense fallback={<CSpinner color="primary" />}>
       <Routes>
 
-        {routes.map((route, idx) => {
-          return (
-            route.element && (
-              <Route
-                key={idx}
-                path={route.path}
-                element={route.element}
-              />
-            )
+        {routes.map((route, idx) => (
+          route.element && (
+            <Route
+              key={idx}
+              path={route.path}
+              element={route.element}
+            />
           )
-        })}
+        ))}
 
-        {/* 🔥 REDIRECT */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        {/* 🔥 FIX 1: لا dashboard redirect */}
+        <Route path="/" element={<Navigate to="/landing" replace />} />
 
-        {/* 🔥 fallback route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* 🔥 FIX 2: fallback آمن */}
+        <Route path="*" element={<Navigate to="/landing" replace />} />
 
       </Routes>
     </Suspense>
@@ -33,5 +31,6 @@ const AppContent = () => {
 }
 
 export default React.memo(AppContent)
+
 
 
