@@ -66,7 +66,6 @@ export default function App() {
   const isMustChange = (v) =>
     v === true || v === 1 || v === "1" || v === "true";
 
-  // 🔥 تم تعطيله مؤقتًا (حتى نرجع الفلو الطبيعي من Login)
   const getHomeRoute = () => "/landing";
 
   if (loading && location.pathname !== "/login") {
@@ -94,20 +93,10 @@ export default function App() {
         {/* ✅ LOGIN (بدون أي redirect تلقائي) */}
         <Route path="/login" element={<Login />} />
 
-        <Route
-          path="/change-password"
-          element={!user ? <Navigate to="/login" /> : <ChangePassword />}
-        />
-
-        <Route
-          path="/forgot-password"
-          element={!user ? <ForgotPassword /> : <Navigate to="/login" />}
-        />
-
-        <Route
-          path="/reset-password"
-          element={!user ? <ResetPassword /> : <Navigate to="/login" />}
-        />
+        {/* 🔥 FIX: auth pages بدون منع user */}
+        <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* 🔥 DASHBOARD (كما هو) */}
         <Route element={<DefaultLayout />}>
@@ -127,6 +116,7 @@ export default function App() {
     </>
   );
 }
+
 
 
 
