@@ -9,12 +9,13 @@ const AppSidebar = ({ type }) => {
     (state) => state.sidebarShow ?? true
   );
 
+  // 🔥 FIX: fallback مهم جدًا
   const navigation =
     type === "court"
       ? courtNav
       : type === "inspection"
       ? inspectionNav
-      : [];
+      : courtNav; // 👈 الافتراضي بدل []
 
   return (
     <aside
@@ -31,7 +32,6 @@ const AppSidebar = ({ type }) => {
         zIndex: 10,
       }}
     >
-      {/* 🔥 مهم: نخفي المحتوى لما يكون مغلق */}
       <div
         style={{
           opacity: sidebarShow ? 1 : 0,
@@ -45,6 +45,7 @@ const AppSidebar = ({ type }) => {
 };
 
 export default AppSidebar;
+
 
 
 
