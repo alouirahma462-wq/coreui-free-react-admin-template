@@ -50,6 +50,8 @@ const styles = {
     flexShrink: 0,
     background: "#111827",
     overflowY: "auto",
+    position: "relative",   // 🔥 إصلاح طبقات
+    zIndex: 20,             // 🔥 يمنع تغطية الداشبورد
   },
 
   main: {
@@ -58,18 +60,24 @@ const styles = {
     flexDirection: "column",
     height: "100vh",
     overflow: "hidden",
+    position: "relative",   // 🔥 مهم لمنع التداخل
+    zIndex: 1,
   },
 
   header: {
     height: "60px",
     flexShrink: 0,
     background: "#1e3a8a",
-    zIndex: 10,
+    zIndex: 1000,           // 🔥 حل اختفاء الهيدر
+    position: "relative",   // 🔥 مهم جداً
+    display: "flex",
+    alignItems: "center",
   },
 
   content: {
     flex: 1,
-    overflowY: "auto",
+    overflowY: "auto",      // 🔥 scroll الوحيد
+    overflowX: "hidden",    // 🔥 يمنع الخط الغريب
     background: "#f3f4f6",
     padding: "15px",
   },
@@ -80,5 +88,6 @@ const styles = {
     background: "#111827",
   },
 };
+
 
 
