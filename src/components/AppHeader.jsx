@@ -88,7 +88,7 @@ const AppHeader = () => {
 export default AppHeader;
 
 /* =========================
-   STYLE (CLEAN + MODERN)
+   STYLE (FIX ONLY)
 ========================= */
 
 const styles = {
@@ -104,9 +104,8 @@ const styles = {
     backdropFilter: "blur(12px)",
     borderBottom: "1px solid rgba(255,255,255,0.1)",
 
-    position: "sticky",
-    top: 0,
-    zIndex: 9999,
+    position: "relative",   // 🔥 FIX مهم جداً (بدل sticky)
+    zIndex: 99999,          // 🔥 يخليه فوق كل شيء
   },
 
   left: {
