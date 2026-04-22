@@ -104,12 +104,13 @@ const styles = {
     backdropFilter: "blur(12px)",
     borderBottom: "1px solid rgba(255,255,255,0.1)",
 
-    position: "fixed",   // 🔥 مهم جداً
+    position: "fixed",
     top: 0,
-    left: "260px",       // 🔥 يترك مساحة للسايدبار
+    left: "260px",
     right: 0,
 
     zIndex: 9999,
+    boxSizing: "border-box", // 🔥 مهم جداً
   },
 
   left: {
@@ -117,6 +118,7 @@ const styles = {
     alignItems: "center",
     gap: "10px",
     color: "white",
+    flexShrink: 0,
   },
 
   logo: {
@@ -152,6 +154,7 @@ const styles = {
   right: {
     display: "flex",
     alignItems: "center",
+    flexShrink: 0, // 🔥 يمنع اختفاء الزر
   },
 
   logout: {
@@ -162,8 +165,10 @@ const styles = {
     color: "white",
     cursor: "pointer",
     fontWeight: "bold",
+    whiteSpace: "nowrap",
   },
 };
+
 
 
 
