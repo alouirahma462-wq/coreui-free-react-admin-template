@@ -6,22 +6,11 @@ import {
   CHeader,
   CHeaderNav,
   CHeaderToggler,
-  CDropdown,
-  CDropdownToggle,
-  CDropdownMenu,
-  CDropdownItem,
   CButton,
-  CModal,
-  CModalHeader,
-  CModalTitle,
-  CModalBody,
-  CModalFooter,
-  CFormInput,
-  useColorModes,
 } from "@coreui/react";
 
 import CIcon from "@coreui/icons-react";
-import { cilMenu, cilMoon, cilSun, cilContrast } from "@coreui/icons";
+import { cilMenu } from "@coreui/icons";
 
 import AppBreadcrumb from "./AppBreadcrumb";
 import { supabase } from "../supabaseClient";
@@ -34,13 +23,8 @@ const AppHeader = ({ type }) => {
 
   const sidebarShow = useSelector((state) => state.sidebarShow ?? true);
 
-  const { colorMode, setColorMode } = useColorModes(
-    "coreui-free-react-admin-template-theme"
-  );
-
   const [fullName, setFullName] = useState("المستخدم");
   const [courtName, setCourtName] = useState("المحكمة");
-  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -84,8 +68,11 @@ const AppHeader = ({ type }) => {
         position: "sticky",
         top: 0,
         zIndex: 1000,
-        background: "#fff",
-        borderBottom: "1px solid #e5e7eb",
+
+        // 🔥 تحسين الشكل فقط (بدون تغيير منطق)
+        background: "#ffffff",
+        borderBottom: "2px solid #e5e7eb",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
       }}
     >
       <CContainer className="px-4" fluid>
@@ -103,7 +90,7 @@ const AppHeader = ({ type }) => {
             🇹🇳 الجمهورية التونسية
           </div>
 
-          <div style={{ fontWeight: "bold", color: "#0d6efd" }}>
+          <div style={{ fontWeight: "bold", color: "#0d6efd", fontSize: "16px" }}>
             🏛️ {courtName}
           </div>
         </div>
@@ -112,15 +99,27 @@ const AppHeader = ({ type }) => {
 
           <div
             style={{
-              padding: "6px 10px",
-              background: "#f1f3f5",
-              borderRadius: 20,
+              padding: "6px 12px",
+              background: "#f1f5f9",
+              borderRadius: "20px",
+              fontSize: "13px",
+              fontWeight: "bold",
+              border: "1px solid #e5e7eb",
             }}
           >
             👤 {fullName}
           </div>
 
-          <CButton color="danger" size="sm" onClick={handleLogout}>
+          <CButton
+            style={{
+              background: "#dc2626",
+              border: "none",
+              borderRadius: "8px",
+              padding: "6px 12px",
+              fontWeight: "bold",
+            }}
+            onClick={handleLogout}
+          >
             🚪 خروج
           </CButton>
 
