@@ -9,8 +9,32 @@ const AppHeader = () => {
     JSON.parse(localStorage.getItem("user")) || {}
   );
 
+  const [time, setTime] = useState("");
+
   const fullName = user?.fullName || "المستخدم";
   const courtName = user?.court_name || "المحكمة";
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+
+      const day = now.toLocaleDateString("ar-TN", {
+        weekday: "long",
+        timeZone: "Africa/Tunis",
+      });
+
+      const clock = now.toLocaleString("ar-TN", {
+        timeZone: "Africa/Tunis",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+
+      setTime(`${day} • ${clock}`);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -52,7 +76,7 @@ const AppHeader = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     localStorage.clear();
-    navigate("/", { replace: true }); // 🔥 رجوع للاندنج
+    navigate("/", { replace: true });
   };
 
   return (
@@ -60,22 +84,19 @@ const AppHeader = () => {
 
       {/* LEFT */}
       <div style={styles.left}>
-        <div style={styles.logo}>⚖️</div>
-        <div>
-          <div style={styles.court}>{courtName}</div>
-          <div style={styles.sub}>الجمهورية التونسية</div>
-        </div>
+        <div style={styles.court}>{courtName}</div>
+        <div style={styles.sub}>الجمهورية التونسية</div>
       </div>
 
-      {/* CENTER */}
+      {/* CENTER (TIME) */}
       <div style={styles.center}>
-        <div style={styles.userGlow}>
-          👤 {fullName}
-        </div>
+        📅 {time}
       </div>
 
       {/* RIGHT */}
       <div style={styles.right}>
+        <div style={styles.user}>👤 {fullName}</div>
+
         <button style={styles.logout} onClick={handleLogout}>
           🚪 خروج
         </button>
@@ -88,73 +109,72 @@ const AppHeader = () => {
 export default AppHeader;
 
 /* =========================
-   FIXED HEADER STYLE
+   FIXED WORKING HEADER
 ========================= */
 
 const styles = {
   header: {
-    width: "100%",
+    position: "fixed",
+    top: 0,
+    left: "260px",   // sidebar
+    right: 0,
+
     height: "60px",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
+
     padding: "0 15px",
+    boxSizing: "border-box",
 
     background: "rgba(15, 23, 42, 0.92)",
     backdropFilter: "blur(12px)",
     borderBottom: "1px solid rgba(255,255,255,0.1)",
 
-    position: "fixed",
-    top: 0,
-    left: "260px",
-    right: 0,
-
     zIndex: 9999,
-    boxSizing: "border-box", // 🔥 مهم جداً
+    overflow: "hidden", // 🔥 يمنع اختفاء العناصر
   },
 
   left: {
     display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    color: "white",
-    flexShrink: 0,
-  },
-
-  logo: {
-    fontSize: "22px",
+    flexDirection: "column",
+    color: "#60a5fa",
+    minWidth: "150px",
   },
 
   court: {
-    fontSize: "14px",
     fontWeight: "bold",
-    color: "#60a5fa",
+    fontSize: "13px",
   },
 
   sub: {
     fontSize: "11px",
     opacity: 0.7,
+    color: "white",
   },
 
   center: {
     flex: 1,
     textAlign: "center",
-  },
-
-  userGlow: {
-    display: "inline-block",
-    padding: "6px 12px",
-    borderRadius: "20px",
-    background: "rgba(59,130,246,0.15)",
-    color: "#fff",
+    color: "white",
     fontWeight: "bold",
-    boxShadow: "0 0 10px rgba(59,130,246,0.4)",
+    fontSize: "13px",
   },
 
   right: {
     display: "flex",
     alignItems: "center",
-    flexShrink: 0, // 🔥 يمنع اختفاء الزر
+    gap: "10px",
+    flexShrink: 0,
+  },
+
+  user: {
+    background: "rgba(59,130,246,0.15)",
+    padding: "5px 10px",
+    borderRadius: "15px",
+    color: "white",
+    fontSize: "12px",
+    whiteSpace: "nowrap",
   },
 
   logout: {
@@ -168,6 +188,7 @@ const styles = {
     whiteSpace: "nowrap",
   },
 };
+
 
 
 
