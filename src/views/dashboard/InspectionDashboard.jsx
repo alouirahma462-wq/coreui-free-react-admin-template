@@ -15,6 +15,12 @@ export default function InspectionDashboard() {
       setTime(
         new Date().toLocaleString("ar-TN", {
           timeZone: "Africa/Tunis",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
         })
       );
     }, 1000);
@@ -23,45 +29,38 @@ export default function InspectionDashboard() {
   }, []);
 
   return (
-    <div
-      style={{
-        width: "100%",
-        minHeight: "100%", // ✅ بدل 100vh
-        backgroundImage: "url('/dashboard-bg.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        position: "relative",
-      }}
-    >
+    <div style={styles.wrapper}>
 
       {/* 🔴 RED BAR */}
       <div style={styles.redBar}>
         <div style={styles.marquee}>
-          🇹🇳 وزارة العدل - التفقدية العامة • 🇹🇳 وزارة العدل - التفقدية العامة •
+          🇹🇳 وزارة العدل - التفقدية العامة • الجمهورية التونسية •
         </div>
       </div>
 
       {/* 🔵 BLUE BAR */}
       <div style={styles.blueBar}>
         <div style={styles.marquee}>
-          ⏰ {time} • {/* ✅ حذف التكرار */}
+          ⏰ {time} •
         </div>
       </div>
 
       {/* CONTENT */}
       <div style={styles.content}>
-        <h1>🕵️ التفقدية العامة</h1>
-        <h2>👋 مرحبا {userName}</h2>
+        <div style={styles.card}>
+          <h1>🕵️ التفقدية العامة</h1>
+          <h2>👋 مرحبا {userName}</h2>
 
-        <p>📊 لوحة مراقبة جميع المحاكم</p>
-        <p>⚖️ نظام التفقدية - إدارة مركزية</p>
+          <p>📊 لوحة مراقبة جميع المحاكم</p>
+          <p>⚖️ نظام التفقدية - إدارة مركزية</p>
+        </div>
       </div>
 
       {/* KEYFRAMES */}
       <style>
         {`
           @keyframes move {
-            0% { transform: translateX(100%); }  /* ✅ يبدأ من اليمين */
+            0% { transform: translateX(100%); }
             100% { transform: translateX(-100%); }
           }
         `}
@@ -72,16 +71,34 @@ export default function InspectionDashboard() {
 }
 
 /* =========================
-   STYLE
+   STYLE (FIXED + CLEAN)
 ========================= */
 
 const styles = {
+  wrapper: {
+    width: "100%",
+    minHeight: "100vh",
+    position: "relative",
+    backgroundImage: "url('/dashboard-bg.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    overflowX: "hidden", // 🔥 يمنع الخط الغريب
+  },
+
   content: {
     position: "relative",
     zIndex: 2,
-    color: "white",
     padding: "30px",
-    marginTop: "100px", // ✅ بدل top
+    marginTop: "100px",
+  },
+
+  card: {
+    background: "rgba(255,255,255,0.12)",
+    backdropFilter: "blur(12px)",
+    padding: "20px",
+    borderRadius: "15px",
+    color: "white",
+    maxWidth: "450px",
   },
 
   marquee: {
@@ -89,6 +106,7 @@ const styles = {
     display: "inline-block",
     animation: "move 15s linear infinite",
     fontWeight: "bold",
+    paddingLeft: "100%",
   },
 
   redBar: {
@@ -119,6 +137,7 @@ const styles = {
     zIndex: 10,
   },
 };
+
 
 
 
