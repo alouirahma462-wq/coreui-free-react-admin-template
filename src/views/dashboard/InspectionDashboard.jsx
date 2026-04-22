@@ -26,12 +26,11 @@ export default function InspectionDashboard() {
     <div
       style={{
         width: "100%",
-        height: "100vh",
+        minHeight: "100%", // ✅ بدل 100vh
         backgroundImage: "url('/dashboard-bg.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         position: "relative",
-        overflow: "hidden",
       }}
     >
 
@@ -45,7 +44,7 @@ export default function InspectionDashboard() {
       {/* 🔵 BLUE BAR */}
       <div style={styles.blueBar}>
         <div style={styles.marquee}>
-          ⏰ {time} • ⏰ {time} • ⏰ {time}
+          ⏰ {time} • {/* ✅ حذف التكرار */}
         </div>
       </div>
 
@@ -58,12 +57,22 @@ export default function InspectionDashboard() {
         <p>⚖️ نظام التفقدية - إدارة مركزية</p>
       </div>
 
+      {/* KEYFRAMES */}
+      <style>
+        {`
+          @keyframes move {
+            0% { transform: translateX(100%); }  /* ✅ يبدأ من اليمين */
+            100% { transform: translateX(-100%); }
+          }
+        `}
+      </style>
+
     </div>
   );
 }
 
 /* =========================
-   STYLE (SAME COURT DASHBOARD)
+   STYLE
 ========================= */
 
 const styles = {
@@ -72,13 +81,12 @@ const styles = {
     zIndex: 2,
     color: "white",
     padding: "30px",
-    top: "100px",
+    marginTop: "100px", // ✅ بدل top
   },
 
   marquee: {
     whiteSpace: "nowrap",
     display: "inline-block",
-    paddingLeft: "100%",
     animation: "move 15s linear infinite",
     fontWeight: "bold",
   },
@@ -111,6 +119,7 @@ const styles = {
     zIndex: 10,
   },
 };
+
 
 
 
