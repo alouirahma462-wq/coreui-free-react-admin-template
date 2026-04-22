@@ -8,21 +8,25 @@ export default function InspectionDashboard() {
 
   const [time, setTime] = useState("");
 
-  const userName = user?.fullName || "المستخدم";
+  const userName = "التفقدية العامة - الإدارة المركزية";
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTime(
-        new Date().toLocaleString("ar-TN", {
-          timeZone: "Africa/Tunis",
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        })
-      );
+      const now = new Date();
+
+      const day = now.toLocaleDateString("ar-TN", {
+        weekday: "long",
+        timeZone: "Africa/Tunis",
+      });
+
+      const clock = now.toLocaleString("ar-TN", {
+        timeZone: "Africa/Tunis",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+
+      setTime(`${day} • ⏰ ${clock}`);
     }, 1000);
 
     return () => clearInterval(interval);
@@ -31,17 +35,10 @@ export default function InspectionDashboard() {
   return (
     <div style={styles.wrapper}>
 
-      {/* 🔴 RED BAR */}
-      <div style={styles.redBar}>
-        <div style={styles.marquee}>
-          🇹🇳 وزارة العدل - التفقدية العامة • الجمهورية التونسية •
-        </div>
-      </div>
-
-      {/* 🔵 BLUE BAR */}
+      {/* 🔵 BLUE BAR ONLY */}
       <div style={styles.blueBar}>
         <div style={styles.marquee}>
-          ⏰ {time} •
+          📅 {time}
         </div>
       </div>
 
@@ -49,14 +46,13 @@ export default function InspectionDashboard() {
       <div style={styles.content}>
         <div style={styles.card}>
           <h1>🕵️ التفقدية العامة</h1>
-          <h2>👋 مرحبا {userName}</h2>
+          <h2>🏛️ {userName}</h2>
 
           <p>📊 لوحة مراقبة جميع المحاكم</p>
           <p>⚖️ نظام التفقدية - إدارة مركزية</p>
         </div>
       </div>
 
-      {/* ANIMATION */}
       <style>
         {`
           @keyframes move {
@@ -69,6 +65,10 @@ export default function InspectionDashboard() {
     </div>
   );
 }
+
+/* =========================
+   STYLE (FIXED CLEAN)
+========================= */
 const styles = {
   wrapper: {
     width: "100%",
@@ -84,18 +84,15 @@ const styles = {
     position: "relative",
     zIndex: 2,
     padding: "30px",
-    paddingTop: "110px",
+    paddingTop: "120px", // 🔥 مهم حتى ما يغطيه الهيدر + الشريط
   },
 
-  /* 🧊 GLASS CARD (CACHE STYLE) */
   card: {
     background: "rgba(255,255,255,0.10)",
     backdropFilter: "blur(15px)",
     WebkitBackdropFilter: "blur(15px)",
-
     border: "1px solid rgba(255,255,255,0.15)",
     boxShadow: "0 8px 30px rgba(0,0,0,0.25)",
-
     padding: "22px",
     borderRadius: "18px",
     color: "white",
@@ -110,23 +107,9 @@ const styles = {
     fontWeight: "bold",
   },
 
-  redBar: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "40px",
-    background: "linear-gradient(90deg, #b91c1c, #ef4444)",
-    display: "flex",
-    alignItems: "center",
-    overflow: "hidden",
-    zIndex: 1000,
-    color: "white",
-  },
-
   blueBar: {
     position: "fixed",
-    top: "40px",
+    top: "0px",
     left: 0,
     width: "100%",
     height: "40px",
@@ -138,6 +121,7 @@ const styles = {
     color: "white",
   },
 };
+
 
 
 
