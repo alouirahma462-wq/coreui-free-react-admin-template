@@ -52,13 +52,13 @@ const AppHeader = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     localStorage.clear();
-    navigate("/login", { replace: true });
+    navigate("/", { replace: true }); // 🔥 رجوع للاندنج
   };
 
   return (
     <header style={styles.header}>
 
-      {/* LEFT SIDE */}
+      {/* LEFT */}
       <div style={styles.left}>
         <div style={styles.logo}>⚖️</div>
         <div>
@@ -67,14 +67,14 @@ const AppHeader = () => {
         </div>
       </div>
 
-      {/* CENTER USER */}
+      {/* CENTER */}
       <div style={styles.center}>
         <div style={styles.userGlow}>
           👤 {fullName}
         </div>
       </div>
 
-      {/* RIGHT ACTIONS */}
+      {/* RIGHT */}
       <div style={styles.right}>
         <button style={styles.logout} onClick={handleLogout}>
           🚪 خروج
@@ -88,7 +88,7 @@ const AppHeader = () => {
 export default AppHeader;
 
 /* =========================
-   STYLE (FIX ONLY)
+   FIXED HEADER STYLE
 ========================= */
 
 const styles = {
@@ -104,8 +104,12 @@ const styles = {
     backdropFilter: "blur(12px)",
     borderBottom: "1px solid rgba(255,255,255,0.1)",
 
-    position: "relative",   // 🔥 FIX مهم جداً (بدل sticky)
-    zIndex: 99999,          // 🔥 يخليه فوق كل شيء
+    position: "fixed",   // 🔥 مهم جداً
+    top: 0,
+    left: "260px",       // 🔥 يترك مساحة للسايدبار
+    right: 0,
+
+    zIndex: 9999,
   },
 
   left: {
@@ -160,6 +164,7 @@ const styles = {
     fontWeight: "bold",
   },
 };
+
 
 
 
