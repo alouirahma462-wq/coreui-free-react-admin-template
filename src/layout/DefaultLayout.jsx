@@ -35,59 +35,74 @@ const DefaultLayout = () => {
 
 export default DefaultLayout;
 
-/* 🔥 CSS FIX ROOT */
+/* =========================
+   FIXED LAYOUT STYLES
+========================= */
 const styles = {
   wrapper: {
     display: "flex",
     height: "100vh",
     width: "100%",
-    overflow: "hidden",
+    overflow: "hidden", // 🔥 يمنع أي scroll خارجي
   },
 
+  /* ================= SIDEBAR ================= */
   sidebar: {
     width: "260px",
     height: "100vh",
     flexShrink: 0,
     background: "#111827",
+
+    position: "relative",
+    zIndex: 50, // فوق المحتوى
+
     overflowY: "auto",
-    position: "relative",   // 🔥 إصلاح طبقات
-    zIndex: 20,             // 🔥 يمنع تغطية الداشبورد
   },
 
+  /* ================= MAIN ================= */
   main: {
     flex: 1,
     display: "flex",
     flexDirection: "column",
     height: "100vh",
-    overflow: "hidden",
-    position: "relative",   // 🔥 مهم لمنع التداخل
-    zIndex: 1,
+
+    overflow: "hidden", // 🔥 scroll واحد فقط
+    position: "relative",
   },
 
+  /* ================= HEADER ================= */
   header: {
     height: "60px",
     flexShrink: 0,
+
+    position: "relative",
+    zIndex: 1000, // 🔥 مهم جداً لمنع الاختفاء
+
     background: "#1e3a8a",
-    zIndex: 1000,           // 🔥 حل اختفاء الهيدر
-    position: "relative",   // 🔥 مهم جداً
     display: "flex",
     alignItems: "center",
   },
 
+  /* ================= CONTENT ================= */
   content: {
     flex: 1,
-    overflowY: "auto",      // 🔥 scroll الوحيد
-    overflowX: "hidden",    // 🔥 يمنع الخط الغريب
+
+    overflowY: "auto",   // 🔥 السكروول الوحيد هنا
+    overflowX: "hidden", // 🔥 يمنع الخط الغريب
+
     background: "#f3f4f6",
     padding: "15px",
   },
 
+  /* ================= FOOTER ================= */
   footer: {
     height: "40px",
     flexShrink: 0,
     background: "#111827",
   },
 };
+
+
 
 
 
