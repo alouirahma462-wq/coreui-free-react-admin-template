@@ -10,6 +10,7 @@ export default function CourtDashboard() {
 
   const courtName = user?.court_name || "المحكمة";
 
+  /* ================= FETCH COURT ================= */
   useEffect(() => {
     const fetchCourt = async () => {
       if (!user?.court_name && user?.court_id) {
@@ -32,6 +33,7 @@ export default function CourtDashboard() {
     fetchCourt();
   }, []);
 
+  /* ================= LIVE CLOCK ================= */
   useEffect(() => {
     const interval = setInterval(() => {
       const now = new Date();
@@ -56,16 +58,16 @@ export default function CourtDashboard() {
     <>
       <div style={styles.wrapper}>
 
-        {/* 🔴 RED BAR */}
+        {/* 🔴 TOP BAR */}
         <div style={styles.redBar}>
-          <div style={styles.marquee}>
+          <div style={styles.marqueeInner}>
             🇹🇳 وزارة العدل - {courtName} • الجمهورية التونسية •
           </div>
         </div>
 
-        {/* 🔵 BLUE BAR */}
+        {/* 🔵 SECOND BAR */}
         <div style={styles.blueBar}>
-          <div style={styles.marquee}>
+          <div style={styles.marqueeInner}>
             ⏰ {time} •
           </div>
         </div>
@@ -74,16 +76,21 @@ export default function CourtDashboard() {
         <div style={styles.content}>
           <div style={styles.card}>
             <h1>🏛️ {courtName}</h1>
-            <h2>👤 {user?.fullName}</h2>
+            <h2>👤 {user?.fullName || "المستخدم"}</h2>
+
+            <p style={{ marginTop: 10, opacity: 0.8 }}>
+              لوحة المحكمة الرئيسية
+            </p>
           </div>
         </div>
 
       </div>
 
+      {/* ANIMATION */}
       <style>
         {`
           @keyframes move {
-            0% { transform: translateX(0); }
+            0% { transform: translateX(100%); }
             100% { transform: translateX(-100%); }
           }
         `}
@@ -92,9 +99,7 @@ export default function CourtDashboard() {
   );
 }
 
-/* =========================
-   STYLES (FIXED + CLEAN)
-========================= */
+/* ================= STYLE ================= */
 const styles = {
   wrapper: {
     width: "100%",
@@ -103,31 +108,38 @@ const styles = {
     backgroundImage: "url('/dashboard-bg.jpg')",
     backgroundSize: "cover",
     backgroundPosition: "center",
-    overflowX: "hidden", // 🔥 يمنع الخط الغريب/الكرسر
+    overflowX: "hidden",
   },
 
+  /* ================= CONTENT ================= */
   content: {
-    paddingTop: "100px", // تحت الهيدر
-    padding: "20px",
+    paddingTop: "110px", // مهم جداً لتحت الشريطين
+    paddingLeft: "20px",
+    paddingRight: "20px",
   },
 
   card: {
-    background: "rgba(255,255,255,0.12)",
-    backdropFilter: "blur(12px)",
+    maxWidth: "450px",
     padding: "20px",
     borderRadius: "15px",
+
+    background: "rgba(255,255,255,0.12)",
+    backdropFilter: "blur(12px)",
+
     color: "white",
-    maxWidth: "420px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
   },
 
-  marquee: {
+  /* ================= MARQUEE ================= */
+  marqueeInner: {
     whiteSpace: "nowrap",
     display: "inline-block",
     paddingLeft: "100%",
-    animation: "move 15s linear infinite",
+    animation: "move 18s linear infinite",
     fontWeight: "bold",
   },
 
+  /* ================= TOP BAR ================= */
   redBar: {
     position: "fixed",
     top: 0,
@@ -135,13 +147,14 @@ const styles = {
     width: "100%",
     height: "40px",
     background: "#b91c1c",
-    color: "white",
     display: "flex",
     alignItems: "center",
     overflow: "hidden",
     zIndex: 1000,
+    color: "white",
   },
 
+  /* ================= SECOND BAR ================= */
   blueBar: {
     position: "fixed",
     top: "40px",
@@ -149,11 +162,11 @@ const styles = {
     width: "100%",
     height: "40px",
     background: "#1e3a8a",
-    color: "white",
     display: "flex",
     alignItems: "center",
     overflow: "hidden",
     zIndex: 1000,
+    color: "white",
   },
 };
 
