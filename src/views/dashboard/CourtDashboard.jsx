@@ -50,12 +50,11 @@ export default function CourtDashboard() {
       <div
         style={{
           width: "100%",
-          height: "100vh",
+          minHeight: "100%", // ✅ بدل 100vh
           backgroundImage: "url('/dashboard-bg.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           position: "relative",
-          overflow: "hidden",
         }}
       >
 
@@ -69,7 +68,7 @@ export default function CourtDashboard() {
         {/* 🔵 BLUE BAR */}
         <div style={styles.blueBar}>
           <div style={styles.marquee}>
-            ⏰ {time} • ⏰ {time} • ⏰ {time}
+            ⏰ {time} • {/* ✅ حذف التكرار */}
           </div>
         </div>
 
@@ -103,7 +102,7 @@ const styles = {
     zIndex: 2,
     color: "white",
     padding: "30px",
-    top: "100px",
+    marginTop: "100px", // ✅ بدل top
   },
 
   marquee: {
@@ -142,6 +141,7 @@ const styles = {
     zIndex: 10,
   },
 };
+
 
 
 
