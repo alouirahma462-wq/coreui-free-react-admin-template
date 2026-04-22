@@ -1,140 +1,167 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  CContainer,
-  CHeader,
-  CHeaderNav,
-  CHeaderToggler,
-  CButton,
-} from "@coreui/react";
-
-import CIcon from "@coreui/icons-react";
-import { cilMenu } from "@coreui/icons";
-
-import AppBreadcrumb from "./AppBreadcrumb";
 import { supabase } from "../supabaseClient";
 
-const AppHeader = ({ type }) => {
-
-  const headerRef = useRef();
+const AppHeader = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
-  const sidebarShow = useSelector((state) => state.sidebarShow ?? true);
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem("user")) || {}
+  );
 
-  const [fullName, setFullName] = useState("المستخدم");
-  const [courtName, setCourtName] = useState("المحكمة");
+  const fullName = user?.fullName || "المستخدم";
+  const courtName = user?.court_name || "المحكمة";
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUser = async () => {
       const userId = localStorage.getItem("user_id");
-
       if (!userId) return;
 
-      const { data: userData } = await supabase
+      const { data } = await supabase
         .from("users")
         .select("full_name, court_id")
         .eq("id", Number(userId))
         .single();
 
-      if (userData?.full_name) setFullName(userData.full_name);
+      if (!data) return;
 
-      if (userData?.court_id) {
-        const { data: court } = await supabase
+      let court = "المحكمة";
+
+      if (data.court_id) {
+        const { data: c } = await supabase
           .from("courts")
           .select("name")
-          .eq("id", userData.court_id)
+          .eq("id", data.court_id)
           .single();
 
-        if (court?.name) setCourtName(court.name);
+        court = c?.name || "المحكمة";
       }
+
+      const updated = {
+        fullName: data.full_name,
+        court_name: court,
+      };
+
+      setUser(updated);
+      localStorage.setItem("user", JSON.stringify(updated));
     };
 
-    fetchData();
+    fetchUser();
   }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     localStorage.clear();
-    navigate("/", { replace: true });
+    navigate("/login", { replace: true });
   };
 
   return (
-    <CHeader
-      className="p-0 header"
-      ref={headerRef}
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 1000,
+    <header style={styles.header}>
 
-        // 🔥 تحسين الشكل فقط (بدون تغيير منطق)
-        background: "#ffffff",
-        borderBottom: "2px solid #e5e7eb",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-      }}
-    >
-      <CContainer className="px-4" fluid>
-
-        <CHeaderToggler
-          onClick={() =>
-            dispatch({ type: "set", sidebarShow: !sidebarShow })
-          }
-        >
-          <CIcon icon={cilMenu} size="lg" />
-        </CHeaderToggler>
-
-        <div className="flex-grow-1 text-center">
-          <div style={{ fontSize: "12px", opacity: 0.6 }}>
-            🇹🇳 الجمهورية التونسية
-          </div>
-
-          <div style={{ fontWeight: "bold", color: "#0d6efd", fontSize: "16px" }}>
-            🏛️ {courtName}
-          </div>
+      {/* LEFT SIDE */}
+      <div style={styles.left}>
+        <div style={styles.logo}>⚖️</div>
+        <div>
+          <div style={styles.court}>{courtName}</div>
+          <div style={styles.sub}>الجمهورية التونسية</div>
         </div>
+      </div>
 
-        <CHeaderNav className="ms-auto d-flex align-items-center gap-2">
+      {/* CENTER USER */}
+      <div style={styles.center}>
+        <div style={styles.userGlow}>
+          👤 {fullName}
+        </div>
+      </div>
 
-          <div
-            style={{
-              padding: "6px 12px",
-              background: "#f1f5f9",
-              borderRadius: "20px",
-              fontSize: "13px",
-              fontWeight: "bold",
-              border: "1px solid #e5e7eb",
-            }}
-          >
-            👤 {fullName}
-          </div>
+      {/* RIGHT ACTIONS */}
+      <div style={styles.right}>
+        <button style={styles.logout} onClick={handleLogout}>
+          🚪 خروج
+        </button>
+      </div>
 
-          <CButton
-            style={{
-              background: "#dc2626",
-              border: "none",
-              borderRadius: "8px",
-              padding: "6px 12px",
-              fontWeight: "bold",
-            }}
-            onClick={handleLogout}
-          >
-            🚪 خروج
-          </CButton>
-
-        </CHeaderNav>
-
-      </CContainer>
-
-      <CContainer className="px-4" fluid>
-        <AppBreadcrumb />
-      </CContainer>
-    </CHeader>
+    </header>
   );
 };
 
 export default AppHeader;
+
+/* =========================
+   STYLE (CLEAN + MODERN)
+========================= */
+
+const styles = {
+  header: {
+    width: "100%",
+    height: "60px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "0 15px",
+
+    background: "rgba(15, 23, 42, 0.92)",
+    backdropFilter: "blur(12px)",
+    borderBottom: "1px solid rgba(255,255,255,0.1)",
+
+    position: "sticky",
+    top: 0,
+    zIndex: 9999,
+  },
+
+  left: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    color: "white",
+  },
+
+  logo: {
+    fontSize: "22px",
+  },
+
+  court: {
+    fontSize: "14px",
+    fontWeight: "bold",
+    color: "#60a5fa",
+  },
+
+  sub: {
+    fontSize: "11px",
+    opacity: 0.7,
+  },
+
+  center: {
+    flex: 1,
+    textAlign: "center",
+  },
+
+  userGlow: {
+    display: "inline-block",
+    padding: "6px 12px",
+    borderRadius: "20px",
+    background: "rgba(59,130,246,0.15)",
+    color: "#fff",
+    fontWeight: "bold",
+    boxShadow: "0 0 10px rgba(59,130,246,0.4)",
+  },
+
+  right: {
+    display: "flex",
+    alignItems: "center",
+  },
+
+  logout: {
+    background: "#ef4444",
+    border: "none",
+    padding: "6px 12px",
+    borderRadius: "8px",
+    color: "white",
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
+};
+
 
 
 
