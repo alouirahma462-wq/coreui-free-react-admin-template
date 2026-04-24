@@ -11,9 +11,13 @@ export default function SmartScreen() {
   const [open, setOpen] = useState(false);
 
   const fullName = user?.fullName || "المستخدم";
-  const courtName = user?.court_name || "المحكمة";
 
-  const isInspection = courtName.includes("التفقدية");
+/* 🔥 FIX: منع "غير محدد" + ضبط التفقدية */
+  const isInspection = user?.court_id === null;
+
+  const courtName = isInspection
+    ? ""
+    : (user?.court_name || "");
 
   const greeting = isInspection
     ? "مرحبا بك في الإدارة المركزية"
@@ -166,5 +170,6 @@ const styles = {
     border: "1px solid rgba(255,255,255,0.2)",
   },
 };
+
 
 
