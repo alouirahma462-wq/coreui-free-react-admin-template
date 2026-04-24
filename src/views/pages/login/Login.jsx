@@ -97,7 +97,8 @@ export default function Login() {
       }
 
       // 🔥 IMPORTANT FIX: ALL USERS GO TO SMARTSCREEN
-      navigate("/smart-screen", { replace: true });
+      navigate("/smart", { replace: true });
+
 
     } catch (err) {
       console.log(err);
