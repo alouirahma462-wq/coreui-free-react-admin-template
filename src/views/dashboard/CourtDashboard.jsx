@@ -65,13 +65,6 @@ export default function CourtDashboard() {
           </div>
         </div>
 
-        {/* 🔵 SECOND BAR */}
-        <div style={styles.blueBar}>
-          <div style={styles.marqueeInner}>
-            ⏰ {time} •
-          </div>
-        </div>
-
         {/* CONTENT */}
         <div style={styles.content}>
           <div style={styles.card}>
@@ -113,7 +106,7 @@ const styles = {
 
   /* ================= CONTENT ================= */
   content: {
-    paddingTop: "110px", // مهم جداً لتحت الشريطين
+    paddingTop: "70px", // 🔥 كان 110 صار أقل لأن شريط واحد فقط
     paddingLeft: "20px",
     paddingRight: "20px",
   },
@@ -147,21 +140,6 @@ const styles = {
     width: "100%",
     height: "40px",
     background: "#b91c1c",
-    display: "flex",
-    alignItems: "center",
-    overflow: "hidden",
-    zIndex: 1000,
-    color: "white",
-  },
-
-  /* ================= SECOND BAR ================= */
-  blueBar: {
-    position: "fixed",
-    top: "40px",
-    left: 0,
-    width: "100%",
-    height: "40px",
-    background: "#1e3a8a",
     display: "flex",
     alignItems: "center",
     overflow: "hidden",
