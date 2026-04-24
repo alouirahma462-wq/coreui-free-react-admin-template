@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import doorImg from "../assets/court-door.png";
 
 export default function SmartScreen() {
   const navigate = useNavigate();
@@ -37,7 +36,8 @@ export default function SmartScreen() {
       {/* CENTER CONTENT */}
       <div style={styles.card}>
 
-        <img src={doorImg} alt="door" style={styles.door} />
+        {/* ✅ من public بدل assets */}
+        <img src="/court-door.png" alt="door" style={styles.door} />
 
         <h1 style={styles.title}>{courtName}</h1>
 
@@ -88,14 +88,11 @@ const styles = {
     zIndex: 2,
     textAlign: "center",
     color: "white",
-
     padding: "30px",
     borderRadius: "20px",
-
     background: "rgba(255,255,255,0.08)",
     backdropFilter: "blur(12px)",
     border: "1px solid rgba(255,255,255,0.15)",
-
     boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
     width: "400px",
   },
@@ -129,11 +126,9 @@ const styles = {
     borderRadius: "10px",
     border: "none",
     cursor: "pointer",
-
     background: "linear-gradient(135deg, #1e3a8a, #3b82f6)",
     color: "white",
     fontWeight: "bold",
-
     boxShadow: "0 10px 25px rgba(59,130,246,0.4)",
   },
 
