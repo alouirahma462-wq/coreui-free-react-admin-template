@@ -17,6 +17,9 @@ import GlobalMusic from "./GlobalMusic";
 // 🔥 مهم: استخدم DefaultLayout فقط
 import DefaultLayout from "./layout/DefaultLayout";
 
+// 🔥 SMART SCREEN (إضافة جديدة فقط)
+import SmartScreen from "./views/pages/SmartScreen.jsx";
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -90,15 +93,18 @@ export default function App() {
         {/* 🔥 ROOT */}
         <Route path="/" element={<Navigate to="/landing" replace />} />
 
-        {/* ✅ LOGIN (بدون أي redirect تلقائي) */}
+        {/* ✅ LOGIN */}
         <Route path="/login" element={<Login />} />
 
-        {/* 🔥 FIX: auth pages بدون منع user */}
+        {/* 🔥 AUTH PAGES */}
         <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* 🔥 DASHBOARD (كما هو) */}
+        {/* 🔥 SMART SCREEN (إضافة فقط) */}
+        <Route path="/smart" element={<SmartScreen />} />
+
+        {/* 🔥 DASHBOARD */}
         <Route element={<DefaultLayout />}>
           <Route
             path="/court/:id"
@@ -116,6 +122,7 @@ export default function App() {
     </>
   );
 }
+
 
 
 
