@@ -16,8 +16,12 @@ export default function SmartScreen() {
   const isInspection = courtName.includes("التفقدية");
 
   const greeting = isInspection
-    ? "مرحبا بك في التفقدية العامة - الإدارة المركزية"
+    ? "مرحبا بك في الإدارة المركزية"
     : `مرحبا بك في ${courtName}`;
+
+  const subGreeting = isInspection
+    ? "مرحبا بالتفقدية العامة"
+    : "";
 
   const handleEnter = () => {
     setOpen(true);
@@ -44,6 +48,10 @@ export default function SmartScreen() {
 
         <h2 style={styles.subTitle}>{greeting}</h2>
 
+        {subGreeting && (
+          <p style={styles.subText}>{subGreeting}</p>
+        )}
+
         <p style={styles.welcome}>👋 مرحباً {fullName}</p>
 
         <button onClick={handleEnter} style={styles.button}>
@@ -63,6 +71,7 @@ export default function SmartScreen() {
     </div>
   );
 }
+
 const styles = {
   wrapper: {
     width: "100%",
@@ -114,6 +123,12 @@ const styles = {
     marginTop: "10px",
   },
 
+  subText: {
+    fontSize: "13px",
+    opacity: 0.75,
+    marginTop: "5px",
+  },
+
   welcome: {
     fontSize: "14px",
     marginTop: "15px",
@@ -151,4 +166,5 @@ const styles = {
     border: "1px solid rgba(255,255,255,0.2)",
   },
 };
+
 
