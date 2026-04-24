@@ -23,21 +23,22 @@ export default function SmartScreen() {
     setOpen(true);
 
     setTimeout(() => {
-      navigate("/dashboard");
+      if (user?.court_id) {
+        navigate(`/court/${user.court_id}`, { replace: true });
+      } else {
+        navigate("/inspection-dashboard", { replace: true });
+      }
     }, 2000);
   };
 
   return (
     <div style={styles.wrapper}>
 
-      {/* BACKGROUND */}
+      {/* OVERLAY */}
       <div style={styles.overlay} />
 
-      {/* CENTER CONTENT */}
+      {/* CONTENT */}
       <div style={styles.card}>
-
-        {/* ✅ من public بدل assets */}
-        <img src="/court-door.png" alt="door" style={styles.door} />
 
         <h1 style={styles.title}>{courtName}</h1>
 
@@ -62,14 +63,16 @@ export default function SmartScreen() {
     </div>
   );
 }
-
 const styles = {
   wrapper: {
     width: "100%",
     height: "100vh",
-    backgroundImage: "url('/court-bg.jpg')",
+
+    backgroundImage: "url('/court-door.png')",
     backgroundSize: "cover",
     backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -88,54 +91,50 @@ const styles = {
     zIndex: 2,
     textAlign: "center",
     color: "white",
+
     padding: "30px",
     borderRadius: "20px",
+
     background: "rgba(255,255,255,0.08)",
     backdropFilter: "blur(12px)",
     border: "1px solid rgba(255,255,255,0.15)",
-    boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
-    width: "400px",
-  },
 
-  door: {
-    width: "180px",
-    marginBottom: "15px",
-    filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.5))",
-    animation: "float 3s ease-in-out infinite",
+    boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+    width: "420px",
   },
 
   title: {
-    fontSize: "18px",
+    fontSize: "20px",
     fontWeight: "bold",
-    marginBottom: "5px",
   },
 
   subTitle: {
     fontSize: "14px",
     opacity: 0.85,
-    marginBottom: "10px",
+    marginTop: "10px",
   },
 
   welcome: {
     fontSize: "14px",
+    marginTop: "15px",
     marginBottom: "20px",
   },
 
   button: {
-    padding: "10px 18px",
+    padding: "12px 20px",
     borderRadius: "10px",
     border: "none",
     cursor: "pointer",
+
     background: "linear-gradient(135deg, #1e3a8a, #3b82f6)",
     color: "white",
     fontWeight: "bold",
-    boxShadow: "0 10px 25px rgba(59,130,246,0.4)",
   },
 
   modal: {
     position: "absolute",
     inset: 0,
-    background: "rgba(0,0,0,0.8)",
+    background: "rgba(0,0,0,0.85)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -152,3 +151,4 @@ const styles = {
     border: "1px solid rgba(255,255,255,0.2)",
   },
 };
+
