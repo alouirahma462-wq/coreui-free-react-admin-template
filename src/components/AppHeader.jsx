@@ -120,7 +120,7 @@ const AppHeader = () => {
 export default AppHeader;
 
 /* =========================
-   HUD + MODERN STYLE
+   HUD + MODERN STYLE (SAFE)
 ========================= */
 
 const styles = {
@@ -138,11 +138,10 @@ const styles = {
     padding: "0 15px",
     boxSizing: "border-box",
 
-    /* 🔥 HUD EFFECT */
-    background: "linear-gradient(90deg, rgba(15,23,42,0.98), rgba(30,58,138,0.85))",
+    background:
+      "linear-gradient(90deg, rgba(15,23,42,0.98), rgba(30,58,138,0.85))",
     backdropFilter: "blur(14px)",
     borderBottom: "1px solid rgba(255,255,255,0.12)",
-
     boxShadow: "0 4px 20px rgba(0,0,0,0.35)",
 
     zIndex: 9999,
@@ -157,17 +156,14 @@ const styles = {
     minWidth: "160px",
   },
 
-  /* 🔥 COURT BADGE */
   courtBadge: {
     fontWeight: "bold",
     fontSize: "13px",
     color: "#ffffff",
-
     background: "rgba(59,130,246,0.25)",
     padding: "4px 10px",
     borderRadius: "12px",
     display: "inline-block",
-
     boxShadow: "0 0 10px rgba(59,130,246,0.3)",
   },
 
@@ -184,7 +180,6 @@ const styles = {
     color: "#ffffff",
     fontWeight: "bold",
     fontSize: "13px",
-
     letterSpacing: "0.5px",
   },
 
@@ -202,7 +197,6 @@ const styles = {
     color: "white",
     fontSize: "12px",
     whiteSpace: "nowrap",
-
     boxShadow: "0 0 8px rgba(59,130,246,0.2)",
   },
 
@@ -215,25 +209,9 @@ const styles = {
     cursor: "pointer",
     fontWeight: "bold",
     whiteSpace: "nowrap",
-
     boxShadow: "0 0 10px rgba(239,68,68,0.4)",
-    transition: "0.2s ease",
   },
 };
-
-/* =========================
-   ANIMATIONS (HUD GLOW)
-========================= */
-
-const styleSheet = document.styleSheets[0];
-
-styleSheet.insertRule(`
-@keyframes headerGlow {
-  0% { filter: brightness(1); }
-  50% { filter: brightness(1.08); }
-  100% { filter: brightness(1); }
-}
-`, styleSheet.cssRules.length);
 
 
 
