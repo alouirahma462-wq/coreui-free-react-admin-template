@@ -96,13 +96,8 @@ export default function Login() {
         return;
       }
 
-      if (user.court_id === null) {
-        navigate("/inspection-dashboard", { replace: true });
-        return;
-      }
-
-      // 🔥 فقط هذا التعديل
-      navigate("/smart", { replace: true });
+      // 🔥 IMPORTANT FIX: ALL USERS GO TO SMARTSCREEN
+      navigate("/smart-screen", { replace: true });
 
     } catch (err) {
       console.log(err);
@@ -179,13 +174,6 @@ export default function Login() {
 
         {message && <p style={styles.error}>{message}</p>}
       </div>
-
-      <style>{`
-        @keyframes move {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-      `}</style>
 
     </div>
   );
