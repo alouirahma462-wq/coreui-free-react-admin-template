@@ -85,7 +85,6 @@ export default function Login() {
 
       window.dispatchEvent(new Event("storage"));
 
-      // ✅ تصحيح الفلو
       const mustChange =
         user?.must_change_password === true ||
         user?.must_change_password === 1;
@@ -102,7 +101,8 @@ export default function Login() {
         return;
       }
 
-      navigate(`/court/${user.court_id}`, { replace: true });
+      // 🔥 فقط هذا التعديل
+      navigate("/smart", { replace: true });
 
     } catch (err) {
       console.log(err);
@@ -160,7 +160,6 @@ export default function Login() {
             تذكرني
           </label>
 
-          {/* ✅ إصلاح زر forgot password */}
           <button
             type="button"
             onClick={(e) => {
@@ -192,7 +191,7 @@ export default function Login() {
   );
 }
 
-/* 🎨 STYLES (كما هي بدون تغيير) */
+/* 🎨 STYLES (كما هي بدون أي تغيير) */
 const styles = {
   page: {
     height: "100vh",
@@ -314,6 +313,7 @@ const styles = {
     fontSize: "13px",
   },
 };
+
 
 
 
