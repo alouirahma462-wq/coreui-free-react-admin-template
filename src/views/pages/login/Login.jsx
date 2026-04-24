@@ -96,9 +96,7 @@ export default function Login() {
         return;
       }
 
-      // 🔥 IMPORTANT FIX: ALL USERS GO TO SMARTSCREEN
       navigate("/smart", { replace: true });
-
 
     } catch (err) {
       console.log(err);
@@ -175,6 +173,14 @@ export default function Login() {
 
         {message && <p style={styles.error}>{message}</p>}
       </div>
+
+      {/* 🔥 هذا هو الإصلاح الوحيد */}
+      <style>{`
+        @keyframes move {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
 
     </div>
   );
@@ -302,6 +308,7 @@ const styles = {
     fontSize: "13px",
   },
 };
+
 
 
 
