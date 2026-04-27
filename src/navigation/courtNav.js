@@ -1,7 +1,4 @@
-import {
-  CNavItem,
-  CNavTitle
-} from '@coreui/react'
+import { CNavItem, CNavTitle } from '@coreui/react'
 
 import {
   cilFolder,
@@ -27,7 +24,9 @@ const courtNav = [
     name: "🏛️ النظام القضائي الذكي",
   },
 
+  // =====================================================
   // 🟦 كتابة ضبط النيابة
+  // =====================================================
   {
     component: CNavTitle,
     name: "🟦 كتابة ضبط النيابة",
@@ -38,10 +37,6 @@ const courtNav = [
     name: "إدارة الملفات القضائية",
     to: "/court/files",
     icon: cilFolder,
-    badge: {
-      color: 'info',
-      text: '128'
-    }
   },
 
   {
@@ -49,10 +44,6 @@ const courtNav = [
     name: "متابعة الملفات",
     to: "/court/tracking",
     icon: cilList,
-    badge: {
-      color: 'warning',
-      text: '12 عاجل'
-    }
   },
 
   {
@@ -67,13 +58,11 @@ const courtNav = [
     name: "إدارة الإشعارات",
     to: "/court/notifications",
     icon: cilBell,
-    badge: {
-      color: 'danger',
-      text: '5'
-    }
   },
 
-  // 🟨 وكيل الجمهورية
+  // =====================================================
+  // 🟨 وكيل الجمهورية (القضاة وأعضاء النيابة)
+  // =====================================================
   {
     component: CNavTitle,
     name: "🟨 وكيل الجمهورية (القضاة وأعضاء النيابة)",
@@ -91,10 +80,6 @@ const courtNav = [
     name: "التحليل الذكي للقضايا",
     to: "/prosecutor/analysis",
     icon: cilChart,
-    badge: {
-      color: 'info',
-      text: 'AI'
-    }
   },
 
   {
@@ -111,7 +96,9 @@ const courtNav = [
     icon: cilEnvelopeOpen,
   },
 
-  // 🚀 الذكاء القضائي (AI Layer)
+  // =====================================================
+  // 🚀 الذكاء القضائي (AI)
+  // =====================================================
   {
     component: CNavTitle,
     name: "🚀 الذكاء القضائي (AI)",
@@ -122,10 +109,6 @@ const courtNav = [
     name: "مساعد المحكمة الذكي",
     to: "/ai/assistant",
     icon: cilChart,
-    badge: {
-      color: 'success',
-      text: 'Live'
-    }
   },
 
   {
@@ -149,7 +132,9 @@ const courtNav = [
     icon: cilSearch,
   },
 
+  // =====================================================
   // ⚙️ أدوات متقدمة
+  // =====================================================
   {
     component: CNavTitle,
     name: "⚙️ أدوات متقدمة",
@@ -167,10 +152,6 @@ const courtNav = [
     name: "التنبيهات الذكية",
     to: "/tools/alerts",
     icon: cilWarning,
-    badge: {
-      color: 'danger',
-      text: '!'
-    }
   },
 
   {
@@ -178,10 +159,6 @@ const courtNav = [
     name: "توزيع القضايا",
     to: "/tools/distribution",
     icon: cilShare,
-    badge: {
-      color: 'warning',
-      text: 'ضغط'
-    }
   },
 
   {
@@ -203,10 +180,6 @@ const courtNav = [
     name: "كشف التلاعب",
     to: "/tools/fraud",
     icon: cilWarning,
-    badge: {
-      color: 'danger',
-      text: 'AI'
-    }
   },
 
   {
@@ -221,15 +194,12 @@ const courtNav = [
     name: "كشف الأنماط الإجرامية",
     to: "/tools/crime-patterns",
     icon: cilFingerprint,
-    badge: {
-      color: 'info',
-      text: 'Smart'
-    }
   },
 
 ]
 
 export default courtNav
+
 
 
 
