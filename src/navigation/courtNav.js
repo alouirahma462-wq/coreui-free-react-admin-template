@@ -9,7 +9,6 @@ import {
   cilLibrary,
   cilBell,
   cilBalanceScale,
-  cilBrain,
   cilChart,
   cilBolt,
   cilSearch,
@@ -39,6 +38,10 @@ const courtNav = [
     name: "إدارة الملفات القضائية",
     to: "/court/files",
     icon: cilFolder,
+    badge: {
+      color: 'info',
+      text: '128'
+    }
   },
 
   {
@@ -46,6 +49,10 @@ const courtNav = [
     name: "متابعة الملفات",
     to: "/court/tracking",
     icon: cilList,
+    badge: {
+      color: 'warning',
+      text: '12 عاجل'
+    }
   },
 
   {
@@ -60,6 +67,10 @@ const courtNav = [
     name: "إدارة الإشعارات",
     to: "/court/notifications",
     icon: cilBell,
+    badge: {
+      color: 'danger',
+      text: '5'
+    }
   },
 
   // 🟨 وكيل الجمهورية
@@ -79,7 +90,11 @@ const courtNav = [
     component: CNavItem,
     name: "التحليل الذكي للقضايا",
     to: "/prosecutor/analysis",
-    icon: cilBrain,
+    icon: cilChart,
+    badge: {
+      color: 'info',
+      text: 'AI'
+    }
   },
 
   {
@@ -96,7 +111,7 @@ const courtNav = [
     icon: cilEnvelopeOpen,
   },
 
-  // 🚀 الذكاء القضائي
+  // 🚀 الذكاء القضائي (AI Layer)
   {
     component: CNavTitle,
     name: "🚀 الذكاء القضائي (AI)",
@@ -106,7 +121,11 @@ const courtNav = [
     component: CNavItem,
     name: "مساعد المحكمة الذكي",
     to: "/ai/assistant",
-    icon: cilBrain,
+    icon: cilChart,
+    badge: {
+      color: 'success',
+      text: 'Live'
+    }
   },
 
   {
@@ -148,6 +167,10 @@ const courtNav = [
     name: "التنبيهات الذكية",
     to: "/tools/alerts",
     icon: cilWarning,
+    badge: {
+      color: 'danger',
+      text: '!'
+    }
   },
 
   {
@@ -155,6 +178,10 @@ const courtNav = [
     name: "توزيع القضايا",
     to: "/tools/distribution",
     icon: cilShare,
+    badge: {
+      color: 'warning',
+      text: 'ضغط'
+    }
   },
 
   {
@@ -176,6 +203,10 @@ const courtNav = [
     name: "كشف التلاعب",
     to: "/tools/fraud",
     icon: cilWarning,
+    badge: {
+      color: 'danger',
+      text: 'AI'
+    }
   },
 
   {
@@ -190,11 +221,16 @@ const courtNav = [
     name: "كشف الأنماط الإجرامية",
     to: "/tools/crime-patterns",
     icon: cilFingerprint,
+    badge: {
+      color: 'info',
+      text: 'Smart'
+    }
   },
 
 ]
 
 export default courtNav
+
 
 
 
