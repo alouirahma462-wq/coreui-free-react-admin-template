@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   CCard,
   CCardBody,
@@ -55,6 +56,8 @@ const getStatusIcon = (status) => {
 // =======================
 const CaseList = () => {
 
+  const navigate = useNavigate()
+
   const [cases, setCases] = useState([])
 
   // 🔍 Filters
@@ -91,7 +94,6 @@ const CaseList = () => {
     const matchType = !type || c.fileType === type
     const matchCrime = !crime || c.crimeType === crime
 
-    // 👤 FIX GENDER / NATIONALITY
     const matchGender =
       !gender ||
       c.plaintiffGender === gender ||
@@ -102,7 +104,6 @@ const CaseList = () => {
       c.plaintiffNationality === nationality ||
       c.suspectNationality === nationality
 
-    // 📍 FIX LOCATION
     const matchLocation =
       !location ||
       c.plaintiffState === location ||
@@ -132,7 +133,7 @@ const CaseList = () => {
   // ================= OPEN =================
   const openCase = (caseData) => {
     localStorage.setItem('selectedCase', JSON.stringify(caseData))
-    window.location.href = '/#/case-detail'
+    navigate('/court/files/detail')
   }
 
   return (
