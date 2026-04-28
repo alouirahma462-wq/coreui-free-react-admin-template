@@ -257,6 +257,47 @@ const CaseForm = () => {
     suspect: {}
   })
 
+  // =======================
+  // 💾 SAVE FUNCTION (ADDED)
+  // =======================
+  const handleSave = () => {
+
+    const normalizedCase = {
+      ...formData,
+
+      caseFileNumber,
+      registryNumber,
+      caseId,
+      fileDate: formData.fileDate,
+      subject: formData.subject,
+      status: formData.status,
+      source: formData.source,
+      fileType: formData.fileType,
+
+      createdAt: tunisTime,
+
+      // 👤 plaintiff flatten
+      plaintiffGender: formData.plaintiff?.gender,
+      plaintiffNationality: formData.plaintiff?.nationality,
+      plaintiffBirthDate: formData.plaintiff?.birthDate,
+      plaintiffState: formData.plaintiff?.birthState,
+      plaintiffResState: formData.plaintiff?.resState,
+
+      // 👤 suspect flatten
+      suspectGender: formData.suspect?.gender,
+      suspectNationality: formData.suspect?.nationality,
+      suspectBirthDate: formData.suspect?.birthDate,
+      suspectState: formData.suspect?.birthState,
+      suspectResState: formData.suspect?.resState,
+    }
+
+    const existing = JSON.parse(localStorage.getItem('cases')) || []
+    existing.push(normalizedCase)
+
+    localStorage.setItem('cases', JSON.stringify(existing))
+
+    alert('✅ تم حفظ القضية بنجاح')
+  }
   return (
     <CCard>
       <CCardBody>
@@ -411,56 +452,67 @@ const CaseForm = () => {
             <PersonForm title="⚠️ المظنون فيه" type="suspect" formData={formData} setFormData={setFormData} />
           </CTabPane>
 
-          {/* ================= TAB 4 ================= */}
-          <CTabPane visible={activeKey === 4}>
-            <CForm>
+    {/* ================= TAB 4 ================= */}
+<CTabPane visible={activeKey === 4}>
+  <CForm>
 
-              <CFormInput value={caseId} label="ID القضية" readOnly className="mb-3" />
+    <CFormInput
+      value={caseId}
+      label="ID القضية"
+      readOnly
+      className="mb-3"
+    />
 
-              <CFormTextarea
-                onChange={(e) => setFormData({ ...formData, decisionText: e.target.value })}
-                label="نص القرار"
-              />
+    <CFormTextarea
+      onChange={(e) => setFormData({ ...formData, decisionText: e.target.value })}
+      label="نص القرار"
+    />
 
-              <CFormInput
-                type="date"
-                onChange={(e) => setFormData({ ...formData, decisionDate: e.target.value })}
-                label="تاريخ القرار"
-              />
+    <CFormInput
+      type="date"
+      onChange={(e) => setFormData({ ...formData, decisionDate: e.target.value })}
+      label="تاريخ القرار"
+    />
 
-              <CFormTextarea
-                onChange={(e) => setFormData({ ...formData, lawText: e.target.value })}
-                label="النص القانوني"
-              />
+    <CFormTextarea
+      onChange={(e) => setFormData({ ...formData, lawText: e.target.value })}
+      label="النص القانوني"
+    />
 
-              <CFormSelect
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                label="حالة القضية"
-              >
-                <option>تسجيل</option>
-                <option>حفظ</option>
-                <option>مجلس</option>
-                <option>أطفال</option>
-                <option>تحقيق</option>
-                <option>جناحي الناحية</option>
-                <option>مخالفات</option>
-                <option>مضافة</option>
-                <option>تعهد</option>
-                <option>تنفيذ</option>
-                <option>محال على قاضي الأسرة</option>
-                <option>محال على القضاء المنفرد</option>
-                <option>الصلح بالوساطة</option>
-                <option>طور البحث</option>
-                <option>تخلي</option>
-              </CFormSelect>
+    <CFormSelect
+      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+      label="حالة القضية"
+    >
+      <option>تسجيل</option>
+      <option>حفظ</option>
+      <option>مجلس</option>
+      <option>أطفال</option>
+      <option>تحقيق</option>
+      <option>جناحي الناحية</option>
+      <option>مخالفات</option>
+      <option>مضافة</option>
+      <option>تعهد</option>
+      <option>تنفيذ</option>
+      <option>محال على قاضي الأسرة</option>
+      <option>محال على القضاء المنفرد</option>
+      <option>الصلح بالوساطة</option>
+      <option>طور البحث</option>
+      <option>تخلي</option>
+    </CFormSelect>
 
-              <CFormTextarea
-                onChange={(e) => setFormData({ ...formData, statusReason: e.target.value })}
-                label="سبب الحالة"
-              />
+    <CFormTextarea
+      onChange={(e) => setFormData({ ...formData, statusReason: e.target.value })}
+      label="سبب الحالة"
+    />
 
-            </CForm>
-          </CTabPane>
+    {/* ✅ زر الحفظ الصحيح */}
+    <CButton color="success" className="mt-3 w-100" onClick={handleSave}>
+      💾 حفظ القضية
+    </CButton>
+
+  </CForm>
+</CTabPane>
+
 
         </CTabContent>
 
