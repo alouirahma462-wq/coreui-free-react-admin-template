@@ -30,13 +30,37 @@ const courtNav = [
     name: "🟦 ─── كتابة ضبط النيابة ───",
   },
 
-  {
-    component: CNavItem,
-    name: "📁 إدارة الملفات القضائية",
-    to: "/court/files",
-    icon: cilFolder,
-    badge: { color: "info", text: "128" } // 🔥 عدد الملفات
-  },
+ {
+  component: 'CNavGroup',
+  name: "📁 إدارة الملفات القضائية",
+  icon: cilFolder,
+  items: [
+    {
+      component: CNavItem,
+      name: "➕ إنشاء ملف جديد",
+      to: "/cases/create",
+      icon: cilFolder,
+    },
+    {
+      component: CNavItem,
+      name: "📂 عرض القضايا",
+      to: "/cases",
+      icon: cilList,
+    },
+    {
+      component: CNavItem,
+      name: "🔍 الفلترة الذكية",
+      to: "/cases/filter",
+      icon: cilSearch,
+    },
+    {
+      component: CNavItem,
+      name: "📊 الإحصائيات",
+      to: "/cases/stats",
+      icon: cilChart,
+    }
+  ]
+},
 
   {
     component: CNavItem,
