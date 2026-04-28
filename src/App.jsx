@@ -11,6 +11,9 @@ import LandingPage from "./views/pages/LandingPage.jsx";
 
 import CourtDashboard from "./views/dashboard/CourtDashboard.jsx";
 import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
+import CaseForm from "./views/court/CaseForm.jsx";
+import CaseList from "./views/court/CaseList.jsx";
+import CaseDetail from "./views/court/CaseDetail.jsx";
 
 import GlobalMusic from "./GlobalMusic";
 
