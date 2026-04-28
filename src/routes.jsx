@@ -10,6 +10,13 @@ import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
 import ChangePassword from "./views/pages/ChangePassword.jsx";
 import ResetPassword from "./views/pages/ResetPassword.jsx";
 
+// =======================
+// 📂 إضافة صفحات القضايا
+// =======================
+import CaseForm from "./views/cases/CaseForm.jsx";
+import CaseList from "./views/cases/CaseList.jsx";
+import CaseDetail from "./views/cases/CaseDetail.jsx";
+
 const routes = [
   {
     path: "/landing",
@@ -52,9 +59,33 @@ const routes = [
     name: "InspectionDashboard",
     element: <InspectionDashboard />,
   },
+
+  // =======================
+  // 📂 ROUTES القضايا (جديد)
+  // =======================
+
+  {
+    path: "/cases/create",
+    name: "CaseForm",
+    element: <CaseForm />,
+  },
+
+  {
+    path: "/cases",
+    name: "CaseList",
+    element: <CaseList />,
+  },
+
+  {
+    path: "/case-detail",
+    name: "CaseDetail",
+    element: <CaseDetail />,
+  },
+
 ];
 
 export default routes;
+
 
 
 
