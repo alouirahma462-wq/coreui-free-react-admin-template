@@ -31,7 +31,6 @@ const CASE_STATUS = {
   search: { label: 'بحث', color: 'primary', icon: '📡' },
   saved: { label: 'حفظ', color: 'success', icon: '💾' },
 
-  // ➕ الإضافات المطلوبة
   criminal: { label: 'جناحي الناحية', color: 'danger', icon: '⚖️' },
   family_judge: { label: 'محال على قاضي الأسرة', color: 'info', icon: '👨‍⚖️' },
   single_judge: { label: 'محال على القضاء المنفرد', color: 'primary', icon: '⚖️' },
@@ -77,23 +76,39 @@ const CaseList = () => {
   }, [])
 
   // =======================
-  // 🧠 FILTER ENGINE (ذكي + متعدد)
+  // 🧠 FILTER ENGINE (معدل)
   // =======================
+  const q = search.toLowerCase()
+
   const filtered = cases.filter(c => {
 
     const matchSearch =
-      (c.subject || '').includes(search) ||
-      (c.caseFileNumber || '').includes(search)
+      (c.subject || '').toLowerCase().includes(q) ||
+      (c.caseFileNumber || '').toLowerCase().includes(q)
 
     const matchStatus = !status || c.status === status
     const matchSource = !source || c.source === source
     const matchType = !type || c.fileType === type
     const matchCrime = !crime || c.crimeType === crime
-    const matchGender = !gender || c.gender === gender
-    const matchNationality = !nationality || c.nationality === nationality
+
+    // 👤 FIX GENDER / NATIONALITY
+    const matchGender =
+      !gender ||
+      c.plaintiffGender === gender ||
+      c.suspectGender === gender
+
+    const matchNationality =
+      !nationality ||
+      c.plaintiffNationality === nationality ||
+      c.suspectNationality === nationality
+
+    // 📍 FIX LOCATION
     const matchLocation =
       !location ||
-      (c.birthState === location || c.resState === location)
+      c.plaintiffState === location ||
+      c.plaintiffResState === location ||
+      c.suspectState === location ||
+      c.suspectResState === location
 
     const matchDate = !date || c.fileDate === date
 
@@ -137,7 +152,9 @@ const CaseList = () => {
             <CFormSelect onChange={(e) => setStatus(e.target.value)}>
               <option value="">كل الحالات</option>
               {Object.values(CASE_STATUS).map((s, i) => (
-                <option key={i}>{s.label}</option>
+                <option value={s.label} key={i}>
+                  {s.label}
+                </option>
               ))}
             </CFormSelect>
           </CCol>
@@ -215,3 +232,4 @@ const CaseList = () => {
 }
 
 export default CaseList
+
