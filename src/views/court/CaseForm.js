@@ -153,8 +153,53 @@ const CaseForm = () => {
   const [caseFileNumber] = useState(generateCaseFileNumber())
   const [registryNumber] = useState(generateRegistryNumber())
   const [tunisTime] = useState(getTunisDateTime())
-
   const [caseId] = useState(generateCaseId())
+
+  // =======================
+  // 🧠 تجميع كل البيانات
+  // =======================
+  const [formData, setFormData] = useState({
+    court: '',
+    fileType: '',
+    source: '',
+    fileDate: '',
+    clerk: '',
+    notes: '',
+    documents: '',
+    subject: '',
+    crimeType: '',
+    crimePlace: '',
+    crimeDate: '',
+    summary: '',
+    aiSuggestion: '',
+    status: '',
+    statusReason: '',
+    decisionText: '',
+    decisionDate: '',
+    lawText: ''
+  })
+
+  // =======================
+  // 💾 حفظ الملف
+  // =======================
+  const handleSave = () => {
+    const newCase = {
+      id: Date.now(),
+
+      caseFileNumber,
+      registryNumber,
+      caseId,
+      createdAt: tunisTime,
+
+      ...formData
+    }
+
+    const existing = JSON.parse(localStorage.getItem('cases')) || []
+    existing.push(newCase)
+    localStorage.setItem('cases', JSON.stringify(existing))
+
+    alert('تم حفظ الملف القضائي بنجاح ✅')
+  }
 
   return (
     <CCard>
@@ -197,7 +242,9 @@ const CaseForm = () => {
               <CRow>
 
                 <CCol md={6}>
-                  <CFormSelect label="المحكمة">
+                  <CFormSelect label="المحكمة"
+                    onChange={(e) => setFormData({ ...formData, court: e.target.value })}
+                  >
                     {courts.map((c, i) => (
                       <option key={i}>{c}</option>
                     ))}
@@ -209,7 +256,9 @@ const CaseForm = () => {
                 </CCol>
 
                 <CCol md={6}>
-                  <CFormSelect label="مصدر الملف">
+                  <CFormSelect label="مصدر الملف"
+                    onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+                  >
                     {sources.map((s, i) => (
                       <option key={i}>{s}</option>
                     ))}
@@ -217,7 +266,9 @@ const CaseForm = () => {
                 </CCol>
 
                 <CCol md={6}>
-                  <CFormSelect label="نوع الملف">
+                  <CFormSelect label="نوع الملف"
+                    onChange={(e) => setFormData({ ...formData, fileType: e.target.value })}
+                  >
                     {fileTypes.map((t, i) => (
                       <option key={i}>{t}</option>
                     ))}
@@ -225,7 +276,10 @@ const CaseForm = () => {
                 </CCol>
 
                 <CCol md={6}>
-                  <CFormInput type="date" label="تاريخ الملف" />
+                  <CFormInput type="date"
+                    onChange={(e) => setFormData({ ...formData, fileDate: e.target.value })}
+                    label="تاريخ الملف"
+                  />
                 </CCol>
 
                 <CCol md={6}>
@@ -237,19 +291,24 @@ const CaseForm = () => {
                 </CCol>
 
                 <CCol md={6}>
-                  <CFormInput label="كاتب الضبط" />
+                  <CFormInput
+                    onChange={(e) => setFormData({ ...formData, clerk: e.target.value })}
+                    label="كاتب الضبط"
+                  />
                 </CCol>
 
                 <CCol md={12}>
-                  <CFormTextarea label="ملاحظات" />
+                  <CFormTextarea
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    label="ملاحظات"
+                  />
                 </CCol>
 
                 <CCol md={12}>
-                  <CFormTextarea label="الوثائق المصاحبة" />
-                </CCol>
-
-                <CCol md={12}>
-                  <CFormTextarea label="كشف الوثائق المتضاربة أو الناقصة (AI)" />
+                  <CFormTextarea
+                    onChange={(e) => setFormData({ ...formData, documents: e.target.value })}
+                    label="الوثائق المصاحبة"
+                  />
                 </CCol>
 
               </CRow>
@@ -260,9 +319,13 @@ const CaseForm = () => {
           <CTabPane visible={activeKey === 2}>
             <CForm>
 
-              <CFormInput label="الموضوع" className="mb-3" />
+              <CFormInput label="الموضوع"
+                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+              />
 
-              <CFormSelect label="التصنيف الجرمي" className="mb-3">
+              <CFormSelect label="التصنيف الجرمي"
+                onChange={(e) => setFormData({ ...formData, crimeType: e.target.value })}
+              >
                 {crimeCategories.map((cat, i) => (
                   <optgroup key={i} label={cat.label}>
                     {cat.options.map((o, j) => (
@@ -272,10 +335,24 @@ const CaseForm = () => {
                 ))}
               </CFormSelect>
 
-              <CFormInput label="مكان الواقعة" className="mb-3" />
-              <CFormInput type="date" label="تاريخ الواقعة" className="mb-3" />
-              <CFormTextarea label="ملخص الوقائع" className="mb-3" />
-              <CFormTextarea label="اقتراح تصنيف جزائي (AI)" />
+              <CFormInput label="مكان الواقعة"
+                onChange={(e) => setFormData({ ...formData, crimePlace: e.target.value })}
+              />
+
+              <CFormInput type="date"
+                onChange={(e) => setFormData({ ...formData, crimeDate: e.target.value })}
+                label="تاريخ الواقعة"
+              />
+
+              <CFormTextarea
+                onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+                label="ملخص الوقائع"
+              />
+
+              <CFormTextarea
+                onChange={(e) => setFormData({ ...formData, aiSuggestion: e.target.value })}
+                label="اقتراح تصنيف جزائي (AI)"
+              />
 
             </CForm>
           </CTabPane>
@@ -290,19 +367,27 @@ const CaseForm = () => {
           <CTabPane visible={activeKey === 4}>
             <CForm>
 
-              <CFormInput
-                value={caseId}
-                label="عدد القضية (ID تلقائي)"
-                readOnly
-                className="mb-3"
+              <CFormInput value={caseId} label="ID القضية" readOnly className="mb-3" />
+
+              <CFormTextarea
+                onChange={(e) => setFormData({ ...formData, decisionText: e.target.value })}
+                label="نص القرار"
               />
 
-              <CFormTextarea label="نص القرار" className="mb-3" />
-              <CFormInput type="date" label="تاريخ القرار" className="mb-3" />
-              <CFormTextarea label="النص القانوني (AI)" className="mb-3" />
+              <CFormInput type="date"
+                onChange={(e) => setFormData({ ...formData, decisionDate: e.target.value })}
+                label="تاريخ القرار"
+              />
 
-              {/* ================= الحالة الجديدة ================= */}
-              <CFormSelect label="حالة القضية" className="mb-3">
+              <CFormTextarea
+                onChange={(e) => setFormData({ ...formData, lawText: e.target.value })}
+                label="النص القانوني"
+              />
+
+              <CFormSelect
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                label="حالة القضية"
+              >
                 <option>تسجيل</option>
                 <option>حفظ</option>
                 <option>مجلس أطفال</option>
@@ -316,7 +401,10 @@ const CaseForm = () => {
                 <option>طور البحث</option>
               </CFormSelect>
 
-              <CFormTextarea label="سبب الحالة" />
+              <CFormTextarea
+                onChange={(e) => setFormData({ ...formData, statusReason: e.target.value })}
+                label="سبب الحالة"
+              />
 
             </CForm>
           </CTabPane>
@@ -324,7 +412,9 @@ const CaseForm = () => {
         </CTabContent>
 
         <div className="mt-3">
-          <CButton color="primary">💾 حفظ الملف</CButton>
+          <CButton color="primary" onClick={handleSave}>
+            💾 حفظ الملف
+          </CButton>
         </div>
 
       </CCardBody>
@@ -333,5 +423,6 @@ const CaseForm = () => {
 }
 
 export default CaseForm
+
 
 
