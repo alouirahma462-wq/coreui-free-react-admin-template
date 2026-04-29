@@ -133,6 +133,57 @@ body::after {
   display: none !important;
 }
 
+/* =====================================================
+   ⚖️ CASE SYSTEM UI (NEW - SAFE ADDITION)
+===================================================== */
+
+.case-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+  padding: 20px;
+  position: relative;
+}
+
+/* ⚖️ watermark */
+.case-page::before {
+  content: "⚖️";
+  position: absolute;
+  font-size: 200px;
+  opacity: 0.03;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* 🧾 card style */
+.case-card {
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  background: white;
+}
+
+/* 🔍 filters box */
+.filter-box {
+  background: #fff;
+  padding: 15px;
+  border-radius: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* 📱 responsive fix for small screens */
+@media (max-width: 768px) {
+  .case-page {
+    padding: 10px;
+  }
+
+  .case-card {
+    border-radius: 12px;
+  }
+}
+
+
 
 
 
