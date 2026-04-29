@@ -57,18 +57,11 @@ const getStatusIcon = (status) => {
 const CaseList = () => {
 
   const navigate = useNavigate()
-
   const [cases, setCases] = useState([])
 
   // 🔍 Filters
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('')
-  const [source, setSource] = useState('')
-  const [type, setType] = useState('')
-  const [crime, setCrime] = useState('')
-  const [gender, setGender] = useState('')
-  const [nationality, setNationality] = useState('')
-  const [location, setLocation] = useState('')
   const [date, setDate] = useState('')
   const [month, setMonth] = useState('')
 
@@ -78,9 +71,7 @@ const CaseList = () => {
     setCases(data)
   }, [])
 
-  // =======================
-  // 🧠 FILTER ENGINE (معدل)
-  // =======================
+  // ================= FILTER ENGINE =================
   const q = search.toLowerCase()
 
   const filtered = cases.filter(c => {
@@ -90,44 +81,10 @@ const CaseList = () => {
       (c.caseFileNumber || '').toLowerCase().includes(q)
 
     const matchStatus = !status || c.status === status
-    const matchSource = !source || c.source === source
-    const matchType = !type || c.fileType === type
-    const matchCrime = !crime || c.crimeType === crime
-
-    const matchGender =
-      !gender ||
-      c.plaintiffGender === gender ||
-      c.suspectGender === gender
-
-    const matchNationality =
-      !nationality ||
-      c.plaintiffNationality === nationality ||
-      c.suspectNationality === nationality
-
-    const matchLocation =
-      !location ||
-      c.plaintiffState === location ||
-      c.plaintiffResState === location ||
-      c.suspectState === location ||
-      c.suspectResState === location
-
     const matchDate = !date || c.fileDate === date
+    const matchMonth = !month || (c.fileDate || '').slice(5, 7) === month
 
-    const matchMonth =
-      !month || (c.fileDate || '').slice(5, 7) === month
-
-    return (
-      matchSearch &&
-      matchStatus &&
-      matchSource &&
-      matchType &&
-      matchCrime &&
-      matchGender &&
-      matchNationality &&
-      matchLocation &&
-      matchDate &&
-      matchMonth
-    )
+    return matchSearch && matchStatus && matchDate && matchMonth
   })
 
   // ================= OPEN =================
@@ -137,100 +94,115 @@ const CaseList = () => {
   }
 
   return (
-    <CCard className="shadow-sm">
-      <CCardBody>
+    <div className="case-page">
 
-        <h4 className="mb-3">📂 قائمة القضايا القضائية</h4>
+      <CCard className="case-card shadow-sm">
+        <CCardBody>
 
-        {/* ================= FILTERS ================= */}
-        <CRow className="g-2 mb-3">
+          <h4 className="mb-4">📂 قائمة القضايا القضائية</h4>
 
-          <CCol md={3}>
-            <CFormInput placeholder="🔍 بحث..." onChange={(e) => setSearch(e.target.value)} />
-          </CCol>
+          {/* ================= FILTERS ================= */}
+          <div className="filter-box">
+            <CRow className="g-3">
 
-          <CCol md={3}>
-            <CFormSelect onChange={(e) => setStatus(e.target.value)}>
-              <option value="">كل الحالات</option>
-              {Object.values(CASE_STATUS).map((s, i) => (
-                <option value={s.label} key={i}>
-                  {s.label}
-                </option>
-              ))}
-            </CFormSelect>
-          </CCol>
+              <CCol xs={12} md={6} lg={3}>
+                <CFormInput
+                  placeholder="🔍 بحث..."
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </CCol>
 
-          <CCol md={3}>
-            <CFormInput type="date" onChange={(e) => setDate(e.target.value)} />
-          </CCol>
+              <CCol xs={12} md={6} lg={3}>
+                <CFormSelect onChange={(e) => setStatus(e.target.value)}>
+                  <option value="">كل الحالات</option>
+                  {Object.values(CASE_STATUS).map((s, i) => (
+                    <option value={s.label} key={i}>
+                      {s.label}
+                    </option>
+                  ))}
+                </CFormSelect>
+              </CCol>
 
-          <CCol md={3}>
-            <CFormSelect onChange={(e) => setMonth(e.target.value)}>
-              <option value="">كل الأشهر</option>
-              <option value="01">يناير</option>
-              <option value="02">فيفري</option>
-              <option value="03">مارس</option>
-              <option value="04">أفريل</option>
-              <option value="05">ماي</option>
-              <option value="06">جوان</option>
-              <option value="07">جويلية</option>
-              <option value="08">أوت</option>
-              <option value="09">سبتمبر</option>
-              <option value="10">أكتوبر</option>
-              <option value="11">نوفمبر</option>
-              <option value="12">ديسمبر</option>
-            </CFormSelect>
-          </CCol>
+              <CCol xs={12} md={6} lg={3}>
+                <CFormInput type="date" onChange={(e) => setDate(e.target.value)} />
+              </CCol>
 
-        </CRow>
+              <CCol xs={12} md={6} lg={3}>
+                <CFormSelect onChange={(e) => setMonth(e.target.value)}>
+                  <option value="">كل الأشهر</option>
+                  <option value="01">يناير</option>
+                  <option value="02">فيفري</option>
+                  <option value="03">مارس</option>
+                  <option value="04">أفريل</option>
+                  <option value="05">ماي</option>
+                  <option value="06">جوان</option>
+                  <option value="07">جويلية</option>
+                  <option value="08">أوت</option>
+                  <option value="09">سبتمبر</option>
+                  <option value="10">أكتوبر</option>
+                  <option value="11">نوفمبر</option>
+                  <option value="12">ديسمبر</option>
+                </CFormSelect>
+              </CCol>
 
-        {/* ================= TABLE ================= */}
-        <CTable hover responsive striped>
+            </CRow>
+          </div>
 
-          <CTableHead>
-            <CTableRow>
-              <CTableHeaderCell>📁 الملف</CTableHeaderCell>
-              <CTableHeaderCell>📌 الموضوع</CTableHeaderCell>
-              <CTableHeaderCell>⚖️ الحالة</CTableHeaderCell>
-              <CTableHeaderCell>📅 التاريخ</CTableHeaderCell>
-              <CTableHeaderCell>⚙️</CTableHeaderCell>
-            </CTableRow>
-          </CTableHead>
+          {/* ================= TABLE ================= */}
+          <CTable hover responsive striped bordered align="middle">
 
-          <CTableBody>
-            {filtered.map((c, i) => (
-              <CTableRow key={i}>
-
-                <CTableDataCell>
-                  <strong>{c.caseFileNumber}</strong>
-                </CTableDataCell>
-
-                <CTableDataCell>{c.subject}</CTableDataCell>
-
-                <CTableDataCell>
-                  <CBadge color={getStatusColor(c.status)}>
-                    {getStatusIcon(c.status)} {c.status}
-                  </CBadge>
-                </CTableDataCell>
-
-                <CTableDataCell>{c.fileDate}</CTableDataCell>
-
-                <CTableDataCell>
-                  <CButton size="sm" color="info" onClick={() => openCase(c)}>
-                    فتح
-                  </CButton>
-                </CTableDataCell>
-
+            <CTableHead>
+              <CTableRow>
+                <CTableHeaderCell>📁 الملف</CTableHeaderCell>
+                <CTableHeaderCell>📌 الموضوع</CTableHeaderCell>
+                <CTableHeaderCell>⚖️ الحالة</CTableHeaderCell>
+                <CTableHeaderCell>📅 التاريخ</CTableHeaderCell>
+                <CTableHeaderCell>⚙️</CTableHeaderCell>
               </CTableRow>
-            ))}
-          </CTableBody>
+            </CTableHead>
 
-        </CTable>
+            <CTableBody>
+              {filtered.map((c, i) => (
+                <CTableRow key={i}>
 
-      </CCardBody>
-    </CCard>
+                  <CTableDataCell>
+                    <strong>{c.caseFileNumber}</strong>
+                  </CTableDataCell>
+
+                  <CTableDataCell>{c.subject}</CTableDataCell>
+
+                  <CTableDataCell>
+                    <CBadge color={getStatusColor(c.status)}>
+                      {getStatusIcon(c.status)} {c.status}
+                    </CBadge>
+                  </CTableDataCell>
+
+                  <CTableDataCell>{c.fileDate}</CTableDataCell>
+
+                  <CTableDataCell>
+                    <CButton
+                      size="sm"
+                      color="primary"
+                      variant="outline"
+                      onClick={() => openCase(c)}
+                    >
+                      👁 عرض
+                    </CButton>
+                  </CTableDataCell>
+
+                </CTableRow>
+              ))}
+            </CTableBody>
+
+          </CTable>
+
+        </CCardBody>
+      </CCard>
+
+    </div>
   )
 }
 
 export default CaseList
+
 
