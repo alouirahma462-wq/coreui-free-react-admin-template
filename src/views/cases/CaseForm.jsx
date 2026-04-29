@@ -65,7 +65,6 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
 
       <CRow className="g-3">
 
-
         <CCol xs={12} md={6}>
 
           <CFormInput
@@ -145,9 +144,11 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
 
           <CFormSelect label="مكان الولادة (معتمدية)">
             <option value="">-- اختر --</option>
-            {locations.find(l => l.state === birthState)?.delegations.map((d, i) => (
-              <option key={i}>{d}</option>
-            ))}
+            {locations
+              .find(l => l.state === birthState)
+              ?.delegations?.map((d, i) => (
+                <option key={i}>{d}</option>
+              ))}
           </CFormSelect>
         </CCol>
 
@@ -165,9 +166,11 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
 
           <CFormSelect label="مكان السكن (معتمدية)">
             <option value="">-- اختر --</option>
-            {locations.find(l => l.state === resState)?.delegations.map((d, i) => (
-              <option key={i}>{d}</option>
-            ))}
+            {locations
+              .find(l => l.state === resState)
+              ?.delegations?.map((d, i) => (
+                <option key={i}>{d}</option>
+              ))}
           </CFormSelect>
         </CCol>
 
@@ -231,11 +234,13 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
 
           <CFormTextarea label="اقتراحات الذكاء الاصطناعي" />
         </CCol>
-      <CRow className="g-3">
+
+      </CRow>
 
     </div>
   )
 }
+
 
 // =======================
 // 🧾 CaseForm
@@ -425,7 +430,7 @@ const CaseForm = () => {
                   />
                 </CCol>
 
-              <CRow className="g-3">
+              </CRow> 
 
             </CForm>
           </CTabPane>
