@@ -106,6 +106,37 @@ ${caseData.summary}
 `
     setAiResult(fake)
   }
+const pdfData = useMemo(() => {
+  return {
+    fileInfo: {
+      court: caseData.court,
+      fileNumber: caseData.caseFileNumber,
+      registry: caseData.registryNumber,
+      fileType: caseData.fileType,
+      source: caseData.source,
+      fileDate: caseData.fileDate
+    },
+
+    crime: {
+      subject: caseData.subject,
+      crimeType: caseData.crimeType,
+      place: caseData.crimePlace,
+      date: caseData.crimeDate,
+      summary: caseData.summary
+    },
+
+    parties: {
+      plaintiff: caseData.plaintiff,
+      suspect: caseData.suspect
+    },
+
+    decision: {
+      status: caseData.status,
+      decisionText: caseData.decisionText,
+      lawText: caseData.lawText
+    }
+  }
+}, [caseData])
 
   // ================= PDF EXPORT =================
   const exportPDF = () => {
