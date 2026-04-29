@@ -133,7 +133,7 @@ const CaseList = () => {
   // ================= OPEN =================
   const openCase = (caseData) => {
     localStorage.setItem('selectedCase', JSON.stringify(caseData))
-    navigate('/court/files/detail')
+    navigate('/cases/detail')
   }
 
   return (
