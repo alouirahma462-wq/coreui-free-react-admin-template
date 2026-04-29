@@ -59,12 +59,15 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
   const person = formData?.[type] || {}
 
   return (
-    <div className="mb-4 p-3 border rounded">
+    <div className="filter-box mb-3">
+
       <h6>{title}</h6>
 
-      <CRow>
+      <CRow className="g-3">
 
-        <CCol md={6}>
+
+        <CCol xs={12} md={6}>
+
           <CFormInput
             label="الاسم الكامل"
             value={person.fullName || ''}
@@ -77,7 +80,8 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           />
         </CCol>
 
-        <CCol md={6}>
+        <CCol xs={12} md={6}>
+
           <CFormSelect
             label="الجنس"
             value={person.gender || ''}
@@ -94,7 +98,8 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           </CFormSelect>
         </CCol>
 
-        <CCol md={6}>
+        <CCol xs={12} md={6}>
+
           <CFormSelect
             label="الجنسية"
             value={person.nationality || ''}
@@ -111,7 +116,8 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           </CFormSelect>
         </CCol>
 
-        <CCol md={6}>
+        <CCol xs={12} md={6}>
+
           <CFormInput
             type="date"
             label="تاريخ الولادة"
@@ -125,7 +131,8 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           />
         </CCol>
 
-        <CCol md={6}>
+        <CCol xs={12} md={6}>
+
           <CFormSelect label="مكان الولادة (ولاية)" onChange={(e) => setBirthState(e.target.value)}>
             <option value="">-- اختر --</option>
             {locations.map((l, i) => (
@@ -134,7 +141,8 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           </CFormSelect>
         </CCol>
 
-        <CCol md={6}>
+        <CCol xs={12} md={6}>
+
           <CFormSelect label="مكان الولادة (معتمدية)">
             <option value="">-- اختر --</option>
             {locations.find(l => l.state === birthState)?.delegations.map((d, i) => (
@@ -143,7 +151,8 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           </CFormSelect>
         </CCol>
 
-        <CCol md={6}>
+        <CCol xs={12} md={6}>
+
           <CFormSelect label="مكان السكن (ولاية)" onChange={(e) => setResState(e.target.value)}>
             <option value="">-- اختر --</option>
             {locations.map((l, i) => (
@@ -152,7 +161,8 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           </CFormSelect>
         </CCol>
 
-        <CCol md={6}>
+        <CCol xs={12} md={6}>
+
           <CFormSelect label="مكان السكن (معتمدية)">
             <option value="">-- اختر --</option>
             {locations.find(l => l.state === resState)?.delegations.map((d, i) => (
@@ -161,7 +171,8 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           </CFormSelect>
         </CCol>
 
-        <CCol md={6}>
+        <CCol xs={12} md={6}>
+
           <CFormInput
             label="المستوى التعليمي"
             value={person.education || ''}
@@ -174,7 +185,8 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           />
         </CCol>
 
-        <CCol md={6}>
+        <CCol xs={12} md={6}>
+
           <CFormInput
             label="المهنة"
             value={person.job || ''}
@@ -187,7 +199,8 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           />
         </CCol>
 
-        <CCol md={12}>
+        <CCol xs={12} md={6}>
+
           <CFormTextarea
             label="ملاحظات إضافية"
             value={person.notes || ''}
@@ -200,7 +213,8 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           />
         </CCol>
 
-        <CCol md={12}>
+        <CCol xs={12} md={6}>
+
           <CFormTextarea
             label="الإفادة (حسب الدور)"
             value={person.statement || ''}
@@ -213,10 +227,12 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           />
         </CCol>
 
-        <CCol md={12}>
+        <CCol xs={12} md={6}>
+
           <CFormTextarea label="اقتراحات الذكاء الاصطناعي" />
         </CCol>
-      </CRow>
+      <CRow className="g-3">
+
     </div>
   )
 }
@@ -298,8 +314,10 @@ const CaseForm = () => {
 
     alert('✅ تم حفظ القضية بنجاح')
   }
-  return (
-    <CCard>
+ return (
+  <div className="case-page">
+
+    <CCard className="case-card">
       <CCardBody>
 
         <CNav variant="tabs">
@@ -322,8 +340,10 @@ const CaseForm = () => {
           {/* ================= TAB 1 ================= */}
           <CTabPane visible={activeKey === 1}>
             <CForm>
-              <CRow>
-                <CCol md={6}>
+              <CRow className="g-3">
+
+                <CCol xs={12} md={6}>
+
                   <CFormSelect
                     label="المحكمة"
                     onChange={(e) => setFormData({ ...formData, court: e.target.value })}
@@ -334,11 +354,13 @@ const CaseForm = () => {
                   </CFormSelect>
                 </CCol>
 
-                <CCol md={6}>
+                <CCol xs={12} md={6}>
+
                   <CFormInput value={caseFileNumber} label="عدد الملف الأمني" readOnly />
                 </CCol>
 
-                <CCol md={6}>
+                <CCol xs={12} md={6}>
+
                   <CFormSelect
                     label="مصدر الملف"
                     onChange={(e) => setFormData({ ...formData, source: e.target.value })}
@@ -349,7 +371,8 @@ const CaseForm = () => {
                   </CFormSelect>
                 </CCol>
 
-                <CCol md={6}>
+                <CCol xs={12} md={6}>
+
                   <CFormSelect
                     label="نوع الملف"
                     onChange={(e) => setFormData({ ...formData, fileType: e.target.value })}
@@ -360,43 +383,50 @@ const CaseForm = () => {
                   </CFormSelect>
                 </CCol>
 
-                <CCol md={6}>
+                <CCol xs={12} md={6}>
+
                   <CFormInput type="date"
                     onChange={(e) => setFormData({ ...formData, fileDate: e.target.value })}
                     label="تاريخ الملف"
                   />
                 </CCol>
 
-                <CCol md={6}>
+                <CCol xs={12} md={6}>
+
                   <CFormInput value={registryNumber} label="عدد التسجيل" readOnly />
                 </CCol>
 
-                <CCol md={6}>
+                <CCol xs={12} md={6}>
+
                   <CFormInput value={tunisTime} label="تاريخ ووقت التلقي" readOnly />
                 </CCol>
 
-                <CCol md={6}>
+                <CCol xs={12} md={6}>
+
                   <CFormInput
                     onChange={(e) => setFormData({ ...formData, clerk: e.target.value })}
                     label="كاتب الضبط"
                   />
                 </CCol>
 
-                <CCol md={12}>
+                <CCol xs={12} md={6}>
+
                   <CFormTextarea
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     label="ملاحظات"
                   />
                 </CCol>
 
-                <CCol md={12}>
+                <CCol xs={12} md={6}>
+
                   <CFormTextarea
                     onChange={(e) => setFormData({ ...formData, documents: e.target.value })}
                     label="الوثائق المصاحبة"
                   />
                 </CCol>
 
-              </CRow>
+              <CRow className="g-3">
+
             </CForm>
           </CTabPane>
 
@@ -506,9 +536,14 @@ const CaseForm = () => {
     />
 
     {/* ✅ زر الحفظ الصحيح */}
-    <CButton color="success" className="mt-3 w-100" onClick={handleSave}>
-      💾 حفظ القضية
-    </CButton>
+   <CButton
+  color="success"
+  size="lg"
+  className="w-100 mt-4"
+  onClick={handleSave}
+>
+  💾 حفظ القضية
+</CButton>
 
   </CForm>
 </CTabPane>
@@ -516,8 +551,11 @@ const CaseForm = () => {
 
         </CTabContent>
 
-      </CCardBody>
-    </CCard>
+  
+        </CCardBody>
+      </CCard>
+
+    </div>
   )
 }
 
