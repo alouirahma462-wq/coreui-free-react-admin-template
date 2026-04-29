@@ -53,8 +53,6 @@ const generateCaseId = () =>
 // 👤 Form الأطراف
 // =======================
 const PersonForm = ({ title, type, formData, setFormData }) => {
-  const [resState, setResState] = useState('')
-  const [birthState, setBirthState] = useState('')
 
   const person = formData?.[type] || {}
 
@@ -65,8 +63,8 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
 
       <CRow className="g-3">
 
+        {/* الاسم */}
         <CCol xs={12} md={6}>
-
           <CFormInput
             label="الاسم الكامل"
             value={person.fullName || ''}
@@ -79,8 +77,8 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           />
         </CCol>
 
+        {/* الجنس */}
         <CCol xs={12} md={6}>
-
           <CFormSelect
             label="الجنس"
             value={person.gender || ''}
@@ -92,13 +90,13 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
             }
           >
             {genders.map((g, i) => (
-              <option key={i}>{g}</option>
+              <option key={i} value={g}>{g}</option>
             ))}
           </CFormSelect>
         </CCol>
 
+        {/* الجنسية */}
         <CCol xs={12} md={6}>
-
           <CFormSelect
             label="الجنسية"
             value={person.nationality || ''}
@@ -110,13 +108,13 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
             }
           >
             {nationalities.map((n, i) => (
-              <option key={i}>{n}</option>
+              <option key={i} value={n}>{n}</option>
             ))}
           </CFormSelect>
         </CCol>
 
+        {/* تاريخ الولادة */}
         <CCol xs={12} md={6}>
-
           <CFormInput
             type="date"
             label="تاريخ الولادة"
@@ -130,52 +128,90 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           />
         </CCol>
 
+        {/* ولاية الولادة */}
         <CCol xs={12} md={6}>
-
-          <CFormSelect label="مكان الولادة (ولاية)" onChange={(e) => setBirthState(e.target.value)}>
+          <CFormSelect
+            label="مكان الولادة (ولاية)"
+            value={person.birthState || ''}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                [type]: { ...person, birthState: e.target.value }
+              })
+            }
+          >
             <option value="">-- اختر --</option>
             {locations.map((l, i) => (
-              <option key={i}>{l.state}</option>
+              <option key={i} value={l.state}>{l.state}</option>
             ))}
           </CFormSelect>
         </CCol>
 
+        {/* معتمدية الولادة */}
         <CCol xs={12} md={6}>
-
-          <CFormSelect label="مكان الولادة (معتمدية)">
+          <CFormSelect
+            label="مكان الولادة (معتمدية)"
+            value={person.birthDelegation || ''}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                [type]: { ...person, birthDelegation: e.target.value }
+              })
+            }
+          >
             <option value="">-- اختر --</option>
+
             {locations
-              .find(l => l.state === birthState)
+              .find(l => l.state === person.birthState)
               ?.delegations?.map((d, i) => (
-                <option key={i}>{d}</option>
+                <option key={i} value={d}>{d}</option>
               ))}
           </CFormSelect>
         </CCol>
 
+        {/* ولاية السكن */}
         <CCol xs={12} md={6}>
-
-          <CFormSelect label="مكان السكن (ولاية)" onChange={(e) => setResState(e.target.value)}>
+          <CFormSelect
+            label="مكان السكن (ولاية)"
+            value={person.resState || ''}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                [type]: { ...person, resState: e.target.value }
+              })
+            }
+          >
             <option value="">-- اختر --</option>
             {locations.map((l, i) => (
-              <option key={i}>{l.state}</option>
+              <option key={i} value={l.state}>{l.state}</option>
             ))}
           </CFormSelect>
         </CCol>
 
+        {/* معتمدية السكن */}
         <CCol xs={12} md={6}>
-
-          <CFormSelect label="مكان السكن (معتمدية)">
+          <CFormSelect
+            label="مكان السكن (معتمدية)"
+            value={person.resDelegation || ''}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                [type]: { ...person, resDelegation: e.target.value }
+              })
+            }
+          >
             <option value="">-- اختر --</option>
+
             {locations
-              .find(l => l.state === resState)
+              .find(l => l.state === person.resState)
               ?.delegations?.map((d, i) => (
-                <option key={i}>{d}</option>
+                <option key={i} value={d}>{d}</option>
               ))}
           </CFormSelect>
         </CCol>
 
+        {/* التعليم */}
         <CCol xs={12} md={6}>
-
           <CFormInput
             label="المستوى التعليمي"
             value={person.education || ''}
@@ -188,8 +224,8 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           />
         </CCol>
 
+        {/* المهنة */}
         <CCol xs={12} md={6}>
-
           <CFormInput
             label="المهنة"
             value={person.job || ''}
@@ -202,8 +238,8 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           />
         </CCol>
 
+        {/* ملاحظات */}
         <CCol xs={12} md={6}>
-
           <CFormTextarea
             label="ملاحظات إضافية"
             value={person.notes || ''}
@@ -216,8 +252,8 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
           />
         </CCol>
 
+        {/* إفادة */}
         <CCol xs={12} md={6}>
-
           <CFormTextarea
             label="الإفادة (حسب الدور)"
             value={person.statement || ''}
@@ -231,7 +267,6 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
         </CCol>
 
         <CCol xs={12} md={6}>
-
           <CFormTextarea label="اقتراحات الذكاء الاصطناعي" />
         </CCol>
 
@@ -240,7 +275,6 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
     </div>
   )
 }
-
 
 // =======================
 // 🧾 CaseForm
