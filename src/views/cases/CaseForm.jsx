@@ -17,7 +17,10 @@ import {
   CModal,
   CModalHeader,
   CModalBody,
-  CModalTitle
+  CModalTitle,
+  CToast,
+  CToastHeader,
+  CToastBody
 } from '@coreui/react'
 
 // =======================
@@ -49,12 +52,22 @@ const getTunisDateTime = () =>
 const generateCaseId = () =>
   'CASE-' + Date.now()
 
-// =======================
-// 👤 Form الأطراف
-// =======================
 const PersonForm = ({ title, type, formData, setFormData }) => {
 
   const person = formData?.[type] || {}
+
+  // ✅ حماية كاملة من crash
+  const birthLocation = Array.isArray(locations)
+    ? locations.find(l =>
+        l?.state?.trim()?.toLowerCase() === person?.birthState?.trim()?.toLowerCase()
+      )
+    : null
+
+  const resLocation = Array.isArray(locations)
+    ? locations.find(l =>
+        l?.state?.trim()?.toLowerCase() === person?.resState?.trim()?.toLowerCase()
+      )
+    : null
 
   return (
     <div className="filter-box mb-3">
@@ -69,10 +82,13 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
             label="الاسم الكامل"
             value={person.fullName || ''}
             onChange={(e) =>
-              setFormData({
-                ...formData,
-                [type]: { ...person, fullName: e.target.value }
-              })
+              setFormData(prev => ({
+                ...prev,
+                [type]: {
+                  ...(prev[type] || {}),
+                  fullName: e.target.value
+                }
+              }))
             }
           />
         </CCol>
@@ -83,13 +99,17 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
             label="الجنس"
             value={person.gender || ''}
             onChange={(e) =>
-              setFormData({
-                ...formData,
-                [type]: { ...person, gender: e.target.value }
-              })
+              setFormData(prev => ({
+                ...prev,
+                [type]: {
+                  ...(prev[type] || {}),
+                  gender: e.target.value
+                }
+              }))
             }
           >
-            {genders.map((g, i) => (
+            <option value="">-- اختر --</option>
+            {genders?.map((g, i) => (
               <option key={i} value={g}>{g}</option>
             ))}
           </CFormSelect>
@@ -101,13 +121,17 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
             label="الجنسية"
             value={person.nationality || ''}
             onChange={(e) =>
-              setFormData({
-                ...formData,
-                [type]: { ...person, nationality: e.target.value }
-              })
+              setFormData(prev => ({
+                ...prev,
+                [type]: {
+                  ...(prev[type] || {}),
+                  nationality: e.target.value
+                }
+              }))
             }
           >
-            {nationalities.map((n, i) => (
+            <option value="">-- اختر --</option>
+            {nationalities?.map((n, i) => (
               <option key={i} value={n}>{n}</option>
             ))}
           </CFormSelect>
@@ -120,10 +144,13 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
             label="تاريخ الولادة"
             value={person.birthDate || ''}
             onChange={(e) =>
-              setFormData({
-                ...formData,
-                [type]: { ...person, birthDate: e.target.value }
-              })
+              setFormData(prev => ({
+                ...prev,
+                [type]: {
+                  ...(prev[type] || {}),
+                  birthDate: e.target.value
+                }
+              }))
             }
           />
         </CCol>
@@ -134,15 +161,18 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
             label="مكان الولادة (ولاية)"
             value={person.birthState || ''}
             onChange={(e) =>
-              setFormData({
-                ...formData,
-                [type]: { ...person, birthState: e.target.value }
-              })
+              setFormData(prev => ({
+                ...prev,
+                [type]: {
+                  ...(prev[type] || {}),
+                  birthState: e.target.value
+                }
+              }))
             }
           >
             <option value="">-- اختر --</option>
-            {locations.map((l, i) => (
-              <option key={i} value={l.state}>{l.state}</option>
+            {locations?.map((l, i) => (
+              <option key={i} value={l?.state}>{l?.state}</option>
             ))}
           </CFormSelect>
         </CCol>
@@ -153,19 +183,20 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
             label="مكان الولادة (معتمدية)"
             value={person.birthDelegation || ''}
             onChange={(e) =>
-              setFormData({
-                ...formData,
-                [type]: { ...person, birthDelegation: e.target.value }
-              })
+              setFormData(prev => ({
+                ...prev,
+                [type]: {
+                  ...(prev[type] || {}),
+                  birthDelegation: e.target.value
+                }
+              }))
             }
           >
             <option value="">-- اختر --</option>
 
-            {locations
-              .find(l => l.state === person.birthState)
-              ?.delegations?.map((d, i) => (
-                <option key={i} value={d}>{d}</option>
-              ))}
+            {birthLocation?.delegations?.map((d, i) => (
+              <option key={i} value={d}>{d}</option>
+            ))}
           </CFormSelect>
         </CCol>
 
@@ -175,15 +206,18 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
             label="مكان السكن (ولاية)"
             value={person.resState || ''}
             onChange={(e) =>
-              setFormData({
-                ...formData,
-                [type]: { ...person, resState: e.target.value }
-              })
+              setFormData(prev => ({
+                ...prev,
+                [type]: {
+                  ...(prev[type] || {}),
+                  resState: e.target.value
+                }
+              }))
             }
           >
             <option value="">-- اختر --</option>
-            {locations.map((l, i) => (
-              <option key={i} value={l.state}>{l.state}</option>
+            {locations?.map((l, i) => (
+              <option key={i} value={l?.state}>{l?.state}</option>
             ))}
           </CFormSelect>
         </CCol>
@@ -194,19 +228,20 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
             label="مكان السكن (معتمدية)"
             value={person.resDelegation || ''}
             onChange={(e) =>
-              setFormData({
-                ...formData,
-                [type]: { ...person, resDelegation: e.target.value }
-              })
+              setFormData(prev => ({
+                ...prev,
+                [type]: {
+                  ...(prev[type] || {}),
+                  resDelegation: e.target.value
+                }
+              }))
             }
           >
             <option value="">-- اختر --</option>
 
-            {locations
-              .find(l => l.state === person.resState)
-              ?.delegations?.map((d, i) => (
-                <option key={i} value={d}>{d}</option>
-              ))}
+            {resLocation?.delegations?.map((d, i) => (
+              <option key={i} value={d}>{d}</option>
+            ))}
           </CFormSelect>
         </CCol>
 
@@ -216,10 +251,13 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
             label="المستوى التعليمي"
             value={person.education || ''}
             onChange={(e) =>
-              setFormData({
-                ...formData,
-                [type]: { ...person, education: e.target.value }
-              })
+              setFormData(prev => ({
+                ...prev,
+                [type]: {
+                  ...(prev[type] || {}),
+                  education: e.target.value
+                }
+              }))
             }
           />
         </CCol>
@@ -230,10 +268,13 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
             label="المهنة"
             value={person.job || ''}
             onChange={(e) =>
-              setFormData({
-                ...formData,
-                [type]: { ...person, job: e.target.value }
-              })
+              setFormData(prev => ({
+                ...prev,
+                [type]: {
+                  ...(prev[type] || {}),
+                  job: e.target.value
+                }
+              }))
             }
           />
         </CCol>
@@ -244,10 +285,13 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
             label="ملاحظات إضافية"
             value={person.notes || ''}
             onChange={(e) =>
-              setFormData({
-                ...formData,
-                [type]: { ...person, notes: e.target.value }
-              })
+              setFormData(prev => ({
+                ...prev,
+                [type]: {
+                  ...(prev[type] || {}),
+                  notes: e.target.value
+                }
+              }))
             }
           />
         </CCol>
@@ -258,16 +302,32 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
             label="الإفادة (حسب الدور)"
             value={person.statement || ''}
             onChange={(e) =>
-              setFormData({
-                ...formData,
-                [type]: { ...person, statement: e.target.value }
-              })
+              setFormData(prev => ({
+                ...prev,
+                [type]: {
+                  ...(prev[type] || {}),
+                  statement: e.target.value
+                }
+              }))
             }
           />
         </CCol>
 
+        {/* AI */}
         <CCol xs={12} md={6}>
-          <CFormTextarea label="اقتراحات الذكاء الاصطناعي" />
+          <CFormTextarea
+            label="اقتراحات الذكاء الاصطناعي"
+            value={person.aiSuggestion || ''}
+            onChange={(e) =>
+              setFormData(prev => ({
+                ...prev,
+                [type]: {
+                  ...(prev[type] || {}),
+                  aiSuggestion: e.target.value
+                }
+              }))
+            }
+          />
         </CCol>
 
       </CRow>
@@ -281,13 +341,13 @@ const PersonForm = ({ title, type, formData, setFormData }) => {
 // =======================
 const CaseForm = () => {
 
-  const [activeKey, setActiveKey] = useState(1)
-  const firstRender = useRef(true)
-
-  const [caseFileNumber] = useState(generateCaseFileNumber())
-  const [registryNumber] = useState(generateRegistryNumber())
-  const [tunisTime] = useState(getTunisDateTime())
-  const [caseId] = useState(generateCaseId())
+const [activeKey, setActiveKey] = useState(1)
+const [caseFileNumber] = useState(generateCaseFileNumber())
+const [registryNumber] = useState(generateRegistryNumber())
+const [tunisTime] = useState(getTunisDateTime())
+const [caseId] = useState(generateCaseId())
+const [toastVisible, setToastVisible] = useState(false)
+const [toastMessage, setToastMessage] = useState('') 
 
   const [formData, setFormData] = useState({
     court: '',
@@ -315,44 +375,81 @@ const CaseForm = () => {
   // =======================
   // 💾 SAVE FUNCTION (ADDED)
   // =======================
-  const handleSave = () => {
+const handleSave = () => {
 
-    const normalizedCase = {
-      ...formData,
+  const normalizedCase = {
+    ...formData,
+    caseFileNumber,
+    registryNumber,
+    caseId,
+    fileDate: formData.fileDate,
+    subject: formData.subject,
+    status: formData.status,
+    source: formData.source,
+    fileType: formData.fileType,
+    createdAt: tunisTime,
 
-      caseFileNumber,
-      registryNumber,
-      caseId,
-      fileDate: formData.fileDate,
-      subject: formData.subject,
-      status: formData.status,
-      source: formData.source,
-      fileType: formData.fileType,
+    plaintiffGender: formData.plaintiff?.gender,
+    plaintiffNationality: formData.plaintiff?.nationality,
+    plaintiffBirthDate: formData.plaintiff?.birthDate,
+    plaintiffState: formData.plaintiff?.birthState,
+    plaintiffResState: formData.plaintiff?.resState,
 
-      createdAt: tunisTime,
-
-      // 👤 plaintiff flatten
-      plaintiffGender: formData.plaintiff?.gender,
-      plaintiffNationality: formData.plaintiff?.nationality,
-      plaintiffBirthDate: formData.plaintiff?.birthDate,
-      plaintiffState: formData.plaintiff?.birthState,
-      plaintiffResState: formData.plaintiff?.resState,
-
-      // 👤 suspect flatten
-      suspectGender: formData.suspect?.gender,
-      suspectNationality: formData.suspect?.nationality,
-      suspectBirthDate: formData.suspect?.birthDate,
-      suspectState: formData.suspect?.birthState,
-      suspectResState: formData.suspect?.resState,
-    }
-
-    const existing = JSON.parse(localStorage.getItem('cases')) || []
-    existing.push(normalizedCase)
-
-    localStorage.setItem('cases', JSON.stringify(existing))
-
-    alert('✅ تم حفظ القضية بنجاح')
+    suspectGender: formData.suspect?.gender,
+    suspectNationality: formData.suspect?.nationality,
+    suspectBirthDate: formData.suspect?.birthDate,
+    suspectState: formData.suspect?.birthState,
+    suspectResState: formData.suspect?.resState,
   }
+
+  let existing = []
+
+  try {
+const raw = localStorage.getItem('cases')
+
+let existing = []
+
+try {
+  existing = raw ? JSON.parse(raw) : []
+} catch {
+  existing = []
+}
+
+  existing.push(normalizedCase)
+
+  localStorage.setItem('cases', JSON.stringify(existing))
+
+  setToastMessage('✅ تم حفظ القضية بنجاح')
+setToastVisible(true)
+
+
+  // ✅ RESET
+  setFormData({
+    court: '',
+    fileType: '',
+    source: '',
+    fileDate: '',
+    clerk: '',
+    notes: '',
+    documents: '',
+    subject: '',
+    crimeType: '',
+    crimePlace: '',
+    crimeDate: '',
+    summary: '',
+    aiSuggestion: '',
+    status: '',
+    statusReason: '',
+    decisionText: '',
+    decisionDate: '',
+    lawText: '',
+    plaintiff: {},
+    suspect: {}
+  })
+
+  setActiveKey(1)
+}
+
  return (
   <div className="case-page">
 
@@ -376,8 +473,8 @@ const CaseForm = () => {
 
         <CTabContent className="mt-3">
 
-          {/* ================= TAB 1 ================= */}
-    <CTabPane visible={activeKey === 1}>
+{/* ================= TAB 1 ================= */}
+<CTabPane visible={activeKey === 1}>
   <CForm>
     <CRow className="g-3">
 
@@ -386,9 +483,13 @@ const CaseForm = () => {
           label="المحكمة"
           value={formData.court || ''}
           onChange={(e) =>
-            setFormData({ ...formData, court: e.target.value })
+            setFormData(prev => ({
+              ...prev,
+              court: e.target.value
+            }))
           }
         >
+          <option value="">-- اختر --</option>
           {courts.map((c, i) => (
             <option key={i} value={c}>{c}</option>
           ))}
@@ -404,9 +505,13 @@ const CaseForm = () => {
           label="مصدر الملف"
           value={formData.source || ''}
           onChange={(e) =>
-            setFormData({ ...formData, source: e.target.value })
+            setFormData(prev => ({
+              ...prev,
+              source: e.target.value
+            }))
           }
         >
+          <option value="">-- اختر --</option>
           {sources.map((s, i) => (
             <option key={i} value={s}>{s}</option>
           ))}
@@ -418,9 +523,13 @@ const CaseForm = () => {
           label="نوع الملف"
           value={formData.fileType || ''}
           onChange={(e) =>
-            setFormData({ ...formData, fileType: e.target.value })
+            setFormData(prev => ({
+              ...prev,
+              fileType: e.target.value
+            }))
           }
         >
+          <option value="">-- اختر --</option>
           {fileTypes.map((t, i) => (
             <option key={i} value={t}>{t}</option>
           ))}
@@ -432,7 +541,10 @@ const CaseForm = () => {
           type="date"
           value={formData.fileDate || ''}
           onChange={(e) =>
-            setFormData({ ...formData, fileDate: e.target.value })
+            setFormData(prev => ({
+              ...prev,
+              fileDate: e.target.value
+            }))
           }
           label="تاريخ الملف"
         />
@@ -450,7 +562,10 @@ const CaseForm = () => {
         <CFormInput
           value={formData.clerk || ''}
           onChange={(e) =>
-            setFormData({ ...formData, clerk: e.target.value })
+            setFormData(prev => ({
+              ...prev,
+              clerk: e.target.value
+            }))
           }
           label="كاتب الضبط"
         />
@@ -460,7 +575,10 @@ const CaseForm = () => {
         <CFormTextarea
           value={formData.notes || ''}
           onChange={(e) =>
-            setFormData({ ...formData, notes: e.target.value })
+            setFormData(prev => ({
+              ...prev,
+              notes: e.target.value
+            }))
           }
           label="ملاحظات"
         />
@@ -470,7 +588,10 @@ const CaseForm = () => {
         <CFormTextarea
           value={formData.documents || ''}
           onChange={(e) =>
-            setFormData({ ...formData, documents: e.target.value })
+            setFormData(prev => ({
+              ...prev,
+              documents: e.target.value
+            }))
           }
           label="الوثائق المصاحبة"
         />
@@ -480,15 +601,18 @@ const CaseForm = () => {
   </CForm>
 </CTabPane>
 
-          {/* ================= TAB 2 ================= */}
-         <CTabPane visible={activeKey === 2}>
+{/* ================= TAB 2 ================= */}
+<CTabPane visible={activeKey === 2}>
   <CForm>
 
     <CFormInput
       value={formData.subject || ''}
       label="الموضوع"
       onChange={(e) =>
-        setFormData({ ...formData, subject: e.target.value })
+        setFormData(prev => ({
+          ...prev,
+          subject: e.target.value
+        }))
       }
     />
 
@@ -496,9 +620,13 @@ const CaseForm = () => {
       label="التصنيف الجرمي"
       value={formData.crimeType || ''}
       onChange={(e) =>
-        setFormData({ ...formData, crimeType: e.target.value })
+        setFormData(prev => ({
+          ...prev,
+          crimeType: e.target.value
+        }))
       }
     >
+      <option value="">-- اختر --</option>
       {crimeCategories.map((cat, i) => (
         <optgroup key={i} label={cat.label}>
           {cat.options.map((o, j) => (
@@ -512,7 +640,10 @@ const CaseForm = () => {
       value={formData.crimePlace || ''}
       label="مكان الواقعة"
       onChange={(e) =>
-        setFormData({ ...formData, crimePlace: e.target.value })
+        setFormData(prev => ({
+          ...prev,
+          crimePlace: e.target.value
+        }))
       }
     />
 
@@ -521,7 +652,10 @@ const CaseForm = () => {
       value={formData.crimeDate || ''}
       label="تاريخ الواقعة"
       onChange={(e) =>
-        setFormData({ ...formData, crimeDate: e.target.value })
+        setFormData(prev => ({
+          ...prev,
+          crimeDate: e.target.value
+        }))
       }
     />
 
@@ -529,7 +663,10 @@ const CaseForm = () => {
       value={formData.summary || ''}
       label="ملخص الوقائع"
       onChange={(e) =>
-        setFormData({ ...formData, summary: e.target.value })
+        setFormData(prev => ({
+          ...prev,
+          summary: e.target.value
+        }))
       }
     />
 
@@ -537,20 +674,23 @@ const CaseForm = () => {
       value={formData.aiSuggestion || ''}
       label="اقتراح تصنيف جزائي (AI)"
       onChange={(e) =>
-        setFormData({ ...formData, aiSuggestion: e.target.value })
+        setFormData(prev => ({
+          ...prev,
+          aiSuggestion: e.target.value
+        }))
       }
     />
 
   </CForm>
 </CTabPane>
 
-          {/* ================= TAB 3 ================= */}
-          <CTabPane visible={activeKey === 3}>
-            <PersonForm title="👤 الشاكي" type="plaintiff" formData={formData} setFormData={setFormData} />
-            <PersonForm title="⚠️ المظنون فيه" type="suspect" formData={formData} setFormData={setFormData} />
-          </CTabPane>
+{/* ================= TAB 3 ================= */}
+<CTabPane visible={activeKey === 3}>
+  <PersonForm title="👤 الشاكي" type="plaintiff" formData={formData} setFormData={setFormData} />
+  <PersonForm title="⚠️ المظنون فيه" type="suspect" formData={formData} setFormData={setFormData} />
+</CTabPane>
 
-    {/* ================= TAB 4 ================= */}
+{/* ================= TAB 4 ================= */}
 <CTabPane visible={activeKey === 4}>
   <CForm>
 
@@ -560,7 +700,10 @@ const CaseForm = () => {
       value={formData.decisionText || ''}
       label="نص القرار"
       onChange={(e) =>
-        setFormData({ ...formData, decisionText: e.target.value })
+        setFormData(prev => ({
+          ...prev,
+          decisionText: e.target.value
+        }))
       }
     />
 
@@ -569,7 +712,10 @@ const CaseForm = () => {
       value={formData.decisionDate || ''}
       label="تاريخ القرار"
       onChange={(e) =>
-        setFormData({ ...formData, decisionDate: e.target.value })
+        setFormData(prev => ({
+          ...prev,
+          decisionDate: e.target.value
+        }))
       }
     />
 
@@ -577,7 +723,10 @@ const CaseForm = () => {
       value={formData.lawText || ''}
       label="النص القانوني"
       onChange={(e) =>
-        setFormData({ ...formData, lawText: e.target.value })
+        setFormData(prev => ({
+          ...prev,
+          lawText: e.target.value
+        }))
       }
     />
 
@@ -585,7 +734,10 @@ const CaseForm = () => {
       label="حالة القضية"
       value={formData.status || ''}
       onChange={(e) =>
-        setFormData({ ...formData, status: e.target.value })
+        setFormData(prev => ({
+          ...prev,
+          status: e.target.value
+        }))
       }
     >
       <option value="">-- اختر --</option>
@@ -610,22 +762,22 @@ const CaseForm = () => {
       value={formData.statusReason || ''}
       label="سبب الحالة"
       onChange={(e) =>
-        setFormData({ ...formData, statusReason: e.target.value })
+        setFormData(prev => ({
+          ...prev,
+          statusReason: e.target.value
+        }))
       }
     />
 
-  </CForm>
-</CTabPane>
-
-    {/* ✅ زر الحفظ الصحيح */}
-   <CButton
+  <CButton
+  type="button"
   color="success"
   size="lg"
   className="w-100 mt-4"
   onClick={handleSave}
 >
-  💾 حفظ القضية
-</CButton>
+      💾 حفظ القضية
+    </CButton>
 
   </CForm>
 </CTabPane>
@@ -633,7 +785,22 @@ const CaseForm = () => {
 
         </CTabContent>
 
-  
+  <CToast
+  autohide={true}
+  visible={toastVisible}
+  onClose={() => setToastVisible(false)}
+  delay={3000}
+  className="position-fixed top-0 end-0 m-3"
+>
+  <CToastHeader closeButton>
+    <strong className="me-auto">النظام</strong>
+  </CToastHeader>
+
+  <CToastBody>
+    {toastMessage}
+  </CToastBody>
+</CToast>
+
         </CCardBody>
       </CCard>
 
