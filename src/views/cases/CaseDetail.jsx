@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
+
 import {
   CCard,
   CCardBody,
@@ -27,44 +28,68 @@ const CaseDetail = () => {
   const [aiResult, setAiResult] = useState('')
 
   // ================= LOAD =================
-  useEffect(() => {
-    const data = JSON.parse(localStorage.getItem('selectedCase')) || {}
-    setCaseData(data)
+useEffect(() => {
+  try {
+    const raw = localStorage.getItem('selectedCase')
+    const data = raw ? JSON.parse(raw) : {}
 
-    // History
+    setCaseData(data || {})
+
     setHistory([
-      { action: 'إنشاء القضية', date: data.createdAt, type: 'create' },
-      { action: 'تعديل الحالة', date: data.createdAt, type: 'update' }
+      {
+        action: 'إنشاء القضية',
+        date: data?.createdAt || '',
+        type: 'create'
+      },
+      {
+        action: 'تعديل الحالة',
+        date: data?.createdAt || '',
+        type: 'update'
+      }
     ])
 
-    // Audit (جديد)
     setAuditTrail([
       {
         user: 'system',
         action: 'إنشاء',
         before: null,
-        after: data.status,
-        time: data.createdAt
+        after: data?.status || '',
+        time: data?.createdAt || ''
       }
     ])
 
-  }, [])
+  } catch (err) {
+    console.error('JSON error:', err)
+    setCaseData({})
+    setHistory([])
+    setAuditTrail([])
+  }
+}, [])
 
-  // ================= AI SUMMARY =================
-  const generateAISummary = () => {
-    return `
+// ================= AI SUMMARY =================
+const aiSummary = useMemo(() => {
+  if (!caseData) return ''
+
+  return `
 🧠 ملخص ذكي:
 
-القضية تتعلق بـ "${caseData.subject}"
-تم تسجيلها بتاريخ ${caseData.fileDate}
+📌 القضية: ${caseData.subject || 'غير محدد'}
+📅 تاريخ التسجيل: ${caseData.fileDate || 'غير متوفر'}
 
-التصنيف: ${caseData.crimeType}
-الحالة الحالية: ${caseData.status}
+⚖️ التصنيف: ${caseData.crimeType || 'غير محدد'}
+📊 الحالة الحالية: ${caseData.status || 'غير محدد'}
 
+━━━━━━━━━━━━━━━━━━
 ⚖️ التوصية:
 متابعة الإجراء حسب المعطيات المتوفرة.
 `
-  }
+}, [
+  caseData.subject,
+  caseData.fileDate,
+  caseData.crimeType,
+  caseData.status
+])
+
 
   // ================= AI REAL (READY) =================
   const getAIAnalysis = async () => {
