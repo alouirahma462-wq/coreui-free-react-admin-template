@@ -82,49 +82,50 @@ export default function App() {
     );
   }
 
-  return (
-    <>
-      {(isAuth || isDashboard) && (
-        <GlobalMusic key={location.pathname} />
-      )}
+return (
+  <>
+    {(isAuth || isDashboard) && (
+      <GlobalMusic key={location.pathname} />
+    )}
 
-      <Routes>
+    <Routes>
 
-        {/* 🔥 LANDING أول صفحة */}
-        <Route path="/landing" element={<LandingPage />} />
+      {/* 🔥 LANDING أول صفحة */}
+      <Route path="/landing" element={<LandingPage />} />
 
-        {/* 🔥 ROOT */}
-        <Route path="/" element={<Navigate to="/landing" replace />} />
+      {/* 🔥 ROOT */}
+      <Route path="/" element={<Navigate to="/landing" replace />} />
 
-        {/* ✅ LOGIN */}
-        <Route path="/login" element={<Login />} />
+      {/* ✅ LOGIN */}
+      <Route path="/login" element={<Login />} />
 
-        {/* 🔥 AUTH PAGES */}
-        <Route path="/change-password" element={<ChangePassword />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+      {/* 🔥 AUTH PAGES */}
+      <Route path="/change-password" element={<ChangePassword />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* 🔥 SMART SCREEN (إضافة فقط) */}
-        <Route path="/smart" element={<SmartScreen />} />
+      {/* 🔥 SMART SCREEN */}
+      <Route path="/smart" element={<SmartScreen />} />
 
-        {/* 🔥 DASHBOARD */}
-        <Route element={<DefaultLayout />}>
-          <Route
-            path="/court/:id"
-            element={<CourtDashboard user={user} />}
-          />
-          <Route
-            path="/inspection-dashboard"
-            element={<InspectionDashboard user={user} />}
-          />
-        </Route>
+      {/* 🔥 DASHBOARD */}
+      <Route element={<DefaultLayout />}>
+        
+        <Route path="/court/:id" element={<CourtDashboard user={user} />} />
+        <Route path="/inspection-dashboard" element={<InspectionDashboard user={user} />} />
 
-        <Route path="*" element={<Navigate to="/landing" />} />
+        {/* ⭐⭐⭐ FIX مهم: إضافة القضايا داخل Layout */}
+        <Route path="/cases" element={<CaseList />} />
+        <Route path="/cases/create" element={<CaseForm />} />
+        <Route path="/case-detail" element={<CaseDetail />} />
 
-      </Routes>
-    </>
-  );
-}
+      </Route>
+
+      <Route path="*" element={<Navigate to="/landing" />} />
+
+    </Routes>
+  </>
+);
+
 
 
 
