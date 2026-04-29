@@ -122,9 +122,11 @@ return (
 
       <Route path="*" element={<Navigate to="/landing" />} />
 
-    </Routes>
-  </>
-);
+
+      </Routes>
+    </>
+  );
+}
 
 
 
