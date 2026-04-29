@@ -377,143 +377,172 @@ const CaseForm = () => {
         <CTabContent className="mt-3">
 
           {/* ================= TAB 1 ================= */}
-          <CTabPane visible={activeKey === 1}>
-            <CForm>
-              <CRow className="g-3">
+    <CTabPane visible={activeKey === 1}>
+  <CForm>
+    <CRow className="g-3">
 
-                <CCol xs={12} md={6}>
+      <CCol xs={12} md={6}>
+        <CFormSelect
+          label="المحكمة"
+          value={formData.court || ''}
+          onChange={(e) =>
+            setFormData({ ...formData, court: e.target.value })
+          }
+        >
+          {courts.map((c, i) => (
+            <option key={i} value={c}>{c}</option>
+          ))}
+        </CFormSelect>
+      </CCol>
 
-                  <CFormSelect
-                    label="المحكمة"
-                    onChange={(e) => setFormData({ ...formData, court: e.target.value })}
-                  >
-                    {courts.map((c, i) => (
-                      <option key={i}>{c}</option>
-                    ))}
-                  </CFormSelect>
-                </CCol>
+      <CCol xs={12} md={6}>
+        <CFormInput value={caseFileNumber} label="عدد الملف الأمني" readOnly />
+      </CCol>
 
-                <CCol xs={12} md={6}>
+      <CCol xs={12} md={6}>
+        <CFormSelect
+          label="مصدر الملف"
+          value={formData.source || ''}
+          onChange={(e) =>
+            setFormData({ ...formData, source: e.target.value })
+          }
+        >
+          {sources.map((s, i) => (
+            <option key={i} value={s}>{s}</option>
+          ))}
+        </CFormSelect>
+      </CCol>
 
-                  <CFormInput value={caseFileNumber} label="عدد الملف الأمني" readOnly />
-                </CCol>
+      <CCol xs={12} md={6}>
+        <CFormSelect
+          label="نوع الملف"
+          value={formData.fileType || ''}
+          onChange={(e) =>
+            setFormData({ ...formData, fileType: e.target.value })
+          }
+        >
+          {fileTypes.map((t, i) => (
+            <option key={i} value={t}>{t}</option>
+          ))}
+        </CFormSelect>
+      </CCol>
 
-                <CCol xs={12} md={6}>
+      <CCol xs={12} md={6}>
+        <CFormInput
+          type="date"
+          value={formData.fileDate || ''}
+          onChange={(e) =>
+            setFormData({ ...formData, fileDate: e.target.value })
+          }
+          label="تاريخ الملف"
+        />
+      </CCol>
 
-                  <CFormSelect
-                    label="مصدر الملف"
-                    onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                  >
-                    {sources.map((s, i) => (
-                      <option key={i}>{s}</option>
-                    ))}
-                  </CFormSelect>
-                </CCol>
+      <CCol xs={12} md={6}>
+        <CFormInput value={registryNumber} label="عدد التسجيل" readOnly />
+      </CCol>
 
-                <CCol xs={12} md={6}>
+      <CCol xs={12} md={6}>
+        <CFormInput value={tunisTime} label="تاريخ ووقت التلقي" readOnly />
+      </CCol>
 
-                  <CFormSelect
-                    label="نوع الملف"
-                    onChange={(e) => setFormData({ ...formData, fileType: e.target.value })}
-                  >
-                    {fileTypes.map((t, i) => (
-                      <option key={i}>{t}</option>
-                    ))}
-                  </CFormSelect>
-                </CCol>
+      <CCol xs={12} md={6}>
+        <CFormInput
+          value={formData.clerk || ''}
+          onChange={(e) =>
+            setFormData({ ...formData, clerk: e.target.value })
+          }
+          label="كاتب الضبط"
+        />
+      </CCol>
 
-                <CCol xs={12} md={6}>
+      <CCol xs={12} md={6}>
+        <CFormTextarea
+          value={formData.notes || ''}
+          onChange={(e) =>
+            setFormData({ ...formData, notes: e.target.value })
+          }
+          label="ملاحظات"
+        />
+      </CCol>
 
-                  <CFormInput type="date"
-                    onChange={(e) => setFormData({ ...formData, fileDate: e.target.value })}
-                    label="تاريخ الملف"
-                  />
-                </CCol>
+      <CCol xs={12} md={6}>
+        <CFormTextarea
+          value={formData.documents || ''}
+          onChange={(e) =>
+            setFormData({ ...formData, documents: e.target.value })
+          }
+          label="الوثائق المصاحبة"
+        />
+      </CCol>
 
-                <CCol xs={12} md={6}>
-
-                  <CFormInput value={registryNumber} label="عدد التسجيل" readOnly />
-                </CCol>
-
-                <CCol xs={12} md={6}>
-
-                  <CFormInput value={tunisTime} label="تاريخ ووقت التلقي" readOnly />
-                </CCol>
-
-                <CCol xs={12} md={6}>
-
-                  <CFormInput
-                    onChange={(e) => setFormData({ ...formData, clerk: e.target.value })}
-                    label="كاتب الضبط"
-                  />
-                </CCol>
-
-                <CCol xs={12} md={6}>
-
-                  <CFormTextarea
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    label="ملاحظات"
-                  />
-                </CCol>
-
-                <CCol xs={12} md={6}>
-
-                  <CFormTextarea
-                    onChange={(e) => setFormData({ ...formData, documents: e.target.value })}
-                    label="الوثائق المصاحبة"
-                  />
-                </CCol>
-
-              </CRow> 
-
-            </CForm>
-          </CTabPane>
+    </CRow>
+  </CForm>
+</CTabPane>
 
           {/* ================= TAB 2 ================= */}
-          <CTabPane visible={activeKey === 2}>
-            <CForm>
+         <CTabPane visible={activeKey === 2}>
+  <CForm>
 
-              <CFormInput
-                label="الموضوع"
-                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-              />
+    <CFormInput
+      value={formData.subject || ''}
+      label="الموضوع"
+      onChange={(e) =>
+        setFormData({ ...formData, subject: e.target.value })
+      }
+    />
 
-              <CFormSelect
-                label="التصنيف الجرمي"
-                onChange={(e) => setFormData({ ...formData, crimeType: e.target.value })}
-              >
-                {crimeCategories.map((cat, i) => (
-                  <optgroup key={i} label={cat.label}>
-                    {cat.options.map((o, j) => (
-                      <option key={j}>{o}</option>
-                    ))}
-                  </optgroup>
-                ))}
-              </CFormSelect>
+    <CFormSelect
+      label="التصنيف الجرمي"
+      value={formData.crimeType || ''}
+      onChange={(e) =>
+        setFormData({ ...formData, crimeType: e.target.value })
+      }
+    >
+      {crimeCategories.map((cat, i) => (
+        <optgroup key={i} label={cat.label}>
+          {cat.options.map((o, j) => (
+            <option key={j} value={o}>{o}</option>
+          ))}
+        </optgroup>
+      ))}
+    </CFormSelect>
 
-              <CFormInput
-                label="مكان الواقعة"
-                onChange={(e) => setFormData({ ...formData, crimePlace: e.target.value })}
-              />
+    <CFormInput
+      value={formData.crimePlace || ''}
+      label="مكان الواقعة"
+      onChange={(e) =>
+        setFormData({ ...formData, crimePlace: e.target.value })
+      }
+    />
 
-              <CFormInput
-                type="date"
-                onChange={(e) => setFormData({ ...formData, crimeDate: e.target.value })}
-                label="تاريخ الواقعة"
-              />
+    <CFormInput
+      type="date"
+      value={formData.crimeDate || ''}
+      label="تاريخ الواقعة"
+      onChange={(e) =>
+        setFormData({ ...formData, crimeDate: e.target.value })
+      }
+    />
 
-              <CFormTextarea
-                onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-                label="ملخص الوقائع"
-              />
+    <CFormTextarea
+      value={formData.summary || ''}
+      label="ملخص الوقائع"
+      onChange={(e) =>
+        setFormData({ ...formData, summary: e.target.value })
+      }
+    />
 
-              <CFormTextarea
-                onChange={(e) => setFormData({ ...formData, aiSuggestion: e.target.value })}
-                label="اقتراح تصنيف جزائي (AI)"
-              />
+    <CFormTextarea
+      value={formData.aiSuggestion || ''}
+      label="اقتراح تصنيف جزائي (AI)"
+      onChange={(e) =>
+        setFormData({ ...formData, aiSuggestion: e.target.value })
+      }
+    />
 
-            </CForm>
-          </CTabPane>
+  </CForm>
+</CTabPane>
 
           {/* ================= TAB 3 ================= */}
           <CTabPane visible={activeKey === 3}>
@@ -525,54 +554,68 @@ const CaseForm = () => {
 <CTabPane visible={activeKey === 4}>
   <CForm>
 
-    <CFormInput
-      value={caseId}
-      label="ID القضية"
-      readOnly
-      className="mb-3"
-    />
+    <CFormInput value={caseId} label="ID القضية" readOnly className="mb-3" />
 
     <CFormTextarea
-      onChange={(e) => setFormData({ ...formData, decisionText: e.target.value })}
+      value={formData.decisionText || ''}
       label="نص القرار"
+      onChange={(e) =>
+        setFormData({ ...formData, decisionText: e.target.value })
+      }
     />
 
     <CFormInput
       type="date"
-      onChange={(e) => setFormData({ ...formData, decisionDate: e.target.value })}
+      value={formData.decisionDate || ''}
       label="تاريخ القرار"
+      onChange={(e) =>
+        setFormData({ ...formData, decisionDate: e.target.value })
+      }
     />
 
     <CFormTextarea
-      onChange={(e) => setFormData({ ...formData, lawText: e.target.value })}
+      value={formData.lawText || ''}
       label="النص القانوني"
+      onChange={(e) =>
+        setFormData({ ...formData, lawText: e.target.value })
+      }
     />
 
     <CFormSelect
-      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
       label="حالة القضية"
+      value={formData.status || ''}
+      onChange={(e) =>
+        setFormData({ ...formData, status: e.target.value })
+      }
     >
-      <option>تسجيل</option>
-      <option>حفظ</option>
-      <option>مجلس</option>
-      <option>أطفال</option>
-      <option>تحقيق</option>
-      <option>جناحي الناحية</option>
-      <option>مخالفات</option>
-      <option>مضافة</option>
-      <option>تعهد</option>
-      <option>تنفيذ</option>
-      <option>محال على قاضي الأسرة</option>
-      <option>محال على القضاء المنفرد</option>
-      <option>الصلح بالوساطة</option>
-      <option>طور البحث</option>
-      <option>تخلي</option>
+      <option value="">-- اختر --</option>
+      <option value="تسجيل">تسجيل</option>
+      <option value="حفظ">حفظ</option>
+      <option value="مجلس">مجلس</option>
+      <option value="أطفال">أطفال</option>
+      <option value="تحقيق">تحقيق</option>
+      <option value="جناحي الناحية">جناحي الناحية</option>
+      <option value="مخالفات">مخالفات</option>
+      <option value="مضافة">مضافة</option>
+      <option value="تعهد">تعهد</option>
+      <option value="تنفيذ">تنفيذ</option>
+      <option value="محال على قاضي الأسرة">محال على قاضي الأسرة</option>
+      <option value="محال على القضاء المنفرد">محال على القضاء المنفرد</option>
+      <option value="الصلح بالوساطة">الصلح بالوساطة</option>
+      <option value="طور البحث">طور البحث</option>
+      <option value="تخلي">تخلي</option>
     </CFormSelect>
 
     <CFormTextarea
-      onChange={(e) => setFormData({ ...formData, statusReason: e.target.value })}
+      value={formData.statusReason || ''}
       label="سبب الحالة"
+      onChange={(e) =>
+        setFormData({ ...formData, statusReason: e.target.value })
+      }
     />
+
+  </CForm>
+</CTabPane>
 
     {/* ✅ زر الحفظ الصحيح */}
    <CButton
