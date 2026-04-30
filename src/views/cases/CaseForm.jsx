@@ -455,22 +455,9 @@ const handleSave = () => {
     <CCard className="case-card">
       <CCardBody>
 
-        <CNav variant="tabs">
-          <CNavItem>
-            <CNavLink active={activeKey === 1} onClick={() => setActiveKey(1)}>📁 بيانات الملف</CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink active={activeKey === 2} onClick={() => setActiveKey(2)}>📍 الواقعة</CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink active={activeKey === 3} onClick={() => setActiveKey(3)}>👥 الأطراف</CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink active={activeKey === 4} onClick={() => setActiveKey(4)}>⚖️ الحالة والقرار</CNavLink>
-          </CNavItem>
-        </CNav>
+        
 
-        <CTabContent className="mt-3">
+      
 
 {/* ================= TAB 1 ================= */}
 <CTabPane visible={activeKey === 1}>
@@ -782,7 +769,7 @@ const handleSave = () => {
 </CTabPane>
 
 
-        </CTabContent>
+       
 
   <CToast
   autohide={true}
