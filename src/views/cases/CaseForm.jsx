@@ -376,78 +376,77 @@ const [toastMessage, setToastMessage] = useState('')
   // 💾 SAVE FUNCTION (ADDED)
   // =======================
 const handleSave = () => {
-
-  const normalizedCase = {
-    ...formData,
-    caseFileNumber,
-    registryNumber,
-    caseId,
-    fileDate: formData.fileDate,
-    subject: formData.subject,
-    status: formData.status,
-    source: formData.source,
-    fileType: formData.fileType,
-    createdAt: tunisTime,
-
-    plaintiffGender: formData.plaintiff?.gender,
-    plaintiffNationality: formData.plaintiff?.nationality,
-    plaintiffBirthDate: formData.plaintiff?.birthDate,
-    plaintiffState: formData.plaintiff?.birthState,
-    plaintiffResState: formData.plaintiff?.resState,
-
-    suspectGender: formData.suspect?.gender,
-    suspectNationality: formData.suspect?.nationality,
-    suspectBirthDate: formData.suspect?.birthDate,
-    suspectState: formData.suspect?.birthState,
-    suspectResState: formData.suspect?.resState,
-  }
-
-  let existing = []
-
   try {
-const raw = localStorage.getItem('cases')
+    const raw = localStorage.getItem('cases')
 
-let existing = []
+    let existing = []
 
-try {
-  existing = raw ? JSON.parse(raw) : []
-} catch {
-  existing = []
-}
+    try {
+      existing = raw ? JSON.parse(raw) : []
+    } catch (e) {
+      existing = []
+    }
 
-  existing.push(normalizedCase)
+    const normalizedCase = {
+      ...formData,
+      caseFileNumber,
+      registryNumber,
+      caseId,
+      fileDate: formData.fileDate,
+      subject: formData.subject,
+      status: formData.status,
+      source: formData.source,
+      fileType: formData.fileType,
+      createdAt: tunisTime,
 
-  localStorage.setItem('cases', JSON.stringify(existing))
+      plaintiffGender: formData.plaintiff?.gender,
+      plaintiffNationality: formData.plaintiff?.nationality,
+      plaintiffBirthDate: formData.plaintiff?.birthDate,
+      plaintiffState: formData.plaintiff?.birthState,
+      plaintiffResState: formData.plaintiff?.resState,
 
-  setToastMessage('✅ تم حفظ القضية بنجاح')
-setToastVisible(true)
+      suspectGender: formData.suspect?.gender,
+      suspectNationality: formData.suspect?.nationality,
+      suspectBirthDate: formData.suspect?.birthDate,
+      suspectState: formData.suspect?.birthState,
+      suspectResState: formData.suspect?.resState,
+    }
 
+    existing.push(normalizedCase)
 
-  // ✅ RESET
-  setFormData({
-    court: '',
-    fileType: '',
-    source: '',
-    fileDate: '',
-    clerk: '',
-    notes: '',
-    documents: '',
-    subject: '',
-    crimeType: '',
-    crimePlace: '',
-    crimeDate: '',
-    summary: '',
-    aiSuggestion: '',
-    status: '',
-    statusReason: '',
-    decisionText: '',
-    decisionDate: '',
-    lawText: '',
-    plaintiff: {},
-    suspect: {}
-  })
+    localStorage.setItem('cases', JSON.stringify(existing))
 
-  setActiveKey(1)
+    setToastMessage('✅ تم حفظ القضية بنجاح')
+    setToastVisible(true)
+
+    setFormData({
+      court: '',
+      fileType: '',
+      source: '',
+      fileDate: '',
+      clerk: '',
+      notes: '',
+      documents: '',
+      subject: '',
+      crimeType: '',
+      crimePlace: '',
+      crimeDate: '',
+      summary: '',
+      aiSuggestion: '',
+      status: '',
+      statusReason: '',
+      decisionText: '',
+      decisionDate: '',
+      lawText: '',
+      plaintiff: {},
+      suspect: {}
+    })
+
+    setActiveKey(1)
+
+  } catch (err) {
+    console.error(err)
+  }
 }
 
  return (
