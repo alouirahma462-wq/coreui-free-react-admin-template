@@ -15,7 +15,25 @@ import {
   CBadge,
   CButton
 } from '@coreui/react'
-
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
+// =======================
+// 🧠 IMAGE LOADER (PUT HERE)
+// =======================
+const loadImage = (url) =>
+  new Promise((resolve) => {
+    const img = new Image()
+    img.crossOrigin = "anonymous"
+    img.src = url
+    img.onload = () => {
+      const canvas = document.createElement("canvas")
+      canvas.width = img.width
+      canvas.height = img.height
+      const ctx = canvas.getContext("2d")
+      ctx.drawImage(img, 0, 0)
+      resolve(canvas.toDataURL("image/png"))
+    }
+  })
 // =======================
 // 🧾 Case Detail
 // =======================
@@ -138,49 +156,191 @@ const pdfData = useMemo(() => {
   }
 }, [caseData])
 
-  // ================= PDF EXPORT =================
-  const exportPDF = () => {
+// ================= PDF EXPORT =================
+const exportPDF = async () => {
+  const doc = new jsPDF()
 
-    const content = `
-******** وزارة العدل ********
+  const logo = await loadImage("/logo.png")
+  const stamp = await loadImage("/stamp.png")
 
-📄 مذكرة قضية رسمية
+  // ✅ رقم حكم رسمي (أفضل من Date.now)
+  const caseNumber = `TN-MJ-${new Date().getFullYear()}-${caseFileNumber}`
 
-رقم الملف: ${caseData.caseFileNumber}
-عدد التسجيل: ${caseData.registryNumber}
+  // 🔐 رابط التحقق (يعتمد على caseId الداخلي)
+  const qrData = `https://case-system.tn/case/${caseId}`
 
-📌 الموضوع:
-${caseData.subject}
+  // ================= COVER PAGE =================
+  doc.setFontSize(20)
+  doc.setFont("helvetica", "bold")
+  doc.text("الجمهورية التونسية", 105, 50, { align: "center" })
+  doc.text("وزارة العدل", 105, 60, { align: "center" })
+  doc.text("ملف قضية رسمي", 105, 75, { align: "center" })
 
-⚖️ الحالة:
-${caseData.status}
+  doc.setFontSize(12)
+  doc.text(`رقم الحكم: ${caseNumber}`, 105, 90, { align: "center" })
 
-📍 الوقائع:
-${caseData.summary}
+  // 🔐 QR CODE
+  const qrImage = await QRCode.toDataURL(qrData)
+  doc.addImage(qrImage, "PNG", 85, 100, 40, 40)
 
-👤 الشاكي:
-${caseData.plaintiff?.fullName}
+  doc.addPage()
 
-⚠️ المظنون فيه:
-${caseData.suspect?.fullName}
+  // ================= HEADER =================
+  doc.addImage(logo, "PNG", 10, 5, 25, 25)
 
-📝 القرار:
-${caseData.decisionText}
+  doc.setFontSize(16)
+  doc.setFont("helvetica", "bold")
+  doc.text("الجمهورية التونسية", 105, 15, { align: "center" })
+  doc.text("وزارة العدل", 105, 23, { align: "center" })
+  doc.text("مذكرة قضية رسمية", 105, 32, { align: "center" })
 
------------------------------
-🖊️ الإمضاء:
-....................
-`
+  doc.line(10, 38, 200, 38)
 
-    const blob = new Blob([content], { type: 'application/pdf' })
-    const url = URL.createObjectURL(blob)
+  let y = 45
 
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'case-report.pdf'
-    a.click()
+  // ================= helper =================
+  const section = (title, body) => {
+    doc.setFontSize(13)
+    doc.setFont("helvetica", "bold")
+    doc.text(title, 14, y)
+    y += 5
+
+    autoTable(doc, {
+      startY: y,
+      theme: "grid",
+      styles: { fontSize: 9, cellPadding: 2 },
+      headStyles: { fillColor: [30, 30, 30], textColor: 255 },
+      body,
+    })
+
+    y = doc.lastAutoTable.finalY + 8
   }
 
+  // ================= TAB 1 =================
+  section("📁 بيانات الملف", [
+    ["المحكمة", formData.court],
+    ["عدد الملف", caseFileNumber],
+    ["المصدر", formData.source],
+    ["نوع الملف", formData.fileType],
+    ["تاريخ الملف", formData.fileDate],
+    ["كاتب الضبط", formData.clerk],
+    ["ملاحظات", formData.notes],
+    ["الوثائق", formData.documents],
+  ])
+
+  // ================= TAB 2 =================
+  section("📍 الواقعة", [
+    ["الموضوع", formData.subject],
+    ["التصنيف الجرمي", formData.crimeType],
+    ["المكان", formData.crimePlace],
+    ["التاريخ", formData.crimeDate],
+    ["الملخص", formData.summary],
+    ["AI اقتراح", formData.aiSuggestion],
+  ])
+
+  // ================= TAB 3 =================
+  section("👤 الشاكي", [
+    ["الاسم الكامل", formData.plaintiff?.fullName],
+    ["الجنس", formData.plaintiff?.gender],
+    ["الجنسية", formData.plaintiff?.nationality],
+    ["تاريخ الولادة", formData.plaintiff?.birthDate],
+    ["ولاية الولادة", formData.plaintiff?.birthState],
+    ["معتمدية الولادة", formData.plaintiff?.birthDelegation],
+    ["ولاية السكن", formData.plaintiff?.resState],
+    ["معتمدية السكن", formData.plaintiff?.resDelegation],
+    ["التعليم", formData.plaintiff?.education],
+    ["المهنة", formData.plaintiff?.job],
+    ["ملاحظات", formData.plaintiff?.notes],
+    ["إفادة", formData.plaintiff?.statement],
+    ["AI", formData.plaintiff?.aiSuggestion],
+  ])
+
+  section("⚠️ المظنون فيه", [
+    ["الاسم الكامل", formData.suspect?.fullName],
+    ["الجنس", formData.suspect?.gender],
+    ["الجنسية", formData.suspect?.nationality],
+    ["تاريخ الولادة", formData.suspect?.birthDate],
+    ["ولاية الولادة", formData.suspect?.birthState],
+    ["معتمدية الولادة", formData.suspect?.birthDelegation],
+    ["ولاية السكن", formData.suspect?.resState],
+    ["معتمدية السكن", formData.suspect?.resDelegation],
+    ["التعليم", formData.suspect?.education],
+    ["المهنة", formData.suspect?.job],
+    ["ملاحظات", formData.suspect?.notes],
+    ["إفادة", formData.suspect?.statement],
+    ["AI", formData.suspect?.aiSuggestion],
+  ])
+
+  // ================= TAB 4 =================
+  section("⚖️ القرار", [
+    ["ID القضية", caseId],
+    ["رقم الحكم", caseNumber],
+    ["الحالة", formData.status],
+    ["تاريخ القرار", formData.decisionDate],
+    ["نص القرار", formData.decisionText],
+    ["النص القانوني", formData.lawText],
+    ["سبب الحالة", formData.statusReason],
+  ])
+
+  // ================= 🧠 AI SUMMARY PAGE =================
+  doc.addPage()
+
+  doc.setFontSize(16)
+  doc.text("🧠 AI SUMMARY", 105, 20, { align: "center" })
+
+  doc.setFontSize(11)
+  doc.text(
+    `
+القضية: ${formData.subject || ""}
+التصنيف: ${formData.crimeType || ""}
+الحالة: ${formData.status || ""}
+
+توصية AI:
+- متابعة القضية قانونياً
+- مراجعة الأدلة والوقائع
+    `,
+    20,
+    40
+  )
+
+  // ================= 🕵️ AUDIT PAGE =================
+  doc.addPage()
+
+  doc.setFontSize(16)
+  doc.text("🕵️ Audit Trail", 105, 20, { align: "center" })
+
+  let ay = 40
+
+  const audit = [
+    `إنشاء القضية: ${new Date().toLocaleString()}`,
+    `حفظ البيانات`,
+    `تحديث الحالة: ${formData.status}`,
+    `توليد رقم حكم: ${caseNumber}`,
+  ]
+
+  audit.forEach((a) => {
+    doc.text(`• ${a}`, 20, ay)
+    ay += 10
+  })
+
+  // ================= FOOTER =================
+  doc.addImage(stamp, "PNG", 145, 250, 45, 45)
+
+  doc.setFontSize(12)
+  doc.text("✍️ توقيع إلكتروني معتمد", 20, 255)
+
+  doc.setFontSize(10)
+  doc.text("النظام القضائي - إدارة القضايا", 20, 262)
+
+  doc.setFontSize(9)
+  doc.text(`ID: ${caseId}`, 20, 270)
+
+  doc.text("Generated by Case Management System", 14, 290)
+
+  // ================= SAVE =================
+  doc.save(`case-${caseFileNumber}.pdf`)
+}
+  
   // ================= TIMELINE COLOR =================
   const getColor = (type) => {
     if (type === 'create') return 'green'
