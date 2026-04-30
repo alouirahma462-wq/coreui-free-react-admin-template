@@ -11,16 +11,16 @@ import LandingPage from "./views/pages/LandingPage.jsx";
 
 import CourtDashboard from "./views/dashboard/CourtDashboard.jsx";
 import InspectionDashboard from "./views/dashboard/InspectionDashboard.jsx";
+
 import CaseForm from "./views/cases/CaseForm.jsx";
 import CaseList from "./views/cases/CaseList.jsx";
 import CaseDetail from "./views/cases/CaseDetail.jsx";
 
 import GlobalMusic from "./GlobalMusic";
 
-// 🔥 مهم: استخدم DefaultLayout فقط
 import DefaultLayout from "./layout/DefaultLayout";
+import FormLayout from "./layout/FormLayout"; // ⭐ NEW ONLY
 
-// 🔥 SMART SCREEN (إضافة جديدة فقط)
 import SmartScreen from "./views/pages/SmartScreen.jsx";
 
 export default function App() {
@@ -82,51 +82,59 @@ export default function App() {
     );
   }
 
-return (
-  <>
-    {(isAuth || isDashboard) && (
-      <GlobalMusic key={location.pathname} />
-    )}
+  return (
+    <>
+      {(isAuth || isDashboard) && (
+        <GlobalMusic key={location.pathname} />
+      )}
 
-    <Routes>
+      <Routes>
 
-      {/* 🔥 LANDING أول صفحة */}
-      <Route path="/landing" element={<LandingPage />} />
+        {/* 🔥 LANDING */}
+        <Route path="/landing" element={<LandingPage />} />
 
-      {/* 🔥 ROOT */}
-      <Route path="/" element={<Navigate to="/landing" replace />} />
+        {/* 🔥 ROOT */}
+        <Route path="/" element={<Navigate to="/landing" replace />} />
 
-      {/* ✅ LOGIN */}
-      <Route path="/login" element={<Login />} />
+        {/* 🔓 AUTH */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* 🔥 AUTH PAGES */}
-      <Route path="/change-password" element={<ChangePassword />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+        {/* 🔥 SMART SCREEN (مستقل) */}
+        <Route path="/smart" element={<SmartScreen />} />
 
-      {/* 🔥 SMART SCREEN */}
-      <Route path="/smart" element={<SmartScreen />} />
+        {/* =========================
+            📊 DASHBOARD ONLY
+        ========================= */}
+        <Route element={<DefaultLayout />}>
 
-      {/* 🔥 DASHBOARD */}
-      <Route element={<DefaultLayout />}>
-        
-        <Route path="/court/:id" element={<CourtDashboard user={user} />} />
-        <Route path="/inspection-dashboard" element={<InspectionDashboard user={user} />} />
+          <Route path="/court/:id" element={<CourtDashboard user={user} />} />
+          <Route path="/inspection-dashboard" element={<InspectionDashboard user={user} />} />
 
-        {/* ⭐⭐⭐ FIX مهم: إضافة القضايا داخل Layout */}
-        <Route path="/cases" element={<CaseList />} />
-        <Route path="/cases/create" element={<CaseForm />} />
-        <Route path="/case-detail" element={<CaseDetail />} />
+        </Route>
 
-      </Route>
+        {/* =========================
+            ⚖️ CASE SYSTEM (FORM LAYOUT)
+        ========================= */}
+        <Route element={<FormLayout />}>
 
-      <Route path="*" element={<Navigate to="/landing" />} />
+          <Route path="/cases" element={<CaseList />} />
+          <Route path="/cases/create" element={<CaseForm />} />
+          <Route path="/cases/edit/:id" element={<CaseForm />} />
+          <Route path="/case-detail" element={<CaseDetail />} />
 
+        </Route>
+
+        {/* fallback */}
+        <Route path="*" element={<Navigate to="/landing" />} />
 
       </Routes>
     </>
   );
 }
+
 
 
 
