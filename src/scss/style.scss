@@ -44,7 +44,7 @@ body {
 }
 
 /* =========================
-   🧱 MAIN AREA (CoreUI uses .body)
+   🧱 MAIN AREA
 ========================= */
 
 .body {
@@ -66,7 +66,7 @@ body {
 }
 
 /* =========================
-   📄 CONTENT AREA (IMPORTANT FIX)
+   📄 CONTENT AREA
 ========================= */
 
 .body > .flex-grow-1 {
@@ -86,7 +86,7 @@ body {
 }
 
 /* =========================
-   🔴 TOP BAR (SAFE)
+   🔴 TOP BAR
 ========================= */
 
 .top-bar {
@@ -134,54 +134,148 @@ body::after {
 }
 
 /* =====================================================
-   ⚖️ CASE SYSTEM UI (NEW - SAFE ADDITION)
+   ⚖️ CASE FORM SYSTEM (ONLY FOR FORMS)
+===================================================== */
+
+/* 🌸 BACKGROUND (only form pages) */
+.form-bg {
+  min-height: 100vh;
+  padding: 40px;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+  background: radial-gradient(circle at top left, #f7e7e2 0%, #e3c4b6 40%, #d7b2a1 100%);
+
+  position: relative;
+  overflow: hidden;
+}
+
+/* glow effect */
+.form-bg::before {
+  content: "";
+  position: absolute;
+  top: -100px;
+  left: -100px;
+  width: 400px;
+  height: 400px;
+  background: rgba(255, 255, 255, 0.25);
+  filter: blur(120px);
+  border-radius: 50%;
+}
+
+.form-bg::after {
+  content: "";
+  position: absolute;
+  bottom: -120px;
+  right: -120px;
+  width: 500px;
+  height: 500px;
+  background: rgba(180, 120, 100, 0.2);
+  filter: blur(140px);
+  border-radius: 50%;
+}
+
+/* 🧊 GLASS CARD */
+.glass-card {
+  width: 100%;
+  max-width: 1150px;
+
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  border-radius: 22px;
+
+  border: 1px solid rgba(255, 255, 255, 0.35);
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+
+  padding: 25px;
+
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+}
+
+/* =========================
+   ✨ INPUTS MODERN STYLE
+========================= */
+
+input,
+select,
+textarea {
+  border-radius: 12px !important;
+  border: 1px solid rgba(0,0,0,0.08) !important;
+
+  background: rgba(255, 255, 255, 0.7) !important;
+
+  transition: all 0.2s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #c79b8a !important;
+  box-shadow: 0 0 0 3px rgba(199, 155, 138, 0.25) !important;
+}
+
+/* =========================
+   🪟 HEADINGS STYLE
+========================= */
+
+h1, h2, h3, h4, h5 {
+  color: #5a3e36;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* =========================
+   🔘 BUTTONS STYLE
+========================= */
+
+.btn-primary {
+  background: linear-gradient(135deg, #b97c6d, #8b5e54) !important;
+  border: none !important;
+  border-radius: 12px !important;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+/* =====================================================
+   📄 CASE OLD STYLE (optional fallback)
 ===================================================== */
 
 .case-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #fdf2f8, #fce7f3);
   padding: 20px;
-  position: relative;
 }
 
-/* ⚖️ watermark */
-.case-page::before {
-  content: "⚖️";
-  position: absolute;
-  font-size: 200px;
-  opacity: 0.03;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-/* 🧾 card style */
 .case-card {
   border-radius: 20px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  background: white;
 }
 
-/* 🔍 filters box */
-.filter-box {
-  background: #fff;
-  padding: 15px;
-  border-radius: 15px;
-  margin-bottom: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-}
+/* =========================
+   📱 RESPONSIVE
+========================= */
 
-/* 📱 responsive fix for small screens */
 @media (max-width: 768px) {
-  .case-page {
-    padding: 10px;
+  .form-bg {
+    padding: 15px;
   }
 
-  .case-card {
-    border-radius: 12px;
+  .glass-card {
+    border-radius: 14px;
   }
 }
+
 
 
 
