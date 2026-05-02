@@ -462,77 +462,85 @@ const validateStep = (step, formData) => {
   const validationErrors = {}
 
   // =========================
-  // 🟦 STEP 1
+  // STEP 1
   // =========================
   if (step === 1) {
-    if (!formData.court) errors.court = "المحكمة مطلوبة"
-    if (!formData.source) errors.source = "مصدر الملف مطلوب"
-    if (!formData.fileType) errors.fileType = "نوع الملف مطلوب"
-    if (!formData.fileDate) errors.fileDate = "تاريخ الملف مطلوب"
-    if (!formData.clerk) errors.clerk = "كاتب الضبط مطلوب"
-    if (!formData.notes) errors.notes = "الملاحظات مطلوبة"
-    if (!formData.documents) errors.documents = "الوثائق المصاحبة مطلوبة"
+    if (!formData.court) validationErrors.court = "المحكمة مطلوبة"
+    if (!formData.source) validationErrors.source = "مصدر الملف مطلوب"
+    if (!formData.fileType) validationErrors.fileType = "نوع الملف مطلوب"
+    if (!formData.fileDate) validationErrors.fileDate = "تاريخ الملف مطلوب"
+    if (!formData.clerk) validationErrors.clerk = "كاتب الضبط مطلوب"
+    if (!formData.notes) validationErrors.notes = "الملاحظات مطلوبة"
+    if (!formData.documents) validationErrors.documents = "الوثائق المصاحبة مطلوبة"
   }
 
   // =========================
-  // 🟦 STEP 2
+  // STEP 2
   // =========================
   if (step === 2) {
-    if (!formData.subject) errors.subject = "الموضوع مطلوب"
-    if (!formData.crimeType) errors.crimeType = "التصنيف الجرمي مطلوب"
-    if (!formData.crimePlace) errors.crimePlace = "مكان الواقعة مطلوب"
-    if (!formData.crimeDate) errors.crimeDate = "تاريخ الواقعة مطلوب"
-    if (!formData.summary) errors.summary = "ملخص الوقائع مطلوب"
-    if (!formData.aiSuggestion) errors.aiSuggestion = "اقتراح AI مطلوب"
+    if (!formData.subject) validationErrors.subject = "الموضوع مطلوب"
+    if (!formData.crimeType) validationErrors.crimeType = "التصنيف الجرمي مطلوب"
+    if (!formData.crimePlace) validationErrors.crimePlace = "مكان الواقعة مطلوب"
+    if (!formData.crimeDate) validationErrors.crimeDate = "تاريخ الواقعة مطلوب"
+    if (!formData.summary) validationErrors.summary = "ملخص الوقائع مطلوب"
+    if (!formData.aiSuggestion) validationErrors.aiSuggestion = "اقتراح AI مطلوب"
   }
 
   // =========================
-  // 🟦 STEP 3
+  // STEP 3
   // =========================
   if (step === 3) {
 
     const checkPerson = (p = {}, key) => {
-      if (!p?.fullName) errors[`${key}.fullName`] = "الاسم الكامل مطلوب"
-      if (!p?.gender) errors[`${key}.gender`] = "الجنس مطلوب"
-      if (!p?.nationality) errors[`${key}.nationality`] = "الجنسية مطلوبة"
-      if (!p?.birthDate) errors[`${key}.birthDate`] = "تاريخ الولادة مطلوب"
-      if (!p?.birthState) errors[`${key}.birthState`] = "ولاية الولادة مطلوبة"
-      if (!p?.birthDelegation) errors[`${key}.birthDelegation`] = "معتمدية الولادة مطلوبة"
-      if (!p?.resState) errors[`${key}.resState`] = "ولاية السكن مطلوبة"
-      if (!p?.resDelegation) errors[`${key}.resDelegation`] = "معتمدية السكن مطلوبة"
-      if (!p?.education) errors[`${key}.education`] = "المستوى التعليمي مطلوب"
-      if (!p?.job) errors[`${key}.job`] = "المهنة مطلوبة"
-      if (!p?.notes) errors[`${key}.notes`] = "ملاحظات مطلوبة"
-      if (!p?.statement) errors[`${key}.statement`] = "الإفادة مطلوبة"
-
-      // ⚠️ تم حذف aiSuggestion من STEP 3 لأنه غالباً خطأ تصميم
+      if (!p?.fullName) validationErrors[`${key}.fullName`] = "الاسم الكامل مطلوب"
+      if (!p?.gender) validationErrors[`${key}.gender`] = "الجنس مطلوب"
+      if (!p?.nationality) validationErrors[`${key}.nationality`] = "الجنسية مطلوبة"
+      if (!p?.birthDate) validationErrors[`${key}.birthDate`] = "تاريخ الولادة مطلوب"
+      if (!p?.birthState) validationErrors[`${key}.birthState`] = "ولاية الولادة مطلوبة"
+      if (!p?.birthDelegation) validationErrors[`${key}.birthDelegation`] = "معتمدية الولادة مطلوبة"
+      if (!p?.resState) validationErrors[`${key}.resState`] = "ولاية السكن مطلوبة"
+      if (!p?.resDelegation) validationErrors[`${key}.resDelegation`] = "معتمدية السكن مطلوبة"
+      if (!p?.education) validationErrors[`${key}.education`] = "المستوى التعليمي مطلوب"
+      if (!p?.job) validationErrors[`${key}.job`] = "المهنة مطلوبة"
+      if (!p?.notes) validationErrors[`${key}.notes`] = "ملاحظات مطلوبة"
+      if (!p?.statement) validationErrors[`${key}.statement`] = "الإفادة مطلوبة"
     }
-checkPerson(formData.plaintiff || {}, "plaintiff")
-checkPerson(formData.suspect || {}, "suspect")
 
+    checkPerson(formData.plaintiff || {}, "plaintiff")
+    checkPerson(formData.suspect || {}, "suspect")
   }
 
   // =========================
-  // 🟦 STEP 4
+  // STEP 4
   // =========================
   if (step === 4) {
-    if (!formData.decisionText) errors.decisionText = "نص القرار مطلوب"
-    if (!formData.decisionDate) errors.decisionDate = "تاريخ القرار مطلوب"
-    if (!formData.lawText) errors.lawText = "النص القانوني مطلوب"
-    if (!formData.status) errors.status = "حالة القضية مطلوبة"
-    if (!formData.statusReason) errors.statusReason = "سبب الحالة مطلوب"
+    if (!formData.decisionText) validationErrors.decisionText = "نص القرار مطلوب"
+    if (!formData.decisionDate) validationErrors.decisionDate = "تاريخ القرار مطلوب"
+    if (!formData.lawText) validationErrors.lawText = "النص القانوني مطلوب"
+    if (!formData.status) validationErrors.status = "حالة القضية مطلوبة"
+    if (!formData.statusReason) validationErrors.statusReason = "سبب الحالة مطلوب"
   }
 
-  return errors
+  return validationErrors
 }
+
 
 const handleNext = (nextStep) => {
   const stepErrors = validateStep(step, formData)
 
-  if (Object.keys(stepErrors).length > 0) {
+  const keys = Object.keys(stepErrors)
+
+  if (keys.length > 0) {
     setErrors(stepErrors)
-   const scrollTop = () =>
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+
+    // 🔥 يركز على أول input فيه خطأ
+    const firstErrorKey = keys[0]
+    const el = document.querySelector(`[name="${firstErrorKey}"]`)
+
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      el.focus()
+    }
 
     return
   }
@@ -541,7 +549,7 @@ const handleNext = (nextStep) => {
   setStep(nextStep)
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
-  
+
 const [showSuccessModal, setShowSuccessModal] = useState(false)
 const [caseFileNumber] = useState(generateCaseFileNumber())
 const [registryNumber] = useState(generateRegistryNumber())
