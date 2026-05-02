@@ -41,12 +41,13 @@
 .medium { color: orange; }
 .low { color: green; }
 
-/* MAIN */
 .main {
   flex: 1;
   padding: 10px;
   background: #f3f4f6;
+  font-size: 1rem;
 }
+
 
 .cards {
   display: grid;
