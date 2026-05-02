@@ -1,5 +1,5 @@
 /* =====================================================
-   🌐 COREUI GLOBAL CLEAN RESET (FINAL FIX)
+   🌐 COREUI GLOBAL RESET (CLEAN FINAL VERSION)
 ===================================================== */
 
 html,
@@ -9,26 +9,26 @@ body,
   width: 100%;
   margin: 0;
   padding: 0;
+  font-size: 16px;
 }
 
 /* =====================================================
-   🔥 BODY (SAFE COREUI FONT - NO OVERRIDE)
+   🔥 BODY (COREUI DEFAULT SAFE FONT)
 ===================================================== */
 
 body {
   background-color: #f3f1ef;
 
+  font-family: var(--cui-font-sans-serif);
   font-size: 1rem;
   line-height: 1.5;
-
-  font-family: var(--cui-font-sans-serif);
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* =====================================================
-   📦 LAYOUT COREUI SAFE
+   📦 LAYOUT
 ===================================================== */
 
 .wrapper {
@@ -54,7 +54,7 @@ body {
 }
 
 /* =====================================================
-   ⚖️ FORM LAYOUT (NO WHITE SCREEN FIXED)
+   ⚖️ FORM LAYOUT
 ===================================================== */
 
 .form-bg {
@@ -68,10 +68,11 @@ body {
   background-color: #f3f1ef;
 
   direction: rtl;
+  text-align: right;
 }
 
 /* =====================================================
-   🧊 CARD CLEAN
+   🧊 CARD
 ===================================================== */
 
 .glass-card {
@@ -89,7 +90,7 @@ body {
 }
 
 /* =====================================================
-   ✨ INPUTS (NO FONT BREAK)
+   ✨ INPUTS
 ===================================================== */
 
 .form-control,
@@ -105,7 +106,7 @@ input {
 
   font-size: 0.875rem;
 
-  font-family: inherit;
+  font-family: var(--cui-font-sans-serif);
 
   text-align: right;
 }
