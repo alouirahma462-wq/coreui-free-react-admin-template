@@ -1,5 +1,5 @@
 /* =====================================================
-   🌐 GLOBAL RESET (RESTORE COREUI ORIGINAL STYLE)
+   🌐 COREUI GLOBAL CLEAN RESET (FINAL FIX)
 ===================================================== */
 
 html,
@@ -12,7 +12,7 @@ body,
 }
 
 /* =====================================================
-   🔥 BODY (COREUI DEFAULT FONT)
+   🔥 BODY (SAFE COREUI FONT - NO OVERRIDE)
 ===================================================== */
 
 body {
@@ -21,14 +21,14 @@ body {
   font-size: 1rem;
   line-height: 1.5;
 
-  font-family: var(--cui-font-sans-serif) !important;
+  font-family: var(--cui-font-sans-serif);
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* =====================================================
-   📦 LAYOUT
+   📦 LAYOUT COREUI SAFE
 ===================================================== */
 
 .wrapper {
@@ -54,12 +54,12 @@ body {
 }
 
 /* =====================================================
-   ⚖️ FORM LAYOUT
+   ⚖️ FORM LAYOUT (NO WHITE SCREEN FIXED)
 ===================================================== */
 
 .form-bg {
   min-height: 100vh;
-  padding: 40px;
+  padding: 20px;
 
   display: flex;
   justify-content: center;
@@ -68,11 +68,10 @@ body {
   background-color: #f3f1ef;
 
   direction: rtl;
-  text-align: right;
 }
 
 /* =====================================================
-   🧊 CARD
+   🧊 CARD CLEAN
 ===================================================== */
 
 .glass-card {
@@ -90,7 +89,7 @@ body {
 }
 
 /* =====================================================
-   ✨ INPUTS (COREUI SAFE)
+   ✨ INPUTS (NO FONT BREAK)
 ===================================================== */
 
 .form-control,
@@ -130,19 +129,6 @@ label {
   padding: 6px 14px;
 
   font-size: 0.875rem;
-}
-
-/* ===============================
-   🔥 FORCE COREUI FONT (FINAL FIX)
-=============================== */
-
-html, body, #root, * {
-  font-family: var(--cui-font-sans-serif) !important;
-}
-
-/* منع أي خط غريب مثل Times New Roman */
-body {
-  font-family: var(--cui-font-sans-serif) !important;
 }
 
 
