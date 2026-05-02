@@ -132,29 +132,51 @@ body {
 }
 
 /* =====================================================
-   🏷 FORM HEADER (FIXED DESIGN)
+   🏷 FORM HEADER (FIXED + PROFESSIONAL DASHBOARD STYLE)
 ===================================================== */
 
 .form-header {
   text-align: right;
   margin-bottom: 15px;
 
-  padding: 10px 15px;
+  padding: 14px 18px;
+
+  /* ✨ بدل الأبيض المسطح */
+  background: linear-gradient(135deg, #ffffff 0%, #faf7f5 100%);
+
   border-right: 4px solid #8b6f5c;
-  background: #fff;
-  border-radius: 10px;
+  border-radius: 12px;
+
+  /* ✨ عمق بسيط */
+  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
+/* العنوان الرئيسي */
 .form-header h4 {
   font-size: 17px;
   margin: 0;
   color: #2c2c2c;
+  font-weight: 600;
+  letter-spacing: 0.2px;
 }
 
+/* النص الثانوي */
 .form-header span {
   font-size: 13px;
   color: #777;
 }
+
+/* ✨ تحسين عند المرور (optional لكن يعطي حياة للواجهة) */
+.form-header:hover {
+  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+  transition: 0.2s ease;
+}
+
 
 /* =====================================================
    ✨ INPUTS (COREUI SAFE FIX)
@@ -306,6 +328,28 @@ label {
   }
 }
 
+/* =====================================================
+   🔘 LOGIN CHECKBOX FIX (REMEMBER ME)
+===================================================== */
+
+.form-check {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.form-check-input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #8b6f5c;
+}
+
+.form-check-label {
+  font-size: 0.85rem !important;
+  color: #333 !important;
+  display: inline-block !important;
+}
 
 
 
