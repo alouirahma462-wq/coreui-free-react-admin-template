@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom' 
-import FormWrapper from "../../components/FormWrapper";
-import { CFormFeedback } from '@coreui/react'
+import { useNavigate } from 'react-router-dom'
+
+import FormWrapper from "../../components/FormWrapper"
+
 import {
   CCard,
   CCardBody,
@@ -23,8 +24,48 @@ import {
   CModalTitle,
   CToast,
   CToastHeader,
-  CToastBody
+  CToastBody,
+  CFormFeedback
 } from '@coreui/react'
+
+// =======================
+// 🧭 Stepper Component
+// =======================
+const Stepper = ({ step }) => {
+  const steps = [
+    "بيانات الملف",
+    "تفاصيل الواقعة",
+    "الأطراف",
+    "القرار"
+  ]
+
+  return (
+    <div className="custom-stepper mb-4">
+
+      <div className="stepper-line" />
+
+      {steps.map((label, index) => {
+        const current = index + 1
+        const active = step === current
+        const done = step > current
+
+        return (
+          <div key={index} className="step-item">
+
+            <div className={`step-circle ${active ? "active" : ""} ${done ? "done" : ""}`}>
+              {done ? "✔" : current}
+            </div>
+
+            <small className={`step-label ${active ? "active" : ""}`}>
+              {label}
+            </small>
+
+          </div>
+        )
+      })}
+    </div>
+  )
+}
 
 // =======================
 // 📦 import الداتا كاملة
@@ -72,16 +113,9 @@ const PersonForm = ({ title, type, formData, setFormData, errors }) => {
     : null
 
   return (
-<div className="filter-box mb-4">
+ <div className="person-card">
 
-  {/* 🧾 عنوان القسم */}
-  <div className="section-header">
-    <h5 className="section-main-title">الأطراف</h5>
-    <span className="section-sub">بيانات الشاكي والمظنون فيه</span>
-  </div>
-
-  <div className="person-card">
-
+    {/* 🧾 عنوان الشخص */}
     <h6 className="section-title">{title}</h6>
 
     <CRow className="g-3">
@@ -404,7 +438,6 @@ const PersonForm = ({ title, type, formData, setFormData, errors }) => {
 
     </CRow>
   </div>
-</div>
   )
 }
 // =======================
@@ -414,6 +447,7 @@ const CaseForm = () => {
 const navigate = useNavigate()
 const [step, setStep] = useState(1)
 const [errors, setErrors] = useState({})  
+const timerRef = useRef(null)  
 const validateStep = (step, formData) => {
   let errors = {}
 
@@ -428,10 +462,6 @@ const validateStep = (step, formData) => {
     if (!formData.clerk) errors.clerk = "كاتب الضبط مطلوب"
     if (!formData.notes) errors.notes = "الملاحظات مطلوبة"
     if (!formData.documents) errors.documents = "الوثائق المصاحبة مطلوبة"
-
-    if (!caseFileNumber) errors.caseFileNumber = "عدد الملف الأمني غير متوفر"
-    if (!registryNumber) errors.registryNumber = "عدد التسجيل غير متوفر"
-    if (!tunisTime) errors.tunisTime = "تاريخ ووقت التلقي غير متوفر"
   }
 
   // =========================
@@ -445,30 +475,30 @@ const validateStep = (step, formData) => {
     if (!formData.summary) errors.summary = "ملخص الوقائع مطلوب"
     if (!formData.aiSuggestion) errors.aiSuggestion = "اقتراح AI مطلوب"
   }
+// 🟦 STEP 3
+// =========================
+if (step === 3) {
 
-  // =========================
-  // 🟦 STEP 3
-  // =========================
-  if (step === 3) {
-    const checkPerson = (p, key) => {
-      if (!p?.fullName) errors[`${key}.fullName`] = "الاسم الكامل مطلوب"
-      if (!p?.gender) errors[`${key}.gender`] = "الجنس مطلوب"
-      if (!p?.nationality) errors[`${key}.nationality`] = "الجنسية مطلوبة"
-      if (!p?.birthDate) errors[`${key}.birthDate`] = "تاريخ الولادة مطلوب"
-      if (!p?.birthState) errors[`${key}.birthState`] = "ولاية الولادة مطلوبة"
-      if (!p?.birthDelegation) errors[`${key}.birthDelegation`] = "معتمدية الولادة مطلوبة"
-      if (!p?.resState) errors[`${key}.resState`] = "ولاية السكن مطلوبة"
-      if (!p?.resDelegation) errors[`${key}.resDelegation`] = "معتمدية السكن مطلوبة"
-      if (!p?.education) errors[`${key}.education`] = "المستوى التعليمي مطلوب"
-      if (!p?.job) errors[`${key}.job`] = "المهنة مطلوبة"
-      if (!p?.notes) errors[`${key}.notes`] = "ملاحظات مطلوبة"
-      if (!p?.statement) errors[`${key}.statement`] = "الإفادة مطلوبة"
-      if (!p?.aiSuggestion) errors[`${key}.aiSuggestion`] = "اقتراح AI مطلوب"
-    }
-
-    checkPerson(formData.plaintiff, "plaintiff")
-    checkPerson(formData.suspect, "suspect")
+  const checkPerson = (p = {}, key) => {
+    if (!p?.fullName) errors[`${key}.fullName`] = "الاسم الكامل مطلوب"
+    if (!p?.gender) errors[`${key}.gender`] = "الجنس مطلوب"
+    if (!p?.nationality) errors[`${key}.nationality`] = "الجنسية مطلوبة"
+    if (!p?.birthDate) errors[`${key}.birthDate`] = "تاريخ الولادة مطلوب"
+    if (!p?.birthState) errors[`${key}.birthState`] = "ولاية الولادة مطلوبة"
+    if (!p?.birthDelegation) errors[`${key}.birthDelegation`] = "معتمدية الولادة مطلوبة"
+    if (!p?.resState) errors[`${key}.resState`] = "ولاية السكن مطلوبة"
+    if (!p?.resDelegation) errors[`${key}.resDelegation`] = "معتمدية السكن مطلوبة"
+    if (!p?.education) errors[`${key}.education`] = "المستوى التعليمي مطلوب"
+    if (!p?.job) errors[`${key}.job`] = "المهنة مطلوبة"
+    if (!p?.notes) errors[`${key}.notes`] = "ملاحظات مطلوبة"
+    if (!p?.statement) errors[`${key}.statement`] = "الإفادة مطلوبة"
+    if (!p?.aiSuggestion) errors[`${key}.aiSuggestion`] = "اقتراح AI مطلوب"
   }
+
+  checkPerson(formData.plaintiff || {}, "plaintiff")
+  checkPerson(formData.suspect || {}, "suspect")
+}
+
 
   // =========================
   // 🟦 STEP 4
@@ -528,20 +558,22 @@ const [toastMessage, setToastMessage] = useState('')
     suspect: {}
   })
 
-  // =======================
-  // 💾 SAVE FUNCTION (ADDED)
-  // =======================
 const handleSave = () => {
-  try {
-    const raw = localStorage.getItem('cases')
+  setShowSuccessModal(true)
 
-    let existing = []
+  timerRef.current = setTimeout(() => {
+    setShowSuccessModal(false)
+    navigate('/cases')
+  }, 2500)
+}
 
-    try {
-      existing = raw ? JSON.parse(raw) : []
-    } catch (e) {
-      existing = []
+useEffect(() => {
+  return () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
     }
+  }
+}, [])
 
     const normalizedCase = {
       ...formData,
@@ -605,38 +637,37 @@ const handleSave = () => {
 
 return (
  <FormWrapper>
-  <div className="form-bg"> {/* 👈 مهم */}
-    <CCard className="glass-card"> {/* 👈 مهم */}
-      <CCardBody>
-        <div className="form-container">
+    <div className="form-bg">
+      <CCard className="glass-card">
+        <CCardBody>
 
-<div className="mb-3">
+          <div className="form-container">
 
-  <div className="d-flex justify-content-between mb-1">
-    <small>المرحلة {step} من 4</small>
-    <small>{Math.round((step / 4) * 100)}%</small>
-  </div>
+            <Stepper step={step} />
 
-  <div className="progress">
-    <div
-      className="progress-bar"
-      style={{
-        width: `${(step / 4) * 100}%`
-      }}
-    />
-  </div>
+            {/* Progress */}
+            <div className="mb-3">
+              <div className="d-flex justify-content-between mb-1">
+                <small>المرحلة {step} من 4</small>
+                <small>{Math.round((step / 4) * 100)}%</small>
+              </div>
 
-</div>
+              <div className="progress">
+                <div
+                  className="progress-bar"
+                  style={{ width: `${(step / 4) * 100}%` }}
+                />
+              </div>
+            </div>
 {step === 1 && (
   <>
     <div className="filter-box mb-4">
 
       {/* 🧾 عنوان المرحلة */}
-      <div className="section-header">
-        <h5 className="section-main-title">بيانات الملف</h5>
-        <span className="section-sub">المحكمة + مصدر الملف + المعلومات الأساسية</span>
-      </div>
-
+      <div className="form-header">
+  <h4>📁 بيانات الملف</h4>
+  <span>المحكمة + مصدر الملف + المعلومات الأساسية</span>
+</div>
       <CForm>
         <CRow className="g-3">
 
@@ -819,11 +850,10 @@ return (
     <div className="filter-box mb-4">
 
       {/* 🧾 عنوان المرحلة */}
-      <div className="section-header">
-        <h5 className="section-main-title">تفاصيل الواقعة</h5>
-        <span className="section-sub">وصف الجريمة + التصنيف + المكان والزمان</span>
-      </div>
-
+     <div className="form-header text-end">
+  <h4>📌 تفاصيل الواقعة</h4>
+  <span>وصف الجريمة + التصنيف + المكان والزمان</span>
+</div>
       <CForm>
         <CRow className="g-3">
 
@@ -969,69 +999,68 @@ return (
 
 {step === 3 && (
   <>
-    <div className="filter-box mb-4">
+ <div className="form-header text-end mb-3">
+  <h4>👥 الأطراف</h4>
+  <span>بيانات الشاكي والمظنون فيه</span>
+</div>
 
-      {/* 🧾 عنوان المرحلة */}
-      <div className="section-header">
-        <h5 className="section-main-title">الأطراف</h5>
-        <span className="section-sub">بيانات الشاكي والمظنون فيه</span>
-      </div>
+{/* 👤 الشاكي */}
+<div className="mb-4">
+  <PersonForm
+    title="👤 الشاكي"
+    type="plaintiff"
+    formData={formData}
+    setFormData={setFormData}
+    errors={errors}
+  />
+</div>
 
-      {/* 👤 الشاكي */}
-      <PersonForm
-        title="👤 الشاكي"
-        type="plaintiff"
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-      />
+{/* ⚠️ المظنون فيه */}
+<div className="mb-4">
+  <PersonForm
+    title="⚠️ المظنون فيه"
+    type="suspect"
+    formData={formData}
+    setFormData={setFormData}
+    errors={errors}
+  />
+</div>
 
-      {/* ⚠️ المظنون فيه */}
-      <PersonForm
-        title="⚠️ المظنون فيه"
-        type="suspect"
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-      />
+{/* 🔘 Navigation (محسّن) */}
+<div className="d-flex justify-content-between align-items-center mt-4 px-2">
 
-      {/* 🔘 Navigation */}
-      <div className="d-flex justify-content-between mt-4">
+  <CButton
+    color="secondary"
+    className="px-4"
+    onClick={() => setStep(2)}
+  >
+    ⬅ السابق
+  </CButton>
 
-        <CButton
-          color="secondary"
-          onClick={() => setStep(2)}
-        >
-          ⬅ السابق
-        </CButton>
+  <div className="step-indicator">
+    <span>خطوة 3 / 4</span>
+  </div>
 
-        <CButton
-          color="primary"
-          onClick={() => {
-            const stepErrors = validateStep(3, formData)
+  <CButton
+    color="primary"
+  className="px-4"
+  onClick={() => handleNext(4)}
+>
+  التالي ➡
+</CButton>
 
-            if (Object.keys(stepErrors).length > 0) {
-              setErrors(stepErrors)
-              return
-            }
-
-            setErrors({})
-            setStep(4)
-
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-          }}
-        >
-          التالي ➡
-        </CButton>
-
-      </div>
-
-    </div>
+</div>
   </>
-)}
+)}   
 {step === 4 && (
   <>
     <CForm>
+
+      {/* 🧾 هيدر احترافي */}
+      <div className="form-header text-end mb-3">
+        <h4>⚖️ القرار والحالة النهائية</h4>
+        <span>تسجيل الحكم + الحالة القانونية للقضية</span>
+      </div>
 
       {/* 🆔 بطاقة ID القضية */}
       <div className="person-card mb-3">
@@ -1045,7 +1074,9 @@ return (
       {/* 📌 الحالة والقرار */}
       <div className="person-card mb-3">
 
-        <h6 className="section-title">📌 الحالة والقرار</h6>
+        <h6 className="section-title text-end mb-3">
+          📌 الحالة والقرار
+        </h6>
 
         {/* 📄 القرار */}
         <CFormTextarea
@@ -1155,11 +1186,19 @@ return (
     </CForm>
 
     {/* NAV STEP 4 */}
-    <div className="d-flex justify-content-between mt-4 px-1">
+    <div className="d-flex justify-content-between align-items-center mt-4 px-2">
 
-      <CButton color="secondary" className="px-4" onClick={() => setStep(3)}>
+      <CButton
+        color="secondary"
+        className="px-4"
+        onClick={() => setStep(3)}
+      >
         ⬅ السابق
       </CButton>
+
+      <div className="step-indicator">
+        خطوة 4 / 4
+      </div>
 
       <CButton
         color="success"
@@ -1175,7 +1214,6 @@ return (
 
           setErrors({})
           handleSave()
-          setShowSuccessModal(true)
         }}
       >
         💾 حفظ القضية
@@ -1203,43 +1241,38 @@ return (
 <CModal
   visible={showSuccessModal}
   onClose={() => setShowSuccessModal(false)}
+  alignment="center"
+  backdrop="static"
+  className="success-modal"
 >
-  <CModalHeader>
-    <CModalTitle>نجاح العملية</CModalTitle>
-  </CModalHeader>
+  <CModalBody className="text-center p-5">
 
-  <CModalBody>
-    <div>
-      ✅ تم حفظ القضية بنجاح
-      <br />
-      يمكنك الآن الانتقال إلى عرض القضايا
+    {/* 🎉 Confetti بسيط */}
+    <div className="confetti">🎉🎊✨</div>
+
+    {/* ✅ Animated Check */}
+    <div className="check-wrapper">
+      <div className="check-circle">
+        <span className="check-icon">✔</span>
+      </div>
     </div>
 
-    <div className="mt-3 d-flex justify-content-end gap-2">
+    {/* الرسالة */}
+    <h4 className="mt-3 fw-bold">
+      تم حفظ القضية بنجاح
+    </h4>
 
-      {/* زر إغلاق فقط */}
-      <CButton
-        color="secondary"
-        onClick={() => setShowSuccessModal(false)}
-      >
-        إغلاق
-      </CButton>
+    <p className="text-muted">
+      جاري الانتقال إلى صفحة عرض القضايا...
+    </p>
 
-      {/* زر الذهاب للكيس ليست */}
-      <CButton
-        color="primary"
-        onClick={() => {
-          setShowSuccessModal(false)
-         navigate('/cases')// 👈 عدلي المسار إذا مختلف عندك
-        }}
-      >
-        عرض القضايا
-      </CButton>
-
+    {/* Spinner */}
+    <div className="d-flex justify-content-center mt-3">
+      <div className="spinner-border text-success" />
     </div>
+
   </CModalBody>
 </CModal>
-
         </div> {/* ⬅️ هذا إغلاق form-container */}
 
       </CCardBody>
