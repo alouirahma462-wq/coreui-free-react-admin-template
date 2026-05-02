@@ -1,5 +1,5 @@
 /* =====================================================
-   🏛️ COREUI FINAL CLEAN STYLE (FULL FIX + CENTERED UI)
+   🏛️ COREUI FINAL FIX (SAFE + NO BREAKS)
 ===================================================== */
 
 /* 🔹 Base Reset */
@@ -11,12 +11,12 @@ html, body, #root {
 }
 
 /* =====================================================
-   🎨 GLOBAL BODY
+   🎨 GLOBAL BODY (رجّع الخط الطبيعي CoreUI)
 ===================================================== */
 
 body {
   font-family: var(--cui-font-sans-serif);
-  font-size: 1rem;
+  font-size: 1rem; /* 🔥 نفس CoreUI */
   line-height: 1.5;
 
   -webkit-font-smoothing: antialiased;
@@ -57,7 +57,7 @@ body {
 }
 
 /* =====================================================
-   ⚖️ MAIN CENTER FIX (IMPORTANT)
+   ⚖️ MAIN CENTER FIX
 ===================================================== */
 
 .main {
@@ -72,7 +72,7 @@ body {
 }
 
 /* =====================================================
-   🧾 FORM CONTAINER CENTER
+   🧾 FORM CONTAINER
 ===================================================== */
 
 .form-container {
@@ -82,7 +82,7 @@ body {
 }
 
 /* =====================================================
-   🧊 MAIN CARD
+   🧊 CARD
 ===================================================== */
 
 .glass-card {
@@ -95,7 +95,7 @@ body {
 }
 
 /* =====================================================
-   🎀 FORM BACKGROUND (ONLY FORM AREA)
+   🎀 FORM BACKGROUND
 ===================================================== */
 
 .form-bg {
@@ -112,7 +112,7 @@ body {
 }
 
 /* =====================================================
-   🧾 SECTIONS (CARDS INSIDE FORM)
+   🧾 SECTIONS
 ===================================================== */
 
 .filter-box,
@@ -127,16 +127,21 @@ body {
 }
 
 /* =====================================================
-   🏷 FORM HEADER
+   🏷 FORM HEADER (FIXED DESIGN)
 ===================================================== */
 
 .form-header {
   text-align: right;
   margin-bottom: 15px;
+
+  padding: 10px 15px;
+  border-right: 4px solid #8b6f5c;
+  background: #fff;
+  border-radius: 10px;
 }
 
 .form-header h4 {
-  font-size: 18px;
+  font-size: 17px;
   margin: 0;
   color: #2c2c2c;
 }
@@ -147,7 +152,7 @@ body {
 }
 
 /* =====================================================
-   ✨ INPUTS (COREUI SAFE)
+   ✨ INPUTS
 ===================================================== */
 
 .form-control,
@@ -170,7 +175,27 @@ textarea:focus {
 }
 
 /* =====================================================
-   🏷 LABELS
+   🚨 VALIDATION ERROR FIX (RED BORDER + TEXT)
+===================================================== */
+
+/* input error border */
+.is-invalid,
+.form-control.is-invalid,
+.form-select.is-invalid,
+textarea.is-invalid {
+  border: 1px solid #dc3545 !important;
+  box-shadow: 0 0 0 0.15rem rgba(220,53,69,0.25) !important;
+}
+
+/* error message */
+.invalid-feedback {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* =====================================================
+   🏷 LABELS (SAFE)
 ===================================================== */
 
 label {
@@ -225,7 +250,6 @@ label {
   right: 0;
   height: 2px;
   background: #ddd;
-  z-index: 0;
 }
 
 .step-item {
@@ -275,6 +299,7 @@ label {
     padding: 10px;
   }
 }
+
 
 
 
