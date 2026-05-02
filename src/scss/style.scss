@@ -107,10 +107,9 @@ body {
 }
 
 /* =====================================================
-   ⚖️ FORM SYSTEM (FINAL CLEAN VERSION)
+   ⚖️ FORM SYSTEM
 ===================================================== */
 
-/* 🌸 BACKGROUND */
 .form-bg {
   min-height: 100vh;
   padding: 40px;
@@ -126,7 +125,6 @@ body {
   isolation: isolate;
 }
 
-/* glow effects */
 .form-bg::before,
 .form-bg::after {
   content: "";
@@ -179,7 +177,7 @@ body {
 }
 
 /* =====================================================
-   📐 EUROPEAN GRID FIX (IMPORTANT)
+   📐 EUROPEAN GRID FIX
 ===================================================== */
 
 .form-bg .row {
@@ -192,7 +190,7 @@ body {
 }
 
 /* =====================================================
-   ✨ INPUT SYSTEM (COREUI FIXED)
+   ✨ INPUT SYSTEM
 ===================================================== */
 
 .form-bg input,
@@ -228,57 +226,123 @@ body {
 }
 
 /* =====================================================
-   ❌ ERRORS
+   ❌ VALIDATION (EU STYLE FIX)
 ===================================================== */
 
-.form-bg .text-danger {
+/* الحقل وقت الخطأ */
+.form-bg .is-invalid,
+.form-bg .form-control.is-invalid,
+.form-bg .form-select.is-invalid,
+.form-bg textarea.is-invalid {
+  border-color: #dc3545 !important;
+  padding-left: 40px;
+  background-image: none !important;
+}
+
+/* رسالة الخطأ */
+.form-bg .invalid-feedback {
   font-size: 12px;
-  margin-top: 5px;
+  font-weight: 500;
+  color: #dc3545;
+  margin-top: 6px;
+}
+
+/* أيقونة X */
+.error-icon {
+  position: absolute;
+  left: 12px;
+  top: 38px;
+  color: #dc3545;
+  font-size: 14px;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+/* focus error */
+.form-bg .is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important;
 }
 
 /* =====================================================
-   🧾 SECTION TITLES
+   🧾 PERSON CARD (EU STYLE)
 ===================================================== */
 
-.filter-box h6 {
-  font-weight: 600;
+.person-card {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 18px;
+
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  transition: 0.25s ease;
+}
+
+.person-card:hover {
+  transform: translateY(-1px);
+}
+
+/* =====================================================
+   🧾 SECTION HEADERS
+===================================================== */
+
+.section-header {
   margin-bottom: 15px;
+}
+
+.section-main-title {
+  font-size: 18px;
+  font-weight: 700;
   color: #5a3e36;
 }
 
-/* =====================================================
-   📊 PROGRESS BAR
-===================================================== */
-
-.progress {
-  height: 10px;
-  border-radius: 20px;
-  background: rgba(0,0,0,0.08);
-  overflow: hidden;
-}
-
-.progress-bar {
-  background: linear-gradient(135deg, #b97c6d, #8b5e54);
-  border-radius: 20px;
+.section-sub {
+  font-size: 12px;
+  color: #8a6b63;
 }
 
 /* =====================================================
    🔘 BUTTONS
 ===================================================== */
 
+.btn {
+  border-radius: 12px !important;
+  font-weight: 500;
+  padding: 8px 16px;
+}
+
 .btn-primary {
   background: linear-gradient(135deg, #b97c6d, #8b5e54) !important;
   border: none !important;
-  border-radius: 12px !important;
 }
 
-.btn-success,
+.btn-success {
+  background: linear-gradient(135deg, #198754, #146c43) !important;
+  border: none !important;
+}
+
 .btn-secondary {
-  border-radius: 12px !important;
+  background: #e9ecef !important;
+  color: #333 !important;
+  border: none !important;
 }
 
 /* =====================================================
-   📄 CASE PAGE FALLBACK
+   📊 PROGRESS
+===================================================== */
+
+.progress {
+  height: 10px;
+  border-radius: 20px;
+  background: rgba(0,0,0,0.08);
+}
+
+.progress-bar {
+  background: linear-gradient(135deg, #b97c6d, #8b5e54);
+}
+
+/* =====================================================
+   📄 CASE PAGE
 ===================================================== */
 
 .case-page {
@@ -309,6 +373,7 @@ body {
     padding-right: 0;
   }
 }
+
 
 
 
