@@ -157,24 +157,21 @@ body {
 }
 
 
-/* 🔥 FIX CHECKBOX LABEL (تذكرني) */
-
-.form-check {
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px;
-}
-
-.form-check-input {
-  margin: 0 !important;
-}
+/* FIX: إظهار "تذكرني" */
 
 .form-check-label {
-  display: inline-block !important;
+  opacity: 1 !important;
   color: #000 !important;
-  font-size: 14px !important;
-  margin: 0 !important;
+  visibility: visible !important;
 }
+
+/* إذا في Bootstrap/CoreUI */
+.form-check-input:checked ~ .form-check-label,
+.form-check-input ~ .form-check-label {
+  opacity: 1 !important;
+  color: #000 !important;
+}
+
 
 
 
