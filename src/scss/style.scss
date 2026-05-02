@@ -329,26 +329,39 @@ label {
 }
 
 /* =====================================================
-   🔘 LOGIN CHECKBOX FIX (REMEMBER ME)
+   🔘 LOGIN "REMEMBER ME" FINAL FIX
 ===================================================== */
 
 .form-check {
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
+  gap: 10px !important;
+
+  margin-top: 8px;
 }
 
+/* 🔥 أهم نقطة: إظهار checkbox الحقيقي */
 .form-check-input {
-  width: 16px;
-  height: 16px;
+  appearance: auto !important;
+  -webkit-appearance: checkbox !important;
+
+  width: 16px !important;
+  height: 16px !important;
+
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-block !important;
+
   cursor: pointer;
   accent-color: #8b6f5c;
 }
 
+/* label */
 .form-check-label {
   font-size: 0.85rem !important;
   color: #333 !important;
-  display: inline-block !important;
+  cursor: pointer;
+  user-select: none;
 }
 
 
