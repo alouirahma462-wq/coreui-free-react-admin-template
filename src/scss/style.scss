@@ -1,12 +1,5 @@
-@use "@coreui/coreui/scss/coreui" as * with (
-  $enable-deprecation-messages: false,
-);
-
-@use "@coreui/chartjs/scss/coreui-chartjs";
-@use "vendors/simplebar";
-
 /* =====================================================
-   🌐 GLOBAL BASE
+   🌐 GLOBAL RESET (FIX FONT & UI)
 ===================================================== */
 
 html,
@@ -18,9 +11,9 @@ body,
   padding: 0;
 }
 
-/* ✅ FIX الخط الحقيقي */
+/* 🔥 FIX نهائي للخط */
 body {
-  background-color: var(--cui-tertiary-bg);
+  background-color: #f3f1ef;
   font-size: 13px;
 
   font-family: var(--cui-font-sans-serif) !important;
@@ -29,10 +22,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ❌ مهم: لا تستخدم * مع font-family */
-
 /* =====================================================
-   📦 COREUI WRAPPER
+   📦 LAYOUT
 ===================================================== */
 
 .wrapper {
@@ -44,41 +35,21 @@ body {
 .sidebar {
   flex-shrink: 0;
   height: 100vh;
-  z-index: 2;
 }
 
 .body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0;
   min-height: 100vh;
 }
 
 .header {
   flex-shrink: 0;
-  z-index: 10;
-  position: relative;
-}
-
-.body > .flex-grow-1 {
-  flex: 1;
-  overflow-y: auto;
-  background: var(--cui-body-bg, #f8f9fa);
 }
 
 /* =====================================================
-   🌙 DARK MODE
-===================================================== */
-
-@include color-mode(dark) {
-  body {
-    background-color: var(--cui-dark-bg-subtle);
-  }
-}
-
-/* =====================================================
-   ⚖️ FORM SYSTEM
+   ⚖️ FORM FIX (WHITE SCREEN SOLVED)
 ===================================================== */
 
 .form-bg {
@@ -89,11 +60,7 @@ body {
   justify-content: center;
   align-items: flex-start;
 
-  background: radial-gradient(circle at top left, #f7e7e2 0%, #e3c4b6 40%, #d7b2a1 100%);
-
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
+  background: #f3f1ef; /* ❌ إزالة gradient اللي كان يبيض */
 
   direction: rtl;
   text-align: right;
@@ -101,51 +68,47 @@ body {
   font-size: 13px;
 }
 
-/* ✔ فقط محاذاة */
+/* ❌ لا تخرب كل العناصر */
 .form-bg * {
   text-align: right;
 }
 
 /* =====================================================
-   🧊 GLASS CARD
+   🧊 CARD FIX
 ===================================================== */
 
 .glass-card {
   width: 100%;
   max-width: 1150px;
 
-  /* ✅ FIX الصفحة البيضاء */
-  background: rgba(255, 255, 255, 0.92);
+  background: #ffffff;
 
-  backdrop-filter: blur(16px);
+  border-radius: 18px;
+  border: 1px solid rgba(0,0,0,0.06);
 
-  border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.10),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 
   padding: 25px;
-  transition: 0.3s ease;
 }
 
 /* =====================================================
-   ✨ INPUT SYSTEM
+   ✨ INPUT FIX (FONT + STYLE)
 ===================================================== */
 
 .form-control,
 .form-select,
 textarea,
 input {
-  border-radius: 10px !important;
-  border: 1px solid rgba(0,0,0,0.08) !important;
-  background: rgba(255, 255, 255, 0.98) !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(0,0,0,0.12) !important;
+
+  background: #fff !important;
 
   padding: 6px 10px;
 
   font-size: 13px !important;
-  font-family: inherit !important;
+
+  font-family: var(--cui-font-sans-serif) !important;
 
   text-align: right;
 }
@@ -157,8 +120,7 @@ input {
 label {
   font-weight: 500;
   font-size: 12px;
-  margin-bottom: 5px;
-  color: #5a3e36;
+  color: #333;
 }
 
 /* =====================================================
@@ -166,19 +128,9 @@ label {
 ===================================================== */
 
 .btn {
-  border-radius: 10px !important;
+  border-radius: 8px !important;
   padding: 6px 14px;
   font-size: 13px;
-}
-
-/* =====================================================
-   📄 RTL FIX
-===================================================== */
-
-input,
-select,
-textarea {
-  text-align: right;
 }
 
 
