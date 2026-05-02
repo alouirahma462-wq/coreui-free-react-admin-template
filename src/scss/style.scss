@@ -157,6 +157,24 @@ body {
 }
 
 
+/* 🔥 FIX CHECKBOX LABEL (تذكرني) */
+
+.form-check {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px;
+}
+
+.form-check-input {
+  margin: 0 !important;
+}
+
+.form-check-label {
+  display: inline-block !important;
+  color: #000 !important;
+  font-size: 14px !important;
+  margin: 0 !important;
+}
 
 
 
