@@ -1,5 +1,5 @@
 /* =====================================================
-   🌐 GLOBAL RESET (FIX FONT & UI)
+   🌐 GLOBAL RESET (COREUI SAFE)
 ===================================================== */
 
 html,
@@ -11,15 +11,11 @@ body,
   padding: 0;
 }
 
-/* 🔥 FIX نهائي للخط (CoreUI safe) */
+/* 🔥 FONT FIX بدون كسر CoreUI */
 body {
   background-color: #f3f1ef;
-
-  /* ❌ مهم: لا نكسر CoreUI */
   font-size: 1rem;
-
-  font-family: var(--cui-font-sans-serif) !important;
-
+  font-family: var(--cui-font-sans-serif);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -51,7 +47,7 @@ body {
 }
 
 /* =====================================================
-   ⚖️ FORM FIX (WHITE SCREEN SOLVED)
+   ⚖️ FORM LAYOUT
 ===================================================== */
 
 .form-bg {
@@ -66,15 +62,10 @@ body {
 
   direction: rtl;
   text-align: right;
-
-  /* ❌ لا نعيد كسر الخط هنا */
-  font-size: 1rem;
 }
 
-/* ❌ مهم: تم حذف form-bg * لأنها تخرب inputs */
-
 /* =====================================================
-   🧊 CARD FIX
+   🧊 CARD
 ===================================================== */
 
 .glass-card {
@@ -92,7 +83,7 @@ body {
 }
 
 /* =====================================================
-   ✨ INPUT FIX (COREUI SAFE)
+   ✨ INPUTS (COREUI SAFE)
 ===================================================== */
 
 .form-control,
@@ -106,10 +97,9 @@ input {
 
   padding: 6px 10px;
 
-  /* ❌ مهم: rem بدل px */
-  font-size: 0.875rem !important;
+  font-size: 0.875rem;
 
-  font-family: var(--cui-font-sans-serif) !important;
+  font-family: var(--cui-font-sans-serif);
 
   text-align: right;
 }
