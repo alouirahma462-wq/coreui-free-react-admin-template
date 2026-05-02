@@ -19,7 +19,6 @@ import CaseDetail from "./views/cases/CaseDetail.jsx";
 import GlobalMusic from "./GlobalMusic";
 
 import DefaultLayout from "./layout/DefaultLayout";
-import FormLayout from "./layout/FormLayout"; // ⭐ NEW ONLY
 
 import SmartScreen from "./views/pages/SmartScreen.jsx";
 
@@ -69,11 +68,6 @@ export default function App() {
     loadUser();
   }, [location.pathname]);
 
-  const isMustChange = (v) =>
-    v === true || v === 1 || v === "1" || v === "true";
-
-  const getHomeRoute = () => "/landing";
-
   if (loading && location.pathname !== "/login") {
     return (
       <div style={{ color: "white", textAlign: "center", marginTop: 50 }}>
@@ -102,24 +96,19 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* 🔥 SMART SCREEN (مستقل) */}
+        {/* 🔥 SMART SCREEN */}
         <Route path="/smart" element={<SmartScreen />} />
 
         {/* =========================
-            📊 DASHBOARD ONLY
+            📊 DEFAULT LAYOUT (DASHBOARD + CASES)
         ========================= */}
         <Route element={<DefaultLayout />}>
 
+          {/* Dashboard */}
           <Route path="/court/:id" element={<CourtDashboard user={user} />} />
           <Route path="/inspection-dashboard" element={<InspectionDashboard user={user} />} />
 
-        </Route>
-
-        {/* =========================
-            ⚖️ CASE SYSTEM (FORM LAYOUT)
-        ========================= */}
-        <Route element={<FormLayout />}>
-
+          {/* Cases داخل الداشبورد */}
           <Route path="/cases" element={<CaseList />} />
           <Route path="/cases/create" element={<CaseForm />} />
           <Route path="/cases/edit/:id" element={<CaseForm />} />
@@ -134,6 +123,7 @@ export default function App() {
     </>
   );
 }
+
 
 
 
