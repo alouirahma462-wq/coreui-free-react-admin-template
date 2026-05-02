@@ -18,9 +18,17 @@ body,
   padding: 0;
 }
 
+/* ✅ FIX مهم: إصلاح تشوه الخط في كل التطبيق */
 body {
-  background-color: var(--cui-tertiary-bg);
+  background-color: var(--cui-tertiary-bg, #f8f9fa);
+
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-size: 13px;
+  line-height: 1.5;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* =====================================================
@@ -65,7 +73,8 @@ body {
 
 @include color-mode(dark) {
   body {
-    background-color: var(--cui-dark-bg-subtle);
+    background-color: var(--cui-dark-bg-subtle, #121212);
+    color: #eaeaea;
   }
 }
 
@@ -88,9 +97,16 @@ body {
   isolation: isolate;
 
   direction: rtl;
+  text-align: right;
+
+  /* ✅ FIX مهم: منع البياض المفاجئ */
+  background-color: #f5f5f5;
 }
 
-/* ❌ FIX: حذف font-size من * لأنه كان يكسر CoreUI inputs */
+/* =====================================================
+   🧠 FIX النص بدون تخريب CoreUI
+===================================================== */
+
 .form-bg * {
   text-align: right;
 }
@@ -103,7 +119,7 @@ body {
   width: 100%;
   max-width: 1150px;
 
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(16px);
 
   border-radius: 22px;
@@ -122,7 +138,7 @@ body {
 }
 
 /* =====================================================
-   ✨ INPUT SYSTEM (FIXED)
+   ✨ INPUT SYSTEM
 ===================================================== */
 
 .form-control,
@@ -131,16 +147,19 @@ textarea,
 input {
   border-radius: 10px !important;
   border: 1px solid rgba(0,0,0,0.08) !important;
-  background: rgba(255, 255, 255, 0.75) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
 
   padding: 6px 10px;
   font-size: 13px;
 
   text-align: right;
+  line-height: 1.4;
+
+  font-family: inherit;
+
   transition: all 0.2s ease;
 }
 
-/* ❌ FIX مهم: منع تضارب CoreUI input focus */
 .form-control:focus,
 .form-select:focus,
 textarea:focus,
@@ -226,7 +245,7 @@ label {
 }
 
 /* =====================================================
-   🔢 CUSTOM STEPPER
+   🔢 STEPPER
 ===================================================== */
 
 .custom-stepper {
@@ -303,15 +322,6 @@ label {
   font-size: 13px;
 }
 
-/* =====================================================
-   📄 FIX RTL ALIGNMENT
-===================================================== */
-
-input,
-select,
-textarea {
-  text-align: right;
-}
 
 
 
