@@ -1,5 +1,5 @@
 import React from 'react'
-import { CFooter, CContainer, CRow, CCol } from '@coreui/react'
+import { CFooter, CContainer } from '@coreui/react'
 
 const AppFooter = () => {
   return (
@@ -13,49 +13,37 @@ const AppFooter = () => {
     >
       <CContainer fluid>
 
-        <CRow>
-
-          {/* 🔹 معلومات النظام */}
-          <CCol md={4}>
-            <h6>🏛️ وزارة العدل</h6>
-            <p style={{ fontSize: "14px" }}>
-              منظومة النيابة العمومية الرقمية
-            </p>
-          </CCol>
-
-          {/* 🔹 روابط سريعة */}
-          <CCol md={4}>
-            <h6>روابط سريعة</h6>
-            <ul style={{ listStyle: "none", padding: 0, fontSize: "14px" }}>
-              <li>متابعة القضايا</li>
-              <li>الخدمات الإدارية</li>
-              <li>إحصائيات قضائية</li>
-            </ul>
-          </CCol>
-
-          {/* 🔹 معلومات المستخدم */}
-          <CCol md={4}>
-            <h6>النظام</h6>
-            <p style={{ fontSize: "14px" }}>
-              نظام داخلي آمن — الوصول للمخولين فقط
-            </p>
-          </CCol>
-
-        </CRow>
-
-        {/* 🔻 خط سفلي */}
         <div
           style={{
-            marginTop: "10px",
-            borderTop: "1px solid rgba(255,255,255,0.2)",
-            paddingTop: "10px",
             display: "flex",
-            justifyContent: "space-between",
-            fontSize: "13px"
+            justifyContent: "center",
+            alignItems: "center",
+            fontSize: "13px",
+            padding: "10px 0",
+            gap: "8px"
           }}
         >
-          <span>🇹🇳 وزارة العدل التونسية</span>
-          <span>© {new Date().getFullYear()} جميع الحقوق محفوظة</span>
+          <span>
+            جميع الحقوق محفوظة © 2026 وزارة العدل - الجمهورية التونسية
+          </span>
+
+          {/* 🇹🇳 علم تونس داخل دائرة */}
+          <span
+            style={{
+              width: "22px",
+              height: "22px",
+              borderRadius: "50%",
+              background: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "14px",
+              lineHeight: "1"
+            }}
+          >
+            🇹🇳
+          </span>
+
         </div>
 
       </CContainer>
