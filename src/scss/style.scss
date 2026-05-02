@@ -5,9 +5,9 @@
 @use "@coreui/chartjs/scss/coreui-chartjs";
 @use "vendors/simplebar";
 
-/* =========================
+/* =====================================================
    🌐 GLOBAL BASE
-========================= */
+===================================================== */
 
 html,
 body,
@@ -18,14 +18,13 @@ body,
   padding: 0;
 }
 
-/* ❌ مهم: لا تستخدم overflow hidden */
 body {
   background-color: var(--cui-tertiary-bg);
 }
 
-/* =========================
-   📦 COREUI WRAPPER (IMPORTANT)
-========================= */
+/* =====================================================
+   📦 COREUI WRAPPER
+===================================================== */
 
 .wrapper {
   display: flex;
@@ -33,19 +32,11 @@ body {
   min-height: 100vh;
 }
 
-/* =========================
-   📌 SIDEBAR (SAFE)
-========================= */
-
 .sidebar {
   flex-shrink: 0;
   height: 100vh;
   z-index: 2;
 }
-
-/* =========================
-   🧱 MAIN AREA
-========================= */
 
 .body {
   flex: 1;
@@ -55,19 +46,11 @@ body {
   min-height: 100vh;
 }
 
-/* =========================
-   🧭 HEADER FIX
-========================= */
-
 .header {
   flex-shrink: 0;
   z-index: 10;
   position: relative;
 }
-
-/* =========================
-   📄 CONTENT AREA
-========================= */
 
 .body > .flex-grow-1 {
   flex: 1;
@@ -75,9 +58,9 @@ body {
   background: var(--cui-body-bg, #f8f9fa);
 }
 
-/* =========================
+/* =====================================================
    🌙 DARK MODE
-========================= */
+===================================================== */
 
 @include color-mode(dark) {
   body {
@@ -85,9 +68,9 @@ body {
   }
 }
 
-/* =========================
+/* =====================================================
    🔴 TOP BAR
-========================= */
+===================================================== */
 
 .top-bar {
   position: absolute;
@@ -112,29 +95,19 @@ body {
   padding-right: 120px;
   font-weight: bold;
   color: white;
-  white-space: nowrap;
 }
 
-/* =========================
+/* =====================================================
    🔄 ANIMATION
-========================= */
+===================================================== */
 
 @keyframes move {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
 
-/* =========================
-   🚫 REMOVE GHOST OVERLAYS
-========================= */
-
-body::before,
-body::after {
-  display: none !important;
-}
-
 /* =====================================================
-   ⚖️ CASE FORM SYSTEM (ONLY FOR FORMS)
+   ⚖️ FORM SYSTEM (FINAL CLEAN VERSION)
 ===================================================== */
 
 /* 🌸 BACKGROUND */
@@ -150,36 +123,38 @@ body::after {
 
   position: relative;
   overflow: hidden;
-
-  isolation: isolate; /* 🟢 حماية الداشبورد */
+  isolation: isolate;
 }
 
-/* glow */
-.form-bg::before {
+/* glow effects */
+.form-bg::before,
+.form-bg::after {
   content: "";
   position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+}
+
+.form-bg::before {
   top: -100px;
   left: -100px;
   width: 400px;
   height: 400px;
   background: rgba(255, 255, 255, 0.25);
-  filter: blur(120px);
-  border-radius: 50%;
 }
 
 .form-bg::after {
-  content: "";
-  position: absolute;
   bottom: -120px;
   right: -120px;
   width: 500px;
   height: 500px;
   background: rgba(180, 120, 100, 0.2);
-  filter: blur(140px);
-  border-radius: 50%;
 }
 
-/* 🧊 GLASS CARD */
+/* =====================================================
+   🧊 GLASS CARD
+===================================================== */
+
 .glass-card {
   width: 100%;
   max-width: 1150px;
@@ -196,51 +171,100 @@ body::after {
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
 
   padding: 25px;
-
-  transition: all 0.3s ease;
+  transition: 0.3s ease;
 }
 
 .glass-card:hover {
   transform: translateY(-2px);
 }
 
-/* =========================
-   ✨ INPUTS (FIXED - SAFE)
-========================= */
+/* =====================================================
+   📐 EUROPEAN GRID FIX (IMPORTANT)
+===================================================== */
+
+.form-bg .row {
+  row-gap: 18px !important;
+}
+
+.form-bg .col-md-6 {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+/* =====================================================
+   ✨ INPUT SYSTEM (COREUI FIXED)
+===================================================== */
 
 .form-bg input,
 .form-bg select,
-.form-bg textarea {
+.form-bg textarea,
+.form-bg .form-control,
+.form-bg .form-select {
   border-radius: 12px !important;
   border: 1px solid rgba(0,0,0,0.08) !important;
-  background: rgba(255, 255, 255, 0.7) !important;
-  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.75) !important;
+  padding: 10px 12px;
+  transition: 0.2s ease;
 }
 
 .form-bg input:focus,
 .form-bg select:focus,
-.form-bg textarea:focus {
+.form-bg textarea:focus,
+.form-bg .form-control:focus,
+.form-bg .form-select:focus {
   border-color: #c79b8a !important;
   box-shadow: 0 0 0 3px rgba(199, 155, 138, 0.25) !important;
 }
 
-/* =========================
-   🪟 HEADINGS (SCOPED)
-========================= */
+/* =====================================================
+   🏷 LABELS
+===================================================== */
 
-.form-bg h1,
-.form-bg h2,
-.form-bg h3,
-.form-bg h4,
-.form-bg h5 {
+.form-bg label {
+  font-weight: 500;
+  font-size: 13px;
+  margin-bottom: 5px;
   color: #5a3e36;
-  font-weight: 600;
-  letter-spacing: 0.3px;
 }
 
-/* =========================
+/* =====================================================
+   ❌ ERRORS
+===================================================== */
+
+.form-bg .text-danger {
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+/* =====================================================
+   🧾 SECTION TITLES
+===================================================== */
+
+.filter-box h6 {
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #5a3e36;
+}
+
+/* =====================================================
+   📊 PROGRESS BAR
+===================================================== */
+
+.progress {
+  height: 10px;
+  border-radius: 20px;
+  background: rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.progress-bar {
+  background: linear-gradient(135deg, #b97c6d, #8b5e54);
+  border-radius: 20px;
+}
+
+/* =====================================================
    🔘 BUTTONS
-========================= */
+===================================================== */
 
 .btn-primary {
   background: linear-gradient(135deg, #b97c6d, #8b5e54) !important;
@@ -248,12 +272,13 @@ body::after {
   border-radius: 12px !important;
 }
 
-.btn-primary:hover {
-  filter: brightness(1.1);
+.btn-success,
+.btn-secondary {
+  border-radius: 12px !important;
 }
 
 /* =====================================================
-   📄 CASE OLD STYLE (optional fallback)
+   📄 CASE PAGE FALLBACK
 ===================================================== */
 
 .case-page {
@@ -265,9 +290,9 @@ body::after {
   border-radius: 20px;
 }
 
-/* =========================
+/* =====================================================
    📱 RESPONSIVE
-========================= */
+===================================================== */
 
 @media (max-width: 768px) {
   .form-bg {
@@ -276,8 +301,15 @@ body::after {
 
   .glass-card {
     border-radius: 14px;
+    padding: 15px;
+  }
+
+  .form-bg .col-md-6 {
+    padding-left: 0;
+    padding-right: 0;
   }
 }
+
 
 
 
