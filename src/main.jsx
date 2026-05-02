@@ -3,9 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./store";
-
-// ✅ مهم جدًا: CoreUI CSS
-import '@coreui/coreui/dist/css/coreui.min.css';
+import './scss/style.scss'; // أو اسم ملفك
 
 import App from "./App.jsx";
 
