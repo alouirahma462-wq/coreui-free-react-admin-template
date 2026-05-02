@@ -604,11 +604,11 @@ const handleSave = () => {
 }
 
 return (
-  <FormWrapper>
-    <div className="case-page">
-      <CCard className="case-card">
-        <CCardBody>
-          <div className="form-container">
+ <FormWrapper>
+  <div className="form-bg"> {/* 👈 مهم */}
+    <CCard className="glass-card"> {/* 👈 مهم */}
+      <CCardBody>
+        <div className="form-container">
 
 <div className="mb-3">
 
