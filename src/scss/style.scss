@@ -20,6 +20,7 @@ body,
 
 body {
   background-color: var(--cui-tertiary-bg);
+  font-size: 13px; /* 🔽 تصغير عام للخط */
 }
 
 /* =====================================================
@@ -69,44 +70,6 @@ body {
 }
 
 /* =====================================================
-   🔴 TOP BAR
-===================================================== */
-
-.top-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 40px;
-  background: #b91c1c;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  z-index: 9999;
-}
-
-.marquee-track {
-  display: inline-flex;
-  white-space: nowrap;
-  animation: move 15s linear infinite;
-}
-
-.marquee-text {
-  padding-right: 120px;
-  font-weight: bold;
-  color: white;
-}
-
-/* =====================================================
-   🔄 ANIMATION
-===================================================== */
-
-@keyframes move {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-/* =====================================================
    ⚖️ FORM SYSTEM
 ===================================================== */
 
@@ -124,33 +87,14 @@ body {
   overflow: hidden;
   isolation: isolate;
 
-  /* ✅ RTL */
   direction: rtl;
   text-align: right;
 }
 
-.form-bg::before,
-.form-bg::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-}
-
-.form-bg::before {
-  top: -100px;
-  left: -100px;
-  width: 400px;
-  height: 400px;
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.form-bg::after {
-  bottom: -120px;
-  right: -120px;
-  width: 500px;
-  height: 500px;
-  background: rgba(180, 120, 100, 0.2);
+/* 🔽 النص داخل الفورم يكون يمين لكن المحتوى مرتب */
+.form-bg * {
+  text-align: right;
+  font-size: 13px;
 }
 
 /* =====================================================
@@ -163,7 +107,6 @@ body {
 
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
 
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.35);
@@ -177,54 +120,45 @@ body {
 }
 
 .glass-card:hover {
-  transform: translateY(-3px) scale(1.01);
-}
-
-/* =====================================================
-   📐 GRID
-===================================================== */
-
-.form-bg .row {
-  row-gap: 14px !important;
-}
-
-.form-bg .col-md-6 {
-  padding-left: 8px;
-  padding-right: 8px;
+  transform: translateY(-2px);
+  transition: 0.25s ease;
 }
 
 /* =====================================================
    ✨ INPUT SYSTEM
 ===================================================== */
 
-.form-bg input,
-.form-bg select,
-.form-bg textarea,
-.form-bg .form-control,
-.form-bg .form-select {
+.form-control,
+.form-select,
+textarea,
+input {
   border-radius: 10px !important;
   border: 1px solid rgba(0,0,0,0.08) !important;
   background: rgba(255, 255, 255, 0.75) !important;
+
   padding: 6px 10px;
   font-size: 13px;
+
+  text-align: right; /* 🔥 مهم */
+  transition: all 0.2s ease;
 }
 
-.form-bg input:focus,
-.form-bg select:focus,
-.form-bg textarea:focus,
-.form-bg .form-control:focus,
-.form-bg .form-select:focus {
+.form-control:focus,
+.form-select:focus,
+textarea:focus,
+input:focus {
   border-color: #c79b8a !important;
   box-shadow: 0 0 0 3px rgba(199, 155, 138, 0.25) !important;
+  transform: scale(1.01);
 }
 
 /* =====================================================
    🏷 LABELS
 ===================================================== */
 
-.form-bg label {
+label {
   font-weight: 500;
-  font-size: 13px;
+  font-size: 12px; /* 🔽 أصغر */
   margin-bottom: 5px;
   color: #5a3e36;
 }
@@ -233,12 +167,8 @@ body {
    ❌ VALIDATION
 ===================================================== */
 
-.form-bg .is-invalid {
-  border-color: #dc3545 !important;
-}
-
-.form-bg .invalid-feedback {
-  font-size: 12px;
+.invalid-feedback {
+  font-size: 11px;
   color: #dc3545;
 }
 
@@ -251,10 +181,13 @@ body {
   border-radius: 14px;
   padding: 14px;
   margin-bottom: 14px;
+
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.04);
 }
 
 /* =====================================================
-   🧾 GLASS HEADER
+   🧾 HEADER
 ===================================================== */
 
 .form-header {
@@ -263,11 +196,12 @@ body {
   border-radius: 14px;
 
   background: linear-gradient(135deg, rgba(185,124,109,0.9), rgba(139,94,84,0.9));
-  backdrop-filter: blur(10px);
 
   color: white;
   margin-bottom: 20px;
+
   overflow: hidden;
+  z-index: 1;
 }
 
 .form-header::before {
@@ -279,6 +213,14 @@ body {
   left: -50%;
   background: radial-gradient(circle, rgba(255,255,255,0.2), transparent 60%);
   animation: rotateGlow 8s linear infinite;
+
+  opacity: 0.6;
+  z-index: 0;
+}
+
+.form-header * {
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes rotateGlow {
@@ -287,19 +229,39 @@ body {
 }
 
 /* =====================================================
-   🔢 STEPPER
+   🔢 CUSTOM STEPPER
 ===================================================== */
 
-.stepper {
+.custom-stepper {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  position: relative;
   margin-bottom: 25px;
 }
 
-.step {
+.stepper-line {
+  position: absolute;
+  top: 17px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(0,0,0,0.1);
+  z-index: 0;
+}
+
+.step-item {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.step-circle {
   width: 34px;
   height: 34px;
   border-radius: 50%;
+  margin: 0 auto;
 
   display: flex;
   align-items: center;
@@ -308,18 +270,30 @@ body {
   background: rgba(0,0,0,0.1);
   color: #555;
   font-weight: bold;
+  transition: 0.3s ease;
 }
 
-.step.active {
+.step-circle.active {
   background: linear-gradient(135deg, #b97c6d, #8b5e54);
+  color: white;
+  transform: scale(1.1);
+}
+
+.step-circle.done {
+  background: #198754;
   color: white;
 }
 
-.line {
-  flex: 1;
-  height: 3px;
-  background: rgba(0,0,0,0.1);
-  margin: 0 5px;
+.step-label {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px; /* 🔽 أصغر */
+  color: #666;
+}
+
+.step-label.active {
+  color: #8b5e54;
+  font-weight: 600;
 }
 
 /* =====================================================
@@ -329,20 +303,19 @@ body {
 .btn {
   border-radius: 10px !important;
   padding: 6px 14px;
+  font-size: 13px;
 }
 
 /* =====================================================
-   📄 PAGE
+   📄 FIX RTL ALIGNMENT
 ===================================================== */
 
-.case-page {
-  min-height: 100vh;
-  padding: 20px;
+input,
+select,
+textarea {
+  text-align: right;
 }
 
-.case-card {
-  border-radius: 20px;
-}
 
 
 
