@@ -132,6 +132,18 @@ label {
   font-size: 0.875rem;
 }
 
+/* ===============================
+   🔥 FORCE COREUI FONT (FINAL FIX)
+=============================== */
+
+html, body, #root, * {
+  font-family: var(--cui-font-sans-serif) !important;
+}
+
+/* منع أي خط غريب مثل Times New Roman */
+body {
+  font-family: var(--cui-font-sans-serif) !important;
+}
 
 
 
