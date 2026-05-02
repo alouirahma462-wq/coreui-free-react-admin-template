@@ -18,23 +18,12 @@ body,
   padding: 0;
 }
 
-/* 🔥 FIX الخط الصحيح بدون كسر CoreUI */
+/* ✅ FIX الخط الحقيقي */
 body {
   background-color: var(--cui-tertiary-bg);
   font-size: 13px;
 
-  /* ✅ FIX 1: stack خط صحيح يدعم عربي + emoji */
-  font-family:
-    var(--cui-font-sans-serif),
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    "Noto Sans",
-    Arial,
-    "Apple Color Emoji",
-    "Segoe UI Emoji",
-    "Segoe UI Symbol" !important;
+  font-family: var(--cui-font-sans-serif) !important;
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -110,12 +99,9 @@ body {
   text-align: right;
 
   font-size: 13px;
-
-  /* ✅ FIX 2: خليه يرث الخط الصحيح */
-  font-family: inherit;
 }
 
-/* ✔ فقط محاذاة بدون تخريب الخط */
+/* ✔ فقط محاذاة */
 .form-bg * {
   text-align: right;
 }
@@ -128,7 +114,8 @@ body {
   width: 100%;
   max-width: 1150px;
 
-  background: rgba(255, 255, 255, 0.9);
+  /* ✅ FIX الصفحة البيضاء */
+  background: rgba(255, 255, 255, 0.92);
 
   backdrop-filter: blur(16px);
 
@@ -143,12 +130,8 @@ body {
   transition: 0.3s ease;
 }
 
-.glass-card:hover {
-  transform: translateY(-2px);
-}
-
 /* =====================================================
-   ✨ INPUT SYSTEM (FIXED)
+   ✨ INPUT SYSTEM
 ===================================================== */
 
 .form-control,
@@ -157,26 +140,14 @@ textarea,
 input {
   border-radius: 10px !important;
   border: 1px solid rgba(0,0,0,0.08) !important;
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
 
   padding: 6px 10px;
 
   font-size: 13px !important;
-
-  /* ✅ FIX 3: لا تفرض خط مختلف */
   font-family: inherit !important;
 
   text-align: right;
-  transition: all 0.2s ease;
-}
-
-.form-control:focus,
-.form-select:focus,
-textarea:focus,
-input:focus {
-  border-color: #c79b8a !important;
-  box-shadow: 0 0 0 3px rgba(199, 155, 138, 0.25) !important;
-  transform: none;
 }
 
 /* =====================================================
@@ -188,138 +159,6 @@ label {
   font-size: 12px;
   margin-bottom: 5px;
   color: #5a3e36;
-}
-
-/* =====================================================
-   ❌ VALIDATION
-===================================================== */
-
-.invalid-feedback {
-  font-size: 11px;
-  color: #dc3545;
-}
-
-/* =====================================================
-   🧾 PERSON CARD
-===================================================== */
-
-.person-card {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 14px;
-  padding: 14px;
-  margin-bottom: 14px;
-
-  border: 1px solid rgba(0,0,0,0.05);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.04);
-}
-
-/* =====================================================
-   🧾 HEADER
-===================================================== */
-
-.form-header {
-  position: relative;
-  padding: 16px 18px;
-  border-radius: 14px;
-
-  background: linear-gradient(135deg, rgba(185,124,109,0.9), rgba(139,94,84,0.9));
-
-  color: white;
-  margin-bottom: 20px;
-
-  overflow: hidden;
-  z-index: 1;
-}
-
-.form-header::before {
-  content: "";
-  position: absolute;
-  width: 200%;
-  height: 200%;
-  top: -50%;
-  left: -50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.2), transparent 60%);
-  animation: rotateGlow 8s linear infinite;
-  opacity: 0.6;
-  z-index: 0;
-}
-
-.form-header * {
-  position: relative;
-  z-index: 1;
-}
-
-@keyframes rotateGlow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* =====================================================
-   🔢 CUSTOM STEPPER
-===================================================== */
-
-.custom-stepper {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: relative;
-  margin-bottom: 25px;
-}
-
-.stepper-line {
-  position: absolute;
-  top: 17px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: rgba(0,0,0,0.1);
-  z-index: 0;
-}
-
-.step-item {
-  flex: 1;
-  text-align: center;
-  position: relative;
-  z-index: 1;
-}
-
-.step-circle {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  margin: 0 auto;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: rgba(0,0,0,0.1);
-  color: #555;
-  font-weight: bold;
-  transition: 0.3s ease;
-}
-
-.step-circle.active {
-  background: linear-gradient(135deg, #b97c6d, #8b5e54);
-  color: white;
-  transform: scale(1.1);
-}
-
-.step-circle.done {
-  background: #198754;
-  color: white;
-}
-
-.step-label {
-  display: block;
-  margin-top: 6px;
-  font-size: 11px;
-  color: #666;
-}
-
-.step-label.active {
-  color: #8b5e54;
-  font-weight: 600;
 }
 
 /* =====================================================
