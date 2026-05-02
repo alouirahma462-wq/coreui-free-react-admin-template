@@ -130,6 +130,31 @@ label {
 }
 
 
+/* =====================================================
+   🧨 COREUI FONT FIX (FINAL ABSOLUTE)
+===================================================== */
+
+/* اجبار الخط والحجم على كل التطبيق بدون كسر CoreUI */
+html, body, #root {
+  font-size: 16px !important;
+}
+
+body {
+  font-family: var(--cui-font-sans-serif) !important;
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+}
+
+/* منع أي عنصر يكبر الخط أو يغيره */
+#root * {
+  font-family: inherit !important;
+  font-size: inherit;
+}
+
+/* حماية CoreUI variables */
+:root {
+  --cui-body-font-size: 1rem;
+}
 
 
 
