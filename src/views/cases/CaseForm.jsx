@@ -29,7 +29,7 @@ import {
 } from '@coreui/react'
 
 // =======================
-// 🧭 Stepper Component
+// 🧭 Stepper Component (FIXED)
 // =======================
 const Stepper = ({ step }) => {
   const steps = [
@@ -45,9 +45,9 @@ const Stepper = ({ step }) => {
       <div className="stepper-line" />
 
       {steps.map((label, index) => {
-const active = step === current
-const done = step >= current
-
+        const current = index + 1
+        const active = step === current
+        const done = step > current
 
         return (
           <div key={index} className="step-item">
@@ -66,6 +66,7 @@ const done = step >= current
     </div>
   )
 }
+
 
 // =======================
 // 📦 import الداتا كاملة
