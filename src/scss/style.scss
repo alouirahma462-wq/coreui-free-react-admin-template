@@ -157,14 +157,18 @@ body {
 }
 
 
-/* 🔥 FINAL FIX - RESTORE LABELS */
+/* 🚨 FINAL GLOBAL FIX - بدون لمس اللوقن */
 
-label,
+/* رجّع كل label لوضعه الطبيعي */
+label {
+  all: revert !important;
+}
+
+/* تأكيد خاص لـ CoreUI */
 .form-check-label {
+  all: revert !important;
   color: #212529 !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  font-size: 0.875rem !important;
+  font-size: 14px !important;
   display: inline-block !important;
 }
 
