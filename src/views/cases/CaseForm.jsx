@@ -45,9 +45,9 @@ const Stepper = ({ step }) => {
       <div className="stepper-line" />
 
       {steps.map((label, index) => {
-        const current = index + 1
-        const active = step === current
-        const done = step > current
+const active = step === current
+const done = step >= current
+
 
         return (
           <div key={index} className="step-item">
@@ -447,9 +447,18 @@ const CaseForm = () => {
 const navigate = useNavigate()
 const [step, setStep] = useState(1)
 const [errors, setErrors] = useState({})  
-const timerRef = useRef(null)  
+const timerRef = useRef(null) 
+useEffect(() => {
+  return () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+  }
+}, [])
+  
 const validateStep = (step, formData) => {
-  let errors = {}
+  const validationErrors = {}
 
   // =========================
   // 🟦 STEP 1
@@ -475,30 +484,32 @@ const validateStep = (step, formData) => {
     if (!formData.summary) errors.summary = "ملخص الوقائع مطلوب"
     if (!formData.aiSuggestion) errors.aiSuggestion = "اقتراح AI مطلوب"
   }
-// 🟦 STEP 3
-// =========================
-if (step === 3) {
 
-  const checkPerson = (p = {}, key) => {
-    if (!p?.fullName) errors[`${key}.fullName`] = "الاسم الكامل مطلوب"
-    if (!p?.gender) errors[`${key}.gender`] = "الجنس مطلوب"
-    if (!p?.nationality) errors[`${key}.nationality`] = "الجنسية مطلوبة"
-    if (!p?.birthDate) errors[`${key}.birthDate`] = "تاريخ الولادة مطلوب"
-    if (!p?.birthState) errors[`${key}.birthState`] = "ولاية الولادة مطلوبة"
-    if (!p?.birthDelegation) errors[`${key}.birthDelegation`] = "معتمدية الولادة مطلوبة"
-    if (!p?.resState) errors[`${key}.resState`] = "ولاية السكن مطلوبة"
-    if (!p?.resDelegation) errors[`${key}.resDelegation`] = "معتمدية السكن مطلوبة"
-    if (!p?.education) errors[`${key}.education`] = "المستوى التعليمي مطلوب"
-    if (!p?.job) errors[`${key}.job`] = "المهنة مطلوبة"
-    if (!p?.notes) errors[`${key}.notes`] = "ملاحظات مطلوبة"
-    if (!p?.statement) errors[`${key}.statement`] = "الإفادة مطلوبة"
-    if (!p?.aiSuggestion) errors[`${key}.aiSuggestion`] = "اقتراح AI مطلوب"
+  // =========================
+  // 🟦 STEP 3
+  // =========================
+  if (step === 3) {
+
+    const checkPerson = (p = {}, key) => {
+      if (!p?.fullName) errors[`${key}.fullName`] = "الاسم الكامل مطلوب"
+      if (!p?.gender) errors[`${key}.gender`] = "الجنس مطلوب"
+      if (!p?.nationality) errors[`${key}.nationality`] = "الجنسية مطلوبة"
+      if (!p?.birthDate) errors[`${key}.birthDate`] = "تاريخ الولادة مطلوب"
+      if (!p?.birthState) errors[`${key}.birthState`] = "ولاية الولادة مطلوبة"
+      if (!p?.birthDelegation) errors[`${key}.birthDelegation`] = "معتمدية الولادة مطلوبة"
+      if (!p?.resState) errors[`${key}.resState`] = "ولاية السكن مطلوبة"
+      if (!p?.resDelegation) errors[`${key}.resDelegation`] = "معتمدية السكن مطلوبة"
+      if (!p?.education) errors[`${key}.education`] = "المستوى التعليمي مطلوب"
+      if (!p?.job) errors[`${key}.job`] = "المهنة مطلوبة"
+      if (!p?.notes) errors[`${key}.notes`] = "ملاحظات مطلوبة"
+      if (!p?.statement) errors[`${key}.statement`] = "الإفادة مطلوبة"
+
+      // ⚠️ تم حذف aiSuggestion من STEP 3 لأنه غالباً خطأ تصميم
+    }
+checkPerson(formData.plaintiff || {}, "plaintiff")
+checkPerson(formData.suspect || {}, "suspect")
+
   }
-
-  checkPerson(formData.plaintiff || {}, "plaintiff")
-  checkPerson(formData.suspect || {}, "suspect")
-}
-
 
   // =========================
   // 🟦 STEP 4
@@ -513,12 +524,15 @@ if (step === 3) {
 
   return errors
 }
+
 const handleNext = (nextStep) => {
   const stepErrors = validateStep(step, formData)
 
   if (Object.keys(stepErrors).length > 0) {
     setErrors(stepErrors)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+   const scrollTop = () =>
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+
     return
   }
 
@@ -559,21 +573,8 @@ const [toastMessage, setToastMessage] = useState('')
   })
 
 const handleSave = () => {
-  setShowSuccessModal(true)
-
-  timerRef.current = setTimeout(() => {
-    setShowSuccessModal(false)
-    navigate('/cases')
-  }, 2500)
-}
-
-useEffect(() => {
-  return () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current)
-    }
-  }
-}, [])
+  try {
+    const existing = JSON.parse(localStorage.getItem('cases') || '[]')
 
     const normalizedCase = {
       ...formData,
@@ -601,12 +602,25 @@ useEffect(() => {
     }
 
     existing.push(normalizedCase)
-
     localStorage.setItem('cases', JSON.stringify(existing))
 
     setToastMessage('✅ تم حفظ القضية بنجاح')
     setToastVisible(true)
 
+    // 🟢 تأكيد نجاح + مودال
+    setShowSuccessModal(true)
+
+    // 🔥 تنظيف أي timeout قديم قبل إنشاء جديد
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+    }
+
+    timerRef.current = setTimeout(() => {
+      setShowSuccessModal(false)
+      navigate('/cases')
+    }, 2500)
+
+    // ♻️ reset form
     setFormData({
       court: '',
       fileType: '',
@@ -631,10 +645,9 @@ useEffect(() => {
     })
 
   } catch (err) {
-    console.error(err)
+    console.error('Save Error:', err)
   }
 }
-
 return (
  <FormWrapper>
     <div className="form-bg">
