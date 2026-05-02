@@ -404,7 +404,8 @@ const PersonForm = ({ title, type, formData, setFormData, errors }) => {
     </CRow>
   </div>
 </div>
-
+  )
+}
 // =======================
 // 🧾 CaseForm
 // =======================
