@@ -4,7 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./store";
 
-import '@coreui/coreui/dist/css/coreui.min.css'; // ✔ هذا الوحيد
+import "./scss/style.scss"; // ✅ فقط هذا
 
 import App from "./App.jsx";
 
@@ -17,6 +17,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
 
 
 
