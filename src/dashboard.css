@@ -1,17 +1,17 @@
 /* =====================================================
-   🏛️ DASHBOARD FINAL COREUI FIX
+   🏛️ DASHBOARD FINAL COREUI STABLE FIX
 ===================================================== */
+
+/* ================= ROOT DASHBOARD ================= */
 
 .dashboard {
   font-family: var(--cui-font-sans-serif);
-  font-size: 1rem;
   line-height: 1.5;
 
   height: 100vh;
   display: flex;
   flex-direction: column;
 
-  /* 🔥 مهم لمنع التكبير البصري */
   overflow: hidden;
 }
 
@@ -23,8 +23,6 @@
   padding: 10px;
   background: #0f172a;
   color: white;
-
-  font-size: 0.95rem;
 }
 
 /* ================= LAYOUT ================= */
@@ -32,8 +30,6 @@
 .layout {
   display: flex;
   flex: 1;
-
-  /* 🔥 fix overflow */
   min-height: 0;
 }
 
@@ -44,8 +40,6 @@
   background: #111827;
   color: white;
   padding: 10px;
-
-  font-size: 0.9rem;
 }
 
 /* ================= MAIN ================= */
@@ -55,10 +49,8 @@
   padding: 10px;
   background: #f3f4f6;
 
-  font-size: 1rem;
   line-height: 1.5;
 
-  /* 🔥 مهم جداً */
   min-width: 0;
   overflow-y: auto;
 }
@@ -70,8 +62,16 @@
   background: #111827;
   color: white;
   padding: 10px;
+}
 
-  font-size: 0.9rem;
+/* ================= COURT CARD ================= */
+
+.courtCard {
+  background: #1f2937;
+  margin: 8px 0;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 8px;
 }
 
 /* ================= CARDS ================= */
@@ -86,20 +86,6 @@
   background: white;
   padding: 10px;
   border-radius: 10px;
-
-  font-size: 0.9rem;
-}
-
-/* ================= COURT CARD ================= */
-
-.courtCard {
-  background: #1f2937;
-  margin: 8px 0;
-  padding: 8px;
-  cursor: pointer;
-  border-radius: 8px;
-
-  font-size: 0.85rem;
 }
 
 /* ================= PRIORITY COLORS ================= */
@@ -124,7 +110,6 @@
   background: white;
   padding: 20px;
   border-radius: 10px;
-
   max-width: 90%;
 }
 
