@@ -1,8 +1,8 @@
 /* =====================================================
-   🏛️ COREUI FINAL CLEAN STYLE (STABLE FIX)
+   🏛️ COREUI FINAL CLEAN STYLE (FULL FIX + CENTERED UI)
 ===================================================== */
 
-/* 🔹 Base reset فقط */
+/* 🔹 Base Reset */
 html, body, #root {
   height: 100%;
   width: 100%;
@@ -10,19 +10,23 @@ html, body, #root {
   padding: 0;
 }
 
-/* 🔹 CoreUI base font (بدون override قاتل) */
+/* =====================================================
+   🎨 GLOBAL BODY
+===================================================== */
+
 body {
   font-family: var(--cui-font-sans-serif);
   font-size: 1rem;
   line-height: 1.5;
-  background-color: #f3f1ef;
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  background: #f3f1ef;
 }
 
 /* =====================================================
-   📦 LAYOUT SYSTEM
+   📦 DASHBOARD LAYOUT
 ===================================================== */
 
 .wrapper {
@@ -53,55 +57,127 @@ body {
 }
 
 /* =====================================================
-   ⚖️ MAIN CONTENT
+   ⚖️ MAIN CENTER FIX (IMPORTANT)
 ===================================================== */
 
 .main {
   flex: 1;
-  padding: 10px;
+  padding: 20px;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
   background: #f3f4f6;
-  font-size: 1rem;
-  line-height: 1.5;
 }
 
 /* =====================================================
-   🧊 CARD
+   🧾 FORM CONTAINER CENTER
+===================================================== */
+
+.form-container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* =====================================================
+   🧊 MAIN CARD
 ===================================================== */
 
 .glass-card {
   width: 100%;
-  max-width: 1150px;
   background: #ffffff;
   border-radius: 18px;
   border: 1px solid rgba(0,0,0,0.06);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  box-shadow: 0 12px 35px rgba(0,0,0,0.10);
   padding: 25px;
 }
 
 /* =====================================================
-   ✨ INPUTS (SAFE ONLY)
+   🎀 FORM BACKGROUND (ONLY FORM AREA)
+===================================================== */
+
+.form-bg {
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px;
+
+  background: linear-gradient(
+    135deg,
+    #f6efe9 0%,
+    #f3e6e0 40%,
+    #f8f1ec 100%
+  );
+}
+
+/* =====================================================
+   🧾 SECTIONS (CARDS INSIDE FORM)
+===================================================== */
+
+.filter-box,
+.person-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 15px;
+
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+}
+
+/* =====================================================
+   🏷 FORM HEADER
+===================================================== */
+
+.form-header {
+  text-align: right;
+  margin-bottom: 15px;
+}
+
+.form-header h4 {
+  font-size: 18px;
+  margin: 0;
+  color: #2c2c2c;
+}
+
+.form-header span {
+  font-size: 13px;
+  color: #777;
+}
+
+/* =====================================================
+   ✨ INPUTS (COREUI SAFE)
 ===================================================== */
 
 .form-control,
 .form-select,
 textarea,
 input {
-  border-radius: 8px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: #fff;
-  padding: 6px 10px;
-  font-size: 0.875rem;
-  font-family: inherit;
+  border-radius: 10px !important;
+  border: 1px solid rgba(0,0,0,0.12) !important;
+  background: #fff !important;
+  padding: 8px 12px !important;
+  font-size: 0.9rem !important;
+}
+
+/* focus */
+.form-control:focus,
+.form-select:focus,
+textarea:focus {
+  border-color: #c59d7d !important;
+  box-shadow: 0 0 0 0.15rem rgba(197,157,125,0.25) !important;
 }
 
 /* =====================================================
-   🏷 TEXT
+   🏷 LABELS
 ===================================================== */
 
 label {
   font-weight: 500;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: #333;
+  margin-bottom: 4px;
 }
 
 /* =====================================================
@@ -109,9 +185,76 @@ label {
 ===================================================== */
 
 .btn {
-  border-radius: 8px;
-  padding: 6px 14px;
-  font-size: 0.875rem;
+  border-radius: 10px;
+  padding: 7px 14px;
+  font-size: 0.9rem;
+}
+
+.btn-primary {
+  background: #8b6f5c;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #6f5647;
+}
+
+.btn-success {
+  background: #2e7d32;
+}
+
+.btn-secondary {
+  background: #6c757d;
+}
+
+/* =====================================================
+   📊 STEPPER
+===================================================== */
+
+.custom-stepper {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.stepper-line {
+  position: absolute;
+  top: 18px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ddd;
+  z-index: 0;
+}
+
+.step-item {
+  text-align: center;
+  flex: 1;
+  z-index: 1;
+}
+
+.step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #eee;
+  margin: 0 auto 5px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.step-circle.active {
+  background: #8b6f5c;
+  color: white;
+}
+
+.step-circle.done {
+  background: #2e7d32;
+  color: white;
 }
 
 /* =====================================================
@@ -127,50 +270,12 @@ label {
     width: 100%;
     height: auto;
   }
+
+  .main {
+    padding: 10px;
+  }
 }
 
-
-/* =====================================================
-   🧨 COREUI FONT FIX (FINAL ABSOLUTE)
-===================================================== */
-
-/* اجبار الخط والحجم على كل التطبيق بدون كسر CoreUI */
-html, body, #root {
-  font-size: 16px !important;
-}
-
-body {
-  font-family: var(--cui-font-sans-serif) !important;
-  font-size: 1rem !important;
-  line-height: 1.5 !important;
-}
-
-/* منع أي عنصر يكبر الخط أو يغيره */
-#root * {
-  font-family: inherit !important;
-  font-size: inherit;
-}
-
-/* حماية CoreUI variables */
-:root {
-  --cui-body-font-size: 1rem;
-}
-
-
-/* 🚨 FINAL GLOBAL FIX - بدون لمس اللوقن */
-
-/* رجّع كل label لوضعه الطبيعي */
-label {
-  all: revert !important;
-}
-
-/* تأكيد خاص لـ CoreUI */
-.form-check-label {
-  all: revert !important;
-  color: #212529 !important;
-  font-size: 14px !important;
-  display: inline-block !important;
-}
 
 
 
