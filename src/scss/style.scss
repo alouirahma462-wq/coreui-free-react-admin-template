@@ -1,34 +1,28 @@
 /* =====================================================
-   🌐 COREUI SAFE GLOBAL RESET (FINAL CLEAN)
+   🏛️ COREUI FINAL CLEAN STYLE (STABLE FIX)
 ===================================================== */
 
-html,
-body,
-#root {
+/* 🔹 Base reset فقط */
+html, body, #root {
   height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
-  font-size: 16px;
 }
 
-/* =====================================================
-   🔥 BODY (KEEP COREUI FONT ONLY)
-===================================================== */
-
+/* 🔹 CoreUI base font (بدون override قاتل) */
 body {
-  background-color: #f3f1ef;
-
   font-family: var(--cui-font-sans-serif);
   font-size: 1rem;
   line-height: 1.5;
+  background-color: #f3f1ef;
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* =====================================================
-   📦 LAYOUT
+   📦 LAYOUT SYSTEM
 ===================================================== */
 
 .wrapper {
@@ -38,8 +32,11 @@ body {
 }
 
 .sidebar {
+  width: 220px;
   flex-shrink: 0;
   height: 100vh;
+  background: #111827;
+  color: white;
 }
 
 .body {
@@ -51,23 +48,20 @@ body {
 
 .header {
   flex-shrink: 0;
+  background: #0f172a;
+  color: white;
 }
 
 /* =====================================================
-   ⚖️ FORM LAYOUT
+   ⚖️ MAIN CONTENT
 ===================================================== */
 
-.form-bg {
-  min-height: 100vh;
-  padding: 20px;
-
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-
-  background-color: #f3f1ef;
-
-  direction: rtl;
+.main {
+  flex: 1;
+  padding: 10px;
+  background: #f3f4f6;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 /* =====================================================
@@ -77,41 +71,31 @@ body {
 .glass-card {
   width: 100%;
   max-width: 1150px;
-
   background: #ffffff;
-
   border-radius: 18px;
   border: 1px solid rgba(0,0,0,0.06);
-
   box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-
   padding: 25px;
 }
 
 /* =====================================================
-   ✨ INPUTS
+   ✨ INPUTS (SAFE ONLY)
 ===================================================== */
 
 .form-control,
 .form-select,
 textarea,
 input {
-  border-radius: 8px !important;
-  border: 1px solid rgba(0,0,0,0.12) !important;
-
-  background: #fff !important;
-
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
   padding: 6px 10px;
-
   font-size: 0.875rem;
-
-  font-family: var(--cui-font-sans-serif);
-
-  text-align: right;
+  font-family: inherit;
 }
 
 /* =====================================================
-   🏷 LABELS
+   🏷 TEXT
 ===================================================== */
 
 label {
@@ -125,10 +109,24 @@ label {
 ===================================================== */
 
 .btn {
-  border-radius: 8px !important;
+  border-radius: 8px;
   padding: 6px 14px;
-
   font-size: 0.875rem;
+}
+
+/* =====================================================
+   📱 RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+  .wrapper {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+  }
 }
 
 
