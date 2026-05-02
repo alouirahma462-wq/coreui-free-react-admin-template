@@ -329,40 +329,34 @@ label {
 }
 
 /* =====================================================
-   🔘 LOGIN "REMEMBER ME" FINAL FIX
+   🔘 REMEMBER ME FORCE FIX (COREUI OVERRIDE KILLER)
 ===================================================== */
 
-.form-check {
+.remember-wrapper {
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
-
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
-/* 🔥 أهم نقطة: إظهار checkbox الحقيقي */
-.form-check-input {
-  appearance: auto !important;
-  -webkit-appearance: checkbox !important;
-
+/* checkbox */
+.remember-wrapper input[type="checkbox"] {
   width: 16px !important;
   height: 16px !important;
-
+  appearance: auto !important;
   opacity: 1 !important;
-  visibility: visible !important;
   display: inline-block !important;
-
   cursor: pointer;
   accent-color: #8b6f5c;
 }
 
 /* label */
-.form-check-label {
+.remember-wrapper label {
   font-size: 0.85rem !important;
   color: #333 !important;
   cursor: pointer;
-  user-select: none;
 }
+
 
 
 
