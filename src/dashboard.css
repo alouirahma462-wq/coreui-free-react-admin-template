@@ -1,5 +1,5 @@
 /* =====================================================
-   🏛️ DASHBOARD CLEAN COREUI FIX (FINAL)
+   🏛️ DASHBOARD FINAL COREUI FIX
 ===================================================== */
 
 .dashboard {
@@ -10,6 +10,9 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
+
+  /* 🔥 مهم لمنع التكبير البصري */
+  overflow: hidden;
 }
 
 /* ================= HEADER ================= */
@@ -20,6 +23,8 @@
   padding: 10px;
   background: #0f172a;
   color: white;
+
+  font-size: 0.95rem;
 }
 
 /* ================= LAYOUT ================= */
@@ -27,6 +32,9 @@
 .layout {
   display: flex;
   flex: 1;
+
+  /* 🔥 fix overflow */
+  min-height: 0;
 }
 
 /* ================= SIDEBAR ================= */
@@ -36,6 +44,8 @@
   background: #111827;
   color: white;
   padding: 10px;
+
+  font-size: 0.9rem;
 }
 
 /* ================= MAIN ================= */
@@ -45,9 +55,12 @@
   padding: 10px;
   background: #f3f4f6;
 
-  font-family: inherit;
   font-size: 1rem;
   line-height: 1.5;
+
+  /* 🔥 مهم جداً */
+  min-width: 0;
+  overflow-y: auto;
 }
 
 /* ================= RIGHT PANEL ================= */
@@ -57,13 +70,15 @@
   background: #111827;
   color: white;
   padding: 10px;
+
+  font-size: 0.9rem;
 }
 
 /* ================= CARDS ================= */
 
 .cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -71,6 +86,8 @@
   background: white;
   padding: 10px;
   border-radius: 10px;
+
+  font-size: 0.9rem;
 }
 
 /* ================= COURT CARD ================= */
@@ -81,6 +98,8 @@
   padding: 8px;
   cursor: pointer;
   border-radius: 8px;
+
+  font-size: 0.85rem;
 }
 
 /* ================= PRIORITY COLORS ================= */
@@ -93,11 +112,9 @@
 
 .modalOverlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: rgba(0,0,0,0.5);
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -107,6 +124,8 @@
   background: white;
   padding: 20px;
   border-radius: 10px;
+
+  max-width: 90%;
 }
 
 /* ================= RESPONSIVE ================= */
@@ -125,4 +144,5 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
 
