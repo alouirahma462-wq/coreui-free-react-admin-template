@@ -27,13 +27,13 @@ const AppFooter = () => {
             جميع الحقوق محفوظة © 2026 وزارة العدل - الجمهورية التونسية
           </span>
 
-          {/* 🇹🇳 علم تونس داخل دائرة */}
+          {/* 🇹🇳 علم تونس داخل دائرة حمراء (أفضل شكل) */}
           <span
             style={{
               width: "22px",
               height: "22px",
               borderRadius: "50%",
-              background: "white",
+              background: "#e70013",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -52,4 +52,5 @@ const AppFooter = () => {
 }
 
 export default React.memo(AppFooter)
+
 
