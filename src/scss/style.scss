@@ -157,19 +157,15 @@ body {
 }
 
 
-/* FIX: إظهار "تذكرني" */
+/* 🔥 FINAL FIX - RESTORE LABELS */
 
+label,
 .form-check-label {
+  color: #212529 !important;
   opacity: 1 !important;
-  color: #000 !important;
   visibility: visible !important;
-}
-
-/* إذا في Bootstrap/CoreUI */
-.form-check-input:checked ~ .form-check-label,
-.form-check-input ~ .form-check-label {
-  opacity: 1 !important;
-  color: #000 !important;
+  font-size: 0.875rem !important;
+  display: inline-block !important;
 }
 
 
