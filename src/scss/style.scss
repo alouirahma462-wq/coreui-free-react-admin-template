@@ -18,14 +18,16 @@ body,
   padding: 0;
 }
 
-/* ✅ FIX 1: رجّع الخط الطبيعي للتطبيق */
+/* 🔥 FIX الخط الصحيح بدون كسر CoreUI */
 body {
   background-color: var(--cui-tertiary-bg);
   font-size: 13px;
-  font-family: var(--cui-font-sans-serif); /* 🔥 مهم جدا */
+  font-family: var(--cui-font-sans-serif) !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* ❌ مهم: لا تستخدم * مع font-family */
 
 /* =====================================================
    📦 COREUI WRAPPER
@@ -92,17 +94,14 @@ body {
   isolation: isolate;
 
   direction: rtl;
-
-  /* ✅ FIX 2: لا تكسر الخط */
-  font-size: 13px;
-  font-family: inherit;
   text-align: right;
+
+  font-size: 13px;
 }
 
-/* ❌ مهم: لا تلمس كل العناصر (كان سبب الكارثة) */
+/* ✔ فقط محاذاة بدون تخريب الخط */
 .form-bg * {
   text-align: right;
-  font-family: inherit;
 }
 
 /* =====================================================
@@ -113,8 +112,7 @@ body {
   width: 100%;
   max-width: 1150px;
 
-  /* ✅ FIX 3: حل الصفحة البيضاء */
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9); /* 🔥 FIX الصفحة البيضاء */
 
   backdrop-filter: blur(16px);
 
@@ -147,9 +145,8 @@ input {
 
   padding: 6px 10px;
 
-  /* ✅ FIX 4: منع تشوه الخط */
   font-size: 13px !important;
-  font-family: inherit !important;
+  font-family: var(--cui-font-sans-serif) !important;
 
   text-align: right;
   transition: all 0.2s ease;
@@ -189,7 +186,7 @@ label {
 ===================================================== */
 
 .person-card {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 14px;
   padding: 14px;
   margin-bottom: 14px;
@@ -318,7 +315,7 @@ label {
 }
 
 /* =====================================================
-   📄 FIX RTL ALIGNMENT
+   📄 RTL FIX
 ===================================================== */
 
 input,
@@ -326,6 +323,7 @@ select,
 textarea {
   text-align: right;
 }
+
 
 
 
