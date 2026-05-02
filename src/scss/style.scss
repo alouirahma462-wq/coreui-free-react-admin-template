@@ -11,10 +11,12 @@ body,
   padding: 0;
 }
 
-/* 🔥 FIX نهائي للخط */
+/* 🔥 FIX نهائي للخط (CoreUI safe) */
 body {
   background-color: #f3f1ef;
-  font-size: 13px;
+
+  /* ❌ مهم: لا نكسر CoreUI */
+  font-size: 1rem;
 
   font-family: var(--cui-font-sans-serif) !important;
 
@@ -60,18 +62,16 @@ body {
   justify-content: center;
   align-items: flex-start;
 
-  background: #f3f1ef; /* ❌ إزالة gradient اللي كان يبيض */
+  background-color: #f3f1ef;
 
   direction: rtl;
   text-align: right;
 
-  font-size: 13px;
+  /* ❌ لا نعيد كسر الخط هنا */
+  font-size: 1rem;
 }
 
-/* ❌ لا تخرب كل العناصر */
-.form-bg * {
-  text-align: right;
-}
+/* ❌ مهم: تم حذف form-bg * لأنها تخرب inputs */
 
 /* =====================================================
    🧊 CARD FIX
@@ -92,7 +92,7 @@ body {
 }
 
 /* =====================================================
-   ✨ INPUT FIX (FONT + STYLE)
+   ✨ INPUT FIX (COREUI SAFE)
 ===================================================== */
 
 .form-control,
@@ -106,7 +106,8 @@ input {
 
   padding: 6px 10px;
 
-  font-size: 13px !important;
+  /* ❌ مهم: rem بدل px */
+  font-size: 0.875rem !important;
 
   font-family: var(--cui-font-sans-serif) !important;
 
@@ -119,7 +120,7 @@ input {
 
 label {
   font-weight: 500;
-  font-size: 12px;
+  font-size: 0.75rem;
   color: #333;
 }
 
@@ -130,8 +131,10 @@ label {
 .btn {
   border-radius: 8px !important;
   padding: 6px 14px;
-  font-size: 13px;
+
+  font-size: 0.875rem;
 }
+
 
 
 
