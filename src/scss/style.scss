@@ -123,6 +123,10 @@ body {
   position: relative;
   overflow: hidden;
   isolation: isolate;
+
+  /* ✅ RTL */
+  direction: rtl;
+  text-align: right;
 }
 
 .form-bg::before,
@@ -173,20 +177,20 @@ body {
 }
 
 .glass-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.01);
 }
 
 /* =====================================================
-   📐 EUROPEAN GRID FIX
+   📐 GRID
 ===================================================== */
 
 .form-bg .row {
-  row-gap: 18px !important;
+  row-gap: 14px !important;
 }
 
 .form-bg .col-md-6 {
-  padding-left: 10px;
-  padding-right: 10px;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
 /* =====================================================
@@ -198,11 +202,11 @@ body {
 .form-bg textarea,
 .form-bg .form-control,
 .form-bg .form-select {
-  border-radius: 12px !important;
+  border-radius: 10px !important;
   border: 1px solid rgba(0,0,0,0.08) !important;
   background: rgba(255, 255, 255, 0.75) !important;
-  padding: 10px 12px;
-  transition: 0.2s ease;
+  padding: 6px 10px;
+  font-size: 13px;
 }
 
 .form-bg input:focus,
@@ -226,79 +230,96 @@ body {
 }
 
 /* =====================================================
-   ❌ VALIDATION (EU STYLE FIX)
+   ❌ VALIDATION
 ===================================================== */
 
-/* الحقل وقت الخطأ */
-.form-bg .is-invalid,
-.form-bg .form-control.is-invalid,
-.form-bg .form-select.is-invalid,
-.form-bg textarea.is-invalid {
+.form-bg .is-invalid {
   border-color: #dc3545 !important;
-  padding-left: 40px;
-  background-image: none !important;
 }
 
-/* رسالة الخطأ */
 .form-bg .invalid-feedback {
   font-size: 12px;
-  font-weight: 500;
   color: #dc3545;
-  margin-top: 6px;
-}
-
-/* أيقونة X */
-.error-icon {
-  position: absolute;
-  left: 12px;
-  top: 38px;
-  color: #dc3545;
-  font-size: 14px;
-  font-weight: bold;
-  pointer-events: none;
-}
-
-/* focus error */
-.form-bg .is-invalid:focus {
-  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25) !important;
 }
 
 /* =====================================================
-   🧾 PERSON CARD (EU STYLE)
+   🧾 PERSON CARD
 ===================================================== */
 
 .person-card {
   background: rgba(255, 255, 255, 0.65);
-  border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 16px;
-  padding: 18px;
-  margin-bottom: 18px;
-
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-  transition: 0.25s ease;
-}
-
-.person-card:hover {
-  transform: translateY(-1px);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 14px;
 }
 
 /* =====================================================
-   🧾 SECTION HEADERS
+   🧾 GLASS HEADER
 ===================================================== */
 
-.section-header {
-  margin-bottom: 15px;
+.form-header {
+  position: relative;
+  padding: 16px 18px;
+  border-radius: 14px;
+
+  background: linear-gradient(135deg, rgba(185,124,109,0.9), rgba(139,94,84,0.9));
+  backdrop-filter: blur(10px);
+
+  color: white;
+  margin-bottom: 20px;
+  overflow: hidden;
 }
 
-.section-main-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #5a3e36;
+.form-header::before {
+  content: "";
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.2), transparent 60%);
+  animation: rotateGlow 8s linear infinite;
 }
 
-.section-sub {
-  font-size: 12px;
-  color: #8a6b63;
+@keyframes rotateGlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* =====================================================
+   🔢 STEPPER
+===================================================== */
+
+.stepper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.step {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0,0,0,0.1);
+  color: #555;
+  font-weight: bold;
+}
+
+.step.active {
+  background: linear-gradient(135deg, #b97c6d, #8b5e54);
+  color: white;
+}
+
+.line {
+  flex: 1;
+  height: 3px;
+  background: rgba(0,0,0,0.1);
+  margin: 0 5px;
 }
 
 /* =====================================================
@@ -306,43 +327,12 @@ body {
 ===================================================== */
 
 .btn {
-  border-radius: 12px !important;
-  font-weight: 500;
-  padding: 8px 16px;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #b97c6d, #8b5e54) !important;
-  border: none !important;
-}
-
-.btn-success {
-  background: linear-gradient(135deg, #198754, #146c43) !important;
-  border: none !important;
-}
-
-.btn-secondary {
-  background: #e9ecef !important;
-  color: #333 !important;
-  border: none !important;
+  border-radius: 10px !important;
+  padding: 6px 14px;
 }
 
 /* =====================================================
-   📊 PROGRESS
-===================================================== */
-
-.progress {
-  height: 10px;
-  border-radius: 20px;
-  background: rgba(0,0,0,0.08);
-}
-
-.progress-bar {
-  background: linear-gradient(135deg, #b97c6d, #8b5e54);
-}
-
-/* =====================================================
-   📄 CASE PAGE
+   📄 PAGE
 ===================================================== */
 
 .case-page {
@@ -354,25 +344,6 @@ body {
   border-radius: 20px;
 }
 
-/* =====================================================
-   📱 RESPONSIVE
-===================================================== */
-
-@media (max-width: 768px) {
-  .form-bg {
-    padding: 15px;
-  }
-
-  .glass-card {
-    border-radius: 14px;
-    padding: 15px;
-  }
-
-  .form-bg .col-md-6 {
-    padding-left: 0;
-    padding-right: 0;
-  }
-}
 
 
 
