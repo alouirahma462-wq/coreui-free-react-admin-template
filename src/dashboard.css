@@ -1,9 +1,10 @@
 .dashboard {
-  font-family: Arial;
+  font-family: var(--cui-font-sans-serif);
   height: 100vh;
   display: flex;
   flex-direction: column;
 }
+
 
 /* HEADER */
 .header {
