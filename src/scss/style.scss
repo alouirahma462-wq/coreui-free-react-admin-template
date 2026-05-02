@@ -137,7 +137,7 @@ body::after {
    ⚖️ CASE FORM SYSTEM (ONLY FOR FORMS)
 ===================================================== */
 
-/* 🌸 BACKGROUND (only form pages) */
+/* 🌸 BACKGROUND */
 .form-bg {
   min-height: 100vh;
   padding: 40px;
@@ -150,9 +150,11 @@ body::after {
 
   position: relative;
   overflow: hidden;
+
+  isolation: isolate; /* 🟢 حماية الداشبورد */
 }
 
-/* glow effect */
+/* glow */
 .form-bg::before {
   content: "";
   position: absolute;
@@ -187,7 +189,6 @@ body::after {
   -webkit-backdrop-filter: blur(16px);
 
   border-radius: 22px;
-
   border: 1px solid rgba(255, 255, 255, 0.35);
 
   box-shadow:
@@ -204,39 +205,41 @@ body::after {
 }
 
 /* =========================
-   ✨ INPUTS MODERN STYLE
+   ✨ INPUTS (FIXED - SAFE)
 ========================= */
 
-input,
-select,
-textarea {
+.form-bg input,
+.form-bg select,
+.form-bg textarea {
   border-radius: 12px !important;
   border: 1px solid rgba(0,0,0,0.08) !important;
-
   background: rgba(255, 255, 255, 0.7) !important;
-
   transition: all 0.2s ease;
 }
 
-input:focus,
-select:focus,
-textarea:focus {
+.form-bg input:focus,
+.form-bg select:focus,
+.form-bg textarea:focus {
   border-color: #c79b8a !important;
   box-shadow: 0 0 0 3px rgba(199, 155, 138, 0.25) !important;
 }
 
 /* =========================
-   🪟 HEADINGS STYLE
+   🪟 HEADINGS (SCOPED)
 ========================= */
 
-h1, h2, h3, h4, h5 {
+.form-bg h1,
+.form-bg h2,
+.form-bg h3,
+.form-bg h4,
+.form-bg h5 {
   color: #5a3e36;
   font-weight: 600;
   letter-spacing: 0.3px;
 }
 
 /* =========================
-   🔘 BUTTONS STYLE
+   🔘 BUTTONS
 ========================= */
 
 .btn-primary {
