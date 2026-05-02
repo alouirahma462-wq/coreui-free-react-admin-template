@@ -1,5 +1,5 @@
 /* =====================================================
-   🌐 COREUI GLOBAL RESET (CLEAN FINAL VERSION)
+   🌐 GLOBAL RESET (SAFE COREUI FIX)
 ===================================================== */
 
 html,
@@ -13,13 +13,13 @@ body,
 }
 
 /* =====================================================
-   🔥 BODY (COREUI DEFAULT SAFE FONT)
+   🔥 BODY (NO OVERRIDE - COREUI DEFAULT)
 ===================================================== */
 
 body {
   background-color: #f3f1ef;
 
-  font-family: var(--cui-font-sans-serif);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-size: 1rem;
   line-height: 1.5;
 
@@ -68,7 +68,6 @@ body {
   background-color: #f3f1ef;
 
   direction: rtl;
-  text-align: right;
 }
 
 /* =====================================================
@@ -106,7 +105,7 @@ input {
 
   font-size: 0.875rem;
 
-  font-family: var(--cui-font-sans-serif);
+  font-family: inherit;
 
   text-align: right;
 }
