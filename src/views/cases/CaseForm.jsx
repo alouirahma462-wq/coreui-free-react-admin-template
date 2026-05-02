@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom' 
+import FormWrapper from "../../components/FormWrapper";
 import {
   CCard,
   CCardBody,
@@ -595,11 +596,12 @@ const handleSave = () => {
   }
 }
 
- return (
-  <div className="case-page">
+return (
+  <FormWrapper>
+    <div className="case-page">
+      <CCard className="case-card">
+        <CCardBody>
 
-    <CCard className="case-card">
-      <CCardBody>
 <div className="mb-3">
 
   <div className="d-flex justify-content-between mb-1">
@@ -1089,7 +1091,8 @@ const handleSave = () => {
       </CCard>
 
     </div>
-  )
+   </FormWrapper>
+)
 }
 
 export default CaseForm
