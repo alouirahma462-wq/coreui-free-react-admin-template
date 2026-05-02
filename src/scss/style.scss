@@ -11,18 +11,23 @@ html, body, #root {
 }
 
 /* =====================================================
-   🎨 GLOBAL BODY (رجّع الخط الطبيعي CoreUI)
+   🎨 GLOBAL BODY (FIXED FONT ISSUE)
 ===================================================== */
 
 body {
-  font-family: var(--cui-font-sans-serif);
-  font-size: 1rem; /* 🔥 نفس CoreUI */
+  font-family: var(--cui-font-sans-serif) !important;
+  font-size: 1rem !important; /* 🔥 يمنع تكبير الخط */
   line-height: 1.5;
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
   background: #f3f1ef;
+}
+
+/* 🔥 منع أي عنصر يكبر الخط */
+#root * {
+  font-size: inherit;
 }
 
 /* =====================================================
@@ -152,7 +157,7 @@ body {
 }
 
 /* =====================================================
-   ✨ INPUTS
+   ✨ INPUTS (COREUI SAFE FIX)
 ===================================================== */
 
 .form-control,
@@ -175,15 +180,15 @@ textarea:focus {
 }
 
 /* =====================================================
-   🚨 VALIDATION ERROR FIX (RED BORDER + TEXT)
+   🚨 VALIDATION FIX (IMPORTANT)
 ===================================================== */
 
-/* input error border */
-.is-invalid,
+/* 🔥 هذا أهم سطر - يجبر CoreUI يبين الخطأ */
+.was-validated .form-control:invalid,
 .form-control.is-invalid,
 .form-select.is-invalid,
 textarea.is-invalid {
-  border: 1px solid #dc3545 !important;
+  border: 2px solid #dc3545 !important;
   box-shadow: 0 0 0 0.15rem rgba(220,53,69,0.25) !important;
 }
 
@@ -192,10 +197,11 @@ textarea.is-invalid {
   color: #dc3545;
   font-size: 12px;
   margin-top: 4px;
+  display: block;
 }
 
 /* =====================================================
-   🏷 LABELS (SAFE)
+   🏷 LABELS
 ===================================================== */
 
 label {
