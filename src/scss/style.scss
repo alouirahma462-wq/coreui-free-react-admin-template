@@ -18,17 +18,13 @@ body,
   padding: 0;
 }
 
-/* ✅ FIX مهم: إصلاح تشوه الخط في كل التطبيق */
+/* ✅ FIX 1: رجّع الخط الطبيعي للتطبيق */
 body {
-  background-color: var(--cui-tertiary-bg, #f8f9fa);
-
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  background-color: var(--cui-tertiary-bg);
   font-size: 13px;
-  line-height: 1.5;
-
+  font-family: var(--cui-font-sans-serif); /* 🔥 مهم جدا */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
 /* =====================================================
@@ -73,8 +69,7 @@ body {
 
 @include color-mode(dark) {
   body {
-    background-color: var(--cui-dark-bg-subtle, #121212);
-    color: #eaeaea;
+    background-color: var(--cui-dark-bg-subtle);
   }
 }
 
@@ -97,18 +92,17 @@ body {
   isolation: isolate;
 
   direction: rtl;
-  text-align: right;
 
-  /* ✅ FIX مهم: منع البياض المفاجئ */
-  background-color: #f5f5f5;
+  /* ✅ FIX 2: لا تكسر الخط */
+  font-size: 13px;
+  font-family: inherit;
+  text-align: right;
 }
 
-/* =====================================================
-   🧠 FIX النص بدون تخريب CoreUI
-===================================================== */
-
+/* ❌ مهم: لا تلمس كل العناصر (كان سبب الكارثة) */
 .form-bg * {
   text-align: right;
+  font-family: inherit;
 }
 
 /* =====================================================
@@ -119,7 +113,9 @@ body {
   width: 100%;
   max-width: 1150px;
 
-  background: rgba(255, 255, 255, 0.7);
+  /* ✅ FIX 3: حل الصفحة البيضاء */
+  background: rgba(255, 255, 255, 0.85);
+
   backdrop-filter: blur(16px);
 
   border-radius: 22px;
@@ -138,7 +134,7 @@ body {
 }
 
 /* =====================================================
-   ✨ INPUT SYSTEM
+   ✨ INPUT SYSTEM (FIXED)
 ===================================================== */
 
 .form-control,
@@ -147,16 +143,15 @@ textarea,
 input {
   border-radius: 10px !important;
   border: 1px solid rgba(0,0,0,0.08) !important;
-  background: rgba(255, 255, 255, 0.85) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
 
   padding: 6px 10px;
-  font-size: 13px;
+
+  /* ✅ FIX 4: منع تشوه الخط */
+  font-size: 13px !important;
+  font-family: inherit !important;
 
   text-align: right;
-  line-height: 1.4;
-
-  font-family: inherit;
-
   transition: all 0.2s ease;
 }
 
@@ -194,7 +189,7 @@ label {
 ===================================================== */
 
 .person-card {
-  background: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.85);
   border-radius: 14px;
   padding: 14px;
   margin-bottom: 14px;
@@ -245,7 +240,7 @@ label {
 }
 
 /* =====================================================
-   🔢 STEPPER
+   🔢 CUSTOM STEPPER
 ===================================================== */
 
 .custom-stepper {
@@ -321,6 +316,17 @@ label {
   padding: 6px 14px;
   font-size: 13px;
 }
+
+/* =====================================================
+   📄 FIX RTL ALIGNMENT
+===================================================== */
+
+input,
+select,
+textarea {
+  text-align: right;
+}
+
 
 
 
