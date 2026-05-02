@@ -1,5 +1,5 @@
 /* =====================================================
-   🌐 GLOBAL RESET (PRODUCTION READY COREUI)
+   🌐 GLOBAL RESET (FINAL STABLE COREUI)
 ===================================================== */
 
 html,
@@ -12,14 +12,14 @@ body,
 }
 
 /* =====================================================
-   🔥 BODY FIX (FINAL)
+   🔥 BODY FIX (SAFE + CLEAN)
 ===================================================== */
 
 body {
   background-color: #f3f1ef;
 
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.6;
 
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 
@@ -90,7 +90,7 @@ body {
 }
 
 /* =====================================================
-   ✨ INPUTS
+   ✨ INPUTS (COREUI SAFE)
 ===================================================== */
 
 .form-control,
@@ -131,6 +131,7 @@ label {
 
   font-size: 0.875rem;
 }
+
 
 
 
