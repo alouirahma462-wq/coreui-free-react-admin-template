@@ -1,12 +1,19 @@
+/* =====================================================
+   🏛️ DASHBOARD CLEAN COREUI FIX (FINAL)
+===================================================== */
+
 .dashboard {
   font-family: var(--cui-font-sans-serif);
+  font-size: 1rem;
+  line-height: 1.5;
+
   height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
+/* ================= HEADER ================= */
 
-/* HEADER */
 .header {
   display: flex;
   justify-content: space-between;
@@ -15,13 +22,15 @@
   color: white;
 }
 
-/* LAYOUT */
+/* ================= LAYOUT ================= */
+
 .layout {
   display: flex;
   flex: 1;
 }
 
-/* SIDEBAR */
+/* ================= SIDEBAR ================= */
+
 .sidebar {
   width: 220px;
   background: #111827;
@@ -29,25 +38,28 @@
   padding: 10px;
 }
 
-.courtCard {
-  background: #1f2937;
-  margin: 8px 0;
-  padding: 8px;
-  cursor: pointer;
-  border-radius: 8px;
-}
-
-.high { color: red; }
-.medium { color: orange; }
-.low { color: green; }
+/* ================= MAIN ================= */
 
 .main {
   flex: 1;
   padding: 10px;
   background: #f3f4f6;
+
+  font-family: inherit;
   font-size: 1rem;
+  line-height: 1.5;
 }
 
+/* ================= RIGHT PANEL ================= */
+
+.rightPanel {
+  width: 220px;
+  background: #111827;
+  color: white;
+  padding: 10px;
+}
+
+/* ================= CARDS ================= */
 
 .cards {
   display: grid;
@@ -61,23 +73,24 @@
   border-radius: 10px;
 }
 
-/* RIGHT PANEL */
-.rightPanel {
-  width: 220px;
-  background: #111827;
-  color: white;
-  padding: 10px;
-}
+/* ================= COURT CARD ================= */
 
-.adminPanel button,
-.userBox button {
-  width: 100%;
-  margin-top: 5px;
+.courtCard {
+  background: #1f2937;
+  margin: 8px 0;
   padding: 8px;
   cursor: pointer;
+  border-radius: 8px;
 }
 
-/* MODAL */
+/* ================= PRIORITY COLORS ================= */
+
+.high { color: #ef4444; }
+.medium { color: #f59e0b; }
+.low { color: #22c55e; }
+
+/* ================= MODAL ================= */
+
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -96,7 +109,8 @@
   border-radius: 10px;
 }
 
-/* RESPONSIVE */
+/* ================= RESPONSIVE ================= */
+
 @media (max-width: 768px) {
   .layout {
     flex-direction: column;
@@ -111,3 +125,4 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
