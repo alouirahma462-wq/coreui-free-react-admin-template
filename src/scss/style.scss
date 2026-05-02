@@ -1,5 +1,5 @@
 /* =====================================================
-   🌐 GLOBAL RESET (COREUI SAFE)
+   🌐 GLOBAL RESET (PRODUCTION READY COREUI)
 ===================================================== */
 
 html,
@@ -11,11 +11,18 @@ body,
   padding: 0;
 }
 
-/* 🔥 FONT FIX بدون كسر CoreUI */
+/* =====================================================
+   🔥 BODY FIX (FINAL)
+===================================================== */
+
 body {
   background-color: #f3f1ef;
-  font-size: 1rem;
-  font-family: var(--cui-font-sans-serif);
+
+  font-size: 16px;
+  line-height: 1.5;
+
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -83,7 +90,7 @@ body {
 }
 
 /* =====================================================
-   ✨ INPUTS (COREUI SAFE)
+   ✨ INPUTS
 ===================================================== */
 
 .form-control,
@@ -99,7 +106,7 @@ input {
 
   font-size: 0.875rem;
 
-  font-family: var(--cui-font-sans-serif);
+  font-family: inherit;
 
   text-align: right;
 }
@@ -123,17 +130,6 @@ label {
   padding: 6px 14px;
 
   font-size: 0.875rem;
-}
-
-body {
-  font-size: 16px !important;
-  line-height: 1.4 !important;
-  letter-spacing: normal !important;
-  word-spacing: normal !important;
-}
-
-* {
-  line-height: 1.4 !important;
 }
 
 
