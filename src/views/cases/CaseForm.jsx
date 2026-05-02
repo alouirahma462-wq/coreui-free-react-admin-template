@@ -71,334 +71,339 @@ const PersonForm = ({ title, type, formData, setFormData, errors }) => {
     : null
 
   return (
-    <div className="filter-box mb-3">
+<div className="filter-box mb-4">
 
-      <h6>{title}</h6>
+  {/* 🧾 عنوان القسم */}
+  <div className="section-header">
+    <h5 className="section-main-title">الأطراف</h5>
+    <span className="section-sub">بيانات الشاكي والمظنون فيه</span>
+  </div>
 
-      <CRow className="g-3">
+  <div className="person-card">
 
-        {/* ===================== */}
-        {/* الاسم الكامل */}
-        {/* ===================== */}
-        <CCol xs={12} md={6}>
-          <CFormInput
-            label="الاسم الكامل"
-            value={person.fullName || ''}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                [type]: {
-                  ...(prev[type] || {}),
-                  fullName: e.target.value
-                }
-              }))
-            }
-          />
-          {errors?.[`${type}.fullName`] && (
-            <div className="text-danger">{errors[`${type}.fullName`]}</div>
-          )}
-        </CCol>
+    <h6 className="section-title">{title}</h6>
 
-        {/* ===================== */}
-        {/* الجنس */}
-        {/* ===================== */}
-        <CCol xs={12} md={6}>
-          <CFormSelect
-            label="الجنس"
-            value={person.gender || ''}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                [type]: {
-                  ...(prev[type] || {}),
-                  gender: e.target.value
-                }
-              }))
-            }
-          >
-            <option value="">-- اختر --</option>
-            {genders?.map((g, i) => (
-              <option key={i} value={g}>{g}</option>
-            ))}
-          </CFormSelect>
-          {errors?.[`${type}.gender`] && (
-            <div className="text-danger">{errors[`${type}.gender`]}</div>
-          )}
-        </CCol>
+    <CRow className="g-3">
 
-        {/* ===================== */}
-        {/* الجنسية */}
-        {/* ===================== */}
-        <CCol xs={12} md={6}>
-          <CFormSelect
-            label="الجنسية"
-            value={person.nationality || ''}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                [type]: {
-                  ...(prev[type] || {}),
-                  nationality: e.target.value
-                }
-              }))
-            }
-          >
-            <option value="">-- اختر --</option>
-            {nationalities?.map((n, i) => (
-              <option key={i} value={n}>{n}</option>
-            ))}
-          </CFormSelect>
-          {errors?.[`${type}.nationality`] && (
-            <div className="text-danger">{errors[`${type}.nationality`]}</div>
-          )}
-        </CCol>
+      {/* الاسم الكامل */}
+      <CCol xs={12} md={6}>
+        <CFormInput
+          label="الاسم الكامل"
+          value={person.fullName || ''}
+          invalid={!!errors?.[`${type}.fullName`]}
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              [type]: {
+                ...(prev[type] || {}),
+                fullName: e.target.value
+              }
+            }))
+          }
+        />
+        <CFormFeedback invalid>
+          ❌ {errors?.[`${type}.fullName`]}
+        </CFormFeedback>
+      </CCol>
 
-        {/* ===================== */}
-        {/* تاريخ الولادة */}
-        {/* ===================== */}
-        <CCol xs={12} md={6}>
-          <CFormInput
-            type="date"
-            label="تاريخ الولادة"
-            value={person.birthDate || ''}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                [type]: {
-                  ...(prev[type] || {}),
-                  birthDate: e.target.value
-                }
-              }))
-            }
-          />
-          {errors?.[`${type}.birthDate`] && (
-            <div className="text-danger">{errors[`${type}.birthDate`]}</div>
-          )}
-        </CCol>
+      {/* الجنس */}
+      <CCol xs={12} md={6}>
+        <CFormSelect
+          label="الجنس"
+          value={person.gender || ''}
+          invalid={!!errors?.[`${type}.gender`]}
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              [type]: {
+                ...(prev[type] || {}),
+                gender: e.target.value
+              }
+            }))
+          }
+        >
+          <option value="">-- اختر --</option>
+          {genders?.map((g, i) => (
+            <option key={i} value={g}>{g}</option>
+          ))}
+        </CFormSelect>
 
-        {/* ===================== */}
-        {/* ولاية الولادة */}
-        {/* ===================== */}
-        <CCol xs={12} md={6}>
-          <CFormSelect
-            label="مكان الولادة (ولاية)"
-            value={person.birthState || ''}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                [type]: {
-                  ...(prev[type] || {}),
-                  birthState: e.target.value
-                }
-              }))
-            }
-          >
-            <option value="">-- اختر --</option>
-            {locations?.map((l, i) => (
-              <option key={i} value={l?.state}>{l?.state}</option>
-            ))}
-          </CFormSelect>
-          {errors?.[`${type}.birthState`] && (
-            <div className="text-danger">{errors[`${type}.birthState`]}</div>
-          )}
-        </CCol>
+        <CFormFeedback invalid>
+          ❌ {errors?.[`${type}.gender`]}
+        </CFormFeedback>
+      </CCol>
 
-        {/* ===================== */}
-        {/* معتمدية الولادة */}
-        {/* ===================== */}
-        <CCol xs={12} md={6}>
-          <CFormSelect
-            label="مكان الولادة (معتمدية)"
-            value={person.birthDelegation || ''}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                [type]: {
-                  ...(prev[type] || {}),
-                  birthDelegation: e.target.value
-                }
-              }))
-            }
-          >
-            <option value="">-- اختر --</option>
-            {birthLocation?.delegations?.map((d, i) => (
-              <option key={i} value={d}>{d}</option>
-            ))}
-          </CFormSelect>
-          {errors?.[`${type}.birthDelegation`] && (
-            <div className="text-danger">{errors[`${type}.birthDelegation`]}</div>
-          )}
-        </CCol>
+      {/* الجنسية */}
+      <CCol xs={12} md={6}>
+        <CFormSelect
+          label="الجنسية"
+          value={person.nationality || ''}
+          invalid={!!errors?.[`${type}.nationality`]}
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              [type]: {
+                ...(prev[type] || {}),
+                nationality: e.target.value
+              }
+            }))
+          }
+        >
+          <option value="">-- اختر --</option>
+          {nationalities?.map((n, i) => (
+            <option key={i} value={n}>{n}</option>
+          ))}
+        </CFormSelect>
 
-        {/* ===================== */}
-        {/* ولاية السكن */}
-        {/* ===================== */}
-        <CCol xs={12} md={6}>
-          <CFormSelect
-            label="مكان السكن (ولاية)"
-            value={person.resState || ''}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                [type]: {
-                  ...(prev[type] || {}),
-                  resState: e.target.value
-                }
-              }))
-            }
-          >
-            <option value="">-- اختر --</option>
-            {locations?.map((l, i) => (
-              <option key={i} value={l?.state}>{l?.state}</option>
-            ))}
-          </CFormSelect>
-          {errors?.[`${type}.resState`] && (
-            <div className="text-danger">{errors[`${type}.resState`]}</div>
-          )}
-        </CCol>
+        <CFormFeedback invalid>
+          ❌ {errors?.[`${type}.nationality`]}
+        </CFormFeedback>
+      </CCol>
 
-        {/* ===================== */}
-        {/* معتمدية السكن */}
-        {/* ===================== */}
-        <CCol xs={12} md={6}>
-          <CFormSelect
-            label="مكان السكن (معتمدية)"
-            value={person.resDelegation || ''}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                [type]: {
-                  ...(prev[type] || {}),
-                  resDelegation: e.target.value
-                }
-              }))
-            }
-          >
-            <option value="">-- اختر --</option>
-            {resLocation?.delegations?.map((d, i) => (
-              <option key={i} value={d}>{d}</option>
-            ))}
-          </CFormSelect>
-          {errors?.[`${type}.resDelegation`] && (
-            <div className="text-danger">{errors[`${type}.resDelegation`]}</div>
-          )}
-        </CCol>
+      {/* تاريخ الولادة */}
+      <CCol xs={12} md={6}>
+        <CFormInput
+          type="date"
+          label="تاريخ الولادة"
+          value={person.birthDate || ''}
+          invalid={!!errors?.[`${type}.birthDate`]}
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              [type]: {
+                ...(prev[type] || {}),
+                birthDate: e.target.value
+              }
+            }))
+          }
+        />
 
-        {/* ===================== */}
-        {/* التعليم */}
-        {/* ===================== */}
-        <CCol xs={12} md={6}>
-          <CFormInput
-            label="المستوى التعليمي"
-            value={person.education || ''}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                [type]: {
-                  ...(prev[type] || {}),
-                  education: e.target.value
-                }
-              }))
-            }
-          />
-          {errors?.[`${type}.education`] && (
-            <div className="text-danger">{errors[`${type}.education`]}</div>
-          )}
-        </CCol>
+        <CFormFeedback invalid>
+          ❌ {errors?.[`${type}.birthDate`]}
+        </CFormFeedback>
+      </CCol>
 
-        {/* ===================== */}
-        {/* المهنة */}
-        {/* ===================== */}
-        <CCol xs={12} md={6}>
-          <CFormInput
-            label="المهنة"
-            value={person.job || ''}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                [type]: {
-                  ...(prev[type] || {}),
-                  job: e.target.value
-                }
-              }))
-            }
-          />
-          {errors?.[`${type}.job`] && (
-            <div className="text-danger">{errors[`${type}.job`]}</div>
-          )}
-        </CCol>
+      {/* ولاية الولادة */}
+      <CCol xs={12} md={6}>
+        <CFormSelect
+          label="مكان الولادة (ولاية)"
+          value={person.birthState || ''}
+          invalid={!!errors?.[`${type}.birthState`]}
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              [type]: {
+                ...(prev[type] || {}),
+                birthState: e.target.value
+              }
+            }))
+          }
+        >
+          <option value="">-- اختر --</option>
+          {locations?.map((l, i) => (
+            <option key={i} value={l?.state}>{l?.state}</option>
+          ))}
+        </CFormSelect>
 
-        {/* ===================== */}
-        {/* ملاحظات */}
-        {/* ===================== */}
-        <CCol xs={12} md={6}>
-          <CFormTextarea
-            label="ملاحظات إضافية"
-            value={person.notes || ''}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                [type]: {
-                  ...(prev[type] || {}),
-                  notes: e.target.value
-                }
-              }))
-            }
-          />
-          {errors?.[`${type}.notes`] && (
-            <div className="text-danger">{errors[`${type}.notes`]}</div>
-          )}
-        </CCol>
+        <CFormFeedback invalid>
+          ❌ {errors?.[`${type}.birthState`]}
+        </CFormFeedback>
+      </CCol>
 
-        {/* ===================== */}
-        {/* الإفادة */}
-        {/* ===================== */}
-        <CCol xs={12} md={6}>
-          <CFormTextarea
-            label="الإفادة (حسب الدور)"
-            value={person.statement || ''}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                [type]: {
-                  ...(prev[type] || {}),
-                  statement: e.target.value
-                }
-              }))
-            }
-          />
-          {errors?.[`${type}.statement`] && (
-            <div className="text-danger">{errors[`${type}.statement`]}</div>
-          )}
-        </CCol>
+      {/* معتمدية الولادة */}
+      <CCol xs={12} md={6}>
+        <CFormSelect
+          label="مكان الولادة (معتمدية)"
+          value={person.birthDelegation || ''}
+          invalid={!!errors?.[`${type}.birthDelegation`]}
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              [type]: {
+                ...(prev[type] || {}),
+                birthDelegation: e.target.value
+              }
+            }))
+          }
+        >
+          <option value="">-- اختر --</option>
+          {birthLocation?.delegations?.map((d, i) => (
+            <option key={i} value={d}>{d}</option>
+          ))}
+        </CFormSelect>
 
-        {/* ===================== */}
-        {/* AI */}
-        {/* ===================== */}
-        <CCol xs={12} md={6}>
-          <CFormTextarea
-            label="اقتراحات الذكاء الاصطناعي"
-            value={person.aiSuggestion || ''}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                [type]: {
-                  ...(prev[type] || {}),
-                  aiSuggestion: e.target.value
-                }
-              }))
-            }
-          />
-          {errors?.[`${type}.aiSuggestion`] && (
-            <div className="text-danger">{errors[`${type}.aiSuggestion`]}</div>
-          )}
-        </CCol>
+        <CFormFeedback invalid>
+          ❌ {errors?.[`${type}.birthDelegation`]}
+        </CFormFeedback>
+      </CCol>
 
-      </CRow>
-    </div>
-  )
-}
+      {/* ولاية السكن */}
+      <CCol xs={12} md={6}>
+        <CFormSelect
+          label="مكان السكن (ولاية)"
+          value={person.resState || ''}
+          invalid={!!errors?.[`${type}.resState`]}
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              [type]: {
+                ...(prev[type] || {}),
+                resState: e.target.value
+              }
+            }))
+          }
+        >
+          <option value="">-- اختر --</option>
+          {locations?.map((l, i) => (
+            <option key={i} value={l?.state}>{l?.state}</option>
+          ))}
+        </CFormSelect>
 
+        <CFormFeedback invalid>
+          ❌ {errors?.[`${type}.resState`]}
+        </CFormFeedback>
+      </CCol>
+
+      {/* معتمدية السكن */}
+      <CCol xs={12} md={6}>
+        <CFormSelect
+          label="مكان السكن (معتمدية)"
+          value={person.resDelegation || ''}
+          invalid={!!errors?.[`${type}.resDelegation`]}
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              [type]: {
+                ...(prev[type] || {}),
+                resDelegation: e.target.value
+              }
+            }))
+          }
+        >
+          <option value="">-- اختر --</option>
+          {resLocation?.delegations?.map((d, i) => (
+            <option key={i} value={d}>{d}</option>
+          ))}
+        </CFormSelect>
+
+        <CFormFeedback invalid>
+          ❌ {errors?.[`${type}.resDelegation`]}
+        </CFormFeedback>
+      </CCol>
+
+      {/* التعليم */}
+      <CCol xs={12} md={6}>
+        <CFormInput
+          label="المستوى التعليمي"
+          value={person.education || ''}
+          invalid={!!errors?.[`${type}.education`]}
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              [type]: {
+                ...(prev[type] || {}),
+                education: e.target.value
+              }
+            }))
+          }
+        />
+
+        <CFormFeedback invalid>
+          ❌ {errors?.[`${type}.education`]}
+        </CFormFeedback>
+      </CCol>
+
+      {/* المهنة */}
+      <CCol xs={12} md={6}>
+        <CFormInput
+          label="المهنة"
+          value={person.job || ''}
+          invalid={!!errors?.[`${type}.job`]}
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              [type]: {
+                ...(prev[type] || {}),
+                job: e.target.value
+              }
+            }))
+          }
+        />
+
+        <CFormFeedback invalid>
+          ❌ {errors?.[`${type}.job`]}
+        </CFormFeedback>
+      </CCol>
+
+      {/* ملاحظات */}
+      <CCol xs={12}>
+        <CFormTextarea
+          label="ملاحظات إضافية"
+          value={person.notes || ''}
+          invalid={!!errors?.[`${type}.notes`]}
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              [type]: {
+                ...(prev[type] || {}),
+                notes: e.target.value
+              }
+            }))
+          }
+        />
+
+        <CFormFeedback invalid>
+          ❌ {errors?.[`${type}.notes`]}
+        </CFormFeedback>
+      </CCol>
+
+      {/* الإفادة */}
+      <CCol xs={12}>
+        <CFormTextarea
+          label="الإفادة (حسب الدور)"
+          value={person.statement || ''}
+          invalid={!!errors?.[`${type}.statement`]}
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              [type]: {
+                ...(prev[type] || {}),
+                statement: e.target.value
+              }
+            }))
+          }
+        />
+
+        <CFormFeedback invalid>
+          ❌ {errors?.[`${type}.statement`]}
+        </CFormFeedback>
+      </CCol>
+
+      {/* 🤖 اقتراحات الذكاء الاصطناعي (الإضافة الجديدة) */}
+      <CCol xs={12}>
+        <CFormTextarea
+          label="اقتراحات الذكاء الاصطناعي"
+          value={person.aiSuggestion || ''}
+          invalid={!!errors?.[`${type}.aiSuggestion`]}
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              [type]: {
+                ...(prev[type] || {}),
+                aiSuggestion: e.target.value
+              }
+            }))
+          }
+        />
+
+        <CFormFeedback invalid>
+          ❌ {errors?.[`${type}.aiSuggestion`]}
+        </CFormFeedback>
+      </CCol>
+
+    </CRow>
+  </div>
+</div>
 
 // =======================
 // 🧾 CaseForm
@@ -601,6 +606,7 @@ return (
     <div className="case-page">
       <CCard className="case-card">
         <CCardBody>
+          <div className="form-container">
 
 <div className="mb-3">
 
@@ -621,396 +627,541 @@ return (
 </div>
 {step === 1 && (
   <>
-    <CForm>
-      <CRow className="g-3">
+    <div className="filter-box mb-4">
 
-        <CCol xs={12} md={6}>
-          <CFormSelect
-            label="المحكمة"
-            value={formData.court || ''}
-            onChange={(e) =>
-              setFormData(prev => ({ ...prev, court: e.target.value }))
-            }
-          >
-            <option value="">-- اختر --</option>
-            {courts.map((c, i) => (
-              <option key={i} value={c}>{c}</option>
-            ))}
-          </CFormSelect>
+      {/* 🧾 عنوان المرحلة */}
+      <div className="section-header">
+        <h5 className="section-main-title">بيانات الملف</h5>
+        <span className="section-sub">المحكمة + مصدر الملف + المعلومات الأساسية</span>
+      </div>
 
-          {errors?.court && (
-            <small className="text-danger d-block mt-1">
-              {errors.court}
-            </small>
-          )}
-        </CCol>
+      <CForm>
+        <CRow className="g-3">
 
-        <CCol xs={12} md={6}>
-          <CFormInput value={caseFileNumber} label="عدد الملف الأمني" readOnly />
-        </CCol>
+          {/* المحكمة */}
+          <CCol xs={12} md={6}>
+            <CFormSelect
+              label="المحكمة"
+              value={formData.court || ''}
+              invalid={!!errors?.court}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, court: e.target.value }))
+              }
+            >
+              <option value="">-- اختر --</option>
+              {courts.map((c, i) => (
+                <option key={i} value={c}>{c}</option>
+              ))}
+            </CFormSelect>
 
-        <CCol xs={12} md={6}>
-          <CFormSelect
-            label="مصدر الملف"
-            value={formData.source || ''}
-            onChange={(e) =>
-              setFormData(prev => ({ ...prev, source: e.target.value }))
-            }
-          >
-            <option value="">-- اختر --</option>
-            {sources.map((s, i) => (
-              <option key={i} value={s}>{s}</option>
-            ))}
-          </CFormSelect>
+            {errors?.court && (
+              <CFormFeedback invalid>
+                ❌ {errors.court}
+              </CFormFeedback>
+            )}
+          </CCol>
 
-          {errors?.source && (
-            <small className="text-danger d-block mt-1">
-              {errors.source}
-            </small>
-          )}
-        </CCol>
+          {/* عدد الملف الأمني */}
+          <CCol xs={12} md={6}>
+            <CFormInput
+              value={caseFileNumber}
+              label="عدد الملف الأمني"
+              readOnly
+            />
+          </CCol>
 
-        <CCol xs={12} md={6}>
-          <CFormSelect
-            label="نوع الملف"
-            value={formData.fileType || ''}
-            onChange={(e) =>
-              setFormData(prev => ({ ...prev, fileType: e.target.value }))
-            }
-          >
-            <option value="">-- اختر --</option>
-            {fileTypes.map((t, i) => (
-              <option key={i} value={t}>{t}</option>
-            ))}
-          </CFormSelect>
+          {/* مصدر الملف */}
+          <CCol xs={12} md={6}>
+            <CFormSelect
+              label="مصدر الملف"
+              value={formData.source || ''}
+              invalid={!!errors?.source}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, source: e.target.value }))
+              }
+            >
+              <option value="">-- اختر --</option>
+              {sources.map((s, i) => (
+                <option key={i} value={s}>{s}</option>
+              ))}
+            </CFormSelect>
 
-          {errors?.fileType && (
-            <small className="text-danger d-block mt-1">
-              {errors.fileType}
-            </small>
-          )}
-        </CCol>
+            {errors?.source && (
+              <CFormFeedback invalid>
+                ❌ {errors.source}
+              </CFormFeedback>
+            )}
+          </CCol>
 
-        <CCol xs={12} md={6}>
-          <CFormInput
-            type="date"
-            value={formData.fileDate || ''}
-            onChange={(e) =>
-              setFormData(prev => ({ ...prev, fileDate: e.target.value }))
-            }
-            label="تاريخ الملف"
-          />
+          {/* نوع الملف */}
+          <CCol xs={12} md={6}>
+            <CFormSelect
+              label="نوع الملف"
+              value={formData.fileType || ''}
+              invalid={!!errors?.fileType}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, fileType: e.target.value }))
+              }
+            >
+              <option value="">-- اختر --</option>
+              {fileTypes.map((t, i) => (
+                <option key={i} value={t}>{t}</option>
+              ))}
+            </CFormSelect>
 
-          {errors?.fileDate && (
-            <small className="text-danger d-block mt-1">
-              {errors.fileDate}
-            </small>
-          )}
-        </CCol>
+            {errors?.fileType && (
+              <CFormFeedback invalid>
+                ❌ {errors.fileType}
+              </CFormFeedback>
+            )}
+          </CCol>
 
-        <CCol xs={12} md={6}>
-          <CFormInput value={registryNumber} label="عدد التسجيل" readOnly />
-        </CCol>
+          {/* تاريخ الملف */}
+          <CCol xs={12} md={6}>
+            <CFormInput
+              type="date"
+              value={formData.fileDate || ''}
+              label="تاريخ الملف"
+              invalid={!!errors?.fileDate}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, fileDate: e.target.value }))
+              }
+            />
 
-        <CCol xs={12} md={6}>
-          <CFormInput value={tunisTime} label="تاريخ ووقت التلقي" readOnly />
-        </CCol>
+            {errors?.fileDate && (
+              <CFormFeedback invalid>
+                ❌ {errors.fileDate}
+              </CFormFeedback>
+            )}
+          </CCol>
 
-        <CCol xs={12} md={6}>
-          <CFormInput
-            value={formData.clerk || ''}
-            onChange={(e) =>
-              setFormData(prev => ({ ...prev, clerk: e.target.value }))
-            }
-            label="كاتب الضبط"
-          />
+          {/* عدد التسجيل */}
+          <CCol xs={12} md={6}>
+            <CFormInput value={registryNumber} label="عدد التسجيل" readOnly />
+          </CCol>
 
-          {errors?.clerk && (
-            <small className="text-danger d-block mt-1">
-              {errors.clerk}
-            </small>
-          )}
-        </CCol>
+          {/* تاريخ ووقت التلقي */}
+          <CCol xs={12} md={6}>
+            <CFormInput value={tunisTime} label="تاريخ ووقت التلقي" readOnly />
+          </CCol>
 
-        <CCol xs={12} md={6}>
-          <CFormTextarea
-            value={formData.notes || ''}
-            onChange={(e) =>
-              setFormData(prev => ({ ...prev, notes: e.target.value }))
-            }
-            label="ملاحظات"
-          />
+          {/* كاتب الضبط */}
+          <CCol xs={12} md={6}>
+            <CFormInput
+              value={formData.clerk || ''}
+              label="كاتب الضبط"
+              invalid={!!errors?.clerk}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, clerk: e.target.value }))
+              }
+            />
 
-          {errors?.notes && (
-            <small className="text-danger d-block mt-1">
-              {errors.notes}
-            </small>
-          )}
-        </CCol>
+            {errors?.clerk && (
+              <CFormFeedback invalid>
+                ❌ {errors.clerk}
+              </CFormFeedback>
+            )}
+          </CCol>
 
-        <CCol xs={12} md={6}>
-          <CFormTextarea
-            value={formData.documents || ''}
-            onChange={(e) =>
-              setFormData(prev => ({ ...prev, documents: e.target.value }))
-            }
-            label="الوثائق المصاحبة"
-          />
+          {/* ملاحظات */}
+          <CCol xs={12} md={6}>
+            <CFormTextarea
+              value={formData.notes || ''}
+              label="ملاحظات"
+              invalid={!!errors?.notes}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, notes: e.target.value }))
+              }
+            />
 
-          {errors?.documents && (
-            <small className="text-danger d-block mt-1">
-              {errors.documents}
-            </small>
-          )}
-        </CCol>
+            {errors?.notes && (
+              <CFormFeedback invalid>
+                ❌ {errors.notes}
+              </CFormFeedback>
+            )}
+          </CCol>
 
-      </CRow>
-    </CForm>
+          {/* الوثائق */}
+          <CCol xs={12} md={6}>
+            <CFormTextarea
+              value={formData.documents || ''}
+              label="الوثائق المصاحبة"
+              invalid={!!errors?.documents}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, documents: e.target.value }))
+              }
+            />
 
-    <div className="d-flex justify-content-end mt-4">
-      <CButton color="primary" onClick={() => handleNext(2)}>
-        التالي ➡
-      </CButton>
+            {errors?.documents && (
+              <CFormFeedback invalid>
+                ❌ {errors.documents}
+              </CFormFeedback>
+            )}
+          </CCol>
+
+        </CRow>
+      </CForm>
+
+      <div className="d-flex justify-content-end mt-4">
+        <CButton color="primary" onClick={() => handleNext(2)}>
+          التالي ➡
+        </CButton>
+      </div>
+
     </div>
   </>
 )}
-
 
 {step === 2 && (
   <>
-    <CForm>
+    <div className="filter-box mb-4">
 
-      <CFormInput
-        value={formData.subject || ''}
-        label="الموضوع"
-        onChange={(e) =>
-          setFormData(prev => ({ ...prev, subject: e.target.value }))
-        }
-      />
-      {errors?.subject && <small className="text-danger d-block mt-1">{errors.subject}</small>}
+      {/* 🧾 عنوان المرحلة */}
+      <div className="section-header">
+        <h5 className="section-main-title">تفاصيل الواقعة</h5>
+        <span className="section-sub">وصف الجريمة + التصنيف + المكان والزمان</span>
+      </div>
 
-      <CFormSelect
-        label="التصنيف الجرمي"
-        value={formData.crimeType || ''}
-        onChange={(e) =>
-          setFormData(prev => ({ ...prev, crimeType: e.target.value }))
-        }
-      >
-        <option value="">-- اختر --</option>
-        {crimeCategories.map((cat, i) => (
-          <optgroup key={i} label={cat.label}>
-            {cat.options.map((o, j) => (
-              <option key={j} value={o}>{o}</option>
-            ))}
-          </optgroup>
-        ))}
-      </CFormSelect>
-      {errors?.crimeType && <small className="text-danger d-block mt-1">{errors.crimeType}</small>}
+      <CForm>
+        <CRow className="g-3">
 
-      <CFormInput
-        value={formData.crimePlace || ''}
-        label="مكان الواقعة"
-        onChange={(e) =>
-          setFormData(prev => ({ ...prev, crimePlace: e.target.value }))
-        }
-      />
-      {errors?.crimePlace && <small className="text-danger d-block mt-1">{errors.crimePlace}</small>}
+          {/* الموضوع */}
+          <CCol xs={12}>
+            <CFormInput
+              label="الموضوع"
+              value={formData.subject || ''}
+              invalid={!!errors?.subject}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, subject: e.target.value }))
+              }
+            />
+            {errors?.subject && (
+              <CFormFeedback invalid>
+                ❌ {errors.subject}
+              </CFormFeedback>
+            )}
+          </CCol>
 
-      <CFormInput
-        type="date"
-        value={formData.crimeDate || ''}
-        label="تاريخ الواقعة"
-        onChange={(e) =>
-          setFormData(prev => ({ ...prev, crimeDate: e.target.value }))
-        }
-      />
-      {errors?.crimeDate && <small className="text-danger d-block mt-1">{errors.crimeDate}</small>}
+          {/* التصنيف الجرمي */}
+          <CCol xs={12} md={6}>
+            <CFormSelect
+              label="التصنيف الجرمي"
+              value={formData.crimeType || ''}
+              invalid={!!errors?.crimeType}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, crimeType: e.target.value }))
+              }
+            >
+              <option value="">-- اختر --</option>
+              {crimeCategories.map((cat, i) => (
+                <optgroup key={i} label={cat.label}>
+                  {cat.options.map((o, j) => (
+                    <option key={j} value={o}>{o}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </CFormSelect>
 
-      <CFormTextarea
-        value={formData.summary || ''}
-        label="ملخص الوقائع"
-        onChange={(e) =>
-          setFormData(prev => ({ ...prev, summary: e.target.value }))
-        }
-      />
-      {errors?.summary && <small className="text-danger d-block mt-1">{errors.summary}</small>}
+            {errors?.crimeType && (
+              <CFormFeedback invalid>
+                ❌ {errors.crimeType}
+              </CFormFeedback>
+            )}
+          </CCol>
 
-      <CFormTextarea
-        value={formData.aiSuggestion || ''}
-        label="اقتراح AI"
-        onChange={(e) =>
-          setFormData(prev => ({ ...prev, aiSuggestion: e.target.value }))
-        }
-      />
-      {errors?.aiSuggestion && <small className="text-danger d-block mt-1">{errors.aiSuggestion}</small>}
+          {/* مكان الواقعة */}
+          <CCol xs={12} md={6}>
+            <CFormInput
+              label="مكان الواقعة"
+              value={formData.crimePlace || ''}
+              invalid={!!errors?.crimePlace}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, crimePlace: e.target.value }))
+              }
+            />
+            {errors?.crimePlace && (
+              <CFormFeedback invalid>
+                ❌ {errors.crimePlace}
+              </CFormFeedback>
+            )}
+          </CCol>
 
-    </CForm>
+          {/* تاريخ الواقعة */}
+          <CCol xs={12} md={6}>
+            <CFormInput
+              type="date"
+              label="تاريخ الواقعة"
+              value={formData.crimeDate || ''}
+              invalid={!!errors?.crimeDate}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, crimeDate: e.target.value }))
+              }
+            />
+            {errors?.crimeDate && (
+              <CFormFeedback invalid>
+                ❌ {errors.crimeDate}
+              </CFormFeedback>
+            )}
+          </CCol>
 
-    <div className="d-flex justify-content-between mt-4">
-      <CButton color="secondary" onClick={() => setStep(1)}>⬅ السابق</CButton>
-      <CButton color="primary" onClick={() => handleNext(3)}>التالي ➡</CButton>
+          {/* ملخص الوقائع */}
+          <CCol xs={12}>
+            <CFormTextarea
+              label="ملخص الوقائع"
+              value={formData.summary || ''}
+              invalid={!!errors?.summary}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, summary: e.target.value }))
+              }
+            />
+            {errors?.summary && (
+              <CFormFeedback invalid>
+                ❌ {errors.summary}
+              </CFormFeedback>
+            )}
+          </CCol>
+
+          {/* AI */}
+          <CCol xs={12}>
+            <CFormTextarea
+              label="اقتراح الذكاء الاصطناعي"
+              value={formData.aiSuggestion || ''}
+              invalid={!!errors?.aiSuggestion}
+              onChange={(e) =>
+                setFormData(prev => ({ ...prev, aiSuggestion: e.target.value }))
+              }
+            />
+            {errors?.aiSuggestion && (
+              <CFormFeedback invalid>
+                ❌ {errors.aiSuggestion}
+              </CFormFeedback>
+            )}
+          </CCol>
+
+        </CRow>
+      </CForm>
+
+      {/* 🔘 الأزرار */}
+      <div className="d-flex justify-content-between mt-4">
+
+        <CButton
+          color="secondary"
+          onClick={() => setStep(1)}
+        >
+          ⬅ رجوع
+        </CButton>
+
+        <CButton
+          color="primary"
+          onClick={() => handleNext(3)}
+        >
+          التالي ➡
+        </CButton>
+
+      </div>
+
     </div>
   </>
 )}
+
 
 {step === 3 && (
   <>
-    <PersonForm
-      title="👤 الشاكي"
-      type="plaintiff"
-      formData={formData}
-      setFormData={setFormData}
-      errors={errors}
-    />
+    <div className="filter-box mb-4">
 
-    <PersonForm
-      title="⚠️ المظنون فيه"
-      type="suspect"
-      formData={formData}
-      setFormData={setFormData}
-      errors={errors}
-    />
+      {/* 🧾 عنوان المرحلة */}
+      <div className="section-header">
+        <h5 className="section-main-title">الأطراف</h5>
+        <span className="section-sub">بيانات الشاكي والمظنون فيه</span>
+      </div>
 
-    {/* NAV STEP 3 */}
-    <div className="d-flex justify-content-between mt-4">
+      {/* 👤 الشاكي */}
+      <PersonForm
+        title="👤 الشاكي"
+        type="plaintiff"
+        formData={formData}
+        setFormData={setFormData}
+        errors={errors}
+      />
 
-      <CButton color="secondary" onClick={() => setStep(2)}>
-        ⬅ السابق
-      </CButton>
+      {/* ⚠️ المظنون فيه */}
+      <PersonForm
+        title="⚠️ المظنون فيه"
+        type="suspect"
+        formData={formData}
+        setFormData={setFormData}
+        errors={errors}
+      />
 
-      <CButton
-        color="primary"
-        onClick={() => {
-          const stepErrors = validateStep(3, formData)
+      {/* 🔘 Navigation */}
+      <div className="d-flex justify-content-between mt-4">
 
-          if (Object.keys(stepErrors).length > 0) {
-            setErrors(stepErrors)
-            return
-          }
+        <CButton
+          color="secondary"
+          onClick={() => setStep(2)}
+        >
+          ⬅ السابق
+        </CButton>
 
-          setErrors({})
-          setStep(4)
+        <CButton
+          color="primary"
+          onClick={() => {
+            const stepErrors = validateStep(3, formData)
 
-          window.scrollTo({ top: 0, behavior: 'smooth' })
-        }}
-      >
-        التالي ➡
-      </CButton>
+            if (Object.keys(stepErrors).length > 0) {
+              setErrors(stepErrors)
+              return
+            }
+
+            setErrors({})
+            setStep(4)
+
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          }}
+        >
+          التالي ➡
+        </CButton>
+
+      </div>
 
     </div>
   </>
 )}
-
 {step === 4 && (
   <>
     <CForm>
 
-      <CFormInput
-        value={caseId}
-        label="ID القضية"
-        readOnly
-        className="mb-3"
-      />
+      {/* 🆔 بطاقة ID القضية */}
+      <div className="person-card mb-3">
+        <CFormInput
+          value={caseId}
+          label="ID القضية"
+          readOnly
+        />
+      </div>
 
-      <CFormTextarea
-        value={formData.decisionText || ''}
-        label="نص القرار"
-        onChange={(e) =>
-          setFormData(prev => ({ ...prev, decisionText: e.target.value }))
-        }
-        invalid={!!errors.decisionText}
-      />
-      {errors?.decisionText && (
-        <small className="text-danger d-block mt-1">
-          {errors.decisionText}
-        </small>
-      )}
+      {/* 📌 الحالة والقرار */}
+      <div className="person-card mb-3">
 
-      <CFormInput
-        type="date"
-        value={formData.decisionDate || ''}
-        label="تاريخ القرار"
-        onChange={(e) =>
-          setFormData(prev => ({ ...prev, decisionDate: e.target.value }))
-        }
-        invalid={!!errors.decisionDate}
-      />
-      {errors?.decisionDate && (
-        <small className="text-danger d-block mt-1">
-          {errors.decisionDate}
-        </small>
-      )}
+        <h6 className="section-title">📌 الحالة والقرار</h6>
 
-      <CFormTextarea
-        value={formData.lawText || ''}
-        label="النص القانوني"
-        onChange={(e) =>
-          setFormData(prev => ({ ...prev, lawText: e.target.value }))
-        }
-        invalid={!!errors.lawText}
-      />
-      {errors?.lawText && (
-        <small className="text-danger d-block mt-1">
-          {errors.lawText}
-        </small>
-      )}
+        {/* 📄 القرار */}
+        <CFormTextarea
+          value={formData.decisionText || ''}
+          label="نص القرار"
+          invalid={!!errors?.decisionText}
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              decisionText: e.target.value
+            }))
+          }
+        />
+        <CFormFeedback invalid>
+          ✖ {errors?.decisionText}
+        </CFormFeedback>
 
-      <CFormSelect
-        label="حالة القضية"
-        value={formData.status || ''}
-        onChange={(e) =>
-          setFormData(prev => ({ ...prev, status: e.target.value }))
-        }
-        invalid={!!errors.status}
-      >
-        <option value="">-- اختر --</option>
-        <option value="تسجيل">تسجيل</option>
-        <option value="حفظ">حفظ</option>
-        <option value="مجلس">مجلس</option>
-        <option value="أطفال">أطفال</option>
-        <option value="تحقيق">تحقيق</option>
-        <option value="جناحي الناحية">جناحي الناحية</option>
-        <option value="مخالفات">مخالفات</option>
-        <option value="مضافة">مضافة</option>
-        <option value="تعهد">تعهد</option>
-        <option value="تنفيذ">تنفيذ</option>
-        <option value="محال على قاضي الأسرة">محال على قاضي الأسرة</option>
-        <option value="محال على القضاء المنفرد">محال على القضاء المنفرد</option>
-        <option value="الصلح بالوساطة">الصلح بالوساطة</option>
-        <option value="طور البحث">طور البحث</option>
-        <option value="تخلي">تخلي</option>
-      </CFormSelect>
-      {errors?.status && (
-        <small className="text-danger d-block mt-1">
-          {errors.status}
-        </small>
-      )}
+        {/* 📅 التاريخ */}
+        <CFormInput
+          type="date"
+          value={formData.decisionDate || ''}
+          label="تاريخ القرار"
+          invalid={!!errors?.decisionDate}
+          className="mt-3"
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              decisionDate: e.target.value
+            }))
+          }
+        />
+        <CFormFeedback invalid>
+          ✖ {errors?.decisionDate}
+        </CFormFeedback>
 
-      <CFormTextarea
-        value={formData.statusReason || ''}
-        label="سبب الحالة"
-        onChange={(e) =>
-          setFormData(prev => ({ ...prev, statusReason: e.target.value }))
-        }
-        invalid={!!errors.statusReason}
-      />
-      {errors?.statusReason && (
-        <small className="text-danger d-block mt-1">
-          {errors.statusReason}
-        </small>
-      )}
+        {/* ⚖️ النص القانوني */}
+        <CFormTextarea
+          value={formData.lawText || ''}
+          label="النص القانوني"
+          invalid={!!errors?.lawText}
+          className="mt-3"
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              lawText: e.target.value
+            }))
+          }
+        />
+        <CFormFeedback invalid>
+          ✖ {errors?.lawText}
+        </CFormFeedback>
+
+        {/* 📌 الحالة */}
+        <CFormSelect
+          label="حالة القضية"
+          value={formData.status || ''}
+          invalid={!!errors?.status}
+          className="mt-3"
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              status: e.target.value
+            }))
+          }
+        >
+          <option value="">-- اختر --</option>
+          <option value="تسجيل">تسجيل</option>
+          <option value="حفظ">حفظ</option>
+          <option value="مجلس">مجلس</option>
+          <option value="أطفال">أطفال</option>
+          <option value="تحقيق">تحقيق</option>
+          <option value="جناحي الناحية">جناحي الناحية</option>
+          <option value="مخالفات">مخالفات</option>
+          <option value="مضافة">مضافة</option>
+          <option value="تعهد">تعهد</option>
+          <option value="تنفيذ">تنفيذ</option>
+          <option value="محال على قاضي الأسرة">محال على قاضي الأسرة</option>
+          <option value="محال على القضاء المنفرد">محال على القضاء المنفرد</option>
+          <option value="الصلح بالوساطة">الصلح بالوساطة</option>
+          <option value="طور البحث">طور البحث</option>
+          <option value="تخلي">تخلي</option>
+        </CFormSelect>
+
+        <CFormFeedback invalid>
+          ✖ {errors?.status}
+        </CFormFeedback>
+
+        {/* 🧾 سبب الحالة */}
+        <CFormTextarea
+          value={formData.statusReason || ''}
+          label="سبب الحالة"
+          invalid={!!errors?.statusReason}
+          className="mt-3"
+          onChange={(e) =>
+            setFormData(prev => ({
+              ...prev,
+              statusReason: e.target.value
+            }))
+          }
+        />
+        <CFormFeedback invalid>
+          ✖ {errors?.statusReason}
+        </CFormFeedback>
+
+      </div>
 
     </CForm>
 
     {/* NAV STEP 4 */}
-    <div className="d-flex justify-content-between mt-4">
+    <div className="d-flex justify-content-between mt-4 px-1">
 
-      <CButton color="secondary" onClick={() => setStep(3)}>
+      <CButton color="secondary" className="px-4" onClick={() => setStep(3)}>
         ⬅ السابق
       </CButton>
 
       <CButton
         color="success"
+        className="px-4 d-flex align-items-center gap-2"
         onClick={() => {
           const stepErrors = validateStep(4, formData)
 
@@ -1087,13 +1238,16 @@ return (
   </CModalBody>
 </CModal>
 
-        </CCardBody>
+        </div> {/* ⬅️ هذا إغلاق form-container */}
+
+      </CCardBody>
       </CCard>
 
     </div>
    </FormWrapper>
 )
 }
+
 
 export default CaseForm
 
