@@ -329,56 +329,20 @@ label {
 }
 
 /* =====================================================
-   🚨 ULTIMATE LABEL FIX (FORCE OVERRIDE - FINAL)
+   🔘 REMEMBER ME TEXT ONLY FIX
 ===================================================== */
 
-/* 🔥 إلغاء أي تخريب سابق على كل label */
-label,
 .form-check-label {
-  all: initial !important;
+  color: #ffffff !important;   /* أبيض واضح */
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
 
-  font-family: var(--cui-font-sans-serif) !important;
-  font-size: 14px !important;
-  color: #222 !important;
-
-  display: inline-block !important;
   opacity: 1 !important;
   visibility: visible !important;
 
-  position: static !important;
-  z-index: 1 !important;
-
-  white-space: normal !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6); /* يوضح فوق الكارد */
 }
 
-/* 🔥 إعادة تنسيق checkbox */
-.form-check {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-}
-
-/* 🔥 تأكيد ظهور checkbox */
-.form-check-input {
-  width: 16px !important;
-  height: 16px !important;
-  opacity: 1 !important;
-  display: inline-block !important;
-  position: relative !important;
-  z-index: 2 !important;
-}
-
-/* 🔥 إذا في عناصر تغطي النص */
-.form-check-label::before,
-.form-check-label::after {
-  display: none !important;
-}
-
-/* 🔥 إذا في overflow مخفي النص */
-.form-check,
-.form-check-label {
-  overflow: visible !important;
-}
 
 
 
