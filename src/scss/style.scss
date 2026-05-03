@@ -329,20 +329,32 @@ label {
 }
 
 /* =====================================================
-   🔘 REMEMBER ME TEXT ONLY FIX
+   🔘 REMEMBER ME FIX (GLOBAL CSS)
 ===================================================== */
 
+label {
+  color: #ffffff !important;   /* يخلي "تذكرني" يظهر */
+}
+
+/* لو في CoreUI أو ستايل عام مخفيه */
 .form-check-label {
-  color: #ffffff !important;   /* أبيض واضح */
-  font-size: 0.9rem !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
   font-weight: 500 !important;
 
   opacity: 1 !important;
   visibility: visible !important;
+  display: inline-block !important;
 
-  text-shadow: 0 1px 3px rgba(0,0,0,0.6); /* يوضح فوق الكارد */
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
 }
 
+/* تحسين checkbox */
+.form-check {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
 
 
 
