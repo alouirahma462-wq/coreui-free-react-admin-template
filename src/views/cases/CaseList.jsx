@@ -11,14 +11,14 @@ import {
   CTableDataCell,
   CButton,
   CFormInput,
-  CFormSelect,
   CBadge,
   CRow,
-  CCol
+  CCol,
+  CCollapse
 } from '@coreui/react'
 
 // =======================
-// 🧠 قاموس الحالات (محدث بالكامل)
+// 🧠 قاموس الحالات (نفسه)
 // =======================
 const CASE_STATUS = {
   registration: { label: 'تسجيل', color: 'secondary', icon: '📝' },
@@ -31,16 +31,12 @@ const CASE_STATUS = {
   investigation: { label: 'تحقيق', color: 'info', icon: '🔍' },
   search: { label: 'بحث', color: 'primary', icon: '📡' },
   saved: { label: 'حفظ', color: 'success', icon: '💾' },
-
   criminal: { label: 'جناحي الناحية', color: 'danger', icon: '⚖️' },
   family_judge: { label: 'محال على قاضي الأسرة', color: 'info', icon: '👨‍⚖️' },
   single_judge: { label: 'محال على القضاء المنفرد', color: 'primary', icon: '⚖️' },
   mediation: { label: 'الصلح بالوساطة', color: 'success', icon: '🤝' }
 }
 
-// =======================
-// 🎨 الحالة -> لون
-// =======================
 const getStatusColor = (status) => {
   const found = Object.values(CASE_STATUS).find(s => s.label === status)
   return found ? found.color : 'light'
@@ -58,139 +54,145 @@ const CaseList = () => {
 
   const navigate = useNavigate()
   const [cases, setCases] = useState([])
-
-  // 🔍 Filters
+  const [expandedId, setExpandedId] = useState(null)
   const [search, setSearch] = useState('')
-  const [status, setStatus] = useState('')
-  const [date, setDate] = useState('')
-  const [month, setMonth] = useState('')
 
-  // 📥 load
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem('cases')) || []
     setCases(data)
   }, [])
 
-  // ================= FILTER ENGINE =================
-  const q = search.toLowerCase()
+  const filtered = cases.filter(c =>
+    (c.subject || '').toLowerCase().includes(search.toLowerCase()) ||
+    (c.caseFileNumber || '').toLowerCase().includes(search.toLowerCase())
+  )
 
-  const filtered = cases.filter(c => {
-
-    const matchSearch =
-      (c.subject || '').toLowerCase().includes(q) ||
-      (c.caseFileNumber || '').toLowerCase().includes(q)
-
-    const matchStatus = !status || c.status === status
-    const matchDate = !date || c.fileDate === date
-    const matchMonth = !month || (c.fileDate || '').slice(5, 7) === month
-
-    return matchSearch && matchStatus && matchDate && matchMonth
-  })
-
-  // ================= OPEN =================
-  const openCase = (caseData) => {
-    localStorage.setItem('selectedCase', JSON.stringify(caseData))
+  // ================= ACTIONS =================
+  const openCase = (c) => {
+    localStorage.setItem('selectedCase', JSON.stringify(c))
     navigate('/cases/detail')
+  }
+
+  const deleteCase = (id) => {
+    const updated = cases.filter(c => c.id !== id)
+    setCases(updated)
+    localStorage.setItem('cases', JSON.stringify(updated))
+  }
+
+  const editCase = (c) => {
+    navigate('/cases/edit', { state: c })
+  }
+
+  const exportMemo = (c) => {
+    navigate('/cases/detail', { state: { mode: 'memo', case: c } })
   }
 
   return (
     <div className="case-page">
 
-      <CCard className="case-card shadow-sm">
+      <CCard className="shadow-sm">
         <CCardBody>
 
-          <h4 className="mb-4">📂 قائمة القضايا القضائية</h4>
+          <h4 className="mb-3">📂 قائمة القضايا القضائية</h4>
 
-          {/* ================= FILTERS ================= */}
-          <div className="filter-box">
-            <CRow className="g-3">
+          {/* FILTER */}
+          <CRow className="mb-3">
+            <CCol md={4}>
+              <CFormInput
+                placeholder="🔍 بحث..."
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </CCol>
+          </CRow>
 
-              <CCol xs={12} md={6} lg={3}>
-                <CFormInput
-                  placeholder="🔍 بحث..."
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </CCol>
-
-              <CCol xs={12} md={6} lg={3}>
-                <CFormSelect onChange={(e) => setStatus(e.target.value)}>
-                  <option value="">كل الحالات</option>
-                  {Object.values(CASE_STATUS).map((s, i) => (
-                    <option value={s.label} key={i}>
-                      {s.label}
-                    </option>
-                  ))}
-                </CFormSelect>
-              </CCol>
-
-              <CCol xs={12} md={6} lg={3}>
-                <CFormInput type="date" onChange={(e) => setDate(e.target.value)} />
-              </CCol>
-
-              <CCol xs={12} md={6} lg={3}>
-                <CFormSelect onChange={(e) => setMonth(e.target.value)}>
-                  <option value="">كل الأشهر</option>
-                  <option value="01">يناير</option>
-                  <option value="02">فيفري</option>
-                  <option value="03">مارس</option>
-                  <option value="04">أفريل</option>
-                  <option value="05">ماي</option>
-                  <option value="06">جوان</option>
-                  <option value="07">جويلية</option>
-                  <option value="08">أوت</option>
-                  <option value="09">سبتمبر</option>
-                  <option value="10">أكتوبر</option>
-                  <option value="11">نوفمبر</option>
-                  <option value="12">ديسمبر</option>
-                </CFormSelect>
-              </CCol>
-
-            </CRow>
-          </div>
-
-          {/* ================= TABLE ================= */}
-          <CTable hover responsive striped bordered align="middle">
+          {/* TABLE */}
+          <CTable hover bordered responsive>
 
             <CTableHead>
-              <CTableRow>
-                <CTableHeaderCell>📁 الملف</CTableHeaderCell>
-                <CTableHeaderCell>📌 الموضوع</CTableHeaderCell>
-                <CTableHeaderCell>⚖️ الحالة</CTableHeaderCell>
-                <CTableHeaderCell>📅 التاريخ</CTableHeaderCell>
-                <CTableHeaderCell>⚙️</CTableHeaderCell>
+              <CTable
+<CTableHeaderCell>🆔 ID القضية</CTableHeaderCell>
+<CTableHeaderCell>🏛 المحكمة</CTableHeaderCell>
+<CTableHeaderCell>⚖️ كاتب ضبط النيابة المسؤول</CTableHeaderCell>
+<CTableHeaderCell>📌 الموضوع</CTableHeaderCell>
+<CTableHeaderCell>🎨 الحالة</CTableHeaderCell>
+<CTableHeaderCell>📌 القرار</CTableHeaderCell>
+<CTableHeaderCell>🕒 تاريخ التلقي</CTableHeaderCell>
+<CTableHeaderCell>⚙️إجراءات</CTableHeaderCell>
+
               </CTableRow>
             </CTableHead>
 
             <CTableBody>
               {filtered.map((c, i) => (
-                <CTableRow key={i}>
+                <React.Fragment key={c.id || i}>
 
-                  <CTableDataCell>
-                    <strong>{c.caseFileNumber}</strong>
-                  </CTableDataCell>
+                  <CTableRow>
 
-                  <CTableDataCell>{c.subject}</CTableDataCell>
+                    <CTableDataCell>{c.caseFileNumber}</CTableDataCell>
+                    <CTableDataCell>{c.court}</CTableDataCell>
+                    <CTableDataCell>{c.prosecution || 'النيابة'}</CTableDataCell>
+                    <CTableDataCell>{c.createdAt || c.fileDate}</CTableDataCell>
+                    <CTableDataCell>{c.subject}</CTableDataCell>
 
-                  <CTableDataCell>
-                    <CBadge color={getStatusColor(c.status)}>
-                      {getStatusIcon(c.status)} {c.status}
-                    </CBadge>
-                  </CTableDataCell>
+                    <CTableDataCell>
+                      <CBadge color={getStatusColor(c.status)}>
+                        {getStatusIcon(c.status)} {c.status}
+                      </CBadge>
+                    </CTableDataCell>
 
-                  <CTableDataCell>{c.fileDate}</CTableDataCell>
+                    <CTableDataCell>{c.decision || '—'}</CTableDataCell>
+                    <CTableDataCell>{c.receivedTime || c.fileDate}</CTableDataCell>
 
-                  <CTableDataCell>
-                    <CButton
-                      size="sm"
-                      color="primary"
-                      variant="outline"
-                      onClick={() => openCase(c)}
-                    >
-                      👁 عرض
-                    </CButton>
-                  </CTableDataCell>
+                    <CTableDataCell>
 
-                </CTableRow>
+                      <CButton size="sm" color="info"
+                        onClick={() => setExpandedId(expandedId === i ? null : i)}>
+                        عرض المزيد
+                      </CButton>
+
+                      <CButton size="sm" color="primary" className="mx-1"
+                        onClick={() => editCase(c)}>
+                        تعديل
+                      </CButton>
+
+                      <CButton size="sm" color="danger"
+                        onClick={() => deleteCase(c.id)}>
+                        حذف
+                      </CButton>
+
+                      <CButton size="sm" color="dark" className="mx-1"
+                        onClick={() => exportMemo(c)}>
+                        مذكرة
+                      </CButton>
+
+                    </CTableDataCell>
+
+                  </CTableRow>
+
+                  {/* EXPAND */}
+                  <CTableRow>
+                    <CTableDataCell colSpan={8} className="p-0">
+                      <CCollapse visible={expandedId === i}>
+                        <div className="p-3 bg-light border-top">
+
+                          <div><b>📁  عدد الملف الأمني :</b> {c.securityFiles || 0}</div>
+                          <div><b>🧾 عدد التسجيل:</b> {c.registrations || 0}</div>
+                          <div><b>👥 الأطراف:</b> {c.parties || '—'}</div>
+                          <div><b>⚖️ التصنيف الجرمي:</b> {c.criminalClass || '—'}</div>
+                          <div><b>📝 آخر تعديل:</b> {c.lastUpdate || '—'}</div>
+
+                          <div className="mt-3">
+                            <CButton color="primary" size="sm" onClick={() => openCase(c)}>
+                              📂 فتح الملف الكامل
+                            </CButton>
+                          </div>
+
+                        </div>
+                      </CCollapse>
+                    </CTableDataCell>
+                  </CTableRow>
+
+                </React.Fragment>
               ))}
             </CTableBody>
 
@@ -204,5 +206,6 @@ const CaseList = () => {
 }
 
 export default CaseList
+
 
 
