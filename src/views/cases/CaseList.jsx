@@ -93,7 +93,7 @@ const CaseList = () => {
       <CCard className="shadow-sm">
         <CCardBody>
 
-          <h4 className="mb-3">📂 قائمة القضايا القضائية</h4>
+          <h4 className="mb-3">📂 قائمة القضايا </h4>
 
           {/* FILTER */}
           <CRow className="mb-3">
@@ -106,21 +106,19 @@ const CaseList = () => {
           </CRow>
 
           {/* TABLE */}
-          <CTable hover bordered responsive>
-
-            <CTableHead>
-              <CTable
-<CTableHeaderCell>🆔 ID القضية</CTableHeaderCell>
-<CTableHeaderCell>🏛 المحكمة</CTableHeaderCell>
-<CTableHeaderCell>⚖️ كاتب ضبط النيابة المسؤول</CTableHeaderCell>
-<CTableHeaderCell>📌 الموضوع</CTableHeaderCell>
-<CTableHeaderCell>🎨 الحالة</CTableHeaderCell>
-<CTableHeaderCell>📌 القرار</CTableHeaderCell>
-<CTableHeaderCell>🕒 تاريخ التلقي</CTableHeaderCell>
-<CTableHeaderCell>⚙️إجراءات</CTableHeaderCell>
-
-              </CTableRow>
-            </CTableHead>
+  <CTable hover bordered responsive>
+  <CTableHead>
+    <CTableRow>
+      <CTableHeaderCell>🆔 ID القضية</CTableHeaderCell>
+      <CTableHeaderCell>🏛 المحكمة</CTableHeaderCell>
+      <CTableHeaderCell>⚖️ كاتب ضبط النيابة المسؤول</CTableHeaderCell>
+      <CTableHeaderCell>📌 الموضوع</CTableHeaderCell>
+      <CTableHeaderCell>🎨 الحالة</CTableHeaderCell>
+      <CTableHeaderCell>📌 القرار</CTableHeaderCell>
+      <CTableHeaderCell>🕒 تاريخ التلقي</CTableHeaderCell>
+      <CTableHeaderCell>⚙️ إجراءات</CTableHeaderCell>
+    </CTableRow>
+  </CTableHead>
 
             <CTableBody>
               {filtered.map((c, i) => (
