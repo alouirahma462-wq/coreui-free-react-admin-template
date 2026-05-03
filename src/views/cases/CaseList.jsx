@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Fragment } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   CCard,
@@ -106,23 +106,23 @@ const CaseList = () => {
           </CRow>
 
           {/* TABLE */}
-  <CTable hover bordered responsive>
-  <CTableHead>
-    <CTableRow>
-      <CTableHeaderCell>🆔 ID القضية</CTableHeaderCell>
-      <CTableHeaderCell>🏛 المحكمة</CTableHeaderCell>
-      <CTableHeaderCell>⚖️ كاتب ضبط النيابة المسؤول</CTableHeaderCell>
-      <CTableHeaderCell>📌 الموضوع</CTableHeaderCell>
-      <CTableHeaderCell>🎨 الحالة</CTableHeaderCell>
-      <CTableHeaderCell>📌 القرار</CTableHeaderCell>
-      <CTableHeaderCell>🕒 تاريخ التلقي</CTableHeaderCell>
-      <CTableHeaderCell>⚙️ إجراءات</CTableHeaderCell>
-    </CTableRow>
-  </CTableHead>
+          <CTable hover bordered responsive>
+            <CTableHead>
+              <CTableRow>
+                <CTableHeaderCell>🆔 ID القضية</CTableHeaderCell>
+                <CTableHeaderCell>🏛 المحكمة</CTableHeaderCell>
+                <CTableHeaderCell>⚖️ كاتب ضبط النيابة المسؤول</CTableHeaderCell>
+                <CTableHeaderCell>📌 الموضوع</CTableHeaderCell>
+                <CTableHeaderCell>🎨 الحالة</CTableHeaderCell>
+                <CTableHeaderCell>📌 القرار</CTableHeaderCell>
+                <CTableHeaderCell>🕒 تاريخ التلقي</CTableHeaderCell>
+                <CTableHeaderCell>⚙️ إجراءات</CTableHeaderCell>
+              </CTableRow>
+            </CTableHead>
 
             <CTableBody>
               {filtered.map((c, i) => (
-                <React.Fragment key={c.id || i}>
+                <Fragment key={c.id || i}>
 
                   <CTableRow>
 
@@ -173,7 +173,7 @@ const CaseList = () => {
                       <CCollapse visible={expandedId === i}>
                         <div className="p-3 bg-light border-top">
 
-                          <div><b>📁  عدد الملف الأمني :</b> {c.securityFiles || 0}</div>
+                          <div><b>📁 عدد الملف الأمني :</b> {c.securityFiles || 0}</div>
                           <div><b>🧾 عدد التسجيل:</b> {c.registrations || 0}</div>
                           <div><b>👥 الأطراف:</b> {c.parties || '—'}</div>
                           <div><b>⚖️ التصنيف الجرمي:</b> {c.criminalClass || '—'}</div>
@@ -190,7 +190,7 @@ const CaseList = () => {
                     </CTableDataCell>
                   </CTableRow>
 
-                </React.Fragment>
+                </Fragment>
               ))}
             </CTableBody>
 
