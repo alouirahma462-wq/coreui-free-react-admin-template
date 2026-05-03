@@ -329,39 +329,55 @@ label {
 }
 
 /* =====================================================
-   🔘 FORCE FIX "تذكرني" (CSS ONLY - NO JSX TOUCH)
+   🚨 ULTIMATE LABEL FIX (FORCE OVERRIDE - FINAL)
 ===================================================== */
 
-/* إعادة تفعيل كل label داخل الفورم */
+/* 🔥 إلغاء أي تخريب سابق على كل label */
+label,
 .form-check-label {
-  all: unset !important;   /* 🔥 يكسر أي تخريب سابق */
-  
-  display: inline-block !important;
-  color: #222 !important;
-  font-size: 0.9rem !important;
+  all: initial !important;
 
+  font-family: var(--cui-font-sans-serif) !important;
+  font-size: 14px !important;
+  color: #222 !important;
+
+  display: inline-block !important;
   opacity: 1 !important;
   visibility: visible !important;
 
-  cursor: pointer;
+  position: static !important;
+  z-index: 1 !important;
+
+  white-space: normal !important;
 }
 
-/* ترتيب checkbox مع النص */
+/* 🔥 إعادة تنسيق checkbox */
 .form-check {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
 }
 
-/* تأكيد ظهور checkbox */
+/* 🔥 تأكيد ظهور checkbox */
 .form-check-input {
+  width: 16px !important;
+  height: 16px !important;
   opacity: 1 !important;
   display: inline-block !important;
+  position: relative !important;
+  z-index: 2 !important;
 }
 
-/* 🔥 احتياط إضافي: لو في label مخفي عام */
-label {
-  color: #222 !important;
+/* 🔥 إذا في عناصر تغطي النص */
+.form-check-label::before,
+.form-check-label::after {
+  display: none !important;
+}
+
+/* 🔥 إذا في overflow مخفي النص */
+.form-check,
+.form-check-label {
+  overflow: visible !important;
 }
 
 
