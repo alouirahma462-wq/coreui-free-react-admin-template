@@ -329,32 +329,30 @@ label {
 }
 
 /* =====================================================
-   🔘 REMEMBER ME FIX (GLOBAL CSS)
+   🔘 REMEMBER ME FIX (ULTRA SAFE)
 ===================================================== */
 
+/* ❌ لا نلمس أي label عالمي */
 label {
-  color: #ffffff !important;   /* يخلي "تذكرني" يظهر */
+  color: inherit !important;
 }
 
-/* لو في CoreUI أو ستايل عام مخفيه */
-.form-check-label {
+/* فقط "تذكرني" داخل login */
+.login-page .form-check-label {
   color: #ffffff !important;
   font-size: 14px !important;
   font-weight: 500 !important;
 
-  opacity: 1 !important;
-  visibility: visible !important;
-  display: inline-block !important;
-
   text-shadow: 0 1px 3px rgba(0,0,0,0.6);
 }
 
-/* تحسين checkbox */
-.form-check {
+/* checkbox layout فقط */
+.login-page .form-check {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
 }
+
 
 
 
