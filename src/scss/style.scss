@@ -329,33 +329,36 @@ label {
 }
 
 /* =====================================================
-   🔘 REMEMBER ME FORCE FIX (COREUI OVERRIDE KILLER)
+   🔘 FINAL REMEMBER ME FIX (COREUI REAL FIX)
 ===================================================== */
 
-.remember-wrapper {
+/* الحاوية */
+.form-check {
   display: flex !important;
   align-items: center !important;
-  gap: 10px !important;
+  gap: 8px !important;
   margin-top: 10px;
 }
 
 /* checkbox */
-.remember-wrapper input[type="checkbox"] {
+.form-check-input {
   width: 16px !important;
   height: 16px !important;
-  appearance: auto !important;
   opacity: 1 !important;
   display: inline-block !important;
   cursor: pointer;
   accent-color: #8b6f5c;
 }
 
-/* label */
-.remember-wrapper label {
-  font-size: 0.85rem !important;
-  color: #333 !important;
-  cursor: pointer;
+/* 🔥 هذا أهم سطر لحل مشكلتك */
+.form-check-label {
+  display: inline-block !important;
+  color: #222 !important;   /* ✨ غيرناه ليظهر */
+  font-size: 0.9rem !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
+
 
 
 
