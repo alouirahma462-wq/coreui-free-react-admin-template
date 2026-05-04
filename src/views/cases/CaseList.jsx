@@ -230,9 +230,11 @@ const deleteCase = (id) => {
                     </CTableDataCell>
                   </CTableRow>
 
-                </Fragment>
-              ))}
-            </CTableBody>
+             </Fragment>
+))
+}
+
+   </CTableBody>
 
           </CTable>
 
