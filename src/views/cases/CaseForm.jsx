@@ -584,34 +584,48 @@ const [toastMessage, setToastMessage] = useState('')
 const handleSave = () => {
   try {
     const existing = JSON.parse(localStorage.getItem('cases') || '[]')
+const normalizedCase = {
+  ...formData,
 
-    const normalizedCase = {
-      ...formData,
-      caseFileNumber,
-      registryNumber,
-      caseId,
-      fileDate: formData.fileDate,
-      subject: formData.subject,
-      status: formData.status,
-      source: formData.source,
-      fileType: formData.fileType,
-      createdAt: tunisTime,
+  // 🆔 بيانات الجدول
+  caseId,
+  caseFileNumber,
+  registryNumber,
 
-      plaintiffGender: formData.plaintiff?.gender,
-      plaintiffNationality: formData.plaintiff?.nationality,
-      plaintiffBirthDate: formData.plaintiff?.birthDate,
-      plaintiffState: formData.plaintiff?.birthState,
-      plaintiffResState: formData.plaintiff?.resState,
+  court: formData.court,
+  prosecution: formData.clerk,
+  subject: formData.subject,
+  status: formData.status,
+  decision: formData.decisionText,
 
-      suspectGender: formData.suspect?.gender,
-      suspectNationality: formData.suspect?.nationality,
-      suspectBirthDate: formData.suspect?.birthDate,
-      suspectState: formData.suspect?.birthState,
-      suspectResState: formData.suspect?.resState,
-    }
+  createdAt: tunisTime,
+  receivedTime: tunisTime,
 
-    existing.push(normalizedCase)
-    localStorage.setItem('cases', JSON.stringify(existing))
+  notes: formData.notes,
+
+  // 📂 عرض المزيد
+  securityFiles: caseFileNumber,   // 📁 عدد الملف الأمني
+  registrations: registryNumber,   // 🧾 عدد التسجيل
+  parties: `${formData.plaintiff?.fullName || ''} / ${formData.suspect?.fullName || ''}`,
+  criminalClass: formData.crimeType,
+  lastUpdate: tunisTime,
+
+  // 🧠 بيانات إضافية (خليتها مثل ما كانت عندك)
+  plaintiffGender: formData.plaintiff?.gender,
+  plaintiffNationality: formData.plaintiff?.nationality,
+  plaintiffBirthDate: formData.plaintiff?.birthDate,
+  plaintiffState: formData.plaintiff?.birthState,
+  plaintiffResState: formData.plaintiff?.resState,
+
+  suspectGender: formData.suspect?.gender,
+  suspectNationality: formData.suspect?.nationality,
+  suspectBirthDate: formData.suspect?.birthDate,
+  suspectState: formData.suspect?.birthState,
+  suspectResState: formData.suspect?.resState,
+}
+
+existing.push(normalizedCase)
+localStorage.setItem('cases', JSON.stringify(existing))
 
     setToastMessage('✅ تم حفظ القضية بنجاح')
     setToastVisible(true)
