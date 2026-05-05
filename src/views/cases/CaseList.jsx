@@ -80,9 +80,9 @@ const deleteCase = (id) => {
   localStorage.setItem('cases', JSON.stringify(updated))
 }
 
-  const editCase = (c) => {
-    navigate('/cases/edit', { state: c })
-  }
+const editCase = (c) => {
+  navigate('/cases/form', { state: { caseData: c, mode: 'edit' } })
+}
 
   const exportMemo = (c) => {
     navigate('/cases/detail', { state: { mode: 'memo', case: c } })
