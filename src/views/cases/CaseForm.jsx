@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-
+import { useLocation } from 'react-router-dom'
 import FormWrapper from "../../components/FormWrapper"
 
 import {
@@ -446,6 +446,15 @@ const PersonForm = ({ title, type, formData, setFormData, errors }) => {
 // =======================
 const CaseForm = () => {
 const navigate = useNavigate()
+const location = useLocation()
+
+const editData = location.state?.caseData || location.state || null
+
+const isEdit = !!editData
+
+const [caseId] = useState(() =>
+  isEdit ? editData?.caseId : generateCaseId()
+)
 const [step, setStep] = useState(1)
 const [errors, setErrors] = useState({})  
 const timerRef = useRef(null) 
@@ -554,33 +563,40 @@ const [showSuccessModal, setShowSuccessModal] = useState(false)
 const [caseFileNumber] = useState(generateCaseFileNumber())
 const [registryNumber] = useState(generateRegistryNumber())
 const [tunisTime] = useState(getTunisDateTime())
-const [caseId] = useState(generateCaseId())
 const [toastVisible, setToastVisible] = useState(false)
-const [toastMessage, setToastMessage] = useState('') 
+const [toastMessage, setToastMessage] = useState('')
 
-  const [formData, setFormData] = useState({
-    court: '',
-    fileType: '',
-    source: '',
-    fileDate: '',
-    clerk: '',
-    notes: '',
-    documents: '',
-    subject: '',
-    crimeType: '',
-    crimePlace: '',
-    crimeDate: '',
-    summary: '',
-    aiSuggestion: '',
-    status: '',
-    statusReason: '',
-    decisionText: '',
-    decisionDate: '',
-    lawText: '',
-    plaintiff: {},
-    suspect: {}
-  })
-
+const initialFormState = {
+  court: '',
+  fileType: '',
+  source: '',
+  fileDate: '',
+  clerk: '',
+  notes: '',
+  documents: '',
+  subject: '',
+  crimeType: '',
+  crimePlace: '',
+  crimeDate: '',
+  summary: '',
+  aiSuggestion: '',
+  status: '',
+  statusReason: '',
+  decisionText: '',
+  decisionDate: '',
+  lawText: '',
+  plaintiff: {},
+  suspect: {}
+}
+const [formData, setFormData] = useState(initialFormState)
+useEffect(() => {
+  if (isEdit && editData) {
+    setFormData({
+      ...initialFormState,
+      ...editData
+    })
+  }
+}, [isEdit, editData])
 const handleSave = () => {
   try {
     const existing = JSON.parse(localStorage.getItem('cases') || '[]')
@@ -598,8 +614,8 @@ const normalizedCase = {
   status: formData.status,
   decision: formData.decisionText,
 
-  createdAt: tunisTime,
-  receivedTime: tunisTime,
+createdAt: isEdit ? editData.createdAt : tunisTime,
+receivedTime: isEdit ? editData.receivedTime : tunisTime,
 
   notes: formData.notes,
 
@@ -623,11 +639,22 @@ const normalizedCase = {
   suspectState: formData.suspect?.birthState,
   suspectResState: formData.suspect?.resState,
 }
+if (isEdit) {
+ const updated = existing.map(c =>
+  c.caseId === caseId
+    ? { ...c, ...normalizedCase, caseId: c.caseId }
+    : c
+)
 
-existing.push(normalizedCase)
-localStorage.setItem('cases', JSON.stringify(existing))
+  localStorage.setItem('cases', JSON.stringify(updated))
+  setToastMessage('✏️ تم تعديل القضية بنجاح')
 
-    setToastMessage('✅ تم حفظ القضية بنجاح')
+} else {
+  existing.push(normalizedCase)
+  localStorage.setItem('cases', JSON.stringify(existing))
+  setToastMessage('✅ تم حفظ القضية بنجاح')
+}
+
     setToastVisible(true)
 
     // 🟢 تأكيد نجاح + مودال
@@ -643,29 +670,32 @@ localStorage.setItem('cases', JSON.stringify(existing))
       navigate('/cases')
     }, 2500)
 
-    // ♻️ reset form
-    setFormData({
-      court: '',
-      fileType: '',
-      source: '',
-      fileDate: '',
-      clerk: '',
-      notes: '',
-      documents: '',
-      subject: '',
-      crimeType: '',
-      crimePlace: '',
-      crimeDate: '',
-      summary: '',
-      aiSuggestion: '',
-      status: '',
-      statusReason: '',
-      decisionText: '',
-      decisionDate: '',
-      lawText: '',
-      plaintiff: {},
-      suspect: {}
-    })
+
+    // ✅ reset فقط إذا إضافة
+    if (!isEdit) {
+      setFormData({
+        court: '',
+        fileType: '',
+        source: '',
+        fileDate: '',
+        clerk: '',
+        notes: '',
+        documents: '',
+        subject: '',
+        crimeType: '',
+        crimePlace: '',
+        crimeDate: '',
+        summary: '',
+        aiSuggestion: '',
+        status: '',
+        statusReason: '',
+        decisionText: '',
+        decisionDate: '',
+        lawText: '',
+        plaintiff: {},
+        suspect: {}
+      })
+    }
 
   } catch (err) {
     console.error('Save Error:', err)
@@ -1235,25 +1265,25 @@ return (
       <div className="step-indicator">
         خطوة 4 / 4
       </div>
+<CButton
+  color={isEdit ? "warning" : "success"}
+  disabled={Object.keys(errors).length > 0}
+  className="px-4 d-flex align-items-center gap-2"
+  onClick={() => {
+    const stepErrors = validateStep(4, formData)
 
-      <CButton
-        color="success"
-        className="px-4 d-flex align-items-center gap-2"
-        onClick={() => {
-          const stepErrors = validateStep(4, formData)
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors(stepErrors)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
 
-          if (Object.keys(stepErrors).length > 0) {
-            setErrors(stepErrors)
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-            return
-          }
-
-          setErrors({})
-          handleSave()
-        }}
-      >
-        💾 حفظ القضية
-      </CButton>
+    setErrors({})
+    handleSave()
+  }}
+>
+  {isEdit ? "✏️ حفظ التعديل" : "💾 إضافة القضية"}
+</CButton>
 
     </div>
   </>
