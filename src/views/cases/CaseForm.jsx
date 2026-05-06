@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useLocation } from 'react-router-dom'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import FormWrapper from "../../components/FormWrapper"
 
@@ -91,10 +89,7 @@ const generateCaseFileNumber = () => 'CF-' + Date.now()
 const generateRegistryNumber = () =>
   'REG-' + Math.floor(Math.random() * 1000000)
 
-const getTunisDateTime = () =>
-  new Date().toLocaleString('fr-TN', {
-    timeZone: 'Africa/Tunis'
-  })
+const getNowTimestamp = () => new Date().toISOString()
 
 const generateCaseId = () => 'CASE-' + Date.now()
 
@@ -357,6 +352,7 @@ const PersonForm = ({ title, type, formData, setFormData, errors }) => {
     </div>
   )
 }
+
 // =======================
 // 🧾 CaseForm
 // =======================
@@ -477,8 +473,17 @@ const handleNext = (nextStep) => {
 }
 
 const [showSuccessModal, setShowSuccessModal] = useState(false)
-const [caseFileNumber] = useState(generateCaseFileNumber())
-const [registryNumber] = useState(generateRegistryNumber())
+const [caseFileNumber] = useState(() =>
+  isEdit
+    ? editData?.securityFiles || generateCaseFileNumber()
+    : generateCaseFileNumber()
+)
+
+const [registryNumber] = useState(() =>
+  isEdit
+    ? editData?.registrations || generateRegistryNumber()
+    : generateRegistryNumber()
+)
 const [tunisTime] = useState(getTunisDateTime())
 const [toastVisible, setToastVisible] = useState(false)
 const [toastMessage, setToastMessage] = useState('')
@@ -506,6 +511,9 @@ const initialFormState = {
   suspect: {}
 }
 const [formData, setFormData] = useState(initialFormState)
+const fieldProps = (field) => ({
+  invalid: isInvalid(field)
+}) 
 useEffect(() => {
   if (isEdit && editData) {
     setFormData({
@@ -516,57 +524,78 @@ useEffect(() => {
 }, [isEdit, editData])
 const handleSave = async () => {
   try {
+    const plaintiff = formData.plaintiff || {}
+    const suspect = formData.suspect || {}
 
     const normalizedCase = {
-      caseId,
+      case_id: caseId,
+
+      // File Info
       court: formData.court,
-      prosecution: formData.clerk,
-      subject: formData.subject,
-      status: formData.status,
-      decision: formData.decisionText,
-
-      createdAt: isEdit ? editData.createdAt : tunisTime,
-      receivedTime: isEdit ? editData.receivedTime : tunisTime,
-
+      source: formData.source,
+      file_type: formData.fileType,
+      file_date: formData.fileDate,
+      clerk: formData.clerk,
       notes: formData.notes,
+      documents: formData.documents,
 
-      securityFiles: caseFileNumber,
+      // Crime
+      subject: formData.subject,
+      crime_type: formData.crimeType,
+      crime_place: formData.crimePlace,
+      crime_date: formData.crimeDate,
+      summary: formData.summary,
+      ai_suggestion: formData.aiSuggestion,
+
+      // Parties
+      plaintiff,
+      suspect,
+      parties: {
+        plaintiffName: plaintiff.fullName || '',
+        suspectName: suspect.fullName || ''
+      },
+
+      // Decision
+      decision_text: formData.decisionText,
+      decision_date: formData.decisionDate,
+      law_text: formData.lawText,
+      status: formData.status,
+      status_reason: formData.statusReason,
+
+      // Numbers
+      security_files: caseFileNumber,
       registrations: registryNumber,
-      parties: `${formData.plaintiff?.fullName || ''} / ${formData.suspect?.fullName || ''}`,
-      criminalClass: formData.crimeType,
-      lastUpdate: tunisTime,
 
-      plaintiff: formData.plaintiff,
-      suspect: formData.suspect
+      // Mapping
+      prosecution: formData.clerk,
+      decision: formData.decisionText,
+      criminal_class: formData.crimeType,
+
+      // timestamps
+      created_at: isEdit ? editData.created_at : getNowTimestamp(),
+      received_time: isEdit ? editData.received_time : getNowTimestamp(),
+      last_update: getNowTimestamp(),
     }
 
-    // 🟢 INSERT أو UPDATE
-    if (isEdit) {
-      const { error } = await supabase
-        .from('cases')
-        .update(normalizedCase)
-        .eq('caseId', caseId)
+    const { error } = isEdit
+      ? await supabase
+          .from('cases')
+          .update(normalizedCase)
+          .eq('id', editData.id)
+      : await supabase
+          .from('cases')
+          .insert([normalizedCase])
 
-      if (error) throw error
+    if (error) throw error
 
-      setToastMessage('✏️ تم تعديل القضية بنجاح')
+    setToastMessage(
+      isEdit ? '✏️ تم تعديل القضية بنجاح' : '✅ تم حفظ القضية بنجاح'
+    )
 
-    } else {
-      const { error } = await supabase
-        .from('cases')
-        .insert([normalizedCase])
-
-      if (error) throw error
-
-      setToastMessage('✅ تم حفظ القضية بنجاح')
-    }
-
-    setToastVisible(true)
+   setToastVisible(true)
     setShowSuccessModal(true)
 
-    setTimeout(() => {
-      navigate('/cases')
-    }, 2000)
+    setTimeout(() => navigate('/cases'), 2000)
 
   } catch (err) {
     console.error(err)
@@ -784,8 +813,7 @@ return (
     </div>
 
   </div>
-)}
-
+  )}
 {step === 2 && (
   <div className="filter-box mb-4">
 
@@ -809,7 +837,6 @@ return (
               setFormData(prev => ({ ...prev, subject: e.target.value }))
             }
           />
-
           <CFormFeedback invalid>
             ❌ {errors?.subject}
           </CFormFeedback>
@@ -827,9 +854,9 @@ return (
             }
           >
             <option value="">-- اختر --</option>
-            {crimeCategories.map((cat, i) => (
+            {crimeCategories?.map((cat, i) => (
               <optgroup key={i} label={cat.label}>
-                {cat.options.map((o, j) => (
+                {cat.options?.map((o, j) => (
                   <option key={j} value={o}>{o}</option>
                 ))}
               </optgroup>
@@ -852,7 +879,6 @@ return (
               setFormData(prev => ({ ...prev, crimePlace: e.target.value }))
             }
           />
-
           <CFormFeedback invalid>
             ❌ {errors?.crimePlace}
           </CFormFeedback>
@@ -870,7 +896,6 @@ return (
               setFormData(prev => ({ ...prev, crimeDate: e.target.value }))
             }
           />
-
           <CFormFeedback invalid>
             ❌ {errors?.crimeDate}
           </CFormFeedback>
@@ -887,7 +912,6 @@ return (
               setFormData(prev => ({ ...prev, summary: e.target.value }))
             }
           />
-
           <CFormFeedback invalid>
             ❌ {errors?.summary}
           </CFormFeedback>
@@ -904,7 +928,6 @@ return (
               setFormData(prev => ({ ...prev, aiSuggestion: e.target.value }))
             }
           />
-
           <CFormFeedback invalid>
             ❌ {errors?.aiSuggestion}
           </CFormFeedback>
@@ -915,7 +938,6 @@ return (
 
     {/* 🔘 الأزرار */}
     <div className="d-flex justify-content-between mt-4">
-
       <CButton color="secondary" onClick={() => setStep(1)}>
         ⬅ رجوع
       </CButton>
@@ -923,11 +945,11 @@ return (
       <CButton color="primary" onClick={() => handleNext(3)}>
         التالي ➡
       </CButton>
-
     </div>
 
   </div>
 )}
+  
 {step === 3 && (
   <div>
 
@@ -991,13 +1013,11 @@ return (
 
     <CForm>
 
-      {/* 🧾 هيدر */}
       <div className="form-header text-end mb-3">
         <h4>⚖️ القرار والحالة النهائية</h4>
         <span>تسجيل الحكم + الحالة القانونية للقضية</span>
       </div>
 
-      {/* 🆔 ID القضية */}
       <div className="person-card mb-3">
         <CFormInput
           name="caseId"
@@ -1007,14 +1027,12 @@ return (
         />
       </div>
 
-      {/* 📌 الحالة والقرار */}
       <div className="person-card mb-3">
 
         <h6 className="section-title text-end mb-3">
           📌 الحالة والقرار
         </h6>
 
-        {/* القرار */}
         <CFormTextarea
           name="decisionText"
           value={formData.decisionText || ''}
@@ -1031,7 +1049,6 @@ return (
           ✖ {errors?.decisionText}
         </CFormFeedback>
 
-        {/* التاريخ */}
         <CFormInput
           name="decisionDate"
           type="date"
@@ -1050,7 +1067,6 @@ return (
           ✖ {errors?.decisionDate}
         </CFormFeedback>
 
-        {/* النص القانوني */}
         <CFormTextarea
           name="lawText"
           value={formData.lawText || ''}
@@ -1068,7 +1084,6 @@ return (
           ✖ {errors?.lawText}
         </CFormFeedback>
 
-        {/* الحالة */}
         <CFormSelect
           name="status"
           label="حالة القضية"
@@ -1104,7 +1119,6 @@ return (
           ✖ {errors?.status}
         </CFormFeedback>
 
-        {/* سبب الحالة */}
         <CFormTextarea
           name="statusReason"
           value={formData.statusReason || ''}
@@ -1126,7 +1140,7 @@ return (
 
     </CForm>
 
-    {/* Navigation */}
+    {/* 🔘 Navigation + Save */}
     <div className="d-flex justify-content-between align-items-center mt-4 px-2">
 
       <CButton
@@ -1141,32 +1155,28 @@ return (
         خطوة 4 / 4
       </div>
 
+      <CButton
+        color={isEdit ? "warning" : "success"}
+        className="px-4"
+        onClick={() => {
+          const stepErrors = validateStep(4, formData)
+
+          if (Object.keys(stepErrors).length > 0) {
+            setErrors(stepErrors)
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+            return
+          }
+
+          setErrors({})
+          handleSave()
+        }}
+      >
+        {isEdit ? "✏️ حفظ التعديل" : "💾 إضافة القضية"}
+      </CButton>
+
     </div>
 
   </div>
-)}
-<CButton
-  color={isEdit ? "warning" : "success"}
-  disabled={Object.keys(errors).length > 0}
-  className="px-4 d-flex align-items-center gap-2"
-  onClick={() => {
-    const stepErrors = validateStep(4, formData)
-
-    if (Object.keys(stepErrors).length > 0) {
-      setErrors(stepErrors)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-      return
-    }
-
-    setErrors({})
-    handleSave()
-  }}
->
-  {isEdit ? "✏️ حفظ التعديل" : "💾 إضافة القضية"}
-</CButton>
-
-    </div>
-  </>
 )}
 
   <CToast
