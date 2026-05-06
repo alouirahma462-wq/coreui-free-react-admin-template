@@ -81,9 +81,9 @@ const deleteCase = (id) => {
 }
 
 const editCase = (c) => {
-  navigate(`/cases/edit/${c.caseId}`, {
-    state: { caseData: c, mode: 'edit' }
-  })
+ navigate(`/cases/edit/${c.caseId}`, {
+  state: { caseData: c, mode: 'edit' }
+})
 }
   const exportMemo = (c) => {
     navigate('/cases/detail', { state: { mode: 'memo', case: c } })
