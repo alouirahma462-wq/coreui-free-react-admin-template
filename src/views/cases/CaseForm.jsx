@@ -376,17 +376,24 @@ const [errors, setErrors] = useState({})
 const timerRef = useRef(null) 
 useEffect(() => {
   const loadCase = async () => {
-    if (!id) return
 
-    const { data, error } = await supabase
-      .from('cases')
-      .select('*')
-      .eq('id', id)
-      .single()
+    // إذا جاي من navigate state
+    if (location.state?.caseData) {
+      setFormData(location.state.caseData)
+      return
+    }
 
-    if (!error && data) {
-      setEditData(data)
-      setFormData({ ...initialFormState, ...data })
+    // إذا فتح بالرابط مباشرة
+    if (id) {
+      const { data, error } = await supabase
+        .from('cases')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (!error && data) {
+        setFormData(data)
+      }
     }
   }
 
