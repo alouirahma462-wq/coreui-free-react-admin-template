@@ -68,24 +68,37 @@ const CaseList = () => {
     loadCases()
   }, [])
 
-const filtered = cases.filter(c =>
-  (c.subject ?? '').toLowerCase().includes(search.toLowerCase()) ||
-  (c.caseId ?? '').toString().toLowerCase().includes(search.toLowerCase()) ||
-  (c.securityFiles ?? '').toString().toLowerCase().includes(search.toLowerCase())
-)
+  // =======================
+  // 🔍 FILTER (FIXED DB FIELDS)
+  // =======================
+  const filtered = cases.filter(c =>
+    (c.subject ?? '').toLowerCase().includes(search.toLowerCase()) ||
+    (c.case_id ?? '').toString().toLowerCase().includes(search.toLowerCase()) ||
+    (c.security_files ?? '').toString().toLowerCase().includes(search.toLowerCase())
+  )
 
   const openCase = (c) => {
     localStorage.setItem('selectedCase', JSON.stringify(c))
     navigate('/cases/detail')
   }
 
+  // =======================
+  // ❌ DELETE FIXED
+  // =======================
   const deleteCase = async (id) => {
-    await supabase.from('cases').delete().eq('caseId', id)
-    setCases(prev => prev.filter(c => c.caseId !== id))
+    await supabase
+      .from('cases')
+      .delete()
+      .eq('case_id', id)
+
+    setCases(prev => prev.filter(c => c.case_id !== id))
   }
 
+  // =======================
+  // ✏️ EDIT FIXED
+  // =======================
   const editCase = (c) => {
-    navigate(`/cases/edit/${c.caseId}`, {
+    navigate(`/cases/edit/${c.case_id}`, {
       state: { caseData: c, mode: 'edit' }
     })
   }
@@ -111,69 +124,57 @@ const filtered = cases.filter(c =>
             </CCol>
           </CRow>
 
-          {/* TABLE */}
           <CTable hover bordered responsive>
+
             <CTableHead>
               <CTableRow>
                 <CTableHeaderCell>🆔 ID القضية</CTableHeaderCell>
                 <CTableHeaderCell>🏛 المحكمة</CTableHeaderCell>
-                <CTableHeaderCell>⚖️ كاتب الظبط</CTableHeaderCell>
+                <CTableHeaderCell>⚖️ كاتب الضبط</CTableHeaderCell>
                 <CTableHeaderCell>📌 الموضوع</CTableHeaderCell>
                 <CTableHeaderCell>🎨 الحالة</CTableHeaderCell>
                 <CTableHeaderCell>📌 القرار</CTableHeaderCell>
-                <CTableHeaderCell>🕒 تاريخ ووقت  التلقي</CTableHeaderCell>
-                <CTableHeaderCell>⚙️  ملاحظات و إجراءات </CTableHeaderCell>
+                <CTableHeaderCell>🕒 وقت التلقي</CTableHeaderCell>
+                <CTableHeaderCell>⚙️ الإجراءات</CTableHeaderCell>
               </CTableRow>
             </CTableHead>
 
             <CTableBody>
-              
-  {/* 🔴 إذا ما في بيانات */}
-     
-            
+
               {filtered.length === 0 ? (
                 <CTableRow>
                   <CTableDataCell colSpan={8} className="text-center">
-                    🚫 لا توجد قضايا
+                    🚫  لا توجد قضايا
                   </CTableDataCell>
                 </CTableRow>
               ) : (
                 filtered.map((c) => (
-                  <Fragment key={c.caseId}>      
+                  <Fragment key={c.id}>
 
-               <CTableRow>
+                    <CTableRow>
 
-  {/* 🆔 ID */}
-  <CTableDataCell>{c.caseId}</CTableDataCell>
+                      <CTableDataCell>{c.case_id}</CTableDataCell>
+                      <CTableDataCell>{c.court}</CTableDataCell>
+                      <CTableDataCell>{c.prosecution || 'النيابة'}</CTableDataCell>
+                      <CTableDataCell>{c.subject}</CTableDataCell>
 
-  {/* 🏛 المحكمة */}
-  <CTableDataCell>{c.court}</CTableDataCell>
+                      <CTableDataCell>
+                        <CBadge color={getStatusColor(c.status)}>
+                          {getStatusIcon(c.status)} {c.status}
+                        </CBadge>
+                      </CTableDataCell>
 
-  {/* ⚖️ كاتب الضبط */}
-  <CTableDataCell>{c.prosecution || 'النيابة'}</CTableDataCell>
+                      <CTableDataCell>{c.decision || '—'}</CTableDataCell>
 
-  {/* 📌 الموضوع */}
-  <CTableDataCell>{c.subject}</CTableDataCell>
+                      <CTableDataCell>
+                        {c.received_time || c.created_at || '—'}
+                      </CTableDataCell>
 
-  {/* 🎨 الحالة */}
-  <CTableDataCell>
-    <CBadge color={getStatusColor(c.status)}>
-      {getStatusIcon(c.status)} {c.status}
-    </CBadge>
-  </CTableDataCell>
+                      <CTableDataCell>
 
-  {/* 📌 القرار */}
-  <CTableDataCell>{c.decision || '—'}</CTableDataCell>
-
-  {/* 🕒 تاريخ  ووقت التلقي */}
-  <CTableDataCell>
-  {c.receivedTime || c.createdAt || '—'}
-</CTableDataCell>
-  {/* ⚙️  ملاحظات و إجراءات */}
-  <CTableDataCell>
-         <CButton size="sm" color="info"
+                        <CButton size="sm" color="info"
                           onClick={() =>
-                            setExpandedId(expandedId === c.caseId ? null : c.caseId)
+                            setExpandedId(expandedId === c.id ? null : c.id)
                           }>
                           عرض
                         </CButton>
@@ -184,7 +185,7 @@ const filtered = cases.filter(c =>
                         </CButton>
 
                         <CButton size="sm" color="danger"
-                          onClick={() => deleteCase(c.caseId)}>
+                          onClick={() => deleteCase(c.case_id)}>
                           حذف
                         </CButton>
 
@@ -192,19 +193,21 @@ const filtered = cases.filter(c =>
                           onClick={() => exportMemo(c)}>
                           مذكرة
                         </CButton>
+
                       </CTableDataCell>
+
                     </CTableRow>
 
                     <CTableRow>
                       <CTableDataCell colSpan={8} className="p-0">
-                        <CCollapse visible={expandedId === c.caseId}>
+                        <CCollapse visible={expandedId === c.id}>
                           <div className="p-3 bg-light border-top">
 
-                            <div><b>📁 عدد الملف الأمني :</b> {c.securityFiles || 0}</div>
-                            <div><b>🧾 عدد التسجيل:</b> {c.registrations || 0}</div>
-                            <div><b>👥 الأطراف:</b> {c.parties || '—'}</div>
-                            <div><b>⚖️ التصنيف الجرمي:</b> {c.criminalClass || '—'}</div>
-                            <div><b>📝 آخر تعديل:</b> {c.lastUpdate || '—'}</div>
+                            <div><b>📁 الملف الأمني:</b> {c.security_files || 0}</div>
+                            <div><b>🧾عدد التسجيل:</b> {c.registrations || 0}</div>
+                            <div><b>👥 الأطراف:</b> {JSON.stringify(c.parties || {})}</div>
+                            <div><b>⚖️ التصنيف الجرمي:</b> {c.criminal_class || '—'}</div>
+                            <div><b>📝 آخر تعديل:</b> {c.last_update || '—'}</div>
 
                             <div className="mt-3">
                               <CButton color="primary" size="sm"
