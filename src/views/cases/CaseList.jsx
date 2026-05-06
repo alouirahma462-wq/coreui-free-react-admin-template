@@ -185,7 +185,7 @@ const deleteCase = async (id) => {
                         </CButton>
 
                         <CButton size="sm" color="danger"
-                          onClick={() => deleteCase(c.case_id)}>
+                          onClick={() => deleteCase(c.id)}
                           حذف
                         </CButton>
 
