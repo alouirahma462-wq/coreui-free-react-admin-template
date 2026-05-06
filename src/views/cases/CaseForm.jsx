@@ -451,9 +451,7 @@ const location = useLocation()
 
 const params = useParams()
 
-const editData =
-  location.state?.caseData ||
-  cases.find(c => c.caseId === params.id)
+const editData = location.state?.caseData || null
 
 const isEdit = !!editData
 const [caseId] = useState(() =>
