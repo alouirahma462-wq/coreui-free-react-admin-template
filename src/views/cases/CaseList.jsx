@@ -57,10 +57,21 @@ const CaseList = () => {
   const [expandedId, setExpandedId] = useState(null)
   const [search, setSearch] = useState('')
 
-  useEffect(() => {
-    const data = JSON.parse(localStorage.getItem('cases')) || []
-    setCases(data)
-  }, [])
+ useEffect(() => {
+  const loadCases = async () => {
+    const { data, error } = await supabase
+      .from('cases')
+      .select('*')
+
+    if (!error) {
+      setCases(data || [])
+    } else {
+      console.log(error)
+    }
+  }
+
+  loadCases()
+}, [])
 
 const filtered = cases.filter(c =>
   (c.subject || '').toLowerCase().includes(search.toLowerCase()) ||
