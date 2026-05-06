@@ -29,11 +29,7 @@ const AppContent = () => {
         <Route path="/court/files/new" element={<CaseForm />} />
         <Route path="/court/files/detail" element={<CaseDetail />} />
 
-        {/* 🔥 FIX 1: لا dashboard redirect */}
-        <Route path="/" element={<Navigate to="/landing" replace />} />
-
-        {/* 🔥 FIX 2: fallback آمن */}
-        <Route path="*" element={<Navigate to="/landing" replace />} />
+    <Route path="*" element={<div>404 - Page Not Found</div>} /> 
 
       </Routes>
     </Suspense>
