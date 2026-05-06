@@ -366,9 +366,8 @@ const CaseForm = () => {
 const navigate = useNavigate()
 const location = useLocation()
 const { id } = useParams()
-const editData = location.state?.caseData || null
-
-const isEdit = !!editData
+const [editData, setEditData] = useState(null)
+const isEdit = !!id
 const [caseId] = useState(() =>
   isEdit ? String(editData?.caseId) : String(generateCaseId())
 )
@@ -377,22 +376,17 @@ const [errors, setErrors] = useState({})
 const timerRef = useRef(null) 
 useEffect(() => {
   const loadCase = async () => {
+    if (!id) return
 
-    if (editData) {
-      setFormData({ ...initialFormState, ...editData })
-      return
-    }
+    const { data, error } = await supabase
+      .from('cases')
+      .select('*')
+      .eq('id', id)
+      .single()
 
-    if (id) {
-      const { data, error } = await supabase
-        .from('cases')
-        .select('*')
-        .eq('id', id)
-        .single()
-
-      if (!error && data) {
-        setFormData({ ...initialFormState, ...data })
-      }
+    if (!error && data) {
+      setEditData(data)
+      setFormData({ ...initialFormState, ...data })
     }
   }
 
