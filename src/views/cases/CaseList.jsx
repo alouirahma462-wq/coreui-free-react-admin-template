@@ -133,7 +133,7 @@ const editCase = (c) => {
     </CTableRow>
   ) : (
     filtered.map((c, i) => (
-    <Fragment key={c.caseId || i}>
+<Fragment key={String(c.caseId)}>
             
 
                <CTableRow>
