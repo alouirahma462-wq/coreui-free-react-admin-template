@@ -85,22 +85,22 @@ const CaseList = () => {
   // =======================
   // ❌ DELETE FIXED
   // =======================
-  const deleteCase = async (id) => {
-    await supabase
-      .from('cases')
-      .delete()
-      .eq('case_id', id)
+const deleteCase = async (id) => {
+  await supabase
+    .from('cases')
+    .delete()
+    .eq('id', id)
 
-    setCases(prev => prev.filter(c => c.case_id !== id))
-  }
+  setCases(prev => prev.filter(c => c.id !== id))
+}
 
   // =======================
   // ✏️ EDIT FIXED
   // =======================
   const editCase = (c) => {
-    navigate(`/cases/edit/${c.case_id}`, {
-      state: { caseData: c, mode: 'edit' }
-    })
+  navigate(`/cases/edit/${c.id}`, {
+  state: { caseData: c }
+})
   }
 
   const exportMemo = (c) => {
