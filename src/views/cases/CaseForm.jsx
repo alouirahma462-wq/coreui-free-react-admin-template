@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import FormWrapper from "../../components/FormWrapper"
 
 import {
@@ -448,7 +449,11 @@ const CaseForm = () => {
 const navigate = useNavigate()
 const location = useLocation()
 
-const editData = location.state?.caseData || location.state || null
+const params = useParams()
+
+const editData =
+  location.state?.caseData ||
+  cases.find(c => c.caseId === params.id)
 
 const isEdit = !!editData
 const [caseId] = useState(() =>
