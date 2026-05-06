@@ -97,11 +97,11 @@ const deleteCase = async (id) => {
   // =======================
   // ✏️ EDIT FIXED
   // =======================
-  const editCase = (c) => {
+const editCase = (c) => {
   navigate(`/cases/edit/${c.id}`, {
-  state: { caseData: c }
-})
-  }
+    state: { caseData: c }
+  })
+}
 
   const exportMemo = (c) => {
     navigate('/cases/detail', { state: { mode: 'memo', case: c } })
@@ -183,11 +183,13 @@ const deleteCase = async (id) => {
                           onClick={() => editCase(c)}>
                           تعديل
                         </CButton>
-
-                        <CButton size="sm" color="danger"
-                          onClick={() => deleteCase(c.id)}
-                          حذف
-                        </CButton>
+                          size="sm"
+                         color="danger"
+                       onClick={() => deleteCase(c.id)}
+                        >
+                       حذف
+                      
+                      </CButton>
 
                         <CButton size="sm" color="dark" className="mx-1"
                           onClick={() => exportMemo(c)}>
