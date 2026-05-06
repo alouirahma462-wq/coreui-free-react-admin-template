@@ -353,17 +353,72 @@ label {
   gap: 8px !important;
 }
 
+/* =========================
+✨ STEP TRANSITION SAFE
+========================= */
 
+.filter-box,
+.person-card {
+  transition: all 0.25s ease;
+  animation: stepFade 0.35s ease;
+}
 
+@keyframes stepFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.filter-box:hover,
+.person-card:hover {
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+}
 
+.btn {
+  transition: all 0.2s ease !important;
+}
 
+.btn:active {
+  transform: scale(0.98);
+}
 
+.step-indicator {
+  font-size: 13px;
+  color: #777;
+  transition: all 0.2s ease;
+}
 
+.form-control:focus,
+.form-select:focus,
+textarea:focus {
+  transition: all 0.2s ease;
+}
+.form-header {
+  animation: headerIn 0.3s ease;
+}
 
+@keyframes headerIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
 
-
-
-
+.filter-box:hover,
+.person-card:hover,
+.form-header:hover {
+  font-size: inherit !important;
+}
 
 
 
