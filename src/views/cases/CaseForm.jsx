@@ -1213,22 +1213,24 @@ return (
     </p>
 
     {/* Spinner */}
-    <div className="d-flex justify-content-center mt-3">
-      <div className="spinner-border text-success" />
-    </div>
+              <div className="d-flex justify-content-center mt-3">
+                <div className="spinner-border text-success" />
+              </div>
 
-  </CModalBody>
-</CModal>
-        </div> {/* ⬅️ هذا إغلاق form-container */}
+            </CModalBody>
+          </CModal>
+
+        </div> {/* form-container */}
 
       </CCardBody>
-      </CCard>
+    </CCard>
 
-    </div>
-   </FormWrapper>
+  </div> {/* form-bg */}
+
+</FormWrapper>
 )
-}
 
+}
 
 export default CaseForm
 
