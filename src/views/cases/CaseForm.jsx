@@ -451,9 +451,8 @@ const location = useLocation()
 const editData = location.state?.caseData || location.state || null
 
 const isEdit = !!editData
-
 const [caseId] = useState(() =>
-  isEdit ? editData?.caseId : generateCaseId()
+  isEdit ? String(editData?.caseId) : String(generateCaseId())
 )
 const [step, setStep] = useState(1)
 const [errors, setErrors] = useState({})  
@@ -640,13 +639,16 @@ receivedTime: isEdit ? editData.receivedTime : tunisTime,
   suspectResState: formData.suspect?.resState,
 }
 if (isEdit) {
- const updated = existing.map(c =>
-  c.caseId === caseId
-    ? { ...c, ...normalizedCase, caseId: c.caseId }
+const updated = existing.map(c =>
+  String(c.caseId) === String(caseId)
+    ? {
+        ...c,
+        ...normalizedCase,
+        caseId: String(c.caseId)
+      }
     : c
 )
-
-  localStorage.setItem('cases', JSON.stringify(updated))
+ localStorage.setItem('cases', JSON.stringify(updated))
   setToastMessage('✏️ تم تعديل القضية بنجاح')
 
 } else {
