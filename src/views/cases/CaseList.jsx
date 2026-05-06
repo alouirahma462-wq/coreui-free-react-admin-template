@@ -17,7 +17,7 @@ import {
   CCollapse
 } from '@coreui/react'
 
-import { supabase } from '../supabaseClient'
+import { supabase } from '../../supabaseClient'
 
 // =======================
 // 🧠 قاموس الحالات
