@@ -17,8 +17,10 @@ import {
   CCollapse
 } from '@coreui/react'
 
+import { supabase } from '../supabaseClient'
+
 // =======================
-// 🧠 قاموس الحالات (نفسه)
+// 🧠 قاموس الحالات
 // =======================
 const CASE_STATUS = {
   registration: { label: 'تسجيل', color: 'secondary', icon: '📝' },
@@ -47,9 +49,6 @@ const getStatusIcon = (status) => {
   return found ? found.icon : '📄'
 }
 
-// =======================
-// 📂 CaseList
-// =======================
 const CaseList = () => {
 
   const navigate = useNavigate()
@@ -57,45 +56,40 @@ const CaseList = () => {
   const [expandedId, setExpandedId] = useState(null)
   const [search, setSearch] = useState('')
 
- useEffect(() => {
-  const loadCases = async () => {
-    const { data, error } = await supabase
-      .from('cases')
-      .select('*')
+  useEffect(() => {
+    const loadCases = async () => {
+      const { data, error } = await supabase
+        .from('cases')
+        .select('*')
 
-    if (!error) {
-      setCases(data || [])
-    } else {
-      console.log(error)
+      if (!error) setCases(data || [])
     }
-  }
 
-  loadCases()
-}, [])
+    loadCases()
+  }, [])
 
 const filtered = cases.filter(c =>
-  (c.subject || '').toLowerCase().includes(search.toLowerCase()) ||
-  (c.caseId || '').toLowerCase().includes(search.toLowerCase()) ||
-  String(c.securityFiles || '').toLowerCase().includes(search.toLowerCase())
+  (c.subject ?? '').toLowerCase().includes(search.toLowerCase()) ||
+  (c.caseId ?? '').toString().toLowerCase().includes(search.toLowerCase()) ||
+  (c.securityFiles ?? '').toString().toLowerCase().includes(search.toLowerCase())
 )
 
-  // ================= ACTIONS =================
   const openCase = (c) => {
     localStorage.setItem('selectedCase', JSON.stringify(c))
     navigate('/cases/detail')
   }
 
-const deleteCase = (id) => {
-  const updated = cases.filter(c => c.caseId !== id)
-  setCases(updated)
-  localStorage.setItem('cases', JSON.stringify(updated))
-}
+  const deleteCase = async (id) => {
+    await supabase.from('cases').delete().eq('caseId', id)
+    setCases(prev => prev.filter(c => c.caseId !== id))
+  }
 
-const editCase = (c) => {
- navigate(`/cases/edit/${c.caseId}`, {
-  state: { caseData: c, mode: 'edit' }
-})
-}
+  const editCase = (c) => {
+    navigate(`/cases/edit/${c.caseId}`, {
+      state: { caseData: c, mode: 'edit' }
+    })
+  }
+
   const exportMemo = (c) => {
     navigate('/cases/detail', { state: { mode: 'memo', case: c } })
   }
@@ -106,9 +100,8 @@ const editCase = (c) => {
       <CCard className="shadow-sm">
         <CCardBody>
 
-          <h4 className="mb-3">📂 قائمة القضايا </h4>
+          <h4 className="mb-3">📂 قائمة القضايا</h4>
 
-          {/* FILTER */}
           <CRow className="mb-3">
             <CCol md={4}>
               <CFormInput
@@ -136,17 +129,17 @@ const editCase = (c) => {
             <CTableBody>
               
   {/* 🔴 إذا ما في بيانات */}
-
-  {filtered.length === 0 ? (
-    <CTableRow>
-      <CTableDataCell colSpan={8} className="text-center">
-        🚫 لا توجد قضايا
-      </CTableDataCell>
-    </CTableRow>
-  ) : (
-    filtered.map((c, i) => (
-<Fragment key={String(c.caseId)}>
+     
             
+              {filtered.length === 0 ? (
+                <CTableRow>
+                  <CTableDataCell colSpan={8} className="text-center">
+                    🚫 لا توجد قضايا
+                  </CTableDataCell>
+                </CTableRow>
+              ) : (
+                filtered.map((c) => (
+                  <Fragment key={c.caseId}>      
 
                <CTableRow>
 
@@ -178,75 +171,58 @@ const editCase = (c) => {
 </CTableDataCell>
   {/* ⚙️  ملاحظات و إجراءات */}
   <CTableDataCell>
+         <CButton size="sm" color="info"
+                          onClick={() =>
+                            setExpandedId(expandedId === c.caseId ? null : c.caseId)
+                          }>
+                          عرض
+                        </CButton>
 
-    <CButton
-      size="sm"
-      color="info"
-      onClick={() =>
-  setExpandedId(expandedId === c.caseId ? null : c.caseId)
-}
-    >
-      عرض المزيد
-    </CButton>
+                        <CButton size="sm" color="primary" className="mx-1"
+                          onClick={() => editCase(c)}>
+                          تعديل
+                        </CButton>
 
-    <CButton
-      size="sm"
-      color="primary"
-      className="mx-1"
-      onClick={() => editCase(c)}
-    >
-      تعديل
-    </CButton>
+                        <CButton size="sm" color="danger"
+                          onClick={() => deleteCase(c.caseId)}>
+                          حذف
+                        </CButton>
 
-    <CButton
-      size="sm"
-      color="danger"
-      onClick={() => deleteCase(c.caseId)}  
-    >
-      حذف
-    </CButton>
+                        <CButton size="sm" color="dark" className="mx-1"
+                          onClick={() => exportMemo(c)}>
+                          مذكرة
+                        </CButton>
+                      </CTableDataCell>
+                    </CTableRow>
 
-    <CButton
-      size="sm"
-      color="dark"
-      className="mx-1"
-      onClick={() => exportMemo(c)}
-    >
-      مذكرة
-    </CButton>
+                    <CTableRow>
+                      <CTableDataCell colSpan={8} className="p-0">
+                        <CCollapse visible={expandedId === c.caseId}>
+                          <div className="p-3 bg-light border-top">
 
-  </CTableDataCell>
+                            <div><b>📁 عدد الملف الأمني :</b> {c.securityFiles || 0}</div>
+                            <div><b>🧾 عدد التسجيل:</b> {c.registrations || 0}</div>
+                            <div><b>👥 الأطراف:</b> {c.parties || '—'}</div>
+                            <div><b>⚖️ التصنيف الجرمي:</b> {c.criminalClass || '—'}</div>
+                            <div><b>📝 آخر تعديل:</b> {c.lastUpdate || '—'}</div>
 
-</CTableRow>
+                            <div className="mt-3">
+                              <CButton color="primary" size="sm"
+                                onClick={() => openCase(c)}>
+                                📂 فتح الملف الكامل
+                              </CButton>
+                            </div>
 
-                  {/* EXPAND */}
-                  <CTableRow>
-                    <CTableDataCell colSpan={8} className="p-0">
-                      <CCollapse visible={expandedId === c.caseId}>
-                        <div className="p-3 bg-light border-top">
-
-                          <div><b>📁 عدد الملف الأمني :</b> {c.securityFiles || 0}</div>
-                          <div><b>🧾 عدد التسجيل:</b> {c.registrations || 0}</div>
-                          <div><b>👥 الأطراف:</b> {c.parties || '—'}</div>
-                          <div><b>⚖️ التصنيف الجرمي:</b> {c.criminalClass || '—'}</div>
-                          <div><b>📝 آخر تعديل:</b> {c.lastUpdate || '—'}</div>
-
-                          <div className="mt-3">
-                            <CButton color="primary" size="sm" onClick={() => openCase(c)}>
-                              📂 فتح الملف الكامل
-                            </CButton>
                           </div>
+                        </CCollapse>
+                      </CTableDataCell>
+                    </CTableRow>
 
-                        </div>
-                      </CCollapse>
-                    </CTableDataCell>
-                  </CTableRow>
-    </Fragment>
-  ))
-)}
+                  </Fragment>
+                ))
+              )}
 
-
-   </CTableBody>
+            </CTableBody>
 
           </CTable>
 
@@ -258,6 +234,8 @@ const editCase = (c) => {
 }
 
 export default CaseList
+
+
 
 
 
