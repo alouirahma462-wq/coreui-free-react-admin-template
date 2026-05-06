@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { supabase } from '../../supabaseClient'
 import FormWrapper from "../../components/FormWrapper"
+import { useParams } from 'react-router-dom'
 const getTunisDateTime = () => {
   const now = new Date()
   return now.toLocaleString('fr-TN', {
@@ -364,9 +365,7 @@ const PersonForm = ({ title, type, formData, setFormData, errors }) => {
 const CaseForm = () => {
 const navigate = useNavigate()
 const location = useLocation()
-
-const params = useParams()
-
+const { id } = useParams()
 const editData = location.state?.caseData || null
 
 const isEdit = !!editData
@@ -377,13 +376,28 @@ const [step, setStep] = useState(1)
 const [errors, setErrors] = useState({})  
 const timerRef = useRef(null) 
 useEffect(() => {
-  return () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current)
-      timerRef.current = null
+  const loadCase = async () => {
+
+    if (editData) {
+      setFormData({ ...initialFormState, ...editData })
+      return
+    }
+
+    if (id) {
+      const { data, error } = await supabase
+        .from('cases')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (!error && data) {
+        setFormData({ ...initialFormState, ...data })
+      }
     }
   }
-}, [])
+
+  loadCase()
+}, [id])
 const isInvalid = (field) => !!errors?.[field]
 const validateStep = (step, formData) => {
   const validationErrors = {}
@@ -591,18 +605,23 @@ const handleSave = async () => {
           .from('cases')
           .insert([normalizedCase])
 
-    if (error) throw error
+  if (error) {
+  console.error('Supabase error:', error)
+  setToastMessage('❌ خطأ أثناء الحفظ')
+  setToastVisible(true)
+  return
+}
 
-    setToastMessage(
-      isEdit ? '✏️ تم تعديل القضية بنجاح' : '✅ تم حفظ القضية بنجاح'
-    )
+setToastMessage(
+  isEdit ? '✏️ تم تعديل القضية بنجاح' : '✅ تم حفظ القضية بنجاح'
+)
 
-   setToastVisible(true)
-    setShowSuccessModal(true)
+setShowSuccessModal(true)
 
-   navigate('/cases')
-
-  } catch (err) {
+setTimeout(() => {
+  setShowSuccessModal(false)
+  navigate('/cases')
+}, 2000)  } catch (err) {
     console.error(err)
   }
 }
