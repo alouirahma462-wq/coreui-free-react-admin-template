@@ -600,7 +600,7 @@ const handleSave = async () => {
    setToastVisible(true)
     setShowSuccessModal(true)
 
-    setTimeout(() => navigate('/cases'), 2000)
+   navigate('/cases')
 
   } catch (err) {
     console.error(err)
