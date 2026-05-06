@@ -112,12 +112,12 @@ export default function App() {
           <Route path="/cases" element={<CaseList />} />
           <Route path="/cases/create" element={<CaseForm />} />
           <Route path="/cases/edit/:id" element={<CaseForm />} />
-          <Route path="/case-detail" element={<CaseDetail />} />
+           <Route path="/cases/detail" element={<CaseDetail />} />
 
         </Route>
 
         {/* fallback */}
-        <Route path="*" element={<Navigate to="/landing" />} />
+        <Route path="*" element={<Navigate to="/cases" replace />} />
 
       </Routes>
     </>
