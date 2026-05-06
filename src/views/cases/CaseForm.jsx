@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
-import { supabase } from '../supabaseClient'
+import { supabase } from '../../supabaseClient'
 import FormWrapper from "../../components/FormWrapper"
 
 import {
