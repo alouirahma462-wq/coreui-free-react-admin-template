@@ -98,7 +98,9 @@ const deleteCase = async (id) => {
   // ✏️ EDIT FIXED
   // =======================
 const editCase = (c) => {
-  navigate(`/cases/edit/${c.id}`, {
+  if (!c?.id && !c?.case_id) return
+
+  navigate(`/cases/edit/${c.id || c.case_id}`, {
     state: { caseData: c }
   })
 }
