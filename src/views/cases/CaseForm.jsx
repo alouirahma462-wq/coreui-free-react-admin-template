@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { supabase } from '../../supabaseClient'
 import FormWrapper from "../../components/FormWrapper"
-import { useParams } from 'react-router-dom'
 const getTunisDateTime = () => {
   const now = new Date()
   return now.toLocaleString('fr-TN', {
