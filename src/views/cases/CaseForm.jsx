@@ -365,7 +365,8 @@ const CaseForm = () => {
 const navigate = useNavigate()
 const location = useLocation()
 const { id } = useParams()
-const [editData, setEditData] = useState(null)
+
+const editData = location.state?.caseData || null
 const isEdit = !!id
 const [caseId] = useState(() =>
   isEdit ? String(editData?.caseId) : String(generateCaseId())
@@ -374,16 +375,23 @@ const [step, setStep] = useState(1)
 const [errors, setErrors] = useState({})  
 const timerRef = useRef(null) 
 useEffect(() => {
+
   const loadCase = async () => {
 
-    // إذا جاي من navigate state
-    if (location.state?.caseData) {
-      setFormData(location.state.caseData)
+    // لو جاية من navigation state
+    if (editData) {
+
+      setFormData(prev => ({
+        ...prev,
+        ...editData
+      }))
+
       return
     }
 
-    // إذا فتح بالرابط مباشرة
+    // لو فتح الصفحة مباشرة
     if (id) {
+
       const { data, error } = await supabase
         .from('cases')
         .select('*')
@@ -391,12 +399,17 @@ useEffect(() => {
         .single()
 
       if (!error && data) {
-        setFormData(data)
+
+        setFormData(prev => ({
+          ...prev,
+          ...data
+        }))
       }
     }
   }
 
   loadCase()
+
 }, [id])
 const isInvalid = (field) => !!errors?.[field]
 const validateStep = (step, formData) => {
