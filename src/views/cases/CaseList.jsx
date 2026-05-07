@@ -171,30 +171,41 @@ const editCase = (c) => {
                       </CTableDataCell>
 
                       <CTableDataCell>
+<CButton
+  size="sm"
+  color="info"
+  onClick={() =>
+    setExpandedId(expandedId === c.id ? null : c.id)
+  }
+>
+  عرض
+</CButton>
 
-                        <CButton size="sm" color="info"
-                          onClick={() =>
-                            setExpandedId(expandedId === c.id ? null : c.id)
-                          }>
-                          عرض
-                        </CButton>
+<CButton
+  size="sm"
+  color="primary"
+  className="mx-1"
+  onClick={() => editCase(c)}
+>
+  تعديل
+</CButton>
 
-                        <CButton size="sm" color="primary" className="mx-1"
-                          onClick={() => editCase(c)}>
-                          تعديل
-                        </CButton>
-                          size="sm"
-                         color="danger"
-                       onClick={() => deleteCase(c.id)}
-                        >
-                       حذف
-                      
-                      </CButton>
+<CButton
+  size="sm"
+  color="danger"
+  onClick={() => deleteCase(c.id)}
+>
+  حذف
+</CButton>
 
-                        <CButton size="sm" color="dark" className="mx-1"
-                          onClick={() => exportMemo(c)}>
-                          مذكرة
-                        </CButton>
+<CButton
+  size="sm"
+  color="dark"
+  className="mx-1"
+  onClick={() => exportMemo(c)}
+>
+  مذكرة
+</CButton>
 
                       </CTableDataCell>
 
