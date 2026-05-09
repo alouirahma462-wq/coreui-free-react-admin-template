@@ -380,9 +380,11 @@ const CaseForm = () => {
   const isEdit = !!id
 
   const caseId = useMemo(() => {
-    if (isEdit && editData?.case_id) return String(editData.case_id)
-    return String(generateCaseId())
-  }, [isEdit, editData])
+  if (isEdit && editData?.case_id) {
+    return editData.case_id
+  }
+  return 'CASE-' + Date.now()
+}, [isEdit, editData])
 
   useEffect(() => {
     const loadCase = async () => {
@@ -494,7 +496,7 @@ const validateStep = (step, formData) => {
   return validationErrors
 }
 
-const handleNext = nextStep => {
+const handleNext = (nextStep) => {
   const stepErrors = validateStep(step, formData)
 
   const keys = Object.keys(stepErrors)
@@ -502,16 +504,23 @@ const handleNext = nextStep => {
   if (keys.length > 0) {
     setErrors(stepErrors)
 
-    // 🔥 أول خطأ
     const firstErrorKey = keys[0]
 
-    // ⚠️ مهم: لحماية النقاط داخل name مثل plaintiff.fullName
-    const safeKey = CSS.escape(firstErrorKey)
+    // 🔥 حماية النقاط + الأقواس في الاسم
+    const safeKey = firstErrorKey.replace(/\./g, "\\.")
+
     const el = document.querySelector(`[name="${safeKey}"]`)
 
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      el.focus()
+      el.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      })
+
+      // بعض العناصر ما تدعمش focus
+      if (typeof el.focus === 'function') {
+        el.focus()
+      }
     }
 
     return
@@ -519,7 +528,11 @@ const handleNext = nextStep => {
 
   setErrors({})
   setStep(nextStep)
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
 }
 
 
@@ -527,9 +540,25 @@ const handleNext = nextStep => {
 // ✅ STATES (FIXED)
 // =======================
 const [showSuccessModal, setShowSuccessModal] = useState(false)
-
 const [caseFileNumber, setCaseFileNumber] = useState('')
 const [registryNumber, setRegistryNumber] = useState('')
+
+const generateCaseFileNumber = () => 'CF-' + Date.now()
+const generateRegistryNumber = () => 'REG-' + Math.floor(Math.random() * 1000000)
+
+useEffect(() => {
+  // 🟢 CREATE MODE
+  if (!isEdit) {
+    setCaseFileNumber(generateCaseFileNumber())
+    setRegistryNumber(generateRegistryNumber())
+  }
+
+  // 🟡 EDIT MODE (ثبات القيم من DB)
+  if (isEdit && editData) {
+    setCaseFileNumber(editData.security_files || '')
+    setRegistryNumber(editData.registrations || '')
+  }
+}, [isEdit, editData])
 
 const [tunisTime] = useState(() => getTunisDateTime())
 
@@ -576,14 +605,12 @@ const fieldProps = field => ({
 useEffect(() => {
   if (!isEdit || !editData) return
 
-  setFormData(() => ({
+  setFormData({
     ...initialFormState,
     ...editData,
-
-    // 🔥 حماية البيانات nested
     plaintiff: editData?.plaintiff || {},
     suspect: editData?.suspect || {}
-  }))
+  })
 }, [isEdit, editData])
 
 
@@ -630,9 +657,14 @@ const handleSave = async () => {
       status: formData.status,
       status_reason: formData.statusReason,
 
-      // Numbers
-      security_files: caseFileNumber,
-      registrations: registryNumber,
+      // Numbers (🔥 مهم: ما تتغير في التعديل)
+      security_files: isEdit
+        ? editData?.security_files
+        : caseFileNumber,
+
+      registrations: isEdit
+        ? editData?.registrations
+        : registryNumber,
 
       // Mapping
       prosecution: formData.clerk,
@@ -642,7 +674,7 @@ const handleSave = async () => {
       // timestamps
       created_at: isEdit ? editData?.created_at : getNowTimestamp(),
       received_time: isEdit ? editData?.received_time : getNowTimestamp(),
-      last_update: getNowTimestamp(),
+      last_update: getNowTimestamp()
     }
 
     const { error } = isEdit
@@ -662,7 +694,9 @@ const handleSave = async () => {
     }
 
     setToastMessage(
-      isEdit ? '✏️ تم تعديل القضية بنجاح' : '✅ تم حفظ القضية بنجاح'
+      isEdit
+        ? '✏️ تم تعديل القضية بنجاح'
+        : '✅ تم حفظ القضية بنجاح'
     )
 
     setShowSuccessModal(true)
@@ -743,15 +777,15 @@ return (
                       </CFormFeedback>
                     </CCol>
 
-                    {/* عدد الملف الأمني */}
-                    <CCol xs={12} md={6}>
-                      <CFormInput
-                        name="caseFileNumber"
-                        label="عدد الملف الأمني"
-                        value={caseFileNumber}
-                        readOnly
-                      />
-                    </CCol>
+                {/* عدد الملف الأمني */}
+                <CCol xs={12} md={6}>
+                    <CFormInput
+               name="caseFileNumber"
+                label="عدد الملف الأمني"
+               value={caseFileNumber}
+               readOnly
+                 />
+                  </CCol>
 
                     {/* مصدر الملف */}
                     <CCol xs={12} md={6}>
@@ -830,15 +864,15 @@ return (
                       </CFormFeedback>
                     </CCol>
 
-                    {/* عدد التسجيل */}
-                    <CCol xs={12} md={6}>
-                      <CFormInput
-                        name="registryNumber"
-                        label="عدد التسجيل"
-                        value={registryNumber}
-                        readOnly
-                      />
-                    </CCol>
+                  {/* عدد التسجيل */}
+                  <CCol xs={12} md={6}>
+                   <CFormInput
+                name="registryNumber"
+               label="عدد التسجيل"
+               value={registryNumber}
+               readOnly
+               />
+               </CCol>
 
                     {/* تاريخ ووقت التلقي */}
                     <CCol xs={12} md={6}>
