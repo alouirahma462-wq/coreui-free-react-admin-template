@@ -23,25 +23,35 @@ import DefaultLayout from "./layout/DefaultLayout";
 import SmartScreen from "./views/pages/SmartScreen.jsx";
 
 export default function App() {
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const location = useLocation();
 
+  // =========================
+  // 🎯 DASHBOARD CHECK
+  // =========================
   const isDashboard =
     location.pathname.startsWith("/court") ||
     location.pathname.startsWith("/inspection-dashboard");
 
+  // =========================
+  // 🔓 AUTH CHECK
+  // =========================
   const isAuth =
     location.pathname === "/login" ||
     location.pathname === "/forgot-password" ||
     location.pathname === "/reset-password" ||
     location.pathname === "/change-password";
 
+  // =========================
+  // 🧠 LOAD USER (FIXED)
+  // =========================
   const loadUser = async () => {
-    setLoading(true);
 
     try {
+
       const userId = localStorage.getItem("user_id");
 
       if (!userId || userId === "undefined" || userId === "null") {
@@ -57,6 +67,7 @@ export default function App() {
         .maybeSingle();
 
       setUser(data || null);
+
     } catch (err) {
       setUser(null);
     } finally {
@@ -64,11 +75,17 @@ export default function App() {
     }
   };
 
+  // =========================
+  // ⚠️ FIX: no reload on every route
+  // =========================
   useEffect(() => {
     loadUser();
-  }, [location.pathname]);
+  }, []);
 
-  if (loading && location.pathname !== "/login") {
+  // =========================
+  // ⏳ LOADING
+  // =========================
+  if (loading) {
     return (
       <div style={{ color: "white", textAlign: "center", marginTop: 50 }}>
         Loading...
@@ -100,24 +117,31 @@ export default function App() {
         <Route path="/smart" element={<SmartScreen />} />
 
         {/* =========================
-            📊 DEFAULT LAYOUT (DASHBOARD + CASES)
+            📊 DEFAULT LAYOUT
         ========================= */}
         <Route element={<DefaultLayout />}>
 
           {/* Dashboard */}
-          <Route path="/court/:id" element={<CourtDashboard user={user} />} />
-          <Route path="/inspection-dashboard" element={<InspectionDashboard user={user} />} />
+          <Route
+            path="/court/:id"
+            element={<CourtDashboard user={user} />}
+          />
 
-          {/* Cases داخل الداشبورد */}
-         <Route path="/cases" element={<CaseList />} />
-         <Route path="/cases/create" element={<CaseForm />} />
-         <Route path="/cases/edit/:id" element={<CaseForm />} />
-           <Route path="/cases/detail" element={<CaseDetail />} />
+          <Route
+            path="/inspection-dashboard"
+            element={<InspectionDashboard user={user} />}
+          />
+
+          {/* Cases */}
+          <Route path="/cases" element={<CaseList />} />
+          <Route path="/cases/create" element={<CaseForm />} />
+          <Route path="/cases/edit/:id" element={<CaseForm />} />
+          <Route path="/cases/detail" element={<CaseDetail />} />
 
         </Route>
 
-        {/* fallback */}
-        <Route path="*" element={<Navigate to="/cases" replace />} />
+        {/* ❌ FIXED fallback (important) */}
+        <Route path="*" element={<Navigate to="/landing" replace />} />
 
       </Routes>
     </>
