@@ -18,10 +18,9 @@ const DefaultLayout = () => {
           <AppHeader />
         </header>
 
-        {/* Content */}
-        <main style={styles.content}>
-          <AppContent />
-        </main>
+       <main style={styles.content}>
+         <Outlet />
+         </main>
 
         {/* Footer */}
         <footer style={styles.footer}>
