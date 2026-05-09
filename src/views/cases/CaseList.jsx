@@ -98,9 +98,7 @@ const deleteCase = async (id) => {
   // ✏️ EDIT FIXED
   // =======================
 const editCase = (c) => {
-  navigate('/cases/edit', {
-    state: { caseData: c }
-  })
+  navigate(`/cases/edit/${c.id}`)
 }
 
   const exportMemo = (c) => {
