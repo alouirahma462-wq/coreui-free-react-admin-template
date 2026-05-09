@@ -364,10 +364,10 @@ const PersonForm = ({ title, type, formData, setFormData, errors }) => {
 const CaseForm = () => {
 const navigate = useNavigate()
 const location = useLocation()
-const { id } = useParams()
+const location = useLocation()
 
 const editData = location.state?.caseData || null
-const isEdit = !!id
+const isEdit = !!editData
 const [caseId] = useState(() =>
   isEdit ? String(editData?.caseId) : String(generateCaseId())
 )
