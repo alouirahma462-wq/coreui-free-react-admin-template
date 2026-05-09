@@ -111,7 +111,7 @@ export default function App() {
           {/* Cases داخل الداشبورد */}
           <Route path="/cases" element={<CaseList />} />
           <Route path="/cases/create" element={<CaseForm />} />
-          <Route path="/cases/edit/:id" element={<CaseForm />} />
+          <Route path="/cases/edit" element={<CaseForm />} />
            <Route path="/cases/detail" element={<CaseDetail />} />
 
         </Route>
