@@ -98,7 +98,7 @@ const deleteCase = async (id) => {
   // ✏️ EDIT FIXED
   // =======================
 const editCase = (c) => {
-  navigate(`/cases/edit/${c.id}`, {
+  navigate('/cases/edit', {
     state: { caseData: c }
   })
 }
