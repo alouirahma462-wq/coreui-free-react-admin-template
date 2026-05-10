@@ -92,7 +92,6 @@ const generateRegistryNumber = () =>
   'REG-' + Math.floor(Math.random() * 1000000)
 const getNowTimestamp = () => new Date().toISOString()
 const generateCaseId = () => 'CASE-' + Date.now()
-
 const PersonForm = ({ title, type, formData, setFormData, errors, locations }) => {
   const person = formData?.[type] || {}
 
@@ -114,40 +113,6 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
 
   const isInvalid = field => !!errors?.[field]
 
-  // ✔️ updateField مرة واحدة فقط
-  const updateField = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [type]: {
-        ...(prev[type] || {}),
-        [field]: value
-      }
-    }))
-  }
-
-  return (
-const PersonForm = ({ title, type, formData, setFormData, errors, locations }) => {
-  const person = formData?.[type] || {}
-
-  const birthLocation = Array.isArray(locations)
-    ? locations.find(
-        l =>
-          l?.state?.trim()?.toLowerCase() ===
-          person?.birthState?.trim()?.toLowerCase()
-      )
-    : null
-
-  const resLocation = Array.isArray(locations)
-    ? locations.find(
-        l =>
-          l?.state?.trim()?.toLowerCase() ===
-          person?.resState?.trim()?.toLowerCase()
-      )
-    : null
-
-  const isInvalid = field => !!errors?.[field]
-
-  // ✅ FIX: تحديث آمن وما يكسّر باقي الحقول
   const updateField = (field, value) => {
     setFormData(prev => ({
       ...prev,
