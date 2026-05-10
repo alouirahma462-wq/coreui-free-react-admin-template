@@ -488,9 +488,6 @@ const [showSuccessModal, setShowSuccessModal] = useState(false)
 const [caseFileNumber, setCaseFileNumber] = useState('')
 const [registryNumber, setRegistryNumber] = useState('')
 
-const generateCaseFileNumber = () => 'CF-' + Date.now()
-const generateRegistryNumber = () => 'REG-' + Math.floor(Math.random() * 1000000)
-
 const initializedRef = useRef(false)
 
 useEffect(() => {
@@ -639,6 +636,7 @@ const normalizedCase = {
     setToastVisible(true)
   }
 }
+const tunisTime = getTunisDateTime()
 return (
   <FormWrapper>
     <div className="form-bg">
@@ -1049,7 +1047,7 @@ return (
       <span>بيانات الشاكي والمظنون فيه</span>
     </div>
 
-    {/* 👤 الشاكي */}
+      {/* 👤 الشاكي */}
     <div className="mb-4">
       <PersonForm
         title="👤 الشاكي"
@@ -1057,10 +1055,11 @@ return (
         formData={formData}
         setFormData={setFormData}
         errors={errors}
+        locations={locations}
       />
     </div>
 
-    {/* ⚠️ المظنون فيه */}
+     {/* ⚠️ المظنون فيه */}
     <div className="mb-4">
       <PersonForm
         title="⚠️ المظنون فيه"
@@ -1068,6 +1067,7 @@ return (
         formData={formData}
         setFormData={setFormData}
         errors={errors}
+        locations={locations}
       />
     </div>
 
