@@ -126,6 +126,39 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
   }
 
   return (
+const PersonForm = ({ title, type, formData, setFormData, errors, locations }) => {
+  const person = formData?.[type] || {}
+
+  const birthLocation = Array.isArray(locations)
+    ? locations.find(
+        l =>
+          l?.state?.trim()?.toLowerCase() ===
+          person?.birthState?.trim()?.toLowerCase()
+      )
+    : null
+
+  const resLocation = Array.isArray(locations)
+    ? locations.find(
+        l =>
+          l?.state?.trim()?.toLowerCase() ===
+          person?.resState?.trim()?.toLowerCase()
+      )
+    : null
+
+  const isInvalid = field => !!errors?.[field]
+
+  // ✅ FIX: تحديث آمن وما يكسّر باقي الحقول
+  const updateField = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [type]: {
+        ...(prev[type] || {}),
+        [field]: value
+      }
+    }))
+  }
+
+  return (
     <div className="person-card">
       <h6 className="section-title">{title}</h6>
 
@@ -145,20 +178,18 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           </CFormFeedback>
         </CCol>
 
-        {/* الجنس (SELECT FIXED) */}
+        {/* الجنس */}
         <CCol xs={12} md={6}>
           <CFormSelect
             name={`${type}.gender`}
             label="الجنس"
-            value={['ذكر', 'أنثى'].includes(person.gender) ? person.gender : ''}
+            value={person.gender || ''}
             invalid={isInvalid(`${type}.gender`)}
             onChange={e => updateField('gender', e.target.value)}
           >
             <option value="">-- اختر --</option>
             {genders?.map((g, i) => (
-              <option key={i} value={g}>
-                {g}
-              </option>
+              <option key={i} value={g}>{g}</option>
             ))}
           </CFormSelect>
 
@@ -167,20 +198,18 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           </CFormFeedback>
         </CCol>
 
-        {/* الجنسية (SELECT FIXED) */}
+        {/* الجنسية */}
         <CCol xs={12} md={6}>
           <CFormSelect
             name={`${type}.nationality`}
             label="الجنسية"
-            value={nationalities?.includes(person.nationality) ? person.nationality : ''}
+            value={person.nationality || ''}
             invalid={isInvalid(`${type}.nationality`)}
             onChange={e => updateField('nationality', e.target.value)}
           >
             <option value="">-- اختر --</option>
             {nationalities?.map((n, i) => (
-              <option key={i} value={n}>
-                {n}
-              </option>
+              <option key={i} value={n}>{n}</option>
             ))}
           </CFormSelect>
 
@@ -201,12 +230,12 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           />
         </CCol>
 
-        {/* ولاية الولادة (SELECT FIXED) */}
+        {/* ولاية الولادة */}
         <CCol xs={12} md={6}>
           <CFormSelect
             name={`${type}.birthState`}
             label="ولاية الولادة"
-            value={locations?.some(l => l.state === person.birthState) ? person.birthState : ''}
+            value={person.birthState || ''}
             invalid={isInvalid(`${type}.birthState`)}
             onChange={e => updateField('birthState', e.target.value)}
           >
@@ -224,15 +253,13 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           <CFormSelect
             name={`${type}.birthDelegation`}
             label="معتمدية الولادة"
-            value={birthLocation?.delegations?.includes(person.birthDelegation) ? person.birthDelegation : ''}
+            value={person.birthDelegation || ''}
             invalid={isInvalid(`${type}.birthDelegation`)}
             onChange={e => updateField('birthDelegation', e.target.value)}
           >
             <option value="">-- اختر --</option>
             {birthLocation?.delegations?.map((d, i) => (
-              <option key={i} value={d}>
-                {d}
-              </option>
+              <option key={i} value={d}>{d}</option>
             ))}
           </CFormSelect>
         </CCol>
@@ -242,7 +269,7 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           <CFormSelect
             name={`${type}.resState`}
             label="ولاية السكن"
-            value={locations?.some(l => l.state === person.resState) ? person.resState : ''}
+            value={person.resState || ''}
             invalid={isInvalid(`${type}.resState`)}
             onChange={e => updateField('resState', e.target.value)}
           >
@@ -260,15 +287,13 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           <CFormSelect
             name={`${type}.resDelegation`}
             label="معتمدية السكن"
-            value={resLocation?.delegations?.includes(person.resDelegation) ? person.resDelegation : ''}
+            value={person.resDelegation || ''}
             invalid={isInvalid(`${type}.resDelegation`)}
             onChange={e => updateField('resDelegation', e.target.value)}
           >
             <option value="">-- اختر --</option>
             {resLocation?.delegations?.map((d, i) => (
-              <option key={i} value={d}>
-                {d}
-              </option>
+              <option key={i} value={d}>{d}</option>
             ))}
           </CFormSelect>
         </CCol>
@@ -489,21 +514,23 @@ const [caseFileNumber, setCaseFileNumber] = useState('')
 const [registryNumber, setRegistryNumber] = useState('')
 
 const initializedRef = useRef(false)
-
 useEffect(() => {
-  if (initializedRef.current) return
-
   if (isEdit && editData) {
     setCaseFileNumber(editData.security_files || '')
     setRegistryNumber(editData.registrations || '')
+
+    setFormData({
+      ...initialFormState,
+      ...editData,
+      plaintiff: editData?.plaintiff || {},
+      suspect: editData?.suspect || {}
+    })
   }
 
   if (!isEdit) {
     setCaseFileNumber(generateCaseFileNumber())
     setRegistryNumber(generateRegistryNumber())
   }
-
-  initializedRef.current = true
 }, [isEdit, editData])
 
 const getTunisDate = () => {
@@ -1046,30 +1073,29 @@ return (
       <h4>👥 الأطراف</h4>
       <span>بيانات الشاكي والمظنون فيه</span>
     </div>
+{/* 👤 الشاكي */}
+<div className="mb-4">
+  <PersonForm
+    title="👤 الشاكي"
+    type="plaintiff"
+    formData={formData}
+    setFormData={setFormData}
+    errors={errors}
+    locations={locations || []}
+  />
+</div>
 
-      {/* 👤 الشاكي */}
-    <div className="mb-4">
-      <PersonForm
-        title="👤 الشاكي"
-        type="plaintiff"
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-        locations={locations}
-      />
-    </div>
-
-     {/* ⚠️ المظنون فيه */}
-    <div className="mb-4">
-      <PersonForm
-        title="⚠️ المظنون فيه"
-        type="suspect"
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-        locations={locations}
-      />
-    </div>
+{/* ⚠️ المظنون فيه */}
+<div className="mb-4">
+  <PersonForm
+    title="⚠️ المظنون فيه"
+    type="suspect"
+    formData={formData}
+    setFormData={setFormData}
+    errors={errors}
+    locations={locations || []}
+  />
+</div>
 
     {/* 🔘 Navigation */}
     <div className="d-flex justify-content-between align-items-center mt-4 px-2">
