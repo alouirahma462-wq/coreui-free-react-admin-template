@@ -321,7 +321,12 @@ const CaseForm = () => {
   const location = useLocation()
  const isEdit = !!id
 const safeValue = (v) => (v ? String(v).trim() : '')
-const safeDateValue = (v) => (v ? String(v).split('T')[0] : '')
+
+const safeDateValue = (v) =>
+  (v ? String(v).split('T')[0] : '')
+
+const safeArray = (arr) =>
+  Array.isArray(arr) ? arr : []
 
   // =======================
   // 🧠 FIX: move OUTSIDE render cycle (stable reference)
