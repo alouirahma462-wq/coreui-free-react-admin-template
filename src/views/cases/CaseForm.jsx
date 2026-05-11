@@ -2,13 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { supabase } from '../../supabaseClient'
 import FormWrapper from "../../components/FormWrapper"
-const getTunisDateTime = () => {
-  return new Date().toLocaleString('fr-TN', {
-    timeZone: 'Africa/Tunis',
-    dateStyle: 'short',
-    timeStyle: 'short'
-  })
-}
+
 import {
   CCard,
   CCardBody,
@@ -33,6 +27,24 @@ import {
   CToastBody,
   CFormFeedback
 } from '@coreui/react'
+
+// ✅ خليها هون
+const getTunisDateTime = () => {
+  return new Date().toLocaleString('fr-TN', {
+    timeZone: 'Africa/Tunis',
+    dateStyle: 'short',
+    timeStyle: 'short'
+  })
+}
+import {
+  courts,
+  fileTypes,
+  sources,
+  crimeCategories,
+  genders,
+  nationalities,
+  locations
+} from '../../data/caseData'
 
 // =======================
 // 🧭 Stepper Component (FIXED)
@@ -73,27 +85,27 @@ const Stepper = ({ step }) => {
   )
 }
 
-
-import {
-  courts,
-  fileTypes,
-  sources,
-  crimeCategories,
-  genders,
-  nationalities,
-  locations
-} from '../../data/caseData'
-
-// =======================
-// 🧠 أدوات مساعدة
-// =======================
-const generateCaseFileNumber = () => 'CF-' + Date.now()
-const generateRegistryNumber = () =>
-  'REG-' + Math.floor(Math.random() * 1000000)
-const getNowTimestamp = () => new Date().toISOString()
-const generateCaseId = () => 'CASE-' + Date.now()
 const PersonForm = ({ title, type, formData, setFormData, errors, locations }) => {
-  const person = formData?.[type] || {}
+
+  // =======================
+  // 🧠 SAFE PERSON (FIXED EDIT MODE BUG)
+  // =======================
+  const person = {
+    fullName: '',
+    gender: '',
+    nationality: '',
+    birthDate: '',
+    birthState: '',
+    birthDelegation: '',
+    resState: '',
+    resDelegation: '',
+    education: '',
+    job: '',
+    notes: '',
+    statement: '',
+    aiSuggestion: '',
+    ...(formData?.[type] ?? {})
+  }
 
   const birthLocation = Array.isArray(locations)
     ? locations.find(
@@ -113,11 +125,14 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
 
   const isInvalid = field => !!errors?.[field]
 
+  // =======================
+  // 🔁 SAFE UPDATE (NO STATE WIPE)
+  // =======================
   const updateField = (field, value) => {
     setFormData(prev => ({
       ...prev,
       [type]: {
-        ...(prev[type] || {}),
+        ...(prev?.[type] ?? {}),
         [field]: value
       }
     }))
@@ -134,7 +149,7 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           <CFormInput
             name={`${type}.fullName`}
             label="الاسم الكامل"
-            value={person.fullName || ''}
+            value={person.fullName ?? ''}
             invalid={isInvalid(`${type}.fullName`)}
             onChange={e => updateField('fullName', e.target.value)}
           />
@@ -148,7 +163,7 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           <CFormSelect
             name={`${type}.gender`}
             label="الجنس"
-            value={person.gender || ''}
+            value={person.gender ?? ''}
             invalid={isInvalid(`${type}.gender`)}
             onChange={e => updateField('gender', e.target.value)}
           >
@@ -168,7 +183,7 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           <CFormSelect
             name={`${type}.nationality`}
             label="الجنسية"
-            value={person.nationality || ''}
+            value={person.nationality ?? ''}
             invalid={isInvalid(`${type}.nationality`)}
             onChange={e => updateField('nationality', e.target.value)}
           >
@@ -189,7 +204,7 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
             type="date"
             name={`${type}.birthDate`}
             label="تاريخ الولادة"
-            value={person.birthDate || ''}
+            value={person.birthDate ?? ''}
             invalid={isInvalid(`${type}.birthDate`)}
             onChange={e => updateField('birthDate', e.target.value)}
           />
@@ -200,7 +215,7 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           <CFormSelect
             name={`${type}.birthState`}
             label="ولاية الولادة"
-            value={person.birthState || ''}
+            value={person.birthState ?? ''}
             invalid={isInvalid(`${type}.birthState`)}
             onChange={e => updateField('birthState', e.target.value)}
           >
@@ -218,7 +233,7 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           <CFormSelect
             name={`${type}.birthDelegation`}
             label="معتمدية الولادة"
-            value={person.birthDelegation || ''}
+            value={person.birthDelegation ?? ''}
             invalid={isInvalid(`${type}.birthDelegation`)}
             onChange={e => updateField('birthDelegation', e.target.value)}
           >
@@ -234,7 +249,7 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           <CFormSelect
             name={`${type}.resState`}
             label="ولاية السكن"
-            value={person.resState || ''}
+            value={person.resState ?? ''}
             invalid={isInvalid(`${type}.resState`)}
             onChange={e => updateField('resState', e.target.value)}
           >
@@ -252,7 +267,7 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           <CFormSelect
             name={`${type}.resDelegation`}
             label="معتمدية السكن"
-            value={person.resDelegation || ''}
+            value={person.resDelegation ?? ''}
             invalid={isInvalid(`${type}.resDelegation`)}
             onChange={e => updateField('resDelegation', e.target.value)}
           >
@@ -268,7 +283,7 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           <CFormInput
             name={`${type}.education`}
             label="المستوى التعليمي"
-            value={person.education || ''}
+            value={person.education ?? ''}
             onChange={e => updateField('education', e.target.value)}
           />
         </CCol>
@@ -278,7 +293,7 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           <CFormInput
             name={`${type}.job`}
             label="المهنة"
-            value={person.job || ''}
+            value={person.job ?? ''}
             onChange={e => updateField('job', e.target.value)}
           />
         </CCol>
@@ -288,7 +303,7 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           <CFormTextarea
             name={`${type}.notes`}
             label="ملاحظات"
-            value={person.notes || ''}
+            value={person.notes ?? ''}
             onChange={e => updateField('notes', e.target.value)}
           />
         </CCol>
@@ -298,7 +313,7 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           <CFormTextarea
             name={`${type}.statement`}
             label="الإفادة"
-            value={person.statement || ''}
+            value={person.statement ?? ''}
             onChange={e => updateField('statement', e.target.value)}
           />
         </CCol>
@@ -308,7 +323,7 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
           <CFormTextarea
             name={`${type}.aiSuggestion`}
             label="اقتراحات الذكاء الاصطناعي"
-            value={person.aiSuggestion || ''}
+            value={person.aiSuggestion ?? ''}
             onChange={e => updateField('aiSuggestion', e.target.value)}
           />
         </CCol>
@@ -318,12 +333,40 @@ const PersonForm = ({ title, type, formData, setFormData, errors, locations }) =
   )
 }
 // =======================
-// 🧾 CaseForm
+// 🧾 CaseForm (FIXED EDIT MODE)
 // =======================
 const CaseForm = () => {
   const navigate = useNavigate()
   const { id } = useParams()
   const location = useLocation()
+
+  const isEdit = !!id
+
+  // ✅ لازم يكون موجود قبل أي useEffect
+  const initialFormState = {
+    court: '',
+    fileType: '',
+    source: '',
+    fileDate: '',
+    clerk: '',
+    notes: '',
+    documents: '',
+    subject: '',
+    crimeType: '',
+    crimePlace: '',
+    crimeDate: '',
+    summary: '',
+    aiSuggestion: '',
+    status: '',
+    statusReason: '',
+    decisionText: '',
+    decisionDate: '',
+    lawText: '',
+    plaintiff: {},
+    suspect: {}
+  }
+
+  const [formData, setFormData] = useState(initialFormState)
 
   const [editData, setEditData] = useState(null)
   const [step, setStep] = useState(1)
@@ -331,15 +374,17 @@ const CaseForm = () => {
 
   const timerRef = useRef(null)
 
-  const isEdit = !!id
-
+  // =======================
+  // 🆔 Case ID SAFE
+  // =======================
   const caseId = useMemo(() => {
-  if (isEdit && editData?.case_id) {
-    return editData.case_id
-  }
-  return 'CASE-' + Date.now()
-}, [isEdit, editData])
+    if (isEdit && editData?.case_id) return editData.case_id
+    return 'CASE-' + Date.now()
+  }, [isEdit, editData])
 
+  // =======================
+  // 📥 LOAD CASE (FIXED MERGE)
+  // =======================
   useEffect(() => {
     const loadCase = async () => {
       if (!id) return
@@ -352,7 +397,14 @@ const CaseForm = () => {
 
       if (data && !error) {
         setEditData(data)
-        setFormData(data)
+
+        // ✅ مهم جداً: merge مش overwrite
+        setFormData({
+          ...initialFormState,
+          ...data,
+          plaintiff: data?.plaintiff || {},
+          suspect: data?.suspect || {}
+        })
       }
     }
 
@@ -361,8 +413,17 @@ const CaseForm = () => {
 
   const isInvalid = field => !!errors?.[field]
 
-const validateStep = (step, formData) => {
+// =========================
+// VALIDATION FIXED (STABLE)
+// =========================
+const validateStep = (step, formData = {}) => {
   const validationErrors = {}
+
+  // Helper: safe check (prevents undefined / null issues)
+  const isEmpty = (v) =>
+    v === undefined ||
+    v === null ||
+    (typeof v === 'string' && v.trim() === '')
 
   // =========================
   // STEP 1
@@ -379,7 +440,9 @@ const validateStep = (step, formData) => {
     }
 
     Object.entries(requiredFields).forEach(([field, msg]) => {
-      if (!formData?.[field]) validationErrors[field] = msg
+      if (isEmpty(formData?.[field])) {
+        validationErrors[field] = msg
+      }
     })
   }
 
@@ -397,12 +460,14 @@ const validateStep = (step, formData) => {
     }
 
     Object.entries(requiredFields).forEach(([field, msg]) => {
-      if (!formData?.[field]) validationErrors[field] = msg
+      if (isEmpty(formData?.[field])) {
+        validationErrors[field] = msg
+      }
     })
   }
 
   // =========================
-  // STEP 3
+  // STEP 3 (PERSON FIXED)
   // =========================
   if (step === 3) {
     const checkPerson = (p = {}, key) => {
@@ -422,10 +487,15 @@ const validateStep = (step, formData) => {
       }
 
       Object.entries(required).forEach(([field, msg]) => {
-        if (!p?.[field]) validationErrors[`${key}.${field}`] = msg
+        const value = p?.[field]
+
+        if (isEmpty(value)) {
+          validationErrors[`${key}.${field}`] = msg
+        }
       })
     }
 
+    // 🔥 IMPORTANT FIX: ensure objects always exist
     checkPerson(formData?.plaintiff || {}, "plaintiff")
     checkPerson(formData?.suspect || {}, "suspect")
   }
@@ -443,7 +513,9 @@ const validateStep = (step, formData) => {
     }
 
     Object.entries(requiredFields).forEach(([field, msg]) => {
-      if (!formData?.[field]) validationErrors[field] = msg
+      if (isEmpty(formData?.[field])) {
+        validationErrors[field] = msg
+      }
     })
   }
 
@@ -471,32 +543,46 @@ const handleNext = (nextStep) => {
   setStep(nextStep)
   window.scrollTo({ top: 0, behavior: "smooth" })
 }
+
+
 // =======================
-// ✅ STATES (FIXED)
+// ✅ STATES (FIXED SAFE EDIT MODE)
 // =======================
 const [showSuccessModal, setShowSuccessModal] = useState(false)
 const [caseFileNumber, setCaseFileNumber] = useState('')
 const [registryNumber, setRegistryNumber] = useState('')
 
 const initializedRef = useRef(false)
-useEffect(() => {
-  if (isEdit && editData) {
-    setCaseFileNumber(editData.security_files || '')
-    setRegistryNumber(editData.registrations || '')
 
-    setFormData({
+useEffect(() => {
+  // ❌ منع إعادة التهيئة كل مرة
+  if (initializedRef.current) return
+
+  if (id && editData) {
+    // 🧠 EDIT MODE (SAFE MERGE - ما يكسر الحقول)
+    setFormData(prev => ({
       ...initialFormState,
+      ...prev,
       ...editData,
       plaintiff: editData?.plaintiff || {},
       suspect: editData?.suspect || {}
-    })
+    }))
+
+    setCaseFileNumber(editData?.security_files || '')
+    setRegistryNumber(editData?.registrations || '')
+
+    initializedRef.current = true
+    return
   }
 
-  if (!isEdit) {
+  // 🆕 CREATE MODE فقط أول مرة
+  if (!id) {
     setCaseFileNumber(generateCaseFileNumber())
     setRegistryNumber(generateRegistryNumber())
+    initializedRef.current = true
   }
-}, [isEdit, editData])
+
+}, [id, editData])
 
 const getTunisDate = () => {
   return new Date().toLocaleDateString('en-CA', {
@@ -507,7 +593,8 @@ const getTunisDate = () => {
 const [toastVisible, setToastVisible] = useState(false)
 const [toastMessage, setToastMessage] = useState('')
 
-const initialFormState = {
+// 🧠 مهم: نخلي initial state ثابت (ما يعادش يتخلق كل render)
+const initialFormState = useMemo(() => ({
   court: '',
   fileType: '',
   source: '',
@@ -528,70 +615,88 @@ const initialFormState = {
   lawText: '',
   plaintiff: {},
   suspect: {}
-}
+}), [])
 
-const [formData, setFormData] = useState(initialFormState)
-
-
-// =======================
-// ✅ helper validation
-// =======================
-const fieldProps = field => ({
-  invalid: !!errors?.[field]
-})
-
+// 🧠 state الرئيسي
+const [formData, setFormData] = useState(() => initialFormState)
 
 // =======================
-// 🧠 EDIT MODE SAFE LOAD
+// 🧠 EDIT MODE SAFE LOAD (FIXED)
 // =======================
 useEffect(() => {
   if (!isEdit || !editData) return
 
-  setFormData(prev => ({
+  setFormData(() => ({
     ...initialFormState,
     ...editData,
-    plaintiff: editData?.plaintiff || {},
-    suspect: editData?.suspect || {}
+
+    // 🛑 مهم جداً: ضمان عدم كسر nested objects
+    plaintiff: {
+      ...initialFormState.plaintiff,
+      ...(editData.plaintiff || {})
+    },
+
+    suspect: {
+      ...initialFormState.suspect,
+      ...(editData.suspect || {})
+    }
   }))
 }, [isEdit, editData])
 
-
 // =======================
-// 💾 SAVE (FIXED)
+// 💾 SAVE (FIXED + SAFE)
 // =======================
 const handleSave = async () => {
   try {
     const plaintiff = formData?.plaintiff || {}
     const suspect = formData?.suspect || {}
 
-const normalizedCase = {
-  case_id: caseId,
-  court: formData.court,
-  source: formData.source,
-  file_type: formData.fileType,
-  file_date: formData.fileDate,
+    const normalizedCase = {
+      case_id: caseId,
 
-  clerk: formData.clerk,
-  notes: formData.notes,
-  documents: formData.documents,
+      // 🧠 بيانات أساسية
+      court: formData.court,
+      source: formData.source,
+      file_type: formData.fileType,
+      file_date: formData.fileDate,
+      clerk: formData.clerk,
+      notes: formData.notes,
+      documents: formData.documents,
 
-  subject: formData.subject,
-  crime_type: formData.crimeType,
-  crime_place: formData.crimePlace,
-  crime_date: formData.crimeDate,
+      // 🧠 الواقعة
+      subject: formData.subject,
+      crime_type: formData.crimeType,
+      crime_place: formData.crimePlace,
+      crime_date: formData.crimeDate,
+      summary: formData.summary,
+      ai_suggestion: formData.aiSuggestion,
 
-  summary: formData.summary,
-  ai_suggestion: formData.aiSuggestion,
+      // 👥 الأطراف (مهم: نعمل spread للحماية)
+      plaintiff: {
+        ...plaintiff
+      },
+      suspect: {
+        ...suspect
+      },
 
-  plaintiff: formData.plaintiff,
-  suspect: formData.suspect,
+      // 📁 أرقام ثابتة (ما تتبدل في edit)
+      security_files: caseFileNumber,
+      registrations: registryNumber,
 
-  security_files: caseFileNumber,
-  registrations: registryNumber,
+      // ⚖️ القرار
+      status: formData.status,
+      status_reason: formData.statusReason,
+      decision_text: formData.decisionText,
+      decision_date: formData.decisionDate,
+      law_text: formData.lawText,
 
-  created_at: isEdit ? editData?.created_at : new Date().toISOString(),
-  last_update: new Date().toISOString()
-}
+      // 🕒 timestamps
+      created_at: isEdit
+        ? editData?.created_at
+        : new Date().toISOString(),
+
+      last_update: new Date().toISOString()
+    }
 
     const { error } = isEdit
       ? await supabase
@@ -615,20 +720,20 @@ const normalizedCase = {
         : '✅ تم حفظ القضية بنجاح'
     )
 
-    setShowSuccessModal(true)
+setShowSuccessModal(true)
 
-    setTimeout(() => {
-      setShowSuccessModal(false)
-      navigate('/cases')
-    }, 2000)
-
+setTimeout(() => {
+  navigate('/cases')
+}, 2000)
   } catch (err) {
     console.error(err)
     setToastMessage('❌ خطأ غير متوقع')
     setToastVisible(true)
   }
 }
+
 const tunisTime = getTunisDateTime()
+
 return (
   <FormWrapper>
     <div className="form-bg">
@@ -654,225 +759,216 @@ return (
               </div>
             </div>
 
-         {step === 1 && (
-  <div className="filter-box mb-4">
+            {step === 1 && (
+              <div className="filter-box mb-4">
 
-    {/* 🧾 عنوان المرحلة */}
-    <div className="form-header">
-      <h4>📁 بيانات الملف</h4>
-      <span>المحكمة + مصدر الملف + المعلومات الأساسية</span>
-    </div>
+                <div className="form-header">
+                  <h4>📁 بيانات الملف</h4>
+                  <span>المحكمة + مصدر الملف + المعلومات الأساسية</span>
+                </div>
 
-    <CForm>
-      <CRow className="g-3">
+                <CForm>
+                  <CRow className="g-3">
 
-        {/* المحكمة */}
-        <CCol xs={12} md={6}>
-          <CFormSelect
-            name="court"
-            label="المحكمة"
-            value={formData.court ?? ''}
-            invalid={!!errors?.court}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                court: e.target.value
-              }))
-            }
-          >
-            <option value="">-- اختر --</option>
-            {courts?.map((c, i) => (
-              <option key={i} value={c}>
-                {c}
-              </option>
-            ))}
-          </CFormSelect>
+                    {/* المحكمة */}
+                    <CCol xs={12} md={6}>
+                      <CFormSelect
+                        name="court"
+                        label="المحكمة"
+                        value={formData.court || ''}
+                        invalid={!!errors?.court}
+                        onChange={(e) =>
+                          setFormData(prev => ({
+                            ...prev,
+                            court: e.target.value
+                          }))
+                        }
+                      >
+                        <option value="">-- اختر --</option>
+                        {courts?.map((c, i) => (
+                          <option key={i} value={c}>{c}</option>
+                        ))}
+                      </CFormSelect>
 
-          <CFormFeedback invalid>
-            ❌ {errors?.court}
-          </CFormFeedback>
-        </CCol>
+                      <CFormFeedback invalid>
+                        ❌ {errors?.court}
+                      </CFormFeedback>
+                    </CCol>
 
-        {/* عدد الملف الأمني */}
-        <CCol xs={12} md={6}>
-          <CFormInput
-            name="caseFileNumber"
-            label="عدد الملف الأمني"
-            value={caseFileNumber || ''}
-            readOnly
-          />
-        </CCol>
+                    {/* عدد الملف الأمني */}
+                    <CCol xs={12} md={6}>
+                      <CFormInput
+                        name="caseFileNumber"
+                        label="عدد الملف الأمني"
+                        value={caseFileNumber || ''}
+                        readOnly
+                      />
+                    </CCol>
 
-        {/* مصدر الملف */}
-        <CCol xs={12} md={6}>
-          <CFormSelect
-            name="source"
-            label="مصدر الملف"
-            value={formData.source ?? ''}
-            invalid={!!errors?.source}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                source: e.target.value
-              }))
-            }
-          >
-            <option value="">-- اختر --</option>
-            {sources?.map((s, i) => (
-              <option key={i} value={s}>
-                {s}
-              </option>
-            ))}
-          </CFormSelect>
+                    {/* مصدر الملف */}
+                    <CCol xs={12} md={6}>
+                      <CFormSelect
+                        name="source"
+                        label="مصدر الملف"
+                        value={formData.source || ''}
+                        invalid={!!errors?.source}
+                        onChange={(e) =>
+                          setFormData(prev => ({
+                            ...prev,
+                            source: e.target.value
+                          }))
+                        }
+                      >
+                        <option value="">-- اختر --</option>
+                        {sources?.map((s, i) => (
+                          <option key={i} value={s}>{s}</option>
+                        ))}
+                      </CFormSelect>
 
-          <CFormFeedback invalid>
-            ❌ {errors?.source}
-          </CFormFeedback>
-        </CCol>
+                      <CFormFeedback invalid>
+                        ❌ {errors?.source}
+                      </CFormFeedback>
+                    </CCol>
 
-        {/* نوع الملف */}
-        <CCol xs={12} md={6}>
-          <CFormSelect
-            name="fileType"
-            label="نوع الملف"
-            value={formData.fileType ?? ''}
-            invalid={!!errors?.fileType}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                fileType: e.target.value
-              }))
-            }
-          >
-            <option value="">-- اختر --</option>
-            {fileTypes?.map((t, i) => (
-              <option key={i} value={t}>
-                {t}
-              </option>
-            ))}
-          </CFormSelect>
+                    {/* نوع الملف */}
+                    <CCol xs={12} md={6}>
+                      <CFormSelect
+                        name="fileType"
+                        label="نوع الملف"
+                        value={formData.fileType || ''}
+                        invalid={!!errors?.fileType}
+                        onChange={(e) =>
+                          setFormData(prev => ({
+                            ...prev,
+                            fileType: e.target.value
+                          }))
+                        }
+                      >
+                        <option value="">-- اختر --</option>
+                        {fileTypes?.map((t, i) => (
+                          <option key={i} value={t}>{t}</option>
+                        ))}
+                      </CFormSelect>
 
-          <CFormFeedback invalid>
-            ❌ {errors?.fileType}
-          </CFormFeedback>
-        </CCol>
+                      <CFormFeedback invalid>
+                        ❌ {errors?.fileType}
+                      </CFormFeedback>
+                    </CCol>
 
-        {/* تاريخ الملف */}
-        <CCol xs={12} md={6}>
-          <CFormInput
-            name="fileDate"
-            type="date"
-            label="تاريخ الملف"
-            value={formData.fileDate ?? ''}
-            invalid={!!errors?.fileDate}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                fileDate: e.target.value
-              }))
-            }
-          />
+                    {/* تاريخ الملف */}
+                    <CCol xs={12} md={6}>
+                      <CFormInput
+                        name="fileDate"
+                        type="date"
+                        label="تاريخ الملف"
+                        value={formData.fileDate || ''}
+                        invalid={!!errors?.fileDate}
+                        onChange={(e) =>
+                          setFormData(prev => ({
+                            ...prev,
+                            fileDate: e.target.value
+                          }))
+                        }
+                      />
 
-          <CFormFeedback invalid>
-            ❌ {errors?.fileDate}
-          </CFormFeedback>
-        </CCol>
+                      <CFormFeedback invalid>
+                        ❌ {errors?.fileDate}
+                      </CFormFeedback>
+                    </CCol>
 
-        {/* عدد التسجيل */}
-        <CCol xs={12} md={6}>
-          <CFormInput
-            name="registryNumber"
-            label="عدد التسجيل"
-            value={registryNumber || ''}
-            readOnly
-          />
-        </CCol>
+                    {/* عدد التسجيل */}
+                    <CCol xs={12} md={6}>
+                      <CFormInput
+                        name="registryNumber"
+                        label="عدد التسجيل"
+                        value={registryNumber || ''}
+                        readOnly
+                      />
+                    </CCol>
 
-        {/* وقت تونس */}
-        <CCol xs={12} md={6}>
-          <CFormInput
-            name="tunisTime"
-            label="تاريخ ووقت التلقي"
-            value={tunisTime}
-            readOnly
-          />
-        </CCol>
+                    {/* وقت تونس */}
+                    <CCol xs={12} md={6}>
+                      <CFormInput
+                        name="tunisTime"
+                        label="تاريخ ووقت التلقي"
+                        value={tunisTime}
+                        readOnly
+                      />
+                    </CCol>
 
-        {/* كاتب الضبط */}
-        <CCol xs={12} md={6}>
-          <CFormInput
-            name="clerk"
-            label="كاتب الضبط"
-            value={formData.clerk ?? ''}
-            invalid={!!errors?.clerk}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                clerk: e.target.value
-              }))
-            }
-          />
+                    {/* كاتب الضبط */}
+                    <CCol xs={12} md={6}>
+                      <CFormInput
+                        name="clerk"
+                        label="كاتب الضبط"
+                        value={formData.clerk || ''}
+                        invalid={!!errors?.clerk}
+                        onChange={(e) =>
+                          setFormData(prev => ({
+                            ...prev,
+                            clerk: e.target.value
+                          }))
+                        }
+                      />
 
-          <CFormFeedback invalid>
-            ❌ {errors?.clerk}
-          </CFormFeedback>
-        </CCol>
+                      <CFormFeedback invalid>
+                        ❌ {errors?.clerk}
+                      </CFormFeedback>
+                    </CCol>
 
-        {/* الملاحظات */}
-        <CCol xs={12} md={6}>
-          <CFormTextarea
-            name="notes"
-            label="ملاحظات"
-            value={formData.notes ?? ''}
-            invalid={!!errors?.notes}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                notes: e.target.value
-              }))
-            }
-          />
+                    {/* الملاحظات */}
+                    <CCol xs={12} md={6}>
+                      <CFormTextarea
+                        name="notes"
+                        label="ملاحظات"
+                        value={formData.notes || ''}
+                        invalid={!!errors?.notes}
+                        onChange={(e) =>
+                          setFormData(prev => ({
+                            ...prev,
+                            notes: e.target.value
+                          }))
+                        }
+                      />
 
-          <CFormFeedback invalid>
-            ❌ {errors?.notes}
-          </CFormFeedback>
-        </CCol>
+                      <CFormFeedback invalid>
+                        ❌ {errors?.notes}
+                      </CFormFeedback>
+                    </CCol>
 
-        {/* الوثائق */}
-        <CCol xs={12} md={6}>
-          <CFormTextarea
-            name="documents"
-            label="الوثائق المصاحبة"
-            value={formData.documents ?? ''}
-            invalid={!!errors?.documents}
-            onChange={(e) =>
-              setFormData(prev => ({
-                ...prev,
-                documents: e.target.value
-              }))
-            }
-          />
+                    {/* الوثائق */}
+                    <CCol xs={12} md={6}>
+                      <CFormTextarea
+                        name="documents"
+                        label="الوثائق المصاحبة"
+                        value={formData.documents || ''}
+                        invalid={!!errors?.documents}
+                        onChange={(e) =>
+                          setFormData(prev => ({
+                            ...prev,
+                            documents: e.target.value
+                          }))
+                        }
+                      />
 
-          <CFormFeedback invalid>
-            ❌ {errors?.documents}
-          </CFormFeedback>
-        </CCol>
+                      <CFormFeedback invalid>
+                        ❌ {errors?.documents}
+                      </CFormFeedback>
+                    </CCol>
 
-      </CRow>
-    </CForm>
+                  </CRow>
+                </CForm>
 
-    {/* 🔘 Navigation */}
-    <div className="d-flex justify-content-end mt-4">
-      <CButton
-        color="primary"
-        onClick={() => handleNext(2)}
-      >
-        التالي ➡
-      </CButton>
-    </div>
+                {/* Navigation */}
+                <div className="d-flex justify-content-end mt-4">
+                  <CButton color="primary" onClick={() => handleNext(2)}>
+                    التالي ➡
+                  </CButton>
+                </div>
 
-  </div>
-)}
+              </div>
+            )}
+
 {step === 2 && (
   <div className="filter-box mb-4">
 
@@ -890,7 +986,7 @@ return (
           <CFormInput
             name="subject"
             label="الموضوع"
-            value={formData.subject ?? ''}
+            value={formData.subject || ''}
             invalid={!!errors?.subject}
             onChange={(e) =>
               setFormData(prev => ({
@@ -904,12 +1000,12 @@ return (
           </CFormFeedback>
         </CCol>
 
-        {/* التصنيف الجرمي (SELECT FIXED) */}
+        {/* التصنيف الجرمي */}
         <CCol xs={12} md={6}>
           <CFormSelect
             name="crimeType"
             label="التصنيف الجرمي"
-            value={formData.crimeType ?? ''}
+            value={formData.crimeType || ''}
             invalid={!!errors?.crimeType}
             onChange={(e) =>
               setFormData(prev => ({
@@ -920,15 +1016,17 @@ return (
           >
             <option value="">-- اختر --</option>
 
-            {crimeCategories?.map((cat, i) => (
-              <optgroup key={i} label={cat.label}>
-                {cat.options?.map((o, j) => (
-                  <option key={j} value={o}>
-                    {o}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
+            {Array.isArray(crimeCategories) &&
+              crimeCategories.map((cat, i) => (
+                <optgroup key={i} label={cat?.label || ''}>
+                  {Array.isArray(cat?.options) &&
+                    cat.options.map((o, j) => (
+                      <option key={j} value={o}>
+                        {o}
+                      </option>
+                    ))}
+                </optgroup>
+              ))}
           </CFormSelect>
 
           <CFormFeedback invalid>
@@ -941,7 +1039,7 @@ return (
           <CFormInput
             name="crimePlace"
             label="مكان الواقعة"
-            value={formData.crimePlace ?? ''}
+            value={formData.crimePlace || ''}
             invalid={!!errors?.crimePlace}
             onChange={(e) =>
               setFormData(prev => ({
@@ -961,7 +1059,7 @@ return (
             name="crimeDate"
             type="date"
             label="تاريخ الواقعة"
-            value={formData.crimeDate ?? ''}
+            value={formData.crimeDate || ''}
             invalid={!!errors?.crimeDate}
             onChange={(e) =>
               setFormData(prev => ({
@@ -980,7 +1078,7 @@ return (
           <CFormTextarea
             name="summary"
             label="ملخص الوقائع"
-            value={formData.summary ?? ''}
+            value={formData.summary || ''}
             invalid={!!errors?.summary}
             onChange={(e) =>
               setFormData(prev => ({
@@ -999,7 +1097,7 @@ return (
           <CFormTextarea
             name="aiSuggestion"
             label="اقتراح الذكاء الاصطناعي"
-            value={formData.aiSuggestion ?? ''}
+            value={formData.aiSuggestion || ''}
             invalid={!!errors?.aiSuggestion}
             onChange={(e) =>
               setFormData(prev => ({
@@ -1029,7 +1127,6 @@ return (
 
   </div>
 )}
-  
 {step === 3 && (
   <div>
 
@@ -1038,29 +1135,30 @@ return (
       <h4>👥 الأطراف</h4>
       <span>بيانات الشاكي والمظنون فيه</span>
     </div>
-{/* 👤 الشاكي */}
-<div className="mb-4">
-  <PersonForm
-    title="👤 الشاكي"
-    type="plaintiff"
-    formData={formData}
-    setFormData={setFormData}
-    errors={errors}
-    locations={locations || []}
-  />
-</div>
 
-{/* ⚠️ المظنون فيه */}
-<div className="mb-4">
-  <PersonForm
-    title="⚠️ المظنون فيه"
-    type="suspect"
-    formData={formData}
-    setFormData={setFormData}
-    errors={errors}
-    locations={locations || []}
-  />
-</div>
+    {/* 👤 الشاكي */}
+    <div className="mb-4">
+      <PersonForm
+        title="👤 الشاكي"
+        type="plaintiff"
+        formData={formData || {}}
+        setFormData={setFormData}
+        errors={errors || {}}
+        locations={Array.isArray(locations) ? locations : []}
+      />
+    </div>
+
+    {/* ⚠️ المظنون فيه */}
+    <div className="mb-4">
+      <PersonForm
+        title="⚠️ المظنون فيه"
+        type="suspect"
+        formData={formData || {}}
+        setFormData={setFormData}
+        errors={errors || {}}
+        locations={Array.isArray(locations) ? locations : []}
+      />
+    </div>
 
     {/* 🔘 Navigation */}
     <div className="d-flex justify-content-between align-items-center mt-4 px-2">
@@ -1119,7 +1217,7 @@ return (
         {/* القرار */}
         <CFormTextarea
           name="decisionText"
-          value={formData.decisionText ?? ''}
+          value={formData?.decisionText ?? ''}
           label="نص القرار"
           invalid={!!errors?.decisionText}
           onChange={(e) =>
@@ -1137,7 +1235,7 @@ return (
         <CFormInput
           name="decisionDate"
           type="date"
-          value={formData.decisionDate ?? ''}
+          value={formData?.decisionDate ?? ''}
           label="تاريخ القرار"
           className="mt-3"
           invalid={!!errors?.decisionDate}
@@ -1155,7 +1253,7 @@ return (
         {/* النص القانوني */}
         <CFormTextarea
           name="lawText"
-          value={formData.lawText ?? ''}
+          value={formData?.lawText ?? ''}
           label="النص القانوني"
           className="mt-3"
           invalid={!!errors?.lawText}
@@ -1170,11 +1268,11 @@ return (
           ✖ {errors?.lawText}
         </CFormFeedback>
 
-        {/* حالة القضية (SELECT FIXED) */}
+        {/* حالة القضية */}
         <CFormSelect
           name="status"
           label="حالة القضية"
-          value={formData.status ?? ''}
+          value={formData?.status ?? ''}
           className="mt-3"
           invalid={!!errors?.status}
           onChange={(e) =>
@@ -1210,7 +1308,7 @@ return (
         {/* سبب الحالة */}
         <CFormTextarea
           name="statusReason"
-          value={formData.statusReason ?? ''}
+          value={formData?.statusReason ?? ''}
           label="سبب الحالة"
           className="mt-3"
           invalid={!!errors?.statusReason}
@@ -1256,7 +1354,7 @@ return (
             const firstErrorKey = Object.keys(stepErrors)[0]
 
             const el = document.querySelector(
-              `[name="${firstErrorKey}"]`
+              `[name="${CSS.escape(firstErrorKey)}"]`
             )
 
             if (el) {
@@ -1264,7 +1362,6 @@ return (
                 behavior: 'smooth',
                 block: 'center'
               })
-
               el.focus()
             }
 
@@ -1317,9 +1414,7 @@ return (
     {/* ✅ Check */}
     <div className="check-wrapper">
       <div className="check-circle">
-        <span className="check-icon">
-          ✔
-        </span>
+        <span className="check-icon">✔</span>
       </div>
     </div>
 
@@ -1340,16 +1435,15 @@ return (
   </CModalBody>
 </CModal>
 
-        </div> {/* form-container */}
+</div>
 
-      </CCardBody>
-    </CCard>
+</CCardBody>
+</CCard>
 
-  </div> {/* form-bg */}
+</div>
 
 </FormWrapper>
 )
-
 }
 
 export default CaseForm
