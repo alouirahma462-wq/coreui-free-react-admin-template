@@ -384,41 +384,54 @@ const CaseForm = () => {
 
 useEffect(() => {
   const loadCase = async () => {
-    if (!id) return
+    if (id) {
+      // =========================
+      // 🟡 EDIT MODE
+      // =========================
+      const { data, error } = await supabase
+        .from('cases')
+        .select('*')
+        .eq('id', id)
+        .single()
 
-    const { data, error } = await supabase
-      .from('cases')
-      .select('*')
-      .eq('id', id)
-      .single()
+      if (data && !error) {
+        setEditData(data)
 
-    if (data && !error) {
-      setEditData(data)
+        setFormData({
+          ...initialFormState,
+          court: data.court,
+          source: data.source,
+          fileType: data.file_type,
+          fileDate: data.file_date,
+          clerk: data.clerk,
+          notes: data.notes,
+          documents: data.documents,
+          subject: data.subject,
+          crimeType: data.crime_type,
+          crimePlace: data.crime_place,
+          crimeDate: data.crime_date,
+          summary: data.summary,
+          aiSuggestion: data.ai_suggestion,
+          status: data.status,
+          statusReason: data.status_reason,
+          decisionText: data.decision_text,
+          decisionDate: data.decision_date,
+          lawText: data.law_text,
+          plaintiff: data?.plaintiff || {},
+          suspect: data?.suspect || {}
+        })
 
-      // 👇 هنا تحط الكود الجديد
-      setFormData({
-        ...initialFormState,
-        court: data.court,
-        source: data.source,
-        fileType: data.file_type,
-        fileDate: data.file_date,
-        clerk: data.clerk,
-        notes: data.notes,
-        documents: data.documents,
-        subject: data.subject,
-        crimeType: data.crime_type,
-        crimePlace: data.crime_place,
-        crimeDate: data.crime_date,
-        summary: data.summary,
-        aiSuggestion: data.ai_suggestion,
-        status: data.status,
-        statusReason: data.status_reason,
-        decisionText: data.decision_text,
-        decisionDate: data.decision_date,
-        lawText: data.law_text,
-        plaintiff: data?.plaintiff || {},
-        suspect: data?.suspect || {}
-      })
+        // 🔥 load saved numbers
+        setCaseFileNumber(data.security_files || '')
+        setRegistryNumber(data.registrations || '')
+      }
+
+    } else {
+      // =========================
+      // 🟢 CREATE MODE
+      // =========================
+      setCaseFileNumber('CASE-' + Date.now())
+      setRegistryNumber('REG-' + Date.now())
     }
   }
 
