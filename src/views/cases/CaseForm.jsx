@@ -382,34 +382,48 @@ const CaseForm = () => {
     return 'CASE-' + Date.now()
   }, [isEdit, editData])
 
-  // =======================
-  // 📥 LOAD CASE (FIXED MERGE)
-  // =======================
-  useEffect(() => {
-    const loadCase = async () => {
-      if (!id) return
+useEffect(() => {
+  const loadCase = async () => {
+    if (!id) return
 
-      const { data, error } = await supabase
-        .from('cases')
-        .select('*')
-        .eq('id', id)
-        .single()
+    const { data, error } = await supabase
+      .from('cases')
+      .select('*')
+      .eq('id', id)
+      .single()
 
-      if (data && !error) {
-        setEditData(data)
+    if (data && !error) {
+      setEditData(data)
 
-        // ✅ مهم جداً: merge مش overwrite
-        setFormData({
-          ...initialFormState,
-          ...data,
-          plaintiff: data?.plaintiff || {},
-          suspect: data?.suspect || {}
-        })
-      }
+      // 👇 هنا تحط الكود الجديد
+      setFormData({
+        ...initialFormState,
+        court: data.court,
+        source: data.source,
+        fileType: data.file_type,
+        fileDate: data.file_date,
+        clerk: data.clerk,
+        notes: data.notes,
+        documents: data.documents,
+        subject: data.subject,
+        crimeType: data.crime_type,
+        crimePlace: data.crime_place,
+        crimeDate: data.crime_date,
+        summary: data.summary,
+        aiSuggestion: data.ai_suggestion,
+        status: data.status,
+        statusReason: data.status_reason,
+        decisionText: data.decision_text,
+        decisionDate: data.decision_date,
+        lawText: data.law_text,
+        plaintiff: data?.plaintiff || {},
+        suspect: data?.suspect || {}
+      })
     }
+  }
 
-    loadCase()
-  }, [id])
+  loadCase()
+}, [id])
 
   const isInvalid = field => !!errors?.[field]
 
@@ -553,37 +567,6 @@ const [caseFileNumber, setCaseFileNumber] = useState('')
 const [registryNumber, setRegistryNumber] = useState('')
 
 const initializedRef = useRef(false)
-
-useEffect(() => {
-  // ❌ منع إعادة التهيئة كل مرة
-  if (initializedRef.current) return
-
-  if (id && editData) {
-    // 🧠 EDIT MODE (SAFE MERGE - ما يكسر الحقول)
-    setFormData(prev => ({
-      ...initialFormState,
-      ...prev,
-      ...editData,
-      plaintiff: editData?.plaintiff || {},
-      suspect: editData?.suspect || {}
-    }))
-
-    setCaseFileNumber(editData?.security_files || '')
-    setRegistryNumber(editData?.registrations || '')
-
-    initializedRef.current = true
-    return
-  }
-
-  // 🆕 CREATE MODE فقط أول مرة
-  if (!id) {
-    setCaseFileNumber(generateCaseFileNumber())
-    setRegistryNumber(generateRegistryNumber())
-    initializedRef.current = true
-  }
-
-}, [id, editData])
-
 const getTunisDate = () => {
   return new Date().toLocaleDateString('en-CA', {
     timeZone: 'Africa/Tunis'
@@ -592,33 +575,6 @@ const getTunisDate = () => {
 
 const [toastVisible, setToastVisible] = useState(false)
 const [toastMessage, setToastMessage] = useState('')
-
-// 🧠 مهم: نخلي initial state ثابت (ما يعادش يتخلق كل render)
-const initialFormState = useMemo(() => ({
-  court: '',
-  fileType: '',
-  source: '',
-  fileDate: '',
-  clerk: '',
-  notes: '',
-  documents: '',
-  subject: '',
-  crimeType: '',
-  crimePlace: '',
-  crimeDate: '',
-  summary: '',
-  aiSuggestion: '',
-  status: '',
-  statusReason: '',
-  decisionText: '',
-  decisionDate: '',
-  lawText: '',
-  plaintiff: {},
-  suspect: {}
-}), [])
-
-// 🧠 state الرئيسي
-const [formData, setFormData] = useState(() => initialFormState)
 
 // =======================
 // 🧠 EDIT MODE SAFE LOAD (FIXED)
