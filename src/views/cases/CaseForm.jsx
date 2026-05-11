@@ -384,54 +384,58 @@ const CaseForm = () => {
 
 useEffect(() => {
   const loadCase = async () => {
-    if (id) {
-      // =========================
-      // 🟡 EDIT MODE
-      // =========================
-      const { data, error } = await supabase
-        .from('cases')
-        .select('*')
-        .eq('id', id)
-        .single()
-
-      if (data && !error) {
-        setEditData(data)
-
-        setFormData({
-          ...initialFormState,
-          court: data.court,
-          source: data.source,
-          fileType: data.file_type,
-          fileDate: data.file_date,
-          clerk: data.clerk,
-          notes: data.notes,
-          documents: data.documents,
-          subject: data.subject,
-          crimeType: data.crime_type,
-          crimePlace: data.crime_place,
-          crimeDate: data.crime_date,
-          summary: data.summary,
-          aiSuggestion: data.ai_suggestion,
-          status: data.status,
-          statusReason: data.status_reason,
-          decisionText: data.decision_text,
-          decisionDate: data.decision_date,
-          lawText: data.law_text,
-          plaintiff: data?.plaintiff || {},
-          suspect: data?.suspect || {}
-        })
-
-        // 🔥 load saved numbers
-        setCaseFileNumber(data.security_files || '')
-        setRegistryNumber(data.registrations || '')
-      }
-
-    } else {
+    if (!id) {
       // =========================
       // 🟢 CREATE MODE
       // =========================
       setCaseFileNumber('CASE-' + Date.now())
       setRegistryNumber('REG-' + Date.now())
+      return
+    }
+
+    // =========================
+    // 🟡 EDIT MODE
+    // =========================
+    const { data, error } = await supabase
+      .from('cases')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (data && !error) {
+      setEditData(data)
+
+      const safeData = {
+        court: data.court ?? '',
+        source: data.source ?? '',
+        fileType: data.file_type ?? '',
+        fileDate: data.file_date ?? '',
+        clerk: data.clerk ?? '',
+        notes: data.notes ?? '',
+        documents: data.documents ?? '',
+        subject: data.subject ?? '',
+        crimeType: data.crime_type ?? '',
+        crimePlace: data.crime_place ?? '',
+        crimeDate: data.crime_date ?? '',
+        summary: data.summary ?? '',
+        aiSuggestion: data.ai_suggestion ?? '',
+        status: data.status ?? '',
+        statusReason: data.status_reason ?? '',
+        decisionText: data.decision_text ?? '',
+        decisionDate: data.decision_date ?? '',
+        lawText: data.law_text ?? '',
+        plaintiff: data.plaintiff ?? {},
+        suspect: data.suspect ?? {}
+      }
+
+      setFormData(prev => ({
+        ...initialFormState,
+        ...prev,
+        ...safeData
+      }))
+
+      setCaseFileNumber(data.security_files || '')
+      setRegistryNumber(data.registrations || '')
     }
   }
 
@@ -692,8 +696,11 @@ const handleSave = async () => {
 setShowSuccessModal(true)
 
 setTimeout(() => {
-  navigate('/cases')
-}, 2000)
+  setShowSuccessModal(false)
+  setTimeout(() => {
+    navigate('/cases')
+  }, 300)
+}, 2200)
   } catch (err) {
     console.error(err)
     setToastMessage('❌ خطأ غير متوقع')
