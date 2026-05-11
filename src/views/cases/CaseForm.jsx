@@ -14,6 +14,7 @@ import {
   CFormTextarea,
   CButton,
   CModal,
+  CModalBody,
   CToast,
   CToastHeader,
   CToastBody,
