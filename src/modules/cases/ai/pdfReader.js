@@ -1,9 +1,10 @@
 import fs from "fs"
-import pdfParse from "pdf-parse"
+import pdf from "pdf-parse"
+import { readFileSync } from "fs"
 
 export const readLegalPDF = async (filePath) => {
-  const buffer = fs.readFileSync(filePath)
-  const data = await pdfParse(buffer)
+  const buffer = readFileSync(filePath)
+  const data = await pdf(buffer)
   return data.text
 }
 
