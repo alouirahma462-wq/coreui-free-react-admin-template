@@ -1,11 +1,13 @@
 import fs from "fs"
-import pdfParsePkg from "pdf-parse"
-
-const pdfParse = pdfParsePkg.default || pdfParsePkg
+import * as pdfParse from "pdf-parse"
 
 export const readLegalPDF = async (filePath) => {
   const buffer = fs.readFileSync(filePath)
-  const data = await pdfParse(buffer)
+
+  // pdf-parse في ESM يعطي function مباشرة غالبًا داخل default أو module object
+  const parse = pdfParse.default ?? pdfParse
+
+  const data = await parse(buffer)
   return data.text
 }
 
