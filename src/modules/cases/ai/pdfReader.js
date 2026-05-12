@@ -1,10 +1,10 @@
 import fs from "fs"
-const pdf = require("pdf-parse")
+import pdfParse from "pdf-parse"
 
 // 📄 قراءة PDF القانون
 export const readLegalPDF = async (filePath) => {
   const buffer = fs.readFileSync(filePath)
-  const data = await pdf(buffer)
+  const data = await pdfParse(buffer)
   return data.text
 }
 
