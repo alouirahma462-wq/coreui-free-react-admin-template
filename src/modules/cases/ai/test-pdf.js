@@ -1,20 +1,16 @@
-import fs from "fs"
-import pdfParse from "pdf-parse"
+import { readLegalPDF, chunkText } from "./pdfReader.js"
 
 const run = async () => {
-
-  const pdfPath =
+  const text = await readLegalPDF(
     "src/legal-library/pdf/code-penal.pdf"
+  )
 
-  const dataBuffer = fs.readFileSync(pdfPath)
+  console.log("📄 أول 500 حرف:")
+  console.log(text.slice(0, 500))
 
-  const data = await pdfParse(dataBuffer)
+  const chunks = chunkText(text)
 
-  console.log("📄 أول 1000 حرف:")
-  console.log(data.text.slice(0, 1000))
-
-  console.log("📏 طول النص:")
-  console.log(data.text.length)
+  console.log("📦 عدد الأجزاء:", chunks.length)
 }
 
 run()
