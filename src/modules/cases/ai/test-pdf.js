@@ -1,4 +1,3 @@
-cat > src/modules/cases/ai/test-pdf.js << 'EOF'
 import { readLegalPDF, chunkText } from "./pdfReader.js"
 
 const run = async () => {
@@ -15,4 +14,3 @@ const run = async () => {
 }
 
 run()
-EOF
