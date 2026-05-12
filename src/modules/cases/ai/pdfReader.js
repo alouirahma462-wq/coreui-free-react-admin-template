@@ -1,5 +1,7 @@
 import fs from "fs"
-import pdfParse from "pdf-parse"
+import pdfParsePkg from "pdf-parse"
+
+const pdfParse = pdfParsePkg.default || pdfParsePkg
 
 export const readLegalPDF = async (filePath) => {
   const buffer = fs.readFileSync(filePath)
