@@ -1,3 +1,4 @@
+cat > src/modules/cases/ai/pdfReader.js << 'EOF'
 import fs from "fs"
 import pdf from "pdf-parse"
 
@@ -14,3 +15,4 @@ export const chunkText = (text, size = 800) => {
   }
   return chunks
 }
+EOF
