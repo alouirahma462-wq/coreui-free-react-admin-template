@@ -1,6 +1,7 @@
-cat > src/modules/cases/ai/pdfReader.js << 'EOF'
 import fs from "fs"
-import pdf from "pdf-parse"
+import pkg from "pdf-parse"
+
+const pdf = pkg
 
 export const readLegalPDF = async (filePath) => {
   const buffer = fs.readFileSync(filePath)
@@ -15,4 +16,3 @@ export const chunkText = (text, size = 800) => {
   }
   return chunks
 }
-EOF
