@@ -1,5 +1,5 @@
 import fs from "fs"
-import pdf from "pdf-parse"
+const pdf = require("pdf-parse")
 
 // 📄 قراءة PDF القانون
 export const readLegalPDF = async (filePath) => {
