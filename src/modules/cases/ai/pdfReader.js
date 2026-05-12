@@ -1,13 +1,12 @@
 import fs from "fs"
-import * as pdfParse from "pdf-parse"
+import { createRequire } from "module"
+
+const require = createRequire(import.meta.url)
+const pdfParse = require("pdf-parse")
 
 export const readLegalPDF = async (filePath) => {
   const buffer = fs.readFileSync(filePath)
-
-  // pdf-parse في ESM يعطي function مباشرة غالبًا داخل default أو module object
-  const parse = pdfParse.default ?? pdfParse
-
-  const data = await parse(buffer)
+  const data = await pdfParse(buffer)
   return data.text
 }
 
