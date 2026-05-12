@@ -1,4 +1,4 @@
-import { readLegalPDF, chunkText } from "./pdfReader"
+const { readLegalPDF, chunkText } = require("./pdfReader")
 
 const run = async () => {
   const text = await readLegalPDF(
