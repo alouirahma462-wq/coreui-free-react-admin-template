@@ -11,8 +11,7 @@ export const readLegalPDF = async (filePath) => {
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i)
     const content = await page.getTextContent()
-    const strings = content.items.map(item => item.str).join(" ")
-    text += strings + "\n"
+    text += content.items.map(i => i.str).join(" ") + "\n"
   }
 
   return text
