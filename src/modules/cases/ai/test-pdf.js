@@ -1,5 +1,5 @@
-const fs = require("fs")
-const pdfParse = require("pdf-parse")
+import fs from "fs"
+import pdfParse from "pdf-parse"
 
 const run = async () => {
 
