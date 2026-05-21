@@ -1,9 +1,16 @@
-import { runJudge } from "./src/modules/cases/ai/engine/judgeEngine.js"
+import { createEmbedding } from "../rag/embeddings.js"
 
-const caseText = `
-تم الاعتداء على شخص وأخذ هاتفه بالقوة في الطريق العام مع وجود شهود وكاميرا
-`
+const run = async () => {
 
-const result = await runJudge(caseText)
+  const text = `
+  تم الاعتداء على شخص وسرقة هاتفه باستعمال العنف
+  `
 
-console.log(result)
+  const embedding = await createEmbedding(text)
+
+  console.log(embedding.length)
+
+  console.log(embedding.slice(0, 10))
+}
+
+run()
