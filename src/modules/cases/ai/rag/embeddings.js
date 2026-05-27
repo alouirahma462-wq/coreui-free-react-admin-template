@@ -1,4 +1,4 @@
-import { openai } from "../../client.js"
+import { openai } from "../client.js"
 
 // 🧠 تحويل النص إلى vector
 export const createEmbedding = async (text) => {
