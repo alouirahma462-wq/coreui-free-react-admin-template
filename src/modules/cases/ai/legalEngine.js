@@ -1,4 +1,4 @@
-import { openai } from "./client.js"
+import { openai } from "../client.js"
 
 export const legalEngine = async (caseText, articles) => {
 
