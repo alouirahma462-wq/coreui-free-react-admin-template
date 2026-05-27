@@ -1,16 +1,9 @@
-import { createEmbedding } from "../rag/embeddings.js"
+import { runLegalAI } from "../runLegalAI.js"
 
-const run = async () => {
+const caseText = `
+تم الاعتداء على شخص في الشارع وأخذ هاتفه بالقوة مع وجود شهود.
+`
 
-  const text = `
-  تم الاعتداء على شخص وسرقة هاتفه باستعمال العنف
-  `
+const result = await runLegalAI(caseText)
 
-  const embedding = await createEmbedding(text)
-
-  console.log(embedding.length)
-
-  console.log(embedding.slice(0, 10))
-}
-
-run()
+console.log(JSON.stringify(result, null, 2))
