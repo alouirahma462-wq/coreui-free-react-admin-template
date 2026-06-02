@@ -8,7 +8,7 @@ export const runLegalAI = async (caseText) => {
   try {
 
     // 🧠 1. تحليل المحضر (NLP)
-    const parsedCase = caseParser(caseText)
+   const parsedCase = parseCase(caseText)
 
     // 📚 2. البحث في القانون (RAG)
     const articles = await searchLaw(caseText)
