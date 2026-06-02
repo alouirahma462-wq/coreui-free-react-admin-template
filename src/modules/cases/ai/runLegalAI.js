@@ -23,7 +23,7 @@ export const runLegalAI = async (caseText) => {
     const legalAnalysis = await legalEngine(caseText, relevantArticles)
 
     // 📊 5. استخراج الحكم ونسبة الإدانة
-    const judgment = await judgeEngine(caseText, legalAnalysis)
+ const judgment = await judgeEngine(caseText, legalAnalysis)
 
     // 🧾 6. النتيجة النهائية
     return {
