@@ -1,5 +1,5 @@
 import { parseCase } from "./nlp/caseParser.js"
-import { searchLaw } from "./rag/lawSearch.js"
+import { searchRelevantArticles } from "./rag/lawSearch.js"
 import { legalEngine } from "./legalEngine.js"
 import { judgeEngine } from "./engine/judgeEngine.js"
 
