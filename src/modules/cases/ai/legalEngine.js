@@ -1,4 +1,4 @@
-import { openai } from "./client.js"
+import { ai } from "./client.js"
 
 export const legalEngine = async (caseText, articles) => {
 
@@ -7,14 +7,7 @@ export const legalEngine = async (caseText, articles) => {
     .map(a => a.text)
     .join("\n\n====================\n\n")
 
-  const res = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    temperature: 0.2,
-
-    messages: [
-      {
-        role: "system",
-        content: `
+  const prompt = `
 أنت قاضٍ تونسي خبير في القانون الجزائي التونسي ومحلل قضائي عالي المستوى.
 
 تعمل كمساعد قاضي/نيابة تحقيق.
@@ -30,12 +23,7 @@ export const legalEngine = async (caseText, articles) => {
 - ناقش وجود الشك المعقول.
 - استخدم reasoning قانوني تحليلي وليس سردي فقط.
 - يجب أن يكون الرد تقريراً قضائياً رسمياً مفصلاً جداً.
-        `
-      },
 
-      {
-        role: "user",
-        content: `
 🧾 القضية:
 ${caseText}
 
@@ -130,10 +118,10 @@ ${context}
 - النتيجة النهائية
 - مدى ثبوت الجريمة
 - الرأي القضائي النهائي
-        `
-      }
-    ]
-  })
+  `
 
-  return res.choices[0].message.content
+  const result = await ai.generateContent(prompt)
+  const response = await result.response
+
+  return response.text()
 }
