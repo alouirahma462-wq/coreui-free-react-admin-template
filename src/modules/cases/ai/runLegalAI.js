@@ -1,4 +1,4 @@
-import { caseParser } from "./nlp/caseParser.js"
+import { parseCase } from "./nlp/caseParser.js"
 import { searchLaw } from "./rag/lawSearch.js"
 import { legalEngine } from "./legalEngine.js"
 import { judgeEngine } from "./engine/judgeEngine.js"
