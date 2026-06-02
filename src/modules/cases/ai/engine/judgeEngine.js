@@ -3,7 +3,7 @@ import { extractArticles } from "../rag/articleExtractor.js"
 import { searchRelevantArticles } from "../rag/lawSearch.js"
 import { legalEngine } from "../legalEngine.js"
 
-export const runJudge = async (caseText) => {
+export const judgeEngine = async (caseText) => {
 
   const lawText = loadAllLaws()
   const articles = extractArticles(lawText)
