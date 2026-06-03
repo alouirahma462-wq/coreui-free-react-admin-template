@@ -15,7 +15,7 @@ export const ai = async (prompt) => {
       },
       signal: controller.signal,
       body: JSON.stringify({
-        model: "llama3", // 👈 أهم تعديل (بدل llama3.2:1b)
+       model: "mistral"  // 👈 أهم تعديل (بدل llama3.2:1b)
         prompt: prompt,
         stream: false
       })
