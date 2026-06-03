@@ -11,6 +11,10 @@ export const runLegalAI = async (caseText) => {
 
     console.log("🚀 START runLegalAI")
 
+    if (!caseText || caseText.trim().length === 0) {
+      throw new Error("caseText is empty")
+    }
+
     // 🧠 1. تحليل المحضر (NLP)
     console.log("1️⃣ parseCase")
     const parsedCase = parseCase(caseText)
@@ -22,21 +26,33 @@ export const runLegalAI = async (caseText) => {
     console.log("3️⃣ extractArticles")
     const articles = extractArticles(lawText)
 
-    // 🔎 3. البحث عن المواد ذات الصلة
-    console.log("4️⃣ searchRelevantArticles")
-    const relevantArticles = searchRelevantArticles(articles, caseText)
-
-    // ⚖️ 4. التحليل القانوني العميق (GPT / Ollama)
-    console.log("5️⃣ legalEngine CALL (AI)")
-    const legalAnalysis = await legalEngine(caseText, relevantArticles)
-
-    if (!legalAnalysis) {
-      console.warn("⚠️ legalAnalysis is EMPTY")
+    if (!articles || articles.length === 0) {
+      console.warn("⚠️ No articles extracted")
     }
 
-    // 📊 5. استخراج الحكم ونسبة الإدانة
+    // 🔎 3. البحث عن المواد ذات الصلة
+    console.log("4️⃣ searchRelevantArticles")
+    const relevantArticles = searchRelevantArticles(articles || [], caseText)
+
+    // ⚖️ 4. التحليل القانوني (AI)
+    console.log("5️⃣ legalEngine CALL")
+
+    const legalAnalysis = await legalEngine(
+      caseText,
+      relevantArticles || []
+    )
+
+    if (!legalAnalysis || legalAnalysis.length < 10) {
+      console.warn("⚠️ Weak legalAnalysis result")
+    }
+
+    // 📊 5. الحكم (Judge Engine)
     console.log("6️⃣ judgeEngine CALL")
-    const judgment = await judgeEngine(caseText, legalAnalysis)
+
+    const judgment = await judgeEngine(
+      caseText,
+      legalAnalysis || "No analysis available"
+    )
 
     console.log("✅ DONE runLegalAI")
 
@@ -44,7 +60,7 @@ export const runLegalAI = async (caseText) => {
     return {
       input: caseText,
       parsedCase,
-      articlesUsed: relevantArticles,
+      articlesUsed: relevantArticles || [],
       legalAnalysis,
       judgment,
       meta: {
@@ -58,7 +74,11 @@ export const runLegalAI = async (caseText) => {
 
     return {
       status: "ERROR",
-      message: err.message
+      message: err.message,
+      meta: {
+        engine: "TUNISIAN-LEGAL-AI-v1",
+        failed: true
+      }
     }
   }
 }
