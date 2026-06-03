@@ -1,12 +1,12 @@
-import { ai } from "../client.js"
+import { runLegalAI } from "../runLegalAI.js"
+
+const testCase = `
+تم الاعتداء على شخص في الشارع وأخذ هاتفه بالقوة مع وجود شهود.
+`
 
 console.log("🚀 FILE STARTED")
 
-const run = async () => {
-  console.log("📥 BEFORE AI CALL")
+const result = await runLegalAI(testCase)
 
-  const res = await ai("مرحبا")
-  console.log("📤 AI RESPONSE:", res)
-}
-
-run()
+console.log("📊 RESULT:")
+console.dir(result, { depth: null })
