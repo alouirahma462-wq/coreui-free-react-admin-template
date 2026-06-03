@@ -6,7 +6,7 @@ export const ai = async (prompt) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer YOUR_GROQ_API_KEY`
+        "Authorization": `Bearer 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`
       },
       body: JSON.stringify({
         model: "llama-3.1-8b-instant",
