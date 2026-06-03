@@ -1,7 +1,5 @@
 export const ai = async (prompt) => {
   try {
-    console.log("📡 AI REQUEST START");
-
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -11,28 +9,22 @@ export const ai = async (prompt) => {
       body: JSON.stringify({
         model: "llama-3.1-8b-instant",
         messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
+          { role: "user", content: prompt }
         ],
-        temperature: 0.2,
-      }),
+        temperature: 0.2
+      })
     });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(errText);
-    }
 
     const data = await res.json();
 
-    console.log("📡 AI RESPONSE OK");
+    if (!res.ok) {
+      throw new Error(data.error?.message || "API ERROR");
+    }
 
-    return data?.choices?.[0]?.message?.content?.trim();
+    return data.choices?.[0]?.message?.content;
 
   } catch (err) {
-    console.error("❌ AI ERROR:", err.message);
+    console.error("AI ERROR:", err.message);
     return "AI_FAILED";
   }
 };
