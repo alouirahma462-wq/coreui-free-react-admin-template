@@ -1,10 +1,9 @@
 export const ai = async (prompt) => {
   const controller = new AbortController()
 
-  // ⏱️ timeout حماية (60 ثانية)
   const timeout = setTimeout(() => {
     controller.abort()
-  }, 60000)
+  }, 90000) // 90 ثانية حماية
 
   try {
     console.log("📡 AI REQUEST START")
@@ -26,14 +25,9 @@ export const ai = async (prompt) => {
 
     console.log("📡 AI RESPONSE STATUS:", res.status)
 
-    if (!res.ok) {
-      const errorText = await res.text()
-      throw new Error(`HTTP ERROR ${res.status}: ${errorText}`)
-    }
-
     const text = await res.text()
 
-    console.log("📡 RAW RESPONSE (cut):", text.slice(0, 200))
+    console.log("📡 RAW RESPONSE (first 200):", text.slice(0, 200))
 
     let data
     try {
@@ -42,17 +36,13 @@ export const ai = async (prompt) => {
       throw new Error("Invalid JSON from Ollama")
     }
 
-    if (!data?.response) {
-      return "EMPTY_RESPONSE"
-    }
-
-    return data.response
+    return data?.response || "EMPTY_RESPONSE"
 
   } catch (err) {
     console.error("❌ AI ERROR:", err.message)
 
     if (err.name === "AbortError") {
-      return "AI_TIMEOUT"
+      return "TIMEOUT"
     }
 
     return "AI_FAILED"
