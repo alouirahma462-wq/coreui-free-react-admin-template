@@ -1,27 +1,24 @@
 export const ai = async (prompt) => {
-  const controller = new AbortController();
-
-  const timeout = setTimeout(() => {
-    controller.abort();
-  }, 90000);
-
   try {
-    console.log("📡 AI REQUEST START");
+    console.log("📡 GROQ AI REQUEST START");
 
-    const res = await fetch("http://127.0.0.1:11434/api/generate", {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": `Bearer YOUR_GROQ_API_KEY`
       },
-      signal: controller.signal,
       body: JSON.stringify({
-       model: "mistral"  // 👈 أهم تعديل (بدل llama3.2:1b)
-        prompt: prompt,
-        stream: false
+        model: "llama-3.1-8b-instant",
+        messages: [
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.2
       })
     });
-
-    clearTimeout(timeout);
 
     if (!res.ok) {
       throw new Error(`HTTP ERROR: ${res.status}`);
@@ -29,17 +26,12 @@ export const ai = async (prompt) => {
 
     const data = await res.json();
 
-    console.log("📡 AI RESPONSE OK");
+    console.log("📡 GROQ RESPONSE OK");
 
-    return data?.response ?? "EMPTY_RESPONSE";
+    return data.choices?.[0]?.message?.content || "EMPTY_RESPONSE";
 
   } catch (err) {
     console.error("❌ AI ERROR:", err.message);
-
-    if (err.name === "AbortError") {
-      return "TIMEOUT";
-    }
-
     return "AI_FAILED";
   }
 };
