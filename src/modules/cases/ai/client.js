@@ -1,6 +1,6 @@
 export const ai = async (prompt) => {
   try {
-    console.log("📡 GROQ AI REQUEST START");
+    console.log("📡 AI REQUEST START");
 
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -21,15 +21,15 @@ export const ai = async (prompt) => {
     });
 
     if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`HTTP ERROR ${res.status}: ${errorText}`);
+      const errText = await res.text();
+      throw new Error(errText);
     }
 
     const data = await res.json();
 
-    console.log("📡 GROQ RESPONSE OK");
+    console.log("📡 AI RESPONSE OK");
 
-    return data?.choices?.[0]?.message?.content?.trim() || "EMPTY_RESPONSE";
+    return data?.choices?.[0]?.message?.content?.trim();
 
   } catch (err) {
     console.error("❌ AI ERROR:", err.message);
