@@ -9,34 +9,44 @@ import { extractArticles } from "./rag/articleExtractor.js"
 export const runLegalAI = async (caseText) => {
   try {
 
+    console.log("🚀 START runLegalAI")
+
     // 🧠 1. تحليل المحضر (NLP)
+    console.log("1️⃣ parseCase")
     const parsedCase = parseCase(caseText)
 
     // 📚 2. تحميل القوانين + استخراج المواد
+    console.log("2️⃣ loadAllLaws")
     const lawText = loadAllLaws()
+
+    console.log("3️⃣ extractArticles")
     const articles = extractArticles(lawText)
 
     // 🔎 3. البحث عن المواد ذات الصلة
+    console.log("4️⃣ searchRelevantArticles")
     const relevantArticles = searchRelevantArticles(articles, caseText)
 
-    // ⚖️ 4. التحليل القانوني العميق (GPT)
+    // ⚖️ 4. التحليل القانوني العميق (GPT / Ollama)
+    console.log("5️⃣ legalEngine CALL (AI)")
     const legalAnalysis = await legalEngine(caseText, relevantArticles)
 
+    if (!legalAnalysis) {
+      console.warn("⚠️ legalAnalysis is EMPTY")
+    }
+
     // 📊 5. استخراج الحكم ونسبة الإدانة
- const judgment = await judgeEngine(caseText, legalAnalysis)
+    console.log("6️⃣ judgeEngine CALL")
+    const judgment = await judgeEngine(caseText, legalAnalysis)
+
+    console.log("✅ DONE runLegalAI")
 
     // 🧾 6. النتيجة النهائية
     return {
       input: caseText,
-
       parsedCase,
-
       articlesUsed: relevantArticles,
-
       legalAnalysis,
-
       judgment,
-
       meta: {
         status: "SUCCESS",
         engine: "TUNISIAN-LEGAL-AI-v1"
@@ -44,6 +54,8 @@ export const runLegalAI = async (caseText) => {
     }
 
   } catch (err) {
+    console.error("❌ runLegalAI ERROR:", err)
+
     return {
       status: "ERROR",
       message: err.message
