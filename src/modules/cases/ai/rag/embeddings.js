@@ -1,12 +1,19 @@
-import { openai } from "../client.js"
+import { pipeline } from "@xenova/transformers"
 
-// 🧠 تحويل النص إلى vector
-export const createEmbedding = async (text) => {
+let embedder = null
 
-  const response = await openai.embeddings.create({
-    model: "text-embedding-3-small",
-    input: text
-  })
+export const getEmbedder = async () => {
+  if (!embedder) {
+    embedder = await pipeline(
+      "feature-extraction",
+      "Xenova/all-MiniLM-L6-v2"
+    )
+  }
+  return embedder
+}
 
-  return response.data[0].embedding
+export const embedText = async (text) => {
+  const model = await getEmbedder()
+  const output = await model(text, { pooling: "mean", normalize: true })
+  return Array.from(output.data)
 }
