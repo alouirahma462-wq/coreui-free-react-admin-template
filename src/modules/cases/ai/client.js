@@ -1,9 +1,13 @@
 export const ai = async (prompt) => {
-  try {
-    const controller = new AbortController()
+  const controller = new AbortController()
 
-    // ⛔ timeout protection
-    const timeout = setTimeout(() => controller.abort(), 60000)
+  // ⏱️ timeout حماية (60 ثانية)
+  const timeout = setTimeout(() => {
+    controller.abort()
+  }, 60000)
+
+  try {
+    console.log("📡 AI REQUEST START")
 
     const res = await fetch("http://127.0.0.1:11434/api/generate", {
       method: "POST",
@@ -20,16 +24,37 @@ export const ai = async (prompt) => {
 
     clearTimeout(timeout)
 
+    console.log("📡 AI RESPONSE STATUS:", res.status)
+
     if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`)
+      const errorText = await res.text()
+      throw new Error(`HTTP ERROR ${res.status}: ${errorText}`)
     }
 
-    const data = await res.json()
+    const text = await res.text()
 
-    return data?.response || "EMPTY_RESPONSE"
+    console.log("📡 RAW RESPONSE (cut):", text.slice(0, 200))
+
+    let data
+    try {
+      data = JSON.parse(text)
+    } catch (e) {
+      throw new Error("Invalid JSON from Ollama")
+    }
+
+    if (!data?.response) {
+      return "EMPTY_RESPONSE"
+    }
+
+    return data.response
 
   } catch (err) {
     console.error("❌ AI ERROR:", err.message)
+
+    if (err.name === "AbortError") {
+      return "AI_TIMEOUT"
+    }
+
     return "AI_FAILED"
   }
 }
