@@ -1,18 +1,22 @@
+const API_KEY =
+  (typeof import.meta !== "undefined" &&
+    import.meta.env &&
+    import.meta.env.VITE_GROQ_API_KEY) ||
+  process.env.VITE_GROQ_API_KEY;
+
 export const ai = async (prompt) => {
   try {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
+        "Authorization": `Bearer ${API_KEY}`,
       },
       body: JSON.stringify({
         model: "llama-3.1-8b-instant",
-        messages: [
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.2
-      })
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.2,
+      }),
     });
 
     const data = await res.json();
