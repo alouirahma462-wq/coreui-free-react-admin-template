@@ -1,9 +1,4 @@
-const API_KEY =
-  (typeof import.meta !== "undefined" &&
-    import.meta.env &&
-    import.meta.env.VITE_GROQ_API_KEY) ||
-  process.env.VITE_GROQ_API_KEY;
-
+const API_KEY = "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";
 export const ai = async (prompt) => {
   try {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
