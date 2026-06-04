@@ -1,8 +1,9 @@
-import { ai } from "../client.js";
+import { ai } from "./src/modules/cases/ai/client.js";
 
 const run = async () => {
-  const res = await ai("تم سرقة هاتف في الشارع");
-  console.log(res);
+  const result = await ai("تم سرقة هاتف في الشارع");
+  console.log("AI RESULT:");
+  console.log(result);
 };
 
 run();
