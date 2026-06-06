@@ -1,16 +1,21 @@
+import { buildLegalChunks } from "../pdfReader.js"
+import path from "path"
 import fs from "fs"
 
 const LAW_PATH = "src/legal-library/pdf"
 
-export const loadAllLaws = () => {
+export const loadAllLaws = async () => {
   const files = fs.readdirSync(LAW_PATH)
 
-  let allText = ""
+  let allChunks = []
 
   for (const file of files) {
-    const content = fs.readFileSync(`${LAW_PATH}/${file}`, "utf-8")
-    allText += "\n" + content
+    const filePath = path.join(LAW_PATH, file)
+
+    const chunks = await buildLegalChunks(filePath)
+
+    allChunks = allChunks.concat(chunks)
   }
 
-  return allText
+  return allChunks
 }
