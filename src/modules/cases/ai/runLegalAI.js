@@ -2,7 +2,6 @@ console.log("🔥 ENTRY FILE REACHED");
 
 import { parseCase } from "./nlp/caseParser.js";
 import { advancedCaseAnalyzer } from "./nlp/advancedCaseAnalyzer.js";
-
 import { advancedForensics } from "./forensics/advancedForensics.js";
 
 import { legalEngine } from "./legalEngine.js";
@@ -12,37 +11,37 @@ import { loadAllLaws } from "./rag/lawLoader.js";
 import { loadLawsIntoVectorDB, lawDB } from "./rag/lawDB.js";
 import { embedText } from "./rag/embeddings.js";
 
+/* ================================
+   ⚖️ MAIN ENGINE
+================================ */
 export const runLegalAI = async (caseText) => {
   try {
 
     console.log("🚀 START LEGAL AI v4");
 
-    if (!caseText || typeof caseText !== "string" || !caseText.trim()) {
+    if (!caseText?.trim()) {
       throw new Error("caseText empty");
     }
 
-    // 🧠 1. BASIC NLP
+    // 🧠 NLP BASIC
     const parsedCase = parseCase(caseText);
 
-    // 🧠 2. ADVANCED NLP
-    const analysisV2 = advancedCaseAnalyzer?.(caseText) || {
-      warning: "advancedCaseAnalyzer missing"
-    };
+    // 🧠 NLP ADVANCED
+    const analysisV2 = advancedCaseAnalyzer?.(caseText) || {};
 
-    // 🧠 3. FORENSICS
-    const forensics = advancedForensics?.(caseText) || {
-      warning: "advancedForensics missing"
-    };
+    // 🔬 FORENSICS
+    const forensics = advancedForensics?.(caseText) || {};
 
     console.log("🧠 NLP + FORENSICS DONE");
 
-    // 📚 4. LOAD LAWS
+    // 📚 LOAD LAW TEXT
     const lawText = await loadAllLaws();
 
     if (!lawText) {
       throw new Error("No law text loaded");
     }
 
+    // ✂️ CHUNKS
     const lawChunks = lawText
       .split(/(?=الفصل|المادة)/g)
       .map((t, i) => ({
@@ -51,17 +50,17 @@ export const runLegalAI = async (caseText) => {
       }))
       .filter(t => t.text && t.text.length > 10);
 
-    // ⚠️ INDEX ONLY ONCE
+    // ⚠️ INDEX ONCE
     if (!lawDB?.data || lawDB.data.length === 0) {
       console.log("📚 indexing law DB...");
       await loadLawsIntoVectorDB(lawChunks);
     }
 
-    // 🔎 RAG SEARCH
+    // 🔎 SEARCH
     const queryVector = await embedText(caseText);
     const relevantArticles = lawDB.search(queryVector, 5);
 
-    console.log("🔎 RAG DONE:", relevantArticles.length);
+    console.log("🔎 RAG DONE");
 
     // ⚖️ LEGAL ENGINE
     const legalAnalysis = await legalEngine(
@@ -76,14 +75,13 @@ export const runLegalAI = async (caseText) => {
 
     console.log("⚖️ LEGAL ENGINE DONE");
 
-    // ⚖️ JUDGE ENGINE (FIXED CALL)
+    // ⚖️ JUDGE ENGINE
     const judgment = await judgeEngine(
       caseText,
       legalAnalysis.analysis || legalAnalysis
     );
 
     console.log("⚖️ JUDGE DONE");
-    console.log("✅ DONE LEGAL AI v4");
 
     return {
       input: caseText,
@@ -113,15 +111,18 @@ export const runLegalAI = async (caseText) => {
   }
 };
 
-/* =========================================================
-   🚀 RUN DIRECTLY (IMPORTANT FIX - ADDITIONAL PART)
-========================================================= */
+/* ================================
+   🚀 AUTO TEST (RUN DIRECTLY)
+================================ */
+(async () => {
+  console.log("\n🧪 RUN TEST START\n");
 
-runLegalAI("تم سرقة هاتف في الشارع واعتراف أحد الشهود")
-  .then(res => {
-    console.log("\n================ RESULT ================\n");
-    console.dir(res, { depth: null });
-  })
-  .catch(err => {
-    console.error("🔥 FATAL ERROR:", err);
-  });
+  const result = await runLegalAI(
+    "تم سرقة هاتف محمول من شخص في الطريق العام مع وجود شاهد"
+  );
+
+  console.log("\n================ RESULT ================\n");
+  console.dir(result, { depth: null });
+
+  console.log("\n🧪 TEST DONE\n");
+})();
