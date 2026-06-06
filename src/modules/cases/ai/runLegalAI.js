@@ -14,50 +14,53 @@ export const runLegalAI = async (caseText) => {
 
     console.log("🚀 START runLegalAI")
 
-    if (!caseText?.trim()) {
+    // ❗ validation
+    if (!caseText || !caseText.trim()) {
       throw new Error("caseText is empty")
     }
 
-    // 1️⃣ NLP
+    // 🧠 1. NLP parsing
     const parsedCase = parseCase(caseText)
 
-    // 2️⃣ Load laws (RAW TEXT)
+    // 📚 2. Load laws
     console.log("2️⃣ loadAllLaws")
     const lawText = await loadAllLaws()
 
-    if (!lawText) {
+    if (!lawText || lawText.length === 0) {
       throw new Error("No law text found")
     }
 
-    // 3️⃣ extract chunks (IMPORTANT FIX)
+    // ✂️ 3. chunking laws
     const lawChunks = lawText
       .split(/(?=الفصل|المادة)/g)
       .map((t, i) => ({
         id: i,
         text: t.trim()
       }))
+      .filter(c => c.text.length > 10)
 
-    // 4️⃣ IMPORTANT: only index ONCE (prevent duplication)
+    // 🧠 4. Index laws ONLY ONCE
     if (lawDB.data.length === 0) {
       console.log("3️⃣ indexing laws into vector DB")
       await loadLawsIntoVectorDB(lawChunks)
     }
 
-    // 5️⃣ semantic search
+    // 🔎 5. semantic search
     console.log("4️⃣ semantic search")
     const queryVector = await embedText(caseText)
     const relevantArticles = lawDB.search(queryVector, 5)
 
-    // 6️⃣ legal engine
+    // ⚖️ 6. legal reasoning AI
     console.log("5️⃣ legalEngine CALL")
     const legalAnalysis = await legalEngine(caseText, relevantArticles)
 
-    if (!legalAnalysis) {
+    if (!legalAnalysis || legalAnalysis === "AI_FAILED") {
       throw new Error("Legal analysis failed")
     }
 
-    // 7️⃣ judge engine (FIXED PARAMETERS)
+    // ⚖️ 7. final judgment
     console.log("6️⃣ judgeEngine CALL")
+
     const judgment = await judgeEngine(caseText, legalAnalysis)
 
     console.log("✅ DONE runLegalAI")
