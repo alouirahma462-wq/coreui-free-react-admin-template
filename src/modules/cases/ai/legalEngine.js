@@ -1,14 +1,14 @@
 import { ai } from "./client.js"
 
-export const legalEngine = async (caseText, articles = []) => {
+export const legalEngine = async (caseText, articles = [], forensics = null) => {
   try {
 
-    console.log("📌 LEGAL ENGINE START (LEXISNEXIS PRO)")
+    console.log("📌 LEGAL ENGINE v4 START (LEXIS + FORENSICS)")
 
-    // 🧠 Build legal context safely
+    // 🧠 Build legal context
     const context = (articles || [])
       .filter(a => a?.text)
-      .map((a) => `📜 ${a.text.trim()}`)
+      .map(a => `📜 ${a.text.trim()}`)
       .join("\n\n--------------------\n\n")
 
     const safeContext =
@@ -16,13 +16,37 @@ export const legalEngine = async (caseText, articles = []) => {
         ? context
         : "⚠️ لا توجد نصوص قانونية كافية من قاعدة البيانات."
 
-    // ⚖️ Advanced LexisNexis-style prompt
+    // 🧠 Forensics safe injection
+    const forensicBlock = forensics
+      ? `
+════════ FORENSIC ANALYSIS ════════
+
+👥 الأطراف:
+${forensics.actors?.join(", ") || "غير محدد"}
+
+⏱️ الأحداث:
+${(forensics.events || []).join("\n")}
+
+🔎 الأدلة:
+${(forensics.evidence || []).join("\n")}
+
+⚠️ التناقضات:
+${JSON.stringify(forensics.contradictions || [], null, 2)}
+
+📊 مصداقية الملف:
+${forensics.credibilityScore ?? "غير محسوب"}
+
+══════════════════════════════
+`
+      : "لا يوجد تحليل جنائي متقدم"
+
+    // ⚖️ Advanced LexisNexis + Forensics prompt
     const prompt = `
 أنت قاضٍ تونسي خبير جداً في القانون الجزائي والإجرائي والتحقيق الجنائي.
-تعمل كنظام LexisNexis + قاضي تحقيق + محلل أدلة جنائية احترافي.
+تعمل كنظام LexisNexis + Forensic AI + قاضي تحقيق صارم.
 
 مهمتك:
-تحليل المحضر بدقة قانونية عالية وربطه فقط بالنصوص القانونية المقدمة.
+تحليل الملف بشكل قضائي دقيق جداً وربطه بالنصوص القانونية + الأدلة + التناقضات.
 
 ════════════════════════════════════
 
@@ -32,65 +56,42 @@ ${caseText}
 📚 النصوص القانونية:
 ${safeContext}
 
+${forensicBlock}
+
 ════════════════════════════════════
 
 🚨 قواعد صارمة:
 - لا تخترع أي مادة قانونية
-- لا تضف معلومات خارج النصوص
-- إذا المعطيات ناقصة اكتب: "غير كافٍ قانونياً"
-- التحليل يجب أن يكون قضائي منطقي وليس سرد فقط
+- لا تعتمد على التخمين
+- إذا المعلومات غير كافية: "غير كافٍ قانونياً"
+- ركز على الأدلة + التناقضات + المصداقية
 
 ════════════════════════════════════
 
-📊 أعد تقرير قضائي احترافي مفصل جداً:
+📊 التقرير القضائي المطلوب:
 
 1️⃣ الوقائع (Facts)
-- سرد دقيق وموضوعي للأحداث
-
 2️⃣ الأطراف (Actors)
-- الضحية / المتهم / الشهود (إن وجدوا)
-
-3️⃣ تكييف الوقائع (Legal Qualification)
-- تصنيف الجريمة حسب القانون التونسي
-
-4️⃣ تحليل الأدلة (Evidence Analysis)
-- الأدلة التي تدعم الإدانة
-- الأدلة التي تضعف القضية
-
-5️⃣ تحليل الإفادات (Statements Analysis)
-- تناقضات الشهود
-- مصداقية الأقوال
-
-6️⃣ الأساس القانوني (Legal Basis)
-- ربط كل واقعة بالنصوص القانونية المقدمة فقط
-
-7️⃣ الأركان القانونية (Legal Elements)
-- الركن المادي
-- الركن المعنوي
-- الركن القانوني
-
-8️⃣ الشكوك والتناقضات (Doubts & Contradictions)
-- نقاط الضعف في الملف
-
-9️⃣ تقييم الملف (Case Strength Score)
-- رقم من 0 إلى 100
-
-🔟 الحكم الأولي (Pre-Verdict)
+3️⃣ التسلسل الزمني (Timeline)
+4️⃣ تحليل الأدلة (Evidence Strength)
+5️⃣ تحليل الشهود (Witness Reliability)
+6️⃣ التناقضات (Contradictions Impact)
+7️⃣ التكييف القانوني (Legal Classification)
+8️⃣ الأركان القانونية (Legal Elements)
+9️⃣ تقييم القوة الجنائية (Case Strength 0-100)
+🔟 نسبة الإدانة (0.00 - 1.00)
+1️⃣1️⃣ القرار الأولي (Verdict)
 - guilty / not_guilty / insufficient_evidence / pending
-
-1️⃣1️⃣ نسبة الإدانة (Probability)
-- رقم من 0.00 إلى 1.00
-
 1️⃣2️⃣ التعليل القضائي (Judicial Reasoning)
-- تحليل طويل بأسلوب قاضي تونسي رسمي محترف جداً
+- تحليل طويل جداً بأسلوب قاضي تحقيق تونسي رسمي
 
 ════════════════════════════════════
 
 🚨 OUTPUT FORMAT:
-يجب أن يكون الرد منظم جداً وكأنه حكم صادر من محكمة تونسية رسمية.
+تقرير قضائي منظم جداً + تحليلي + صارم + غير متحيز
 `
 
-    console.log("📡 CALLING AI...")
+    console.log("📡 CALLING AI v4...")
 
     const response = await ai(prompt)
 
@@ -105,11 +106,15 @@ ${safeContext}
 
     return {
       success: true,
-      analysis: response
+      analysis: response,
+      meta: {
+        engine: "LEXISNEXIS-V4",
+        mode: "FORENSIC+LEGAL+JUDICIAL"
+      }
     }
 
   } catch (err) {
-    console.error("❌ legalEngine error:", err.message)
+    console.error("❌ legalEngine v4 error:", err.message)
 
     return {
       success: false,
