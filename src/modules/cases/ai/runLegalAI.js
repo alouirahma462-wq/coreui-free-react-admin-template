@@ -1,3 +1,4 @@
+console.log("🔥 ENTRY FILE REACHED");
 import { parseCase } from "./nlp/caseParser.js"
 import { advancedCaseAnalyzer } from "./nlp/advancedCaseAnalyzer.js"
 
