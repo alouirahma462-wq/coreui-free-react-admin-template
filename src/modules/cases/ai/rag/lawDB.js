@@ -1,4 +1,4 @@
-import { embedText } from "./embedding.js"
+import { embedText } from "./embeddings.js"
 import { VectorStore } from "./vectorStore.js"
 
 export const lawDB = new VectorStore()
