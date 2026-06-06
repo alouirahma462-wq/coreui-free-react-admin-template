@@ -3,46 +3,52 @@ import { legalEngine } from "./legalEngine.js"
 import { judgeEngine } from "./engine/judgeEngine.js"
 
 import { loadAllLaws } from "./rag/lawLoader.js"
-import { loadLawsIntoVectorDB } from "./rag/lawDB.js"
+import { loadLawsIntoVectorDB, lawDB } from "./rag/lawDB.js"
 
 import { embedText } from "./rag/embeddings.js"
-import { lawDB } from "./rag/lawDB.js"
 
 console.log("⚖️ LEGAL AI MODULE LOADED")
 
-// ⚖️ LexisNexis Style AI Pipeline
 export const runLegalAI = async (caseText) => {
   try {
 
     console.log("🚀 START runLegalAI")
 
-    // ❗ validation
-    if (!caseText || caseText.trim().length === 0) {
+    if (!caseText?.trim()) {
       throw new Error("caseText is empty")
     }
 
-    // 🧠 1. NLP: فهم المحضر
-    console.log("1️⃣ parseCase")
+    // 1️⃣ NLP
     const parsedCase = parseCase(caseText)
 
-    // 📚 2. تحميل القانون (chunks من PDF)
+    // 2️⃣ Load laws (RAW TEXT)
     console.log("2️⃣ loadAllLaws")
-    const lawChunks = await loadAllLaws()
+    const lawText = await loadAllLaws()
 
-    if (!lawChunks || lawChunks.length === 0) {
-      throw new Error("No law chunks found (PDF issue)")
+    if (!lawText) {
+      throw new Error("No law text found")
     }
 
-    // 🧠 3. تحويل القوانين إلى Vector DB (مرة واحدة في كل تشغيل)
-    console.log("3️⃣ indexing laws into vector DB")
-    await loadLawsIntoVectorDB(lawChunks)
+    // 3️⃣ extract chunks (IMPORTANT FIX)
+    const lawChunks = lawText
+      .split(/(?=الفصل|المادة)/g)
+      .map((t, i) => ({
+        id: i,
+        text: t.trim()
+      }))
 
-    // 🔎 4. البحث الذكي (RAG)
+    // 4️⃣ IMPORTANT: only index ONCE (prevent duplication)
+    if (lawDB.data.length === 0) {
+      console.log("3️⃣ indexing laws into vector DB")
+      await loadLawsIntoVectorDB(lawChunks)
+    }
+
+    // 5️⃣ semantic search
     console.log("4️⃣ semantic search")
     const queryVector = await embedText(caseText)
     const relevantArticles = lawDB.search(queryVector, 5)
 
-    // ⚖️ 5. التحليل القانوني (AI reasoning)
+    // 6️⃣ legal engine
     console.log("5️⃣ legalEngine CALL")
     const legalAnalysis = await legalEngine(caseText, relevantArticles)
 
@@ -50,24 +56,18 @@ export const runLegalAI = async (caseText) => {
       throw new Error("Legal analysis failed")
     }
 
-    // ⚖️ 6. الحكم النهائي (structured)
+    // 7️⃣ judge engine (FIXED PARAMETERS)
     console.log("6️⃣ judgeEngine CALL")
-    const judgment = await judgeEngine(legalAnalysis)
+    const judgment = await judgeEngine(caseText, legalAnalysis)
 
     console.log("✅ DONE runLegalAI")
 
-    // 🧾 7. OUTPUT النهائي (LexisNexis style)
     return {
       input: caseText,
-
       parsedCase,
-
       articlesUsed: relevantArticles,
-
       legalAnalysis,
-
       judgment,
-
       meta: {
         status: "SUCCESS",
         engine: "LEXISNEXIS-STYLE-AI-v1"
