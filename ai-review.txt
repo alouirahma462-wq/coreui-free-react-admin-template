@@ -1,0 +1,450 @@
+]633;E;for f in $(find src/modules/cases/ai -name "*.js");4f37359e-9de9-456d-beeb-9175469f2d35]633;C===== src/modules/cases/ai/engine/judgeEngine.js =====
+import { ai } from "../client.js"
+
+export const judgeEngine = async (caseText, analysis) => {
+
+  const prompt = `
+أنت قاضي حكم نهائي.
+
+بناء على التحليل التالي:
+
+${analysis}
+
+والقضية:
+${caseText}
+
+أعطني:
+
+1. verdict (guilty / not_guilty / pending)
+2. confidence (0-1)
+3. حكم مختصر
+4. توصية قانونية
+`
+
+  const res = await ai(prompt)
+
+  return {
+    verdict: "pending",
+    confidence: 0.7,
+    judgment: res
+  }
+}
+
+===== src/modules/cases/ai/legalEngine.js =====
+import { ai } from "./client.js"
+
+export const legalEngine = async (caseText, articles) => {
+  try {
+
+    console.log("📌 legalEngine START")
+
+    // 🧠 تجهيز السياق القانوني
+    const context = (articles || [])
+      .filter(a => a?.text)
+      .map(a => a.text.trim())
+      .join("\n\n---\n\n")
+
+    const safeContext =
+      context && context.length > 0
+        ? context
+        : "لا توجد نصوص قانونية متوفرة."
+
+    const prompt = `
+أنت قاضٍ تونسي خبير في القانون الجزائي.
+
+⚠️ قواعد صارمة:
+- لا تخترع مواد قانونية
+- التزم بالنصوص المقدمة فقط
+- إذا المعلومات غير كافية قل: غير كافٍ قانونياً
+
+──────────────────────
+
+🧾 القضية:
+${caseText}
+
+📚 النصوص القانونية:
+${safeContext}
+
+──────────────────────
+
+أصدر تقرير قضائي رسمي مفصل:
+
+1. الوقائع
+2. الأطراف
+3. التحليل الواقعي
+4. الأركان القانونية
+5. التكييف القانوني
+6. التعليل القضائي
+7. تقييم الأدلة
+8. الشكوك
+9. نسبة الإدانة (%)
+10. القرار النهائي
+`
+
+    console.log("📡 CALLING AI...")
+
+    // 🤖 AI CALL
+    const response = await ai(prompt)
+
+    console.log("📡 AI RESPONSE RECEIVED")
+
+    if (!response || response.length < 5) {
+      console.warn("⚠️ Empty AI response")
+      return "NO_AI_RESPONSE"
+    }
+
+    return response
+
+  } catch (err) {
+    console.error("❌ legalEngine error:", err.message)
+    return "ERROR_LEGAL_ENGINE"
+  }
+}
+
+===== src/modules/cases/ai/pdfReader.js =====
+import fs from "fs"
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs"
+
+//
+// 🧠 قراءة PDF قانوني بشكل احترافي
+// يحافظ على ترتيب الصفحات + ينظف النص + جاهز للـ RAG
+//
+export const readLegalPDF = async (filePath) => {
+  const data = new Uint8Array(fs.readFileSync(filePath))
+
+  const pdf = await pdfjsLib.getDocument({ data }).promise
+
+  let pages = []
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i)
+    const content = await page.getTextContent()
+
+    // 🧹 تنظيف النص
+    const pageText = content.items
+      .map(item => item.str)
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim()
+
+    pages.push({
+      pageNumber: i,
+      text: pageText
+    })
+  }
+
+  return pages
+}
+
+//
+// ✂️ تقسيم ذكي للنص (RAG chunks)
+// يحافظ على المعنى القانوني
+//
+export const chunkText = (text, size = 1000) => {
+  const chunks = []
+
+  const sentences = text
+    .replace(/\n/g, " ")
+    .split(".")
+
+  let current = ""
+
+  for (const sentence of sentences) {
+    const clean = sentence.trim()
+
+    if (!clean) continue
+
+    if ((current + clean).length > size) {
+      chunks.push(current.trim())
+      current = clean + ". "
+    } else {
+      current += clean + ". "
+    }
+  }
+
+  if (current.trim()) {
+    chunks.push(current.trim())
+  }
+
+  return chunks
+}
+
+//
+// 📚 تحويل PDF كامل إلى chunks جاهزة للـ AI
+//
+export const buildLegalChunks = async (filePath) => {
+  const pages = await readLegalPDF(filePath)
+
+  const chunks = []
+
+  for (const page of pages) {
+    const pageChunks = chunkText(page.text)
+
+    pageChunks.forEach((chunk, index) => {
+      chunks.push({
+        page: page.pageNumber,
+        chunkIndex: index,
+        text: chunk
+      })
+    })
+  }
+
+  return chunks
+}
+
+===== src/modules/cases/ai/client.js =====
+const API_KEY = "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";
+export const ai = async (prompt) => {
+  try {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.1-8b-instant",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.2,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error?.message || "API ERROR");
+    }
+
+    return data.choices?.[0]?.message?.content;
+
+  } catch (err) {
+    console.error("AI ERROR:", err.message);
+    return "AI_FAILED";
+  }
+};
+
+===== src/modules/cases/ai/nlp/caseParser.js =====
+export const parseCase = (text) => {
+  return {
+    facts: text,
+    actors: {
+      victim: text.includes("شخص") ? "موجود" : "غير محدد",
+      accused: "غير محدد"
+    }
+  }
+}
+
+===== src/modules/cases/ai/runLegalAI.js =====
+import { parseCase } from "./nlp/caseParser.js"
+import { searchRelevantArticles } from "./rag/lawSearch.js"
+import { legalEngine } from "./legalEngine.js"
+import { judgeEngine } from "./engine/judgeEngine.js"
+import { loadAllLaws } from "./rag/lawLoader.js"
+import { extractArticles } from "./rag/articleExtractor.js"
+
+// ⚖️ النظام الكامل: من محضر إلى حكم AI
+export const runLegalAI = async (caseText) => {
+  try {
+
+    console.log("🚀 START runLegalAI")
+
+    if (!caseText || caseText.trim().length === 0) {
+      throw new Error("caseText is empty")
+    }
+
+    // 🧠 1. تحليل المحضر (NLP)
+    console.log("1️⃣ parseCase")
+    const parsedCase = parseCase(caseText)
+
+    // 📚 2. تحميل القوانين + استخراج المواد
+    console.log("2️⃣ loadAllLaws")
+    const lawText = loadAllLaws()
+
+    console.log("3️⃣ extractArticles")
+    const articles = extractArticles(lawText)
+
+    if (!articles || articles.length === 0) {
+      console.warn("⚠️ No articles extracted")
+    }
+
+    // 🔎 3. البحث عن المواد ذات الصلة
+    console.log("4️⃣ searchRelevantArticles")
+    const relevantArticles = searchRelevantArticles(articles || [], caseText)
+
+    // ⚖️ 4. التحليل القانوني (AI)
+    console.log("5️⃣ legalEngine CALL")
+
+    const legalAnalysis = await legalEngine(
+      caseText,
+      relevantArticles || []
+    )
+
+    if (!legalAnalysis || legalAnalysis.length < 10) {
+      console.warn("⚠️ Weak legalAnalysis result")
+    }
+
+    // 📊 5. الحكم (Judge Engine)
+    console.log("6️⃣ judgeEngine CALL")
+
+    const judgment = await judgeEngine(
+      caseText,
+      legalAnalysis || "No analysis available"
+    )
+
+    console.log("✅ DONE runLegalAI")
+
+    // 🧾 6. النتيجة النهائية
+    return {
+      input: caseText,
+      parsedCase,
+      articlesUsed: relevantArticles || [],
+      legalAnalysis,
+      judgment,
+      meta: {
+        status: "SUCCESS",
+        engine: "TUNISIAN-LEGAL-AI-v1"
+      }
+    }
+
+  } catch (err) {
+    console.error("❌ runLegalAI ERROR:", err)
+
+    return {
+      status: "ERROR",
+      message: err.message,
+      meta: {
+        engine: "TUNISIAN-LEGAL-AI-v1",
+        failed: true
+      }
+    }
+  }
+}
+
+===== src/modules/cases/ai/rag/search.js =====
+import { embedText } from "./embedding.js"
+import { lawDB } from "./lawDB.js"
+
+export const searchRelevantArticles = async (caseText, k = 5) => {
+  const queryVector = await embedText(caseText)
+
+  return lawDB.search(queryVector, k)
+}
+
+===== src/modules/cases/ai/rag/lawSearch.js =====
+export const searchRelevantArticles = (articles, caseText) => {
+  const keywords = caseText.split(" ")
+
+  return articles
+    .map(article => {
+      let score = 0
+
+      for (const word of keywords) {
+        if (article.text.includes(word)) score++
+      }
+
+      return { ...article, score }
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+}
+
+===== src/modules/cases/ai/rag/articleExtractor.js =====
+export const extractArticles = (text) => {
+  const articles = text.split(/(?=الفصل|المادة)/g)
+
+  return articles.map((a, i) => ({
+    id: i,
+    text: a.trim()
+  }))
+}
+
+===== src/modules/cases/ai/rag/lawLoader.js =====
+import fs from "fs"
+
+const LAW_PATH = "src/legal-library/pdf"
+
+export const loadAllLaws = () => {
+  const files = fs.readdirSync(LAW_PATH)
+
+  let allText = ""
+
+  for (const file of files) {
+    const content = fs.readFileSync(`${LAW_PATH}/${file}`, "utf-8")
+    allText += "\n" + content
+  }
+
+  return allText
+}
+
+===== src/modules/cases/ai/rag/lawDB.js =====
+import { embedText } from "./embedding.js"
+import { VectorStore } from "./vectorStore.js"
+
+export const lawDB = new VectorStore()
+
+export const loadLawsIntoVectorDB = async (articles) => {
+  for (const article of articles) {
+    const vector = await embedText(article.text)
+
+    lawDB.add(vector, {
+      id: article.id,
+      text: article.text
+    })
+  }
+
+  console.log("✅ Laws indexed into Vector DB")
+}
+
+===== src/modules/cases/ai/rag/embeddings.js =====
+import { pipeline } from "@xenova/transformers"
+
+let embedder = null
+
+export const getEmbedder = async () => {
+  if (!embedder) {
+    embedder = await pipeline(
+      "feature-extraction",
+      "Xenova/all-MiniLM-L6-v2"
+    )
+  }
+  return embedder
+}
+
+export const embedText = async (text) => {
+  const model = await getEmbedder()
+  const output = await model(text, { pooling: "mean", normalize: true })
+  return Array.from(output.data)
+}
+
+===== src/modules/cases/ai/rag/vectorStore.js =====
+import faiss from "faiss-node"
+
+export class VectorStore {
+  constructor(dim = 384) {
+    this.index = new faiss.IndexFlatL2(dim)
+    this.data = []
+  }
+
+  add(vector, metadata) {
+    this.index.add(Float32Array.from(vector))
+    this.data.push(metadata)
+  }
+
+  search(vector, k = 5) {
+    const result = this.index.search(Float32Array.from(vector), k)
+
+    return result.labels.map(i => this.data[i]).filter(Boolean)
+  }
+}
+
+===== src/modules/cases/ai/tests/test-ai.js =====
+import { ai } from "../client.js";
+
+const run = async () => {
+  const res = await ai("تم سرقة هاتف في الشارع");
+  console.log("AI RESULT:");
+  console.log(res);
+};
+
+run();
+
