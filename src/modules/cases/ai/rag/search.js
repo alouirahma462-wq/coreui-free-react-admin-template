@@ -1,4 +1,4 @@
-import { embedText } from "./embedding.js"
+import { embedText } from "./embeddings.js"
 import { lawDB } from "./lawDB.js"
 
 export const searchRelevantArticles = async (caseText, k = 5) => {
