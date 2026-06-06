@@ -16,7 +16,7 @@ export const runLegalAI = async (caseText) => {
     console.log("🚀 START LEGAL AI v4")
 
     // ❗ validation
-    if (!caseText?.trim()) {
+    if (!caseText || typeof caseText !== "string" || !caseText.trim()) {
       throw new Error("caseText empty")
     }
 
@@ -24,13 +24,23 @@ export const runLegalAI = async (caseText) => {
     const parsedCase = parseCase(caseText)
 
     // 🧠 2. ADVANCED NLP (v2)
-    const analysisV2 = advancedCaseAnalyzer(caseText)
+    const analysisV2 = advancedCaseAnalyzer
+      ? advancedCaseAnalyzer(caseText)
+      : { warning: "advancedCaseAnalyzer missing" }
 
     // 🧠 3. FORENSIC ENGINE (NEW v4 CORE)
-    const forensics = advancedForensics(caseText)
+    const forensics = advancedForensics
+      ? advancedForensics(caseText)
+      : { warning: "advancedForensics missing" }
+
+    console.log("🧠 NLP + FORENSICS DONE")
 
     // 📚 4. LOAD LAWS
     const lawText = await loadAllLaws()
+
+    if (!lawText) {
+      throw new Error("No law text loaded")
+    }
 
     const lawChunks = lawText
       .split(/(?=الفصل|المادة)/g)
@@ -40,8 +50,8 @@ export const runLegalAI = async (caseText) => {
       }))
       .filter(t => t.text && t.text.length > 10)
 
-    // ⚠️ index only once (performance fix)
-    if (lawDB.data.length === 0) {
+    // ⚠️ index only once
+    if (!lawDB?.data || lawDB.data.length === 0) {
       console.log("📚 indexing law DB...")
       await loadLawsIntoVectorDB(lawChunks)
     }
@@ -50,16 +60,20 @@ export const runLegalAI = async (caseText) => {
     const queryVector = await embedText(caseText)
     const relevantArticles = lawDB.search(queryVector, 5)
 
-    // ⚖️ 6. LEGAL ENGINE v4 (with forensics)
+    console.log("🔎 RAG DONE:", relevantArticles?.length || 0)
+
+    // ⚖️ 6. LEGAL ENGINE v4
     const legalAnalysis = await legalEngine(
       caseText,
-      relevantArticles,
+      relevantArticles || [],
       forensics
     )
 
-    if (!legalAnalysis?.success && !legalAnalysis?.analysis) {
-      throw new Error("legal analysis failed")
+    if (!legalAnalysis) {
+      throw new Error("legal analysis failed (empty result)")
     }
+
+    console.log("⚖️ LEGAL ENGINE DONE")
 
     // ⚖️ 7. JUDGE ENGINE v4
     const judgment = await judgeEngine(
@@ -67,23 +81,20 @@ export const runLegalAI = async (caseText) => {
       legalAnalysis.analysis || legalAnalysis
     )
 
+    console.log("⚖️ JUDGE DONE")
+
     console.log("✅ DONE LEGAL AI v4")
 
     return {
       input: caseText,
 
-      // NLP layers
       parsedCase,
       analysisV2,
-
-      // forensic layer
       forensics,
 
-      // legal layer
-      articlesUsed: relevantArticles,
-      legalAnalysis,
+      articlesUsed: relevantArticles || [],
 
-      // final judgment
+      legalAnalysis,
       judgment,
 
       meta: {
@@ -101,6 +112,7 @@ export const runLegalAI = async (caseText) => {
     }
 
   } catch (err) {
+
     console.error("❌ runLegalAI v4 ERROR:", err)
 
     return {
