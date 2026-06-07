@@ -7,36 +7,38 @@ export class VectorStore {
     this.data = []
   }
 
-  // ✅ ADD FIXED
   add(items) {
     if (!Array.isArray(items)) {
-      throw new Error("VectorStore.add expects ARRAY")
+      throw new Error("VectorStore.add expects ARRAY of {vector, metadata}")
     }
 
-    const flatVectors = []
+    const vectors = []
 
     for (const item of items) {
       if (!item?.vector || !Array.isArray(item.vector)) continue
       if (item.vector.length !== this.dim) continue
 
-      // 🔥 FAISS NEEDS FLAT ARRAY
-      flatVectors.push(...item.vector)
-
+      vectors.push(Float32Array.from(item.vector)) // 🔥 FIX مهم
       this.data.push(item.metadata)
     }
 
-    if (this.data.length === 0) {
-      console.warn("⚠️ No valid data added")
+    if (vectors.length === 0) {
+      console.warn("⚠️ No valid vectors to add")
       return
     }
 
-    // 🔥 FIX: must be Float32Array
-    const floatVectors = new Float32Array(flatVectors)
+    // 🔥 مهم: تحويلها لمصفوفة Float32Array
+    const matrix = new Float32Array(vectors.length * this.dim)
 
-    this.index.add(floatVectors)
+    vectors.forEach((vec, i) => {
+      matrix.set(vec, i * this.dim)
+    })
+
+    this.index.add(matrix)
+
+    console.log(`✅ Added ${vectors.length} vectors`)
   }
 
-  // ✅ SEARCH FIXED
   search(vector, k = 5) {
     if (!Array.isArray(vector)) {
       throw new Error("Search vector must be ARRAY")
@@ -46,7 +48,7 @@ export class VectorStore {
       throw new Error(`Vector dim mismatch: ${vector.length} != ${this.dim}`)
     }
 
-    const query = new Float32Array(vector)
+    const query = Float32Array.from(vector)
 
     const result = this.index.search(query, k)
 
