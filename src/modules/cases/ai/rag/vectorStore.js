@@ -18,25 +18,17 @@ export class VectorStore {
       if (!item?.vector || !Array.isArray(item.vector)) continue
       if (item.vector.length !== this.dim) continue
 
-      vectors.push(Float32Array.from(item.vector)) // 🔥 FIX مهم
+      vectors.push(item.vector.map(Number)) // 🔥 مهم جداً
       this.data.push(item.metadata)
     }
 
     if (vectors.length === 0) {
-      console.warn("⚠️ No valid vectors to add")
+      console.warn("⚠️ No valid vectors")
       return
     }
 
-    // 🔥 مهم: تحويلها لمصفوفة Float32Array
-    const matrix = new Float32Array(vectors.length * this.dim)
-
-    vectors.forEach((vec, i) => {
-      matrix.set(vec, i * this.dim)
-    })
-
-    this.index.add(matrix)
-
-    console.log(`✅ Added ${vectors.length} vectors`)
+    // 🔥 FAISS FIX: لازم array 2D صافية
+    this.index.add(vectors)
   }
 
   search(vector, k = 5) {
@@ -48,9 +40,7 @@ export class VectorStore {
       throw new Error(`Vector dim mismatch: ${vector.length} != ${this.dim}`)
     }
 
-    const query = Float32Array.from(vector)
-
-    const result = this.index.search(query, k)
+    const result = this.index.search([vector.map(Number)], k)
 
     if (!result?.labels) return []
 
