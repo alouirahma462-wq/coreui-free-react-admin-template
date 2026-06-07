@@ -7,46 +7,54 @@ export class VectorStore {
     this.data = []
   }
 
+  // =========================
+  // ADD (FIXED GLOBALLY)
+  // =========================
   add(items) {
     if (!Array.isArray(items)) {
-      throw new Error("add expects array")
+      throw new Error("VectorStore.add expects array of items")
     }
 
     const vectors = []
 
     for (const item of items) {
-      if (!item?.vector || !Array.isArray(item.vector)) continue
+      if (!item || !Array.isArray(item.vector)) continue
       if (item.vector.length !== this.dim) continue
 
-      // 🔥 مهم: تحويل إلى Float32Array
-      vectors.push(Float32Array.from(item.vector))
+      // 🔥 IMPORTANT: keep pure number array (NO Float32Array objects)
+      vectors.push(item.vector.map(v => Number(v)))
 
+      // store metadata in same order
       this.data.push(item.metadata)
     }
 
     if (vectors.length === 0) {
-      console.warn("No vectors")
+      console.warn("⚠️ No valid vectors to add")
       return
     }
 
-    // 🔥 FAISS safe format
+    // 🔥 FAISS expects: number[][]
     this.index.add(vectors)
   }
 
+  // =========================
+  // SEARCH (FIXED + SAFE)
+  // =========================
   search(vector, k = 5) {
     if (!Array.isArray(vector)) {
-      throw new Error("search expects array")
+      throw new Error("VectorStore.search expects array")
     }
 
     if (vector.length !== this.dim) {
-      throw new Error("bad dim")
+      throw new Error(`Vector dim mismatch: ${vector.length} != ${this.dim}`)
     }
 
-    const query = Float32Array.from(vector)
+    // FAISS query format
+    const query = vector.map(v => Number(v))
 
     const result = this.index.search([query], k)
 
-    if (!result?.labels) return []
+    if (!result || !result.labels) return []
 
     return result.labels
       .map(i => this.data[i])
