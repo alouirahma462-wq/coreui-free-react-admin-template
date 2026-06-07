@@ -6,14 +6,44 @@ export class VectorStore {
     this.data = []
   }
 
-  add(vector, metadata) {
-    this.index.add(Float32Array.from(vector))
-    this.data.push(metadata)
+  // =========================
+  // ADD VECTORS (FIXED)
+  // =========================
+  add(items) {
+    if (!Array.isArray(items)) {
+      throw new Error("add expects array of [vector, metadata]")
+    }
+
+    const vectors = []
+
+    for (const item of items) {
+      if (!Array.isArray(item) || item.length !== 2) continue
+
+      const [vector, metadata] = item
+
+      vectors.push(Float32Array.from(vector))
+      this.data.push(metadata)
+    }
+
+    // 🔥 FAISS expects batch 2D array
+    this.index.add(vectors)
   }
 
+  // =========================
+  // SEARCH (FIXED)
+  // =========================
   search(vector, k = 5) {
-    const result = this.index.search(Float32Array.from(vector), k)
+    if (!Array.isArray(vector)) {
+      console.error("❌ search input must be array")
+      return []
+    }
 
-    return result.labels.map(i => this.data[i]).filter(Boolean)
+    const result = this.index.search(new Float32Array(vector), k)
+
+    if (!result || !result.labels) return []
+
+    return result.labels
+      .filter(i => i !== -1)
+      .map(i => this.data[i])
   }
 }
