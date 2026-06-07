@@ -1,7 +1,6 @@
 import { VectorStore } from "./vectorStore.js"
 import { embedText } from "./embeddings.js"
 
-// ✔️ هذا لازم يبقى export ثابت
 export const lawDB = new VectorStore(384)
 
 export const loadLawsIntoVectorDB = async (articles) => {
@@ -19,10 +18,11 @@ export const loadLawsIntoVectorDB = async (articles) => {
 
     const vector = await embedText(article.text)
 
-    if (!Array.isArray(vector) || vector.length !== 384) continue
+    if (!Array.isArray(vector)) continue
+    if (vector.length !== 384) continue
 
     items.push({
-      vector: vector.map(Number),
+      vector: Float32Array.from(vector),
       metadata: {
         id: article.id ?? i,
         text: article.text
@@ -35,10 +35,10 @@ export const loadLawsIntoVectorDB = async (articles) => {
   }
 
   if (items.length === 0) {
-    throw new Error("No valid items to index")
+    throw new Error("No valid items")
   }
 
   lawDB.add(items)
 
-  console.log("✅ DONE. Total:", items.length)
+  console.log("✅ DONE:", items.length)
 }
