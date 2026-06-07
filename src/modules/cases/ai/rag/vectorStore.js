@@ -9,49 +9,42 @@ export class VectorStore {
 
   add(items) {
     if (!Array.isArray(items)) {
-      throw new Error("VectorStore.add expects array")
+      throw new Error("items must be array")
     }
 
     const vectors = []
 
     for (const item of items) {
-      if (!item || !item.vector || !item.metadata) continue
+      if (!item?.vector) continue
 
-      let vec = item.vector
+      const vec = Float32Array.from(item.vector.map(Number))
 
-      // تحويل آمن
-      if (Array.isArray(vec)) {
-        vec = Float32Array.from(vec)
-      }
-
-      if (!(vec instanceof Float32Array)) continue
       if (vec.length !== this.dim) continue
+
+      if (vec.some(v => isNaN(v))) continue
 
       vectors.push(vec)
       this.data.push(item.metadata)
     }
 
     if (vectors.length === 0) {
-      throw new Error("No valid vectors to add")
+      throw new Error("No valid vectors")
     }
 
-    // FAISS يحتاج Array of Float32Array
     this.index.add(vectors)
   }
 
   search(vector, k = 5) {
     if (!Array.isArray(vector)) {
-      throw new Error("VectorStore.search expects array")
+      throw new Error("vector must be array")
     }
 
-    const query = Float32Array.from(vector)
+    const query = Float32Array.from(vector.map(Number))
 
     const result = this.index.search([query], k)
 
     if (!result?.labels) return []
 
-    return result.labels
-      .map(i => this.data[i])
-      .filter(Boolean)
+    return result.labels.map(i => this.data[i]).filter(Boolean)
   }
 }
