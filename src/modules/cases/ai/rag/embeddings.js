@@ -20,11 +20,24 @@ export const embedText = async (text) => {
     normalize: true
   })
 
-  // 🔥 FIX: force clean array + remove nested issues
-  const vector = Array.from(output.data || output)
+  // 🔥 تحويل آمن 100%
+  let vector = null
 
-  if (!Array.isArray(vector)) {
-    throw new Error("Embedding failed: not array")
+  if (output?.data) {
+    vector = Array.from(output.data)
+  } else if (Array.isArray(output)) {
+    vector = output.flat()
+  } else {
+    throw new Error("Invalid embedding output")
+  }
+
+  // تنظيف القيم
+  vector = vector
+    .map(Number)
+    .filter(v => Number.isFinite(v))
+
+  if (vector.length === 0) {
+    throw new Error("Empty embedding vector")
   }
 
   return vector
