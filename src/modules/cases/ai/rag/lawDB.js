@@ -21,7 +21,12 @@ export const loadLawsIntoVectorDB = async (articles) => {
 
       const vector = await embedText(article.text)
 
-      // ✅ FIX HERE (important)
+      // 🚨 FIX 1: skip invalid embeddings
+      if (!Array.isArray(vector) || vector.length === 0) {
+        console.warn("⚠️ Skipping invalid embedding at:", i)
+        continue
+      }
+
       vectors.push([
         vector,
         {
@@ -36,6 +41,11 @@ export const loadLawsIntoVectorDB = async (articles) => {
     }
 
     console.log("📦 Sending to VectorStore...")
+
+    // 🚨 FIX 2: safety check before sending
+    if (vectors.length === 0) {
+      throw new Error("No valid vectors generated")
+    }
 
     lawDB.add(vectors)
 
