@@ -34,21 +34,17 @@ export const runLegalAI = async (caseText) => {
 
     console.log("🧠 NLP + FORENSICS DONE");
 
-    // 📚 LOAD LAW TEXT
-    const lawText = await loadAllLaws();
+    // 📚 LOAD LAW TEXT (already chunked from PDF reader)
+    const lawChunksRaw = await loadAllLaws();
 
-    if (!lawText) {
-      throw new Error("No law text loaded");
+    if (!Array.isArray(lawChunksRaw) || lawChunksRaw.length === 0) {
+      throw new Error("No law chunks loaded");
     }
 
-    // ✂️ CHUNKS
-    const lawChunks = lawText
-      .split(/(?=الفصل|المادة)/g)
-      .map((t, i) => ({
-        id: i,
-        text: t.trim()
-      }))
-      .filter(t => t.text && t.text.length > 10);
+    // ✂️ CLEAN ONLY (NO SPLIT !!! IMPORTANT FIX)
+    const lawChunks = lawChunksRaw.filter(
+      t => t?.text && t.text.length > 10
+    );
 
     // ⚠️ INDEX ONCE
     if (!lawDB?.data || lawDB.data.length === 0) {
