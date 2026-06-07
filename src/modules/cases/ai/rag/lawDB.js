@@ -17,36 +17,29 @@ export const loadLawsIntoVectorDB = async (articles) => {
     for (let i = 0; i < articles.length; i++) {
 
       const article = articles[i]
+      if (!article?.text) continue
 
-      if (!article?.text || article.text.trim().length < 5) continue
-
-      // 🔥 embedding
       const vector = await embedText(article.text)
 
-      vectors.push({
+      // ✅ FIX HERE (important)
+      vectors.push([
         vector,
-        metadata: {
+        {
           id: article.id ?? i,
           text: article.text
         }
-      })
+      ])
 
-      // 📊 progress tracking (important for debugging)
       if (i % 50 === 0) {
         console.log(`📌 Indexed ${i}/${articles.length}`)
       }
     }
 
-    if (vectors.length === 0) {
-      throw new Error("No valid vectors generated")
-    }
+    console.log("📦 Sending to VectorStore...")
 
-    console.log("📦 Sending vectors to VectorStore...")
-
-    // 🔥 IMPORTANT FIX: ensure correct array format
     lawDB.add(vectors)
 
-    console.log(`✅ Laws indexed successfully: ${vectors.length}`)
+    console.log("✅ Indexing complete:", vectors.length)
 
   } catch (err) {
     console.error("❌ loadLawsIntoVectorDB error:", err)
