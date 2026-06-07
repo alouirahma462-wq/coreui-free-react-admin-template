@@ -8,7 +8,7 @@ import { legalEngine } from "./legalEngine.js";
 import { judgeEngine } from "./engine/judgeEngine.js";
 
 import { loadAllLaws } from "./rag/lawLoader.js";
-import { loadLawsIntoVectorDB, lawDB } from "./rag/lawDB.js";
+import { loadLawsIntoVectorDB, lawDB } from "./rag/lawDB.js"
 import { embedText } from "./rag/embeddings.js";
 
 /* ================================
