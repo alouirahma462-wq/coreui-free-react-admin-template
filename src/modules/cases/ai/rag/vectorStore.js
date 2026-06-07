@@ -2,40 +2,53 @@ import faiss from "faiss-node"
 
 export class VectorStore {
   constructor(dim = 384) {
+    this.dim = dim
     this.index = new faiss.IndexFlatL2(dim)
     this.data = []
   }
 
-  // ✅ يدعم 2 صيغ:
-  // 1) add(vector, metadata)
-  // 2) add([{vector, metadata}])
-  add(input, metadata = null) {
+  // ✅ add must ALWAYS receive: [{vector: [], metadata: {}}]
+  add(items) {
+    if (!Array.isArray(items)) {
+      throw new Error("VectorStore.add expects ARRAY of {vector, metadata}")
+    }
 
-    // 🟢 الحالة 1: array of objects
-    if (Array.isArray(input) && typeof input[0] === "object") {
-      for (const item of input) {
-        if (!item?.vector) continue
+    const vectors = []
 
-        this.index.add(Float32Array.from(item.vector))
-        this.data.push(item.metadata)
+    for (const item of items) {
+      if (!item?.vector || !Array.isArray(item.vector)) continue
+      if (item.vector.length !== this.dim) {
+        console.warn("❌ Skipping bad vector dim:", item.vector.length)
+        continue
       }
+
+      vectors.push(item.vector)
+      this.data.push(item.metadata)
+    }
+
+    if (vectors.length === 0) {
+      console.warn("⚠️ No valid vectors to add")
       return
     }
 
-    // 🟢 الحالة 2: vector + metadata
-    if (Array.isArray(input) && metadata) {
-      this.index.add(Float32Array.from(input))
-      this.data.push(metadata)
-      return
-    }
-
-    throw new Error("Invalid VectorStore.add input format")
+    // 🔥 FAISS REQUIREMENT: number[][]
+    this.index.add(vectors)
   }
 
   search(vector, k = 5) {
-    const result = this.index.search(Float32Array.from(vector), k)
+    if (!Array.isArray(vector)) {
+      throw new Error("Search vector must be ARRAY")
+    }
 
-    return (result.labels || [])
+    if (vector.length !== this.dim) {
+      throw new Error(`Vector dim mismatch: ${vector.length} != ${this.dim}`)
+    }
+
+    const result = this.index.search([vector], k)
+
+    if (!result?.labels) return []
+
+    return result.labels
       .map(i => this.data[i])
       .filter(Boolean)
   }
