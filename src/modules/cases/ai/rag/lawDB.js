@@ -1,17 +1,13 @@
 import { embedText } from "./embeddings.js"
 import { VectorStore } from "./vectorStore.js"
 
-export const lawDB = new VectorStore()
+export const lawDB = new VectorStore(384)
 
 export const loadLawsIntoVectorDB = async (articles) => {
   try {
-    if (!Array.isArray(articles)) {
-      throw new Error("articles must be array")
-    }
-
     console.log("⚙️ Starting embedding + indexing...")
 
-    const batch = []
+    const items = []
 
     for (let i = 0; i < articles.length; i++) {
       const article = articles[i]
@@ -19,7 +15,9 @@ export const loadLawsIntoVectorDB = async (articles) => {
 
       const vector = await embedText(article.text)
 
-      batch.push({
+      if (!vector || vector.length !== 384) continue
+
+      items.push({
         vector,
         metadata: {
           id: article.id ?? i,
@@ -34,9 +32,9 @@ export const loadLawsIntoVectorDB = async (articles) => {
 
     console.log("📦 Sending to VectorStore...")
 
-    lawDB.add(batch)
+    lawDB.add(items)
 
-    console.log("✅ Indexing complete:", batch.length)
+    console.log("✅ DONE. Total:", items.length)
 
   } catch (err) {
     console.error("❌ loadLawsIntoVectorDB error:", err)
