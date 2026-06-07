@@ -1,17 +1,15 @@
 import faiss from "faiss-node"
 
 export class VectorStore {
-  constructor(dim = 384) {
-    this.index = new faiss.IndexFlatL2(dim)
+  constructor() {
+    this.index = null
     this.data = []
+    this.dim = null
   }
 
-  // =========================
-  // ADD VECTORS (FIXED)
-  // =========================
   add(items) {
     if (!Array.isArray(items)) {
-      throw new Error("add expects array of [vector, metadata]")
+      throw new Error("VectorStore.add expects array")
     }
 
     const vectors = []
@@ -21,28 +19,39 @@ export class VectorStore {
 
       const [vector, metadata] = item
 
+      // 🧠 أول مرة نحدد dimension تلقائياً
+      if (!this.index) {
+        this.dim = vector.length
+        this.index = new faiss.IndexFlatL2(this.dim)
+      }
+
+      // ⚠️ حماية من اختلاف الأبعاد
+      if (vector.length !== this.dim) {
+        console.warn("Skipping vector wrong dim:", vector.length)
+        continue
+      }
+
       vectors.push(Float32Array.from(vector))
       this.data.push(metadata)
     }
 
-    // 🔥 FAISS expects batch 2D array
-    this.index.add(vectors)
+    if (vectors.length > 0) {
+      this.index.add(vectors)
+    }
   }
 
-  // =========================
-  // SEARCH (FIXED)
-  // =========================
   search(vector, k = 5) {
-    if (!Array.isArray(vector)) {
-      console.error("❌ search input must be array")
+    if (!this.index) return []
+    if (!Array.isArray(vector)) return []
+
+    if (vector.length !== this.dim) {
+      console.error("Query dim mismatch:", vector.length, "expected:", this.dim)
       return []
     }
 
     const result = this.index.search(new Float32Array(vector), k)
 
-    if (!result || !result.labels) return []
-
-    return result.labels
+    return (result.labels || [])
       .filter(i => i !== -1)
       .map(i => this.data[i])
   }
