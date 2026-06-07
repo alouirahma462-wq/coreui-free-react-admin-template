@@ -7,15 +7,20 @@ export const loadLawsIntoVectorDB = async (articles) => {
   try {
     console.log("⚙️ Starting embedding + indexing...")
 
+    if (!Array.isArray(articles)) {
+      throw new Error("articles must be an array")
+    }
+
     const items = []
 
     for (let i = 0; i < articles.length; i++) {
       const article = articles[i]
-      if (!article?.text) continue
+
+      if (!article || !article.text) continue
 
       const vector = await embedText(article.text)
 
-      if (!vector || vector.length !== 384) continue
+      if (!Array.isArray(vector) || vector.length !== 384) continue
 
       items.push({
         vector,
@@ -31,6 +36,11 @@ export const loadLawsIntoVectorDB = async (articles) => {
     }
 
     console.log("📦 Sending to VectorStore...")
+
+    // 🔥 FIX: ensure always array + not empty
+    if (items.length === 0) {
+      throw new Error("No valid items to index")
+    }
 
     lawDB.add(items)
 
