@@ -9,43 +9,44 @@ export class VectorStore {
 
   add(items) {
     if (!Array.isArray(items)) {
-      throw new Error("VectorStore.add expects ARRAY of {vector, metadata}")
+      throw new Error("VectorStore.add expects array")
     }
 
     const vectors = []
 
     for (const item of items) {
-      if (!item?.vector || !Array.isArray(item.vector)) continue
+      if (!item?.vector) continue
+      if (!Array.isArray(item.vector)) continue
       if (item.vector.length !== this.dim) continue
 
-      vectors.push(item.vector.map(Number)) // 🔥 مهم جداً
+      // مهم جداً: FAISS يحتاج float array نظيف
+      const cleanVector = Array.from(item.vector.map(Number))
+
+      vectors.push(cleanVector)
       this.data.push(item.metadata)
     }
 
     if (vectors.length === 0) {
-      console.warn("⚠️ No valid vectors")
-      return
+      throw new Error("No valid vectors")
     }
 
-    // 🔥 FAISS FIX: لازم array 2D صافية
+    // 🔥 IMPORTANT: ensure 2D array
     this.index.add(vectors)
   }
 
   search(vector, k = 5) {
     if (!Array.isArray(vector)) {
-      throw new Error("Search vector must be ARRAY")
+      throw new Error("Search vector must be array")
     }
 
     if (vector.length !== this.dim) {
-      throw new Error(`Vector dim mismatch: ${vector.length} != ${this.dim}`)
+      throw new Error(`Vector dim mismatch`)
     }
 
-    const result = this.index.search([vector.map(Number)], k)
+    const result = this.index.search([vector], k)
 
-    if (!result?.labels) return []
+    if (!result || !result.labels) return []
 
-    return result.labels
-      .map(i => this.data[i])
-      .filter(Boolean)
+    return result.labels.map(i => this.data[i]).filter(Boolean)
   }
 }
