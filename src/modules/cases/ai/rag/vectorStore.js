@@ -20,8 +20,7 @@ export class VectorStore {
       const vec = Float32Array.from(item.vector.map(Number))
 
       if (vec.length !== this.dim) continue
-
-      if (vec.some(v => isNaN(v))) continue
+      if (vec.some(v => !Number.isFinite(v))) continue
 
       vectors.push(vec)
       this.data.push(item.metadata)
@@ -31,7 +30,14 @@ export class VectorStore {
       throw new Error("No valid vectors")
     }
 
-    this.index.add(vectors)
+    // 🔥 IMPORTANT FIX: flatten into ONE matrix
+    const flat = new Float32Array(vectors.length * this.dim)
+
+    for (let i = 0; i < vectors.length; i++) {
+      flat.set(vectors[i], i * this.dim)
+    }
+
+    this.index.add(flat)
   }
 
   search(vector, k = 5) {
