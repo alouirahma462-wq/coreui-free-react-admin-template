@@ -1,6 +1,7 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config();
 
-const API_KEY = process.env.GROQ_API_KEY?.trim();
+const API_KEY = process.env.GROQ_API_KEY;
 
 if (!API_KEY) {
   throw new Error("Missing GROQ_API_KEY in .env");
