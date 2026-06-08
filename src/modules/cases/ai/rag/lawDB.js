@@ -6,10 +6,6 @@ export const lawDB = new VectorStore(384)
 export const loadLawsIntoVectorDB = async (articles) => {
   console.log("⚙️ Starting embedding + indexing...")
 
-  if (!Array.isArray(articles)) {
-    throw new Error("articles must be array")
-  }
-
   const items = []
 
   for (let i = 0; i < articles.length; i++) {
@@ -22,7 +18,7 @@ export const loadLawsIntoVectorDB = async (articles) => {
     if (vector.length !== 384) continue
 
     items.push({
-      vector: Float32Array.from(vector),
+      vector,
       metadata: {
         id: article.id ?? i,
         text: article.text
@@ -34,7 +30,7 @@ export const loadLawsIntoVectorDB = async (articles) => {
     }
   }
 
-  if (items.length === 0) {
+  if (!items.length) {
     throw new Error("No valid items")
   }
 
