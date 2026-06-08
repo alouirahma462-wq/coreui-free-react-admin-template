@@ -1,3 +1,5 @@
+import dotenv from "dotenv"
+dotenv.config()
 console.log("🔥 ENTRY FILE REACHED");
 
 import { parseCase } from "./nlp/caseParser.js";
