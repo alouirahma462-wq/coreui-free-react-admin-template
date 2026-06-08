@@ -1,12 +1,10 @@
-import dotenv from "dotenv";
-dotenv.config();
+import "dotenv/config";
 
 const API_KEY = process.env.GROQ_API_KEY;
 
 if (!API_KEY) {
-  throw new Error("❌ GROQ_API_KEY is missing in .env");
+  throw new Error("Missing GROQ_API_KEY in .env");
 }
-
 export const ai = async (prompt) => {
   try {
     const res = await fetch(
