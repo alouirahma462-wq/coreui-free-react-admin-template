@@ -1,9 +1,7 @@
-import faiss from "faiss-node"
-
 export class VectorStore {
   constructor(dim = 384) {
     this.dim = dim
-    this.index = new faiss.IndexFlatL2(dim)
+    this.vectors = []
     this.data = []
   }
 
@@ -12,32 +10,37 @@ export class VectorStore {
       throw new Error("items must be array")
     }
 
-    const vectors = []
+    let added = 0
 
     for (const item of items) {
-      if (!item?.vector) continue
+      if (!item?.vector || !item?.metadata) continue
 
-      const vec = Float32Array.from(item.vector.map(Number))
+      const vec = Array.from(item.vector).map(Number)
 
       if (vec.length !== this.dim) continue
       if (vec.some(v => !Number.isFinite(v))) continue
 
-      vectors.push(vec)
+      this.vectors.push(vec)
       this.data.push(item.metadata)
+
+      added++
     }
 
-    if (vectors.length === 0) {
-      throw new Error("No valid vectors")
+    console.log(`✅ Indexed: ${added}`)
+  }
+
+  cosineSimilarity(a, b) {
+    let dot = 0
+    let magA = 0
+    let magB = 0
+
+    for (let i = 0; i < a.length; i++) {
+      dot += a[i] * b[i]
+      magA += a[i] * a[i]
+      magB += b[i] * b[i]
     }
 
-    // 🔥 IMPORTANT FIX: flatten into ONE matrix
-    const flat = new Float32Array(vectors.length * this.dim)
-
-    for (let i = 0; i < vectors.length; i++) {
-      flat.set(vectors[i], i * this.dim)
-    }
-
-    this.index.add(flat)
+    return dot / (Math.sqrt(magA) * Math.sqrt(magB))
   }
 
   search(vector, k = 5) {
@@ -45,12 +48,22 @@ export class VectorStore {
       throw new Error("vector must be array")
     }
 
-    const query = Float32Array.from(vector.map(Number))
+    const query = Array.from(vector).map(Number)
 
-    const result = this.index.search([query], k)
+    const scores = []
 
-    if (!result?.labels) return []
+    for (let i = 0; i < this.vectors.length; i++) {
+      const score = this.cosineSimilarity(query, this.vectors[i])
 
-    return result.labels.map(i => this.data[i]).filter(Boolean)
+      scores.push({
+        score,
+        data: this.data[i]
+      })
+    }
+
+    return scores
+      .sort((a, b) => b.score - a.score)
+      .slice(0, k)
+      .map(x => x.data)
   }
 }
