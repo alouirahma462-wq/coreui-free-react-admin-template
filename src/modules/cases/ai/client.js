@@ -1,4 +1,4 @@
-const API_KEY = "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";
+const API_KEY = process.env.GROQ_API_KEY;
 export const ai = async (prompt) => {
   try {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
