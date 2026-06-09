@@ -58,90 +58,26 @@ export const runLegalAI = async (caseText) => {
     console.log("🔎 RAG DONE");
 
     /* ========================
-       ⚖️ 🧠 LEXISNEXIS PROMPT
-    ======================== */
-
-    const fullCase = `
-${caseText}
-
---- NLP PARSED DATA ---
-${JSON.stringify(parsedCase, null, 2)}
-
---- ADVANCED ANALYSIS ---
-${JSON.stringify(analysisV2, null, 2)}
-
---- FORENSICS ---
-${JSON.stringify(forensics, null, 2)}
-
---- RELEVANT ARTICLES ---
-${JSON.stringify(relevantArticles, null, 2)}
-`;
-
-    const prompt = `
-You are a senior criminal court judge and forensic legal AI system (LexisNexis-level engine).
-
-Your role:
-Analyze the FULL case file with extreme precision, as if preparing an official court judgment.
-
-────────────────────────────
-RULES (STRICT)
-────────────────────────────
-- Read the entire case carefully
-- Do NOT ignore any detail (even small ones)
-- Infer missing facts logically when possible (mark inferred)
-- Separate facts vs assumptions clearly
-- Identify all legal actors (victim, suspect, witnesses)
-- Reconstruct full timeline logically
-- Classify the crime under criminal law principles
-- Match relevant legal articles ONLY if applicable
-- Evaluate evidence strength objectively
-- Provide professional court-level reasoning
-- Be structured, formal, and precise
-
-────────────────────────────
-OUTPUT FORMAT (MANDATORY)
-────────────────────────────
-
-1. CASE SUMMARY
-2. FACTS
-3. ACTORS
-4. TIMELINE
-5. EVIDENCE ANALYSIS
-6. FORENSIC INTERPRETATION
-7. LEGAL CLASSIFICATION
-8. APPLICABLE LEGAL FRAMEWORK
-9. COURT REASONING
-10. FINAL VERDICT
-11. CONFIDENCE SCORE (0-100)
-
-────────────────────────────
-CASE FILE
-────────────────────────────
-
-"""
-${fullCase}
-"""
-`;
-
-    /* ========================
        ⚖️ LEGAL ENGINE
     ======================== */
     const legalAnalysis = await legalEngine(
       caseText,
       relevantArticles,
-      forensics,
-      prompt
+      forensics
     );
 
     console.log("⚖️ LEGAL ENGINE DONE");
+
+    if (!legalAnalysis?.success) {
+      throw new Error(legalAnalysis?.error || "Legal engine failed");
+    }
 
     /* ========================
        ⚖️ JUDGE ENGINE
     ======================== */
     const judgment = await judgeEngine(
       caseText,
-      legalAnalysis?.analysis || legalAnalysis,
-      prompt
+      legalAnalysis.analysis
     );
 
     console.log("⚖️ JUDGE DONE");
@@ -155,7 +91,7 @@ ${fullCase}
       legalAnalysis,
       judgment,
       meta: {
-        version: "LEXISNEXIS-AI-v4",
+        version: "LEXISNEXIS-AI-v4-FIXED",
         status: "SUCCESS"
       }
     };
@@ -167,7 +103,7 @@ ${fullCase}
       status: "ERROR",
       message: err.message,
       meta: {
-        version: "LEXISNEXIS-AI-v4",
+        version: "LEXISNEXIS-AI-v4-FIXED",
         failed: true
       }
     };
