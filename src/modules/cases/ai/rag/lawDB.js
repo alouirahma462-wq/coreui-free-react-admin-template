@@ -1,15 +1,18 @@
 import { VectorStore } from "./vectorStore.js"
 import { embedText } from "./embeddings.js"
 
-// ✅ GLOBAL SINGLE INSTANCE (FIXED)
-if (!global.__LAW_DB__) {
-  global.__LAW_DB__ = new VectorStore(384)
-}
+class LawDatabase {
+  constructor() {
+    if (!global.__LAW_DB__) {
+      global.__LAW_DB__ = new VectorStore(384)
+    }
 
-const db = global.__LAW_DB__
+    this.db = global.__LAW_DB__
+  }
 
-export const lawDB = {
-  instance: db,
+  get instance() {
+    return this.db
+  }
 
   async addArticles(articles) {
     console.log("⚙️ LAW DB INDEXING START...")
@@ -38,8 +41,10 @@ export const lawDB = {
       }
     }
 
-    db.add(items)
+    this.db.add(items)
 
-    console.log("✅ LAW DB READY:", db.vectors.length)
+    console.log("✅ LAW DB READY:", items.length)
   }
 }
+
+export const lawDB = new LawDatabase()
