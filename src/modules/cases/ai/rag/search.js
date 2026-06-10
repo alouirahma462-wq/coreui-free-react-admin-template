@@ -3,7 +3,7 @@ import { lawDB } from "./lawDB.js";
 
 export const searchRelevantArticles = async (caseText, k = 5) => {
   if (!lawDB.vectors.length) {
-    console.log("⚠️ Vector DB is empty");
+    console.log("⚠️ Vector DB EMPTY");
     return [];
   }
 
@@ -11,7 +11,10 @@ export const searchRelevantArticles = async (caseText, k = 5) => {
 
   const results = lawDB.search(queryVector, k);
 
-  console.log("🔎 SEARCH RESULTS:", results.length);
-
-  return results;
+  return results
+    .filter(r => r?.text || r?.metadata?.text)
+    .map(r => ({
+      text: r.text || r.metadata.text,
+      id: r.id
+    }));
 };
