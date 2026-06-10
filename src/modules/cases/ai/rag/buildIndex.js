@@ -6,7 +6,7 @@ export const buildIndex = async () => {
 
   const chunks = await loadAllLaws()
 
-  console.log("🧠 Creating embeddings + indexing...")
+  console.log("🧠 Creating embeddings...")
 
   await lawDB.addArticles(chunks)
 
