@@ -1,4 +1,4 @@
-import { loadAllLaws } from "./lawLoader.js"
+import { loadAllLaws } from "../lawLoader.js"
 import { lawDB } from "./lawDB.js"
 
 export const buildIndex = async () => {
@@ -6,7 +6,7 @@ export const buildIndex = async () => {
 
   const chunks = await loadAllLaws()
 
-  console.log("🧠 Creating embeddings...")
+  console.log("🧠 Creating embeddings + indexing...")
 
   await lawDB.addArticles(chunks)
 
