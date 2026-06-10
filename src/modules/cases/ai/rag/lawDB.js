@@ -1,16 +1,17 @@
 import { VectorStore } from "./vectorStore.js";
 
-const GLOBAL_KEY = "__LAW_DB_SINGLETON__";
+const GLOBAL_KEY = "__TUNISIAN_LAW_DB__";
 
-// ✅ Singleton (حل مشكلة [])
-export const lawDB =
-  globalThis[GLOBAL_KEY] || new VectorStore(384);
+// ✅ GLOBAL SINGLETON (FIX FINAL)
+function getDB() {
+  if (!globalThis[GLOBAL_KEY]) {
+    globalThis[GLOBAL_KEY] = new VectorStore(384);
+  }
+  return globalThis[GLOBAL_KEY];
+}
 
-globalThis[GLOBAL_KEY] = lawDB;
+export const lawDB = getDB();
 
-// =========================
-// ADD TO VECTOR DB
-// =========================
 export const loadLawsIntoVectorDB = async (articles) => {
   console.log("⚙️ Starting embedding + indexing...");
 
@@ -18,13 +19,10 @@ export const loadLawsIntoVectorDB = async (articles) => {
 
   for (let i = 0; i < articles.length; i++) {
     const article = articles[i];
-    if (!article?.text) continue;
-
-    const vector = article.vector;
-    if (!Array.isArray(vector)) continue;
+    if (!article?.vector) continue;
 
     items.push({
-      vector,
+      vector: article.vector,
       metadata: {
         id: article.id ?? i,
         text: article.text
@@ -36,7 +34,7 @@ export const loadLawsIntoVectorDB = async (articles) => {
     }
   }
 
-  lawDB.add(items);
+  getDB().add(items);
 
   console.log("✅ VECTOR DB READY:", items.length);
 };
