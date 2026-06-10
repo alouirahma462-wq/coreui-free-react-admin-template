@@ -1,4 +1,4 @@
-import { loadAllLaws } from "../lawLoader.js"
+import { loadAllLaws } from "./lawLoader.js"
 import { lawDB } from "./lawDB.js"
 
 export const buildIndex = async () => {
