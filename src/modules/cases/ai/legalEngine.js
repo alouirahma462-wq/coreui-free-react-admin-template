@@ -74,6 +74,22 @@ RULES (NON-NEGOTIABLE)
 8. Formal EU court judgment tone.
 
 ────────────────────────────
+IMPORTANT STRICT RULE
+────────────────────────────
+- You MUST output ALL sections 1–16.
+- If a section cannot be computed, write: "NOT COMPUTED - DATA INSUFFICIENT"
+- Do NOT skip any section.
+- Do NOT merge sections.
+
+────────────────────────────
+ANTI-HALLUCINATION RULE
+────────────────────────────
+Do NOT simulate or invent software outputs (FAISS, D3, ML models).
+Only provide logical legal reasoning.
+If system data is not available, explicitly state:
+"SIMULATION NOT AVAILABLE IN RUNTIME"
+
+────────────────────────────
 INPUT CASE
 ────────────────────────────
 ${caseText}
@@ -84,59 +100,6 @@ LEGAL CONTEXT
 ${safeContext}
 
 ${forensicBlock}
-
-────────────────────────────
-LEXISNEXIS v7 REAL SYSTEM ARCHITECTURE LAYER
-────────────────────────────
-
-🧠 REAL VECTOR DB RANKING ENGINE (FAISS-STYLE)
-- Semantic embedding retrieval
-- similarity scoring (cosine / dot product)
-- legal article ranking optimization
-- relevance threshold filtering
-
-👁️ WITNESS ML MODEL (PYTHON BACKEND SYSTEM)
-- consistency_score model
-- bias detection classifier
-- credibility neural estimator
-- output: witness reliability 0–100
-
-📊 GRAPH VISUALIZATION ENGINE (REACT + D3)
-Nodes:
-- crime events
-- evidence nodes
-- witness nodes
-- suspect nodes
-Edges:
-- supports
-- contradicts
-- weakens
-- confirms
-- inferred_link
-
-⚖️ LEGAL ONTOLOGY DATABASE (JSON + GRAPH STRUCTURE)
-{
-  "entities": ["crime", "intent", "evidence", "actors"],
-  "relations": ["causes", "proves", "contradicts", "supports"],
-  "mapping": {
-    "EU_law": "Tunisian_penal_code_alignment"
-  }
-}
-
-🧠 CASE MEMORY SYSTEM (PERSISTENT JUDICIAL MEMORY)
-- stores past cases embeddings
-- retrieves similar cases
-- precedent-based reasoning layer
-- long-term judicial consistency engine
-
-────────────────────────────
-LEXISNEXIS v6 CORE STILL ACTIVE
-────────────────────────────
-🧠 Bayesian guilt probability engine  
-⚖️ Rule-based ontology mapping  
-🔍 Evidence ranking system  
-📊 Case strength dashboard  
-🧾 Auto indictment generator  
 
 ────────────────────────────
 LEGAL TASK
@@ -150,7 +113,7 @@ LEGAL TASK
 - Apply EU + Tunisian classification
 
 ────────────────────────────
-OUTPUT FORMAT
+OUTPUT FORMAT (MANDATORY - DO NOT MODIFY)
 ────────────────────────────
 1. CASE OVERVIEW
 2. FACTUAL FINDINGS
@@ -172,16 +135,20 @@ OUTPUT FORMAT
 ────────────────────────────
 STYLE REQUIREMENTS
 ────────────────────────────
-- Formal judicial language
-- No repetition
-- No emotional language
-- Court of Appeal reasoning style
-- High analytical depth
+OUTPUT MUST BE STRUCTURED LIKE A COURT DOCUMENT.
+NO EXTRA TEXT OUTSIDE SECTIONS.
+NO INTRODUCTION.
+NO CONCLUSION OUTSIDE FORMAT.
+FORMAL JUDICIAL LANGUAGE.
+NO EMOTIONAL LANGUAGE.
+HIGH ANALYTICAL DEPTH.
 `;
 
     console.log("📡 CALLING AI v7...");
 
-    const response = await ai(prompt);
+    const response = await ai(prompt, {
+      temperature: 0.2
+    });
 
     console.log("📡 AI RESPONSE RECEIVED");
 
