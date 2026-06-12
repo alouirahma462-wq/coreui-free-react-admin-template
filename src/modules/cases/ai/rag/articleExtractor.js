@@ -1,15 +1,11 @@
-export const extractArticles = (chunks) => {
-  return chunks.map((chunk, index) => {
-    const match =
-      chunk.text.match(/(الفصل|المادة|Article)\s*\d+/i)?.[0] ||
-      `UNKNOWN_${index}`;
+export const extractArticles = (text) => {
+  const matches = text.split(/(?=الفصل|المادة)/g);
 
-    return {
-      id: index,
-      article: match,
-      text: chunk.text,
-      page: chunk.page,
-      type: chunk.type,
-    };
-  });
+  return matches
+    .map((t, i) => ({
+      id: i,
+      text: t.trim(),
+      articleNumber: t.match(/\d+/)?.[0] || null
+    }))
+    .filter(a => a.text.length > 20);
 };
