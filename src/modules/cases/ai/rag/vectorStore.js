@@ -1,69 +1,100 @@
 export class VectorStore {
   constructor(dim = 384) {
-    this.dim = dim
-    this.vectors = []
-    this.data = []
+    this.dim = dim;
+    this.vectors = [];
+    this.data = [];
   }
 
+  /**
+   * 🧠 Normalize vector (important for cosine stability)
+   */
+  normalize(vec) {
+    let norm = 0;
+
+    for (let i = 0; i < vec.length; i++) {
+      norm += vec[i] * vec[i];
+    }
+
+    norm = Math.sqrt(norm);
+
+    if (norm === 0) return vec;
+
+    return vec.map((v) => v / norm);
+  }
+
+  /**
+   * 📌 Add embeddings to store
+   */
   add(items) {
     if (!Array.isArray(items)) {
-      throw new Error("items must be array")
+      throw new Error("items must be array");
     }
 
-    let added = 0
+    let added = 0;
 
     for (const item of items) {
-      if (!item?.vector || !item?.metadata) continue
+      if (!item?.vector || !item?.metadata) continue;
 
-      const vec = Array.from(item.vector).map(Number)
+      const vec = Array.from(item.vector).map(Number);
 
-      if (vec.length !== this.dim) continue
-      if (vec.some(v => !Number.isFinite(v))) continue
+      // validation
+      if (vec.length !== this.dim) continue;
+      if (vec.some((v) => !Number.isFinite(v))) continue;
 
-      this.vectors.push(vec)
-      this.data.push(item.metadata)
+      // normalize before storing (IMPORTANT FIX)
+      const normalized = this.normalize(vec);
 
-      added++
+      this.vectors.push(normalized);
+      this.data.push(item.metadata);
+
+      added++;
     }
 
-    console.log(`✅ Indexed: ${added}`)
+    console.log(`✅ Indexed: ${added}`);
   }
 
+  /**
+   * 🧠 Cosine similarity (safe version)
+   */
   cosineSimilarity(a, b) {
-    let dot = 0
-    let magA = 0
-    let magB = 0
+    let dot = 0;
 
     for (let i = 0; i < a.length; i++) {
-      dot += a[i] * b[i]
-      magA += a[i] * a[i]
-      magB += b[i] * b[i]
+      dot += a[i] * b[i];
     }
 
-    return dot / (Math.sqrt(magA) * Math.sqrt(magB))
+    return dot; // لأننا normalized → dot = cosine
   }
 
+  /**
+   * 🔍 Search RAG
+   */
   search(vector, k = 5) {
     if (!Array.isArray(vector)) {
-      throw new Error("vector must be array")
+      throw new Error("vector must be array");
     }
 
-    const query = Array.from(vector).map(Number)
+    const query = this.normalize(
+      Array.from(vector).map((v) => Number(v || 0))
+    );
 
-    const scores = []
+    const scores = [];
 
     for (let i = 0; i < this.vectors.length; i++) {
-      const score = this.cosineSimilarity(query, this.vectors[i])
+      const score = this.cosineSimilarity(query, this.vectors[i]);
 
       scores.push({
         score,
-        data: this.data[i]
-      })
+        data: this.data[i],
+      });
     }
 
     return scores
       .sort((a, b) => b.score - a.score)
       .slice(0, k)
-      .map(x => x.data)
+      .map((x) => ({
+        ...x.data,
+        _score: x.score, // مهم للـ debug + citation engine لاحقاً
+      }));
   }
 }
