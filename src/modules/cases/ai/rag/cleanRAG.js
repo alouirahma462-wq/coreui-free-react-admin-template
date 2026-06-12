@@ -1,18 +1,44 @@
+import { loadPDF } from "./pdfLoader.js";
+import { chunkLaw } from "./chunker.js";
 import { embedText } from "./embeddings.js";
-import { lawDB } from "./lawDB.js";
+import { VectorStore } from "./vectorStore.js";
 
-/**
- * ⚖️ CLEAN LEGAL SEARCH ENGINE
- */
-export const searchLaw = async (query, k = 5) => {
-  const vector = await embedText(query);
+class CleanRAG {
+  constructor() {
+    this.store = new VectorStore(384);
+    this.ready = false;
+  }
 
-  const results = lawDB.search(vector, k);
+  async build(filePath) {
+    const pages = await loadPDF(filePath);
+    const chunks = chunkLaw(pages);
 
-  return results.map(r => ({
-    title: r.title || "unknown",
-    text: r.text,
-    page: r.page,
-    id: r.id
-  }));
-};
+    const items = [];
+
+    for (const c of chunks) {
+      try {
+        const vector = await embedText(c.text);
+
+        items.push({
+          vector,
+          metadata: {
+            text: c.text,
+            page: c.page,
+            type: c.type
+          }
+        });
+      } catch (e) {}
+    }
+
+    this.store.add(items);
+    this.ready = true;
+
+    console.log("✅ CLEAN RAG READY:", items.length);
+  }
+
+  search(queryVector, k = 5) {
+    return this.store.search(queryVector, k);
+  }
+}
+
+export const cleanRAG = new CleanRAG();
