@@ -1,43 +1,30 @@
 export const chunkLaw = (pages) => {
   const chunks = [];
 
-  let current = null;
-
   for (const page of pages) {
-    if (!page?.text) continue;
+    const text = page.text;
 
-    const lines = page.text.split(/\n|\r/);
+    // 🔥 فصل حسب "الفصل / المادة"
+    const parts = text.split(/(?=الفصل|المادة|Article)/g);
 
-    for (const line of lines) {
-      const clean = line.trim();
-      if (!clean) continue;
+    for (const part of parts) {
+      const clean = part.trim();
 
-      // 🧠 detect article start
-      const isArticle = /(الفصل|المادة|Article)\s*\d+/i.test(clean);
+      if (clean.length < 30) continue;
 
-      if (isArticle) {
-        if (current) chunks.push(current);
-
-        current = {
-          text: clean,
-          page: page.page,
-          type: "article",
-        };
-      } else {
-        if (!current) {
-          current = {
-            text: clean,
-            page: page.page,
-            type: "paragraph",
-          };
-        } else {
-          current.text += " " + clean;
-        }
-      }
+      chunks.push({
+        text: clean,
+        page: page.pageNumber,
+        type: detectType(clean)
+      });
     }
   }
 
-  if (current) chunks.push(current);
-
   return chunks;
 };
+
+function detectType(text) {
+  if (text.includes("الفصل")) return "chapter";
+  if (text.includes("المادة")) return "article";
+  return "paragraph";
+}
