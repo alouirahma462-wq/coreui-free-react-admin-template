@@ -1,10 +1,7 @@
-export const buildCitations = (articles) => {
-  return articles.map((a) => {
-    return {
-      article: a.article,
-      page: a.page,
-      text: a.text.slice(0, 500),
-      citation: `${a.article || "غير معروف"} - صفحة ${a.page}`,
-    };
-  });
+export const buildCitation = (article) => {
+  return {
+    article: article.text.match(/(الفصل|المادة)\s*\d+/)?.[0] || "غير محدد",
+    page: article.page || null,
+    text: article.text.slice(0, 300)
+  };
 };
