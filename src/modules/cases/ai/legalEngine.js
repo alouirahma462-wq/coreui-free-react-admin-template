@@ -3,20 +3,36 @@ import { ai } from "./client.js";
 export const legalEngine = async (caseText, articles = [], forensics = null) => {
   try {
 
-    console.log("📌 LEGAL ENGINE START (TUNISIAN PRO MAX REAL RAG v5)");
+    console.log("📌 LEGAL ENGINE START (TUNISIAN PRO MAX REAL RAG v6 - ARTICLE ENGINE)");
 
-    // 🧠 Build legal context from PDF extraction (RAG INPUT)
-    const context = (articles || [])
+    // ─────────────────────────────
+    // 🧠 ARTICLE ENGINE (NEW)
+    // ─────────────────────────────
+    const structuredArticles = (articles || [])
       .filter(a => a?.text)
-      .map(a => `📜 ${a.text.trim()}`)
+      .map((a, index) => {
+        return {
+          id: index + 1,
+          text: a.text.trim(),
+          // محاولة استخراج رقم المادة/الفصل
+          match:
+            a.text.match(/(الفصل|المادة|Article)\s*\d+/gi)?.[0] ||
+            "UNKNOWN_ARTICLE",
+        };
+      });
+
+    const context = structuredArticles
+      .map(a => `📜 [${a.match}] ${a.text}`)
       .join("\n\n--------------------\n\n");
 
     const safeContext =
-      context && context.length > 0
+      context && context.length > 50
         ? context
-        : "⚠️ RAG EMPTY - NO PDF LEGAL TEXT LOADED (code-penal.pdf / ProcedurepenaleArabe.pdf / manuel_proced_trib_1instance.pdf)";
+        : "⚠️ RAG EMPTY - NO LEGAL TEXT FOUND";
 
-    // 🧠 Forensics block
+    // ─────────────────────────────
+    // 🧠 FORENSIC BLOCK (UNCHANGED BUT CLEAN)
+    // ─────────────────────────────
     const forensicBlock = forensics
       ? `
 ════════ FORENSIC ANALYSIS ════════
@@ -40,143 +56,126 @@ ${forensics.credibilityScore ?? "غير محسوب"}
 `
       : "لا يوجد تحليل جنائي متقدم";
 
-    // ⚖️ PRO MAX REAL RAG LEGAL PROMPT (100% SYSTEM)
+    // ─────────────────────────────
+    // ⚖️ ADVANCED PROMPT (WESTLAW STYLE)
+    // ─────────────────────────────
     const prompt = `
-You are a Tunisian Criminal Court Judge AI (PRO MAX REAL RAG 100% SYSTEM).
+You are a Tunisian Legal AI Judge System (WESTLAW-LEVEL RAG ENGINE).
 
-────────────────────────────────────────
-📚 REAL RAG LEGAL ARCHITECTURE (ACTIVE)
-────────────────────────────────────────
-You operate using a REAL retrieval system built on:
+────────────────────────────────────
+📚 RETRIEVAL SYSTEM (REAL RAG ONLY)
+────────────────────────────────────
+You ONLY use retrieved legal text below.
 
-- code-penal.pdf (Tunisian Penal Code)
-- ProcedurepenaleArabe.pdf (Criminal Procedure Code)
-- manuel_proced_trib_1instance.pdf (Court Procedures)
+Each paragraph contains:
+- Article/Chapter reference (if available)
+- Official Tunisian Penal Code excerpts
 
-SYSTEM COMPONENTS (LOGICAL ONLY):
-✔ PDF parsing engine (text extraction)
-✔ Vector database (FAISS / cosine similarity)
-✔ Semantic search (legal paragraph retrieval)
-✔ Case precedent memory (historical matching)
+NEVER invent articles.
 
-IMPORTANT:
-- You MUST assume retrieval happened BEFORE you answer
-- You only see FINAL retrieved text (not raw system)
+────────────────────────────────────
+⚖️ ARTICLE ENGINE RULES (NEW)
+────────────────────────────────────
+You MUST:
 
-────────────────────────────────────────
-⚖️ STRICT LEGAL RULES (NON NEGOTIABLE)
-────────────────────────────────────────
-1. ONLY Tunisian law is allowed
-2. NEVER use EU / foreign law
-3. NEVER invent legal article numbers
-4. If article missing:
-   → "المادة غير متوفرة في قاعدة البيانات القانونية"
-5. NEVER hallucinate legal databases
-6. NEVER fabricate FAISS / embeddings / graphs outputs
-7. If asked:
-   → "المحاكاة غير متوفرة في نظام RAG"
+1. Extract legal articles if present
+2. Link each legal conclusion to:
+   - Article ID
+   - Exact text snippet
+3. If unclear → "غير محدد في النص"
+4. If missing → "غير موجود في قاعدة البيانات"
 
-────────────────────────────────────────
-🧠 REAL CRIME → LEGAL MAPPING ENGINE
-────────────────────────────────────────
-Use ONLY if supported by retrieved text:
+────────────────────────────────────
+🧠 LEGAL CLASSIFICATION ENGINE
+────────────────────────────────────
+Map crimes:
 
-- السرقة → theft under Tunisian Penal Code principles
-- الاعتداء → violence / assault
+- السرقة → theft
+- العنف → assault
 - التحيل → fraud
 - التهديد → threat
 
-If no match → "تصنيف جنائي عام وفق المبادئ التونسية"
+If no match:
+→ "تصنيف عام وفق القانون التونسي"
 
-────────────────────────────────────────
-📊 REAL SCORING ENGINE
-────────────────────────────────────────
-Evidence scoring:
+────────────────────────────────────
+📊 EVIDENCE SCORING
+────────────────────────────────────
+- LOW (0–40)
+- MEDIUM (41–70)
+- HIGH (71–100)
 
-- LOW (0–40) → weak / indirect evidence
-- MEDIUM (41–70) → partial proof
-- HIGH (71–100) → strong direct proof
+Only based on RAG evidence.
 
-Guilt probability:
-→ MUST be computed ONLY from evidence strength
-
-────────────────────────────────────────
+────────────────────────────────────
 🧠 CASE INPUT
-────────────────────────────────────────
+────────────────────────────────────
 ${caseText}
 
-────────────────────────────────────────
-📚 RAG RETRIEVED LEGAL CONTEXT
-────────────────────────────────────────
+────────────────────────────────────
+📚 STRUCTURED LEGAL RAG
+────────────────────────────────────
 ${safeContext}
 
+────────────────────────────────────
 ${forensicBlock}
 
-────────────────────────────────────────
-🚨 OUTPUT MODE (DUAL SYSTEM)
-────────────────────────────────────────
+────────────────────────────────────
+🚨 OUTPUT FORMAT (STRICT)
+────────────────────────────────────
 
-You MUST return:
+Return:
 
-1) ARABIC COURT REPORT (STRICT 16 SECTIONS)
-2) JSON STRUCTURED OUTPUT (FOR REACT DASHBOARD)
+### 1) COURT REPORT (ARABIC)
+Must include:
 
-────────────────────────────────────────
-📄 COURT REPORT (MUST KEEP ORDER)
-────────────────────────────────────────
-1. ملخص القضية
-2. الوقائع
-3. التحليل القانوني
-4. الأطراف
-5. التسلسل الزمني
-6. تقييم الأدلة
-7. التحليل الجنائي
-8. التكييف القانوني التونسي (بدون أرقام مواد إلا إذا موجودة في النص)
-9. التعليل القضائي
-10. احتمال الإدانة
-11. مخطط القضية
-12. قرار الاتهام
-13. مطابقة السوابق القانونية
-14. لوحة القضية
-15. الحكم النهائي
-16. نسبة الثقة
+- كل مادة مستخدمة + مصدرها
+- شرح مبسط لكل مادة
+- ربط المادة بالوقائع
+- فصل/Article extraction
 
-────────────────────────────────────────
-📊 JSON OUTPUT SCHEMA (STRICT)
-────────────────────────────────────────
-Return EXACT JSON:
+### 2) LEGAL CITATION MAP
+Show:
+
+- المادة → النص → الاستخدام → السبب
+
+### 3) JSON OUTPUT
 
 {
   "case_type": "",
   "crime_category": "",
   "actors": [],
   "timeline": [],
+  "articles_used": [
+    {
+      "article": "",
+      "source_text": "",
+      "usage": ""
+    }
+  ],
   "evidence": {
     "scores": [],
     "summary": ""
   },
   "legal_mapping": "",
-  "tunisian_code_reference": "ONLY IF FOUND IN RAG TEXT",
   "guilt_probability": 0,
   "confidence_score": 0,
   "verdict": "",
   "risk_level": "LOW | MEDIUM | HIGH",
-  "rag_mode": "REAL_VECTOR_RAG_ACTIVE"
+  "rag_mode": "WESTLAW_TUNISIAN_RAG_V6"
 }
 
-────────────────────────────────────────
-🚨 FINAL SYSTEM LOCK
-────────────────────────────────────────
-- NO English in court report
-- NO invented legal articles
-- NO hallucinated databases
-- NO EU law
-- ONLY Tunisian Penal Code reasoning
-- ONLY based on RAG retrieval
-- If missing → "غير متوفر في قاعدة البيانات القانونية"
+────────────────────────────────────
+🚨 FINAL RULES
+────────────────────────────────────
+- NO hallucinated articles
+- NO external laws
+- ONLY Tunisian Penal Code
+- Every article MUST have source text
+- If missing → "غير متوفر في RAG"
 `;
 
-    console.log("📡 CALLING AI (PRO MAX REAL RAG v5)...");
+    console.log("📡 CALLING AI (WESTLAW RAG v6)...");
 
     const response = await ai(prompt, {
       temperature: 0.05
@@ -195,14 +194,14 @@ Return EXACT JSON:
       success: true,
       analysis: response,
       meta: {
-        engine: "TUNISIAN-LEGAL-PRO-MAX-RAG-v5",
-        mode: "REAL_VECTOR_PDF_RAG_TUNISIAN_SYSTEM",
+        engine: "TUNISIAN-LEGAL-WESTLAW-RAG-v6",
+        mode: "ARTICLE_ENGINE + RAG + CITATION_MAP",
         features: [
-          "PDF_RAG",
-          "VECTOR_SEARCH",
-          "CASE_MEMORY",
-          "NO_ARTICLE_HALLUCINATION",
-          "DUAL_OUTPUT_JSON"
+          "ARTICLE_EXTRACTION",
+          "SOURCE_LINKING",
+          "WESTLAW_STYLE_ANALYSIS",
+          "NO_HALLUCINATION",
+          "STRUCTURED_OUTPUT"
         ]
       }
     };
