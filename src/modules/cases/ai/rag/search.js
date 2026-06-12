@@ -1,17 +1,13 @@
-import { embedText } from "./embeddings.js"
-import { lawDB } from "./lawDB.js"
+import { embedText } from "../embeddings.js";
+import { lawDB } from "./lawDB.js";
 
-export const searchRelevantArticles = async (caseText, k = 5) => {
-  console.log("🔎 Searching vector DB...")
+export const retrieveArticles = async (query, k = 5) => {
+  const vector = await embedText(query);
 
-  const queryVector = await embedText(caseText)
+  const results = lawDB.instance.search(vector, k);
 
-  const db = lawDB.instance
-
-  if (!db || db.vectors.length === 0) {
-    console.log("⚠️ Vector DB EMPTY")
-    return []
-  }
-
-  return db.search(queryVector, k)
-}
+  return results.map(r => ({
+    ...r,
+    weight: r.text?.length || 1
+  }));
+};
