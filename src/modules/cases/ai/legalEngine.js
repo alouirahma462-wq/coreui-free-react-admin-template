@@ -1,37 +1,41 @@
 import { ai } from "./client.js";
 
-export const legalEngine = async (caseText, articles = [], forensics = null) => {
+export const legalEngine = async (
+  caseText,
+  articles = [],
+  forensics = null
+) => {
   try {
-
-    console.log("📌 LEGAL ENGINE START (TUNISIAN PRO MAX REAL RAG v6 - ARTICLE ENGINE)");
+    console.log("📌 LEGAL ENGINE START (CLEAN WESTLAW RAG v7)");
 
     // ─────────────────────────────
-    // 🧠 ARTICLE ENGINE (NEW)
+    // 🧠 ARTICLE ENGINE (STRUCTURE FIXED)
     // ─────────────────────────────
     const structuredArticles = (articles || [])
-      .filter(a => a?.text)
+      .filter((a) => a?.text)
       .map((a, index) => {
+        const match =
+          a.text.match(/(الفصل|المادة|Article)\s*\d+/i)?.[0] ||
+          "UNKNOWN_ARTICLE";
+
         return {
           id: index + 1,
+          article: match,
           text: a.text.trim(),
-          // محاولة استخراج رقم المادة/الفصل
-          match:
-            a.text.match(/(الفصل|المادة|Article)\s*\d+/gi)?.[0] ||
-            "UNKNOWN_ARTICLE",
         };
       });
 
     const context = structuredArticles
-      .map(a => `📜 [${a.match}] ${a.text}`)
+      .map((a) => `📜 [${a.article}] ${a.text}`)
       .join("\n\n--------------------\n\n");
 
     const safeContext =
-      context && context.length > 50
+      context && context.length > 0
         ? context
-        : "⚠️ RAG EMPTY - NO LEGAL TEXT FOUND";
+        : "⚠️ NO RAG DATA FOUND IN LEGAL DATABASE";
 
     // ─────────────────────────────
-    // 🧠 FORENSIC BLOCK (UNCHANGED BUT CLEAN)
+    // 🧠 FORENSICS BLOCK (SAFE)
     // ─────────────────────────────
     const forensicBlock = forensics
       ? `
@@ -41,152 +45,115 @@ export const legalEngine = async (caseText, articles = [], forensics = null) => 
 ${forensics.actors?.join(", ") || "غير محدد"}
 
 ⏱️ الأحداث:
-${(forensics.events || []).join("\n")}
+${(forensics.events || []).join("\n") || "غير متوفر"}
 
 🔎 الأدلة:
-${(forensics.evidence || []).join("\n")}
+${(forensics.evidence || []).join("\n") || "غير متوفر"}
 
 ⚠️ التناقضات:
 ${JSON.stringify(forensics.contradictions || [], null, 2)}
 
-📊 مصداقية الملف:
+📊 المصداقية:
 ${forensics.credibilityScore ?? "غير محسوب"}
 
 ══════════════════════════════
 `
-      : "لا يوجد تحليل جنائي متقدم";
+      : "NO FORENSIC DATA";
 
     // ─────────────────────────────
-    // ⚖️ ADVANCED PROMPT (WESTLAW STYLE)
+    // ⚖️ FINAL LEGAL PROMPT (STABLE + NO HALLUCINATION)
     // ─────────────────────────────
     const prompt = `
-You are a Tunisian Legal AI Judge System (WESTLAW-LEVEL RAG ENGINE).
+You are a Tunisian Legal AI System (WESTLAW RAG v7).
 
-────────────────────────────────────
-📚 RETRIEVAL SYSTEM (REAL RAG ONLY)
-────────────────────────────────────
-You ONLY use retrieved legal text below.
+────────────────────────────
+RULES (STRICT)
+────────────────────────────
+- Use ONLY provided RAG text
+- NEVER invent articles
+- If missing → "غير متوفر في قاعدة البيانات"
+- No external law
+- No hallucination
 
-Each paragraph contains:
-- Article/Chapter reference (if available)
-- Official Tunisian Penal Code excerpts
-
-NEVER invent articles.
-
-────────────────────────────────────
-⚖️ ARTICLE ENGINE RULES (NEW)
-────────────────────────────────────
-You MUST:
-
-1. Extract legal articles if present
-2. Link each legal conclusion to:
-   - Article ID
-   - Exact text snippet
-3. If unclear → "غير محدد في النص"
-4. If missing → "غير موجود في قاعدة البيانات"
-
-────────────────────────────────────
-🧠 LEGAL CLASSIFICATION ENGINE
-────────────────────────────────────
-Map crimes:
-
-- السرقة → theft
-- العنف → assault
-- التحيل → fraud
-- التهديد → threat
-
-If no match:
-→ "تصنيف عام وفق القانون التونسي"
-
-────────────────────────────────────
-📊 EVIDENCE SCORING
-────────────────────────────────────
-- LOW (0–40)
-- MEDIUM (41–70)
-- HIGH (71–100)
-
-Only based on RAG evidence.
-
-────────────────────────────────────
-🧠 CASE INPUT
-────────────────────────────────────
+────────────────────────────
+CASE
+────────────────────────────
 ${caseText}
 
-────────────────────────────────────
-📚 STRUCTURED LEGAL RAG
-────────────────────────────────────
+────────────────────────────
+RAG ARTICLES
+────────────────────────────
 ${safeContext}
 
-────────────────────────────────────
+────────────────────────────
+FORENSICS
+────────────────────────────
 ${forensicBlock}
 
-────────────────────────────────────
-🚨 OUTPUT FORMAT (STRICT)
-────────────────────────────────────
+────────────────────────────
+TASK
+────────────────────────────
+1. Extract legal articles
+2. Link each article to facts
+3. Explain legal reasoning
+4. Give verdict probability
 
-Return:
+────────────────────────────
+OUTPUT FORMAT
+────────────────────────────
 
-### 1) COURT REPORT (ARABIC)
-Must include:
+A) COURT REPORT (Arabic)
+- الوقائع
+- المواد القانونية المستخدمة
+- تحليل قانوني واضح
+- التعليل
 
-- كل مادة مستخدمة + مصدرها
-- شرح مبسط لكل مادة
-- ربط المادة بالوقائع
-- فصل/Article extraction
+B) ARTICLE MAP
+Format:
+- المادة → النص → السبب → العلاقة بالقضية
 
-### 2) LEGAL CITATION MAP
-Show:
-
-- المادة → النص → الاستخدام → السبب
-
-### 3) JSON OUTPUT
+C) JSON OUTPUT
 
 {
   "case_type": "",
   "crime_category": "",
-  "actors": [],
-  "timeline": [],
   "articles_used": [
     {
       "article": "",
-      "source_text": "",
-      "usage": ""
+      "text": "",
+      "reason": ""
     }
   ],
-  "evidence": {
-    "scores": [],
-    "summary": ""
-  },
   "legal_mapping": "",
+  "evidence_score": {
+    "low": 0,
+    "medium": 0,
+    "high": 0
+  },
   "guilt_probability": 0,
   "confidence_score": 0,
   "verdict": "",
   "risk_level": "LOW | MEDIUM | HIGH",
-  "rag_mode": "WESTLAW_TUNISIAN_RAG_V6"
+  "rag_mode": "WESTLAW_RAG_V7"
 }
 
-────────────────────────────────────
-🚨 FINAL RULES
-────────────────────────────────────
-- NO hallucinated articles
-- NO external laws
-- ONLY Tunisian Penal Code
-- Every article MUST have source text
-- If missing → "غير متوفر في RAG"
+────────────────────────────
+FINAL RULE
+────────────────────────────
+If no article found:
+→ return "غير متوفر في RAG"
 `;
 
-    console.log("📡 CALLING AI (WESTLAW RAG v6)...");
+    console.log("📡 CALLING AI (CLEAN RAG V7)...");
 
     const response = await ai(prompt, {
-      temperature: 0.05
+      temperature: 0.05,
     });
-
-    console.log("📡 AI RESPONSE RECEIVED");
 
     if (!response || response.length < 20) {
       return {
         success: false,
-        error: "EMPTY_AI_RESPONSE"
+        error: "EMPTY_AI_RESPONSE",
       };
     }
 
@@ -194,24 +161,21 @@ Show:
       success: true,
       analysis: response,
       meta: {
-        engine: "TUNISIAN-LEGAL-WESTLAW-RAG-v6",
-        mode: "ARTICLE_ENGINE + RAG + CITATION_MAP",
+        engine: "WESTLAW_RAG_V7_CLEAN",
         features: [
-          "ARTICLE_EXTRACTION",
-          "SOURCE_LINKING",
-          "WESTLAW_STYLE_ANALYSIS",
+          "RAG_ONLY",
+          "ARTICLE_ENGINE",
           "NO_HALLUCINATION",
-          "STRUCTURED_OUTPUT"
-        ]
-      }
+          "LEGAL_MAPPING",
+        ],
+      },
     };
-
   } catch (err) {
     console.error("❌ legalEngine error:", err.message);
 
     return {
       success: false,
-      error: err.message
+      error: err.message,
     };
   }
 };
