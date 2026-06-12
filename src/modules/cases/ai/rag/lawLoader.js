@@ -1,40 +1,137 @@
-import { buildLegalChunks } from "../pdfReader.js"
-import path from "path"
-import fs from "fs"
+import fs from "fs";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
-const LAW_PATH = path.resolve("src/legal-library/pdf")
-
-export const loadAllLaws = async () => {
+/**
+ * 📚 READ PDF (stable + clean)
+ */
+export const readLegalPDF = async (filePath) => {
   try {
+    if (!fs.existsSync(filePath)) {
+      throw new Error("PDF not found: " + filePath);
+    }
 
-    console.log("📚 Loading laws from:", LAW_PATH)
+    const buffer = fs.readFileSync(filePath);
 
-    const files = fs.readdirSync(LAW_PATH)
-      .filter(file => file.endsWith(".pdf"))
+    if (!buffer || buffer.length === 0) {
+      throw new Error("Empty PDF file");
+    }
 
-    let allChunks = []
+    const data = new Uint8Array(buffer);
 
-    for (const file of files) {
+    const pdf = await pdfjsLib.getDocument({
+      data,
+      disableWorker: true
+    }).promise;
 
-      const filePath = path.join(LAW_PATH, file)
+    let pages = [];
 
-      console.log("📄 Processing PDF:", file)
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
 
-      const chunks = await buildLegalChunks(filePath)
+      let text = content.items
+        .map(item => item.str)
+        .join(" ")
+        .replace(/\s+/g, " ")
+        .trim();
 
-      if (Array.isArray(chunks)) {
-        allChunks.push(...chunks)
-      } else {
-        console.warn("⚠️ No chunks returned from:", file)
+      // 🧠 CLEANING RULES (important for Tunisian OCR PDFs)
+      text = cleanText(text);
+
+      // ignore empty or garbage pages
+      if (!text || text.length < 20) continue;
+
+      pages.push({
+        pageNumber: i,
+        text
+      });
+    }
+
+    return pages;
+  } catch (err) {
+    console.error("❌ readLegalPDF error:", err.message);
+    return [];
+  }
+};
+
+/**
+ * 🧹 STRONG LEGAL CLEANING
+ */
+const cleanText = (text) => {
+  return text
+    // remove weird OCR symbols
+    .replace(/[^\u0600-\u06FF0-9a-zA-Z\s\.\,\;\:\(\)\-\n]/g, " ")
+
+    // fix spacing
+    .replace(/\s+/g, " ")
+
+    // fix broken numbers (OCR issue)
+    .replace(/(\d)\s+(\d)/g, "$1$2")
+
+    // remove repeated headers (common in Tunisian PDFs)
+    .replace(/Imprimerie Officielle de la République Tunisienne/g, "")
+
+    .trim();
+};
+
+/**
+ * ✂️ SMART LEGAL CHUNKING
+ */
+export const chunkText = (text, size = 1200) => {
+  if (!text) return [];
+
+  const chunks = [];
+  const sentences = text.split(/[.؟!]/g);
+
+  let current = "";
+
+  for (const sentence of sentences) {
+    const clean = sentence.trim();
+    if (!clean) continue;
+
+    if ((current + clean).length > size) {
+      chunks.push(current.trim());
+      current = clean + ". ";
+    } else {
+      current += clean + ". ";
+    }
+  }
+
+  if (current.trim()) {
+    chunks.push(current.trim());
+  }
+
+  return chunks;
+};
+
+/**
+ * 📚 BUILD FINAL RAG INPUT
+ * (THIS is what your AI uses)
+ */
+export const buildLegalChunks = async (filePath) => {
+  try {
+    const pages = await readLegalPDF(filePath);
+
+    let chunks = [];
+
+    for (const page of pages) {
+      const pageChunks = chunkText(page.text);
+
+      for (let i = 0; i < pageChunks.length; i++) {
+        chunks.push({
+          id: `${filePath}-p${page.pageNumber}-c${i}`,
+          page: page.pageNumber,
+          chunkIndex: i,
+          text: pageChunks[i]
+        });
       }
     }
 
-    console.log("✅ Total chunks loaded:", allChunks.length)
+    console.log(`📦 Built ${chunks.length} chunks from ${filePath}`);
 
-    return allChunks
-
+    return chunks;
   } catch (err) {
-    console.error("❌ loadAllLaws error:", err)
-    return []
+    console.error("❌ buildLegalChunks error:", err.message);
+    return [];
   }
-}
+};
