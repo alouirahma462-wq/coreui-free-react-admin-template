@@ -1,48 +1,43 @@
-/**
- * 📚 LAW CHUNKER (Legal optimized for Arabic + OCR PDFs)
- */
-
-export const chunkLaw = (pages, chunkSize = 800) => {
+export const chunkLaw = (pages) => {
   const chunks = [];
+
+  let current = null;
 
   for (const page of pages) {
     if (!page?.text) continue;
 
-    // تنظيف أولي
-    const text = page.text
-      .replace(/\s+/g, " ")
-      .replace(/\n/g, " ")
-      .trim();
+    const lines = page.text.split(/\n|\r/);
 
-    // تقسيم ذكي حسب الجمل
-    const sentences = text.split(/(?<=[.؟!])\s+/g);
+    for (const line of lines) {
+      const clean = line.trim();
+      if (!clean) continue;
 
-    let current = "";
+      // 🧠 detect article start
+      const isArticle = /(الفصل|المادة|Article)\s*\d+/i.test(clean);
 
-    for (const sentence of sentences) {
-      if (!sentence) continue;
+      if (isArticle) {
+        if (current) chunks.push(current);
 
-      if ((current + sentence).length > chunkSize) {
-        chunks.push({
-          text: current.trim(),
+        current = {
+          text: clean,
           page: page.page,
-          type: "chunk",
-        });
-
-        current = sentence + " ";
+          type: "article",
+        };
       } else {
-        current += sentence + " ";
+        if (!current) {
+          current = {
+            text: clean,
+            page: page.page,
+            type: "paragraph",
+          };
+        } else {
+          current.text += " " + clean;
+        }
       }
     }
-
-    if (current.trim().length > 0) {
-      chunks.push({
-        text: current.trim(),
-        page: page.page,
-        type: "chunk",
-      });
-    }
   }
+
+  if (current) chunks.push(current);
 
   return chunks;
 };
