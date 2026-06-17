@@ -1,7 +1,7 @@
 import { loadPDF } from "./pdfLoader.js";
 import { chunkLaw } from "./chunker.js";
 import { embedText } from "./embeddings.js";
-import { VectorStore } from "./vectorStore.js";
+import { VectorStore } from "../retrieval/vectorStore.js";
 
 class CleanRAG {
   constructor() {
