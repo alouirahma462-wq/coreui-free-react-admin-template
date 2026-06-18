@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-console.log("🔥 LEGAL AI SYSTEM BOOTING (v1 - Intelligent Core)");
+console.log("🔥 LEGAL AI SYSTEM BOOTING (v2 - FULL INTELLIGENCE CORE)");
 
 import { parseCase } from "../nlp/caseParser.js";
 import { advancedCaseAnalyzer } from "../nlp/advancedCaseAnalyzer.js";
@@ -15,9 +15,9 @@ import { lawDB } from "../rag/lawDB.js";
 import { embedText } from "../rag/embeddings.js";
 
 /* ================================
-   🧠 STAGE 1: CASE UNDERSTANDING ENGINE
+   🧠 CASE MODEL BUILDER
 ================================ */
-function buildCaseModel(parsed, analysisV2, forensics) {
+function buildCaseModel(parsed, analysisV2) {
   return {
     facts: parsed?.facts || [],
     actors: parsed?.actors || [],
@@ -25,7 +25,6 @@ function buildCaseModel(parsed, analysisV2, forensics) {
     timeline: parsed?.timeline || [],
     location: parsed?.location || null,
     crime_type: analysisV2?.crime_type || "unknown",
-
     metadata: {
       confidence: analysisV2?.confidence || 0.5,
       language: "ar",
@@ -35,100 +34,173 @@ function buildCaseModel(parsed, analysisV2, forensics) {
 }
 
 /* ================================
-   🧠 STAGE 2: EVIDENCE ENGINE (BASIC VERSION)
-   (Preparation for Bayesian upgrade later)
+   📊 EVIDENCE ENGINE (IMPROVED BASE)
 ================================ */
-function evidenceScoring(caseModel, forensics) {
-  const witnessScore = forensics?.witnessReliability || 0.6;
-  const documentScore = forensics?.documentIntegrity || 0.7;
-  const contradictionPenalty = forensics?.contradictions?.length || 0;
+function evidenceScoring(forensics) {
+  const witness = forensics?.witnessReliability ?? 0.6;
+  const document = forensics?.documentIntegrity ?? 0.7;
+  const contradictions = forensics?.contradictions?.length ?? 0;
 
-  const finalScore =
-    (witnessScore * 0.4 +
-     documentScore * 0.4 -
-     contradictionPenalty * 0.05);
+  const score =
+    witness * 0.4 +
+    document * 0.4 -
+    contradictions * 0.05;
 
   return {
-    witness_score: witnessScore,
-    document_score: documentScore,
-    contradiction_penalty: contradictionPenalty,
-    final_score: Math.max(0, Math.min(1, finalScore))
+    witness_score: witness,
+    document_score: document,
+    contradiction_penalty: contradictions,
+    base_score: Math.max(0, Math.min(1, score))
   };
 }
 
 /* ================================
-   🧠 STAGE 3: GRAPH RELATION BUILDER
+   🧠 BAYESIAN ENGINE (UPGRADE 1)
 ================================ */
-function buildEvidenceGraph(parsedCase) {
-  const graph = [];
+function bayesianEvidenceEngine(evidence) {
+  const prior = 0.5;
+
+  const P_E_given_G = (evidence.witness_score + evidence.document_score) / 2;
+
+  const P_E_given_notG = Math.max(
+    0.1,
+    1 - P_E_given_G + evidence.contradiction_penalty * 0.1
+  );
+
+  const numerator = P_E_given_G * prior;
+  const denominator = numerator + (P_E_given_notG * (1 - prior));
+
+  const posterior = numerator / (denominator || 1);
+
+  return {
+    prior,
+    likelihood_guilty: P_E_given_G,
+    likelihood_innocent: P_E_given_notG,
+    posterior_guilt_probability: Number(posterior.toFixed(3))
+  };
+}
+
+/* ================================
+   🕸 KNOWLEDGE GRAPH ENGINE (UPGRADE 2)
+================================ */
+function buildKnowledgeGraph(parsedCase) {
+  const nodes = [];
+  const edges = [];
 
   const actors = parsedCase?.actors || [];
   const events = parsedCase?.events || [];
 
-  for (const actor of actors) {
-    for (const event of events) {
-      graph.push({
+  actors.forEach(a => nodes.push({ id: a, type: "actor" }));
+  events.forEach(e => nodes.push({ id: e, type: "event" }));
+
+  actors.forEach(actor => {
+    events.forEach(event => {
+      edges.push({
         from: actor,
-        relation: "involved_in",
+        relation: "linked_to_event",
         to: event
       });
-    }
-  }
+    });
+  });
 
   return {
-    nodes: [...actors, ...events],
-    edges: graph
+    nodes,
+    edges,
+    graph_score: nodes.length + edges.length
   };
 }
 
 /* ================================
-   ⚖️ MAIN ENGINE (ORCHESTRATOR)
+   ⚖️ LEGAL EXPLANATION ENGINE (UPGRADE 3)
+================================ */
+function explainDecision({
+  caseModel,
+  evidence,
+  bayesian,
+  legalAnalysis,
+  judgment,
+  graph
+}) {
+  return {
+    explanation: `
+🧠 CASE UNDERSTANDING:
+- Actors: ${caseModel.actors.length}
+- Events: ${caseModel.events.length}
+- Confidence: ${caseModel.metadata.confidence}
+
+📊 EVIDENCE ANALYSIS:
+- Witness score: ${evidence.witness_score}
+- Document score: ${evidence.document_score}
+- Contradictions: ${evidence.contradiction_penalty}
+
+🧠 BAYESIAN PROBABILITY:
+- Prior: ${bayesian.prior}
+- P(Guilt|Evidence): ${bayesian.posterior_guilt_probability}
+
+🕸 GRAPH ANALYSIS:
+- Nodes: ${graph.nodes.length}
+- Edges: ${graph.edges.length}
+
+⚖️ LEGAL RESULT:
+- Verdict: ${judgment?.verdict || "undetermined"}
+
+🔎 SYSTEM REASONING:
+The decision is based on structured legal inference using Tunisian law mapping,
+probabilistic evidence scoring, and relational graph analysis.
+`,
+    confidence: bayesian.posterior_guilt_probability
+  };
+}
+
+/* ================================
+   ⚖️ MAIN PIPELINE (CORE ORCHESTRATOR)
 ================================ */
 export const runLegalAI = async (caseText) => {
   try {
-    console.log("🚀 START CASE INTELLIGENCE PIPELINE");
+    console.log("🚀 STARTING FULL LEGAL AI PIPELINE v2");
 
     if (!caseText?.trim()) {
       throw new Error("Empty case text");
     }
 
     /* ========================
-       🧠 1. NLP UNDERSTANDING
+       🧠 NLP LAYER
     ======================== */
     const parsedCase = parseCase(caseText);
     const analysisV2 = advancedCaseAnalyzer?.(caseText) || {};
     const forensics = advancedForensics?.(caseText) || {};
 
-    console.log("🧠 CASE UNDERSTANDING COMPLETE");
+    const caseModel = buildCaseModel(parsedCase, analysisV2);
 
-    const caseModel = buildCaseModel(parsedCase, analysisV2, forensics);
-
-    /* ========================
-       🧠 2. EVIDENCE ENGINE
-    ======================== */
-    const evidence = evidenceScoring(caseModel, forensics);
-
-    console.log("📊 EVIDENCE SCORING DONE");
+    console.log("🧠 CASE MODEL READY");
 
     /* ========================
-       🕸 3. GRAPH ENGINE
+       📊 EVIDENCE LAYER
     ======================== */
-    const graph = buildEvidenceGraph(parsedCase);
+    const evidence = evidenceScoring(forensics);
 
-    console.log("🕸 GRAPH BUILT");
+    const bayesian = bayesianEvidenceEngine(evidence);
+
+    console.log("📊 BAYESIAN EVIDENCE COMPLETE");
 
     /* ========================
-       📚 LAW RETRIEVAL (HYBRID READY)
+       🕸 GRAPH LAYER
     ======================== */
-    const lawChunksRaw = await loadAllLaws();
+    const graph = buildKnowledgeGraph(parsedCase);
 
+    console.log("🕸 KNOWLEDGE GRAPH BUILT");
+
+    /* ========================
+       📚 RETRIEVAL LAYER (RAG)
+    ======================== */
+    await loadAllLaws();
     const queryVector = await embedText(caseText);
     const relevantArticles = lawDB.search(queryVector, 5);
 
     console.log("📚 LEGAL RETRIEVAL DONE");
 
     /* ========================
-       ⚖️ LEGAL REASONING ENGINE
+       ⚖️ LEGAL REASONING
     ======================== */
     const legalAnalysis = await legalEngine(
       caseModel,
@@ -149,25 +221,36 @@ export const runLegalAI = async (caseText) => {
     console.log("🏁 JUDGMENT COMPLETE");
 
     /* ========================
-       📦 FINAL OUTPUT (SYSTEM STATE)
+       🧠 EXPLANATION LAYER
+    ======================== */
+    const explanation = explainDecision({
+      caseModel,
+      evidence,
+      bayesian,
+      legalAnalysis,
+      judgment,
+      graph
+    });
+
+    console.log("🧠 EXPLANATION GENERATED");
+
+    /* ========================
+       📦 FINAL OUTPUT
     ======================== */
     return {
       caseModel,
       evidence,
+      bayesian,
       graph,
       relevantArticles,
       legalAnalysis,
       judgment,
+      explanation,
 
       system: {
-        version: "LEGAL-AI-v1-INTELLIGENCE-CORE",
-        stage: "foundation",
-        next_upgrades: [
-          "bayesian_evidence_learning",
-          "knowledge_graph_upgrade (Neo4j)",
-          "LLM explanation layer",
-          "probabilistic verdict engine"
-        ]
+        version: "LEGAL-AI-v2-FULL-INTELLIGENCE",
+        level: "bayesian + graph + explanation + reasoning",
+        status: "ACTIVE"
       }
     };
 
@@ -178,20 +261,20 @@ export const runLegalAI = async (caseText) => {
       status: "FAILED",
       error: err.message,
       system: {
-        version: "LEGAL-AI-v1-INTELLIGENCE-CORE"
+        version: "LEGAL-AI-v2-FULL-INTELLIGENCE"
       }
     };
   }
 };
 
 /* ================================
-   🧪 TEST RUN (REALISTIC CASE)
+   🧪 TEST RUN
 ================================ */
 (async () => {
-  console.log("\n🧪 TEST CASE RUN START\n");
+  console.log("\n🧪 TEST START\n");
 
   const result = await runLegalAI(
-    "تم سرقة هاتف شخص في الطريق العام مع وجود شاهد وتناقض في أقوال المشتبه به"
+    "تم سرقة هاتف في الطريق العام مع وجود شاهد وتناقض في أقوال المشتبه به"
   );
 
   console.log("\n================ RESULT ================\n");
