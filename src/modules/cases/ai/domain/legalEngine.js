@@ -1,4 +1,4 @@
-import { ai } from "./client.js";
+import { ai } from "../services/client.js"
 
 export const legalEngine = async (
   caseText,
