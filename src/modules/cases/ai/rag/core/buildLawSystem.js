@@ -1,4 +1,4 @@
-import { readLegalPDF } from "../pdfReader.js";
+import { readLegalPDF } from "../../ingestion/pdfReader.js";
 
 /**
  * 📚 STEP 1: Extract clean articles
