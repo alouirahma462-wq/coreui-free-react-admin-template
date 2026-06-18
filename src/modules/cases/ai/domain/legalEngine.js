@@ -1,4 +1,5 @@
-import { ai } from "../services/client.js"
+import { ai } from "../services/client.js";
+import { getSimilarCases, storeCaseOutcome } from "../core/caseMemory.js";
 
 export const legalEngine = async (
   caseText,
@@ -6,176 +7,297 @@ export const legalEngine = async (
   forensics = null
 ) => {
   try {
-    console.log("📌 LEGAL ENGINE START (CLEAN WESTLAW RAG v7)");
+    console.log("📌 LEGAL ENGINE v10 FINAL DECISION MODE");
 
-    // ─────────────────────────────
-    // 🧠 ARTICLE ENGINE (STRUCTURE FIXED)
-    // ─────────────────────────────
-    const structuredArticles = (articles || [])
-      .filter((a) => a?.text)
-      .map((a, index) => {
-        const match =
-          a.text.match(/(الفصل|المادة|Article)\s*\d+/i)?.[0] ||
-          "UNKNOWN_ARTICLE";
+    if (!caseText) throw new Error("MISSING_CASE");
 
-        return {
-          id: index + 1,
-          article: match,
-          text: a.text.trim(),
-        };
-      });
-
-    const context = structuredArticles
-      .map((a) => `📜 [${a.article}] ${a.text}`)
-      .join("\n\n--------------------\n\n");
-
-    const safeContext =
-      context && context.length > 0
-        ? context
-        : "⚠️ NO RAG DATA FOUND IN LEGAL DATABASE";
-
-    // ─────────────────────────────
-    // 🧠 FORENSICS BLOCK (SAFE)
-    // ─────────────────────────────
-    const forensicBlock = forensics
-      ? `
-════════ FORENSIC ANALYSIS ════════
-
-👥 الأطراف:
-${forensics.actors?.join(", ") || "غير محدد"}
-
-⏱️ الأحداث:
-${(forensics.events || []).join("\n") || "غير متوفر"}
-
-🔎 الأدلة:
-${(forensics.evidence || []).join("\n") || "غير متوفر"}
-
-⚠️ التناقضات:
-${JSON.stringify(forensics.contradictions || [], null, 2)}
-
-📊 المصداقية:
-${forensics.credibilityScore ?? "غير محسوب"}
-
-══════════════════════════════
-`
-      : "NO FORENSIC DATA";
-
-    // ─────────────────────────────
-    // ⚖️ FINAL LEGAL PROMPT (STABLE + NO HALLUCINATION)
-    // ─────────────────────────────
-    const prompt = `
-You are a Tunisian Legal AI System (WESTLAW RAG v7).
-
-────────────────────────────
-RULES (STRICT)
-────────────────────────────
-- Use ONLY provided RAG text
-- NEVER invent articles
-- If missing → "غير متوفر في قاعدة البيانات"
-- No external law
-- No hallucination
-
-────────────────────────────
-CASE
-────────────────────────────
-${caseText}
-
-────────────────────────────
-RAG ARTICLES
-────────────────────────────
-${safeContext}
-
-────────────────────────────
-FORENSICS
-────────────────────────────
-${forensicBlock}
-
-────────────────────────────
-TASK
-────────────────────────────
-1. Extract legal articles
-2. Link each article to facts
-3. Explain legal reasoning
-4. Give verdict probability
-
-────────────────────────────
-OUTPUT FORMAT
-────────────────────────────
-
-A) COURT REPORT (Arabic)
-- الوقائع
-- المواد القانونية المستخدمة
-- تحليل قانوني واضح
-- التعليل
-
-B) ARTICLE MAP
-Format:
-- المادة → النص → السبب → العلاقة بالقضية
-
-C) JSON OUTPUT
-
-{
-  "case_type": "",
-  "crime_category": "",
-  "articles_used": [
-    {
-      "article": "",
-      "text": "",
-      "reason": ""
-    }
-  ],
-  "legal_mapping": "",
-  "evidence_score": {
-    "low": 0,
-    "medium": 0,
-    "high": 0
-  },
-  "guilt_probability": 0,
-  "confidence_score": 0,
-  "verdict": "",
-  "risk_level": "LOW | MEDIUM | HIGH",
-  "rag_mode": "WESTLAW_RAG_V7"
-}
-
-────────────────────────────
-FINAL RULE
-────────────────────────────
-If no article found:
-→ return "غير متوفر في RAG"
-`;
-
-    console.log("📡 CALLING AI (CLEAN RAG V7)...");
-
-    const response = await ai(prompt, {
-      temperature: 0.05,
+    // ================================
+    // 🧠 CASE MEMORY
+    // ================================
+    const memoryCases = getSimilarCases({
+      crime_type: caseText,
+      actors: forensics?.actors,
+      evidence: forensics?.evidence,
     });
 
-    if (!response || response.length < 20) {
-      return {
-        success: false,
-        error: "EMPTY_AI_RESPONSE",
-      };
-    }
+    const memoryContext =
+      memoryCases.length > 0
+        ? memoryCases
+            .slice(0, 3)
+            .map(
+              (m) =>
+                `🧠 PREVIOUS CASE → ${m.outcome} | confidence ${m.confidence}`
+            )
+            .join("\n")
+        : "NO_RELEVANT_MEMORY";
+
+    // ================================
+    // 📚 RAG ARTICLES
+    // ================================
+    const structuredArticles = (articles || [])
+      .filter((a) => a?.text)
+      .map((a, i) => {
+        const article =
+          a.text.match(/(الفصل|المادة|Article)\s*\d+/i)?.[0] ||
+          "UNKNOWN";
+
+        return {
+          id: i,
+          article,
+          text: a.text,
+          score: scoreArticle(a.text, caseText),
+        };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8);
+
+    const context = structuredArticles
+      .map((a) => `📜 ${a.article}\n${a.text}`)
+      .join("\n\n---\n\n");
+
+    // ================================
+    // 🧠 FORENSICS
+    // ================================
+    const forensicBlock = buildForensics(forensics);
+
+    // ================================
+    // ⚖️ SUPREME COURT SIMULATION
+    // ================================
+    const judges = await Promise.all([
+      runJudge("PROSECUTION", caseText, context, forensicBlock),
+      runJudge("DEFENSE", caseText, context, forensicBlock),
+      runJudge("NEUTRAL", caseText, context, forensicBlock),
+    ]);
+
+    const synthesis = synthesizeJudges(judges);
+
+    // ================================
+    // 🧠 FINAL META JUDGE
+    // ================================
+    const prompt = `
+You are FINAL SUPREME COURT META JUDGE.
+
+You MUST produce structured judgment data ONLY.
+
+CASE:
+${caseText}
+
+JUDGES:
+${JSON.stringify(judges, null, 2)}
+
+SYNTHESIS:
+${JSON.stringify(synthesis, null, 2)}
+
+Return ONLY JSON:
+
+{
+  "verdict": "",
+  "confidence": 0,
+  "legal_strength": "LOW | MEDIUM | HIGH",
+  "agreement_level": 0,
+  "risk_level": "LOW | MEDIUM | HIGH",
+  "reasoning": "string",
+  "decision_type": "CONSENSUS | SPLIT | CONFLICT"
+}
+`;
+
+    const response = await ai(prompt, { temperature: 0.01 });
+
+    const parsed = safeParse(response);
+    if (!parsed) return { success: false, error: "PARSE_FAILED" };
+
+    const validated = validate(parsed);
+
+    // ================================
+    // 🧠 🔥 DECISION COMPILER (NEW CORE UPGRADE)
+    // ================================
+    const finalDecision = compileFinalDecision(validated, judges, synthesis);
+
+    // ================================
+    // 🧠 LEARNING LOOP
+    // ================================
+    storeCaseOutcome(
+      {
+        crime_type: caseText,
+        actors: forensics?.actors,
+        evidence: forensics?.evidence,
+      },
+      {
+        verdict: finalDecision.verdict,
+        probability: finalDecision.confidence / 100,
+      }
+    );
 
     return {
       success: true,
-      analysis: response,
+
+      // 🔥 FINAL COURT OUTPUT (NOT JUST ANALYSIS)
+      judgment: finalDecision,
+
+      court: {
+        judges,
+        synthesis,
+        meta_judgment: validated,
+      },
+
       meta: {
-        engine: "WESTLAW_RAG_V7_CLEAN",
+        engine: "LEXIS_V10_FINAL_DECISION",
         features: [
-          "RAG_ONLY",
-          "ARTICLE_ENGINE",
-          "NO_HALLUCINATION",
-          "LEGAL_MAPPING",
+          "MULTI_JUDGE_SYSTEM",
+          "DECISION_COMPILER",
+          "CONSENSUS_RESOLUTION",
+          "LEARNING_LOOP",
         ],
       },
     };
   } catch (err) {
-    console.error("❌ legalEngine error:", err.message);
-
-    return {
-      success: false,
-      error: err.message,
-    };
+    return { success: false, error: err.message };
   }
 };
+
+/* ================================
+   ⚖️ 🔥 FINAL DECISION COMPILER (CORE UPGRADE)
+================================ */
+function compileFinalDecision(meta, judges, synthesis) {
+  const votes = synthesis.votes;
+
+  const confidenceBoost =
+    synthesis.agreement_level > 0.6 ? 10 : -10;
+
+  const finalConfidence = Math.max(
+    0,
+    Math.min(100, meta.confidence + confidenceBoost)
+  );
+
+  // 🧠 Majority rule enforcement
+  let verdict = Object.keys(votes).reduce((a, b) =>
+    votes[a] > votes[b] ? a : b
+  );
+
+  // ⚖️ conflict override
+  if (synthesis.agreement_level < 0.5) {
+    verdict = "CONFLICTING_EVIDENCE";
+  }
+
+  return {
+    verdict,
+    confidence: finalConfidence,
+    strength: meta.legal_strength,
+    agreement: synthesis.agreement_level,
+    decision_type: meta.decision_type,
+
+    // 🔥 REAL COURT OUTPUT
+    ruling: `
+FINAL COURT DECISION:
+
+- Verdict: ${verdict}
+- Confidence: ${finalConfidence}%
+- Agreement: ${synthesis.agreement_level}
+- Legal Strength: ${meta.legal_strength}
+- Decision Type: ${meta.decision_type}
+    `.trim(),
+  };
+}
+
+/* ================================
+   ⚖️ JUDGE RUNNER
+================================ */
+async function runJudge(role, caseText, context, forensic) {
+  const prompt = `
+${role} Judge.
+
+Return JSON ONLY:
+{
+  "vote": "GUILTY | NOT_GUILTY | UNCERTAIN",
+  "confidence": 0-100,
+  "reason": "string",
+  "key_factors": ["string"]
+}
+
+CASE:
+${caseText}
+
+ARTICLES:
+${context}
+
+FORENSICS:
+${forensic}
+`;
+
+  const res = await ai(prompt, { temperature: 0.02 });
+  const parsed = safeParse(res);
+
+  return (
+    parsed || {
+      vote: "UNCERTAIN",
+      confidence: 40,
+      reason: "parse_failed",
+      key_factors: [],
+    }
+  );
+}
+
+/* ================================
+   🧠 SYNTHESIS ENGINE
+================================ */
+function synthesizeJudges(judges) {
+  const votes = { GUILTY: 0, NOT_GUILTY: 0, UNCERTAIN: 0 };
+  let confidence = 0;
+
+  for (const j of judges) {
+    votes[j.vote] = (votes[j.vote] || 0) + 1;
+    confidence += j.confidence || 0;
+  }
+
+  return {
+    votes,
+    agreement_level:
+      Math.max(...Object.values(votes)) / judges.length,
+    avg_confidence: Math.round(confidence / judges.length),
+  };
+}
+
+/* ================================
+   📚 ARTICLE SCORING
+================================ */
+function scoreArticle(text, query) {
+  let score = 0;
+  if (/قانون|جريمة|crime|law/i.test(text)) score += 0.4;
+  if (text.length > 400) score += 0.2;
+  if (query && text.includes(query)) score += 0.4;
+  return score;
+}
+
+/* ================================
+   🧠 FORENSIC BUILDER
+================================ */
+function buildForensics(f) {
+  if (!f) return "NO_FORENSIC_DATA";
+
+  return `
+Actors: ${f.actors?.join(", ") || "N/A"}
+Events: ${f.events?.join(", ") || "N/A"}
+Evidence: ${f.evidence?.join(", ") || "N/A"}
+Contradictions: ${JSON.stringify(f.contradictions || [])}
+`;
+}
+
+/* ================================
+   🧾 SAFE PARSER
+================================ */
+function safeParse(text) {
+  try {
+    return JSON.parse(text.replace(/```json/g, "").replace(/```/g, "").trim());
+  } catch {
+    return null;
+  }
+}
+
+/* ================================
+   ⚖️ VALIDATION
+================================ */
+function validate(data) {
+  data.confidence = Math.max(0, Math.min(100, data.confidence || 50));
+  if (!data.verdict) data.verdict = "UNCERTAIN";
+  return { ...data, validated: true };
+}
