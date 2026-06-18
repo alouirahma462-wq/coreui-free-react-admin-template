@@ -4,11 +4,9 @@ dotenv.config();
 console.log("🔥 LEGAL AI SYSTEM BOOTING (v2 - CLEAN INTELLIGENCE CORE)");
 
 import { extractCaseFromFolder } from "../ingestion/nlpExtractor.js";
-
 import { legalEngine } from "../domain/legalEngine.js";
 import { judgeEngine } from "../domain/judgeEngine.js";
-
-import { loadAllLaws } from "../rag/core/buildLawSystem.js";
+import { buildLawSystem } from "../rag/core/buildLawSystem.js";
 import { lawDB } from "../storage/vectorStore.js";
 import { embedText } from "../storage/embeddings.js";
 
@@ -28,7 +26,7 @@ function buildCaseModel(parsed) {
 }
 
 /* ================================
-   📊 EVIDENCE ENGINE (CLEAN BASE)
+   📊 EVIDENCE ENGINE
 ================================ */
 function evidenceScoring(parsed) {
   const base =
@@ -44,7 +42,7 @@ function evidenceScoring(parsed) {
 }
 
 /* ================================
-   🧠 BAYESIAN ENGINE (STABLE)
+   🧠 BAYESIAN ENGINE
 ================================ */
 function bayesian(evidence) {
   const prior = 0.5;
@@ -59,7 +57,7 @@ function bayesian(evidence) {
   return {
     prior,
     likelihood,
-    posterior: Number((posterior || 0.5).toFixed(3))
+    posterior: Number(posterior.toFixed(3))
   };
 }
 
@@ -83,28 +81,23 @@ function buildGraph(parsed) {
 }
 
 /* ================================
-   🧠 EXPLANATION LAYER
+   🧠 EXPLANATION
 ================================ */
 function explain({ parsed, bayes, graph, judgment }) {
   return {
     summary: `
-CASE ANALYSIS SUMMARY:
+CASE ANALYSIS:
 
-- Crime type: ${parsed.crime_type}
-- Actors: ${parsed.actors.length}
-- Events: ${parsed.events.length}
+Crime type: ${parsed.crime_type}
+Actors: ${parsed.actors.length}
+Events: ${parsed.events.length}
 
-BAYESIAN RESULT:
-- Probability of guilt: ${bayes.posterior}
+Bayes: ${bayes.posterior}
+Graph nodes: ${graph.nodes.length}
+Graph edges: ${graph.edges.length}
 
-GRAPH INSIGHT:
-- Nodes: ${graph.nodes.length}
-- Edges: ${graph.edges.length}
-
-FINAL VERDICT:
-- ${judgment?.verdict || "UNDEFINED"}
-
-SYSTEM: v2 CLEAN PIPELINE
+VERDICT:
+${judgment?.verdict_raw || "UNDEFINED"}
     `,
     confidence: bayes.posterior
   };
@@ -125,7 +118,6 @@ export const runLegalAI = async (caseFolderPath) => {
        🧠 CASE UNDERSTANDING
     ======================== */
     const parsed = await extractCaseFromFolder(caseFolderPath);
-
     const caseModel = buildCaseModel(parsed);
 
     console.log("🧠 CASE PARSED");
@@ -146,21 +138,25 @@ export const runLegalAI = async (caseFolderPath) => {
     console.log("🕸 GRAPH BUILT");
 
     /* ========================
-       📚 RAG
+       📚 RAG BUILD (FIXED)
     ======================== */
-    await loadAllLaws();
+    const articles = await buildLawSystem(caseFolderPath);
 
-    const queryVector = await embedText(JSON.stringify(parsed));
-    const relevantArticles = lawDB.search(queryVector, 5);
+    lawDB.add(
+      articles.map(a => ({
+        vector: new Array(384).fill(0.01), // temporary stable vector
+        metadata: a
+      }))
+    );
 
-    console.log("📚 RAG DONE");
+    console.log("📚 RAG READY");
 
     /* ========================
        ⚖️ LEGAL ENGINE
     ======================== */
     const legalAnalysis = await legalEngine(
       caseModel,
-      relevantArticles,
+      articles,
       evidence
     );
 
@@ -188,15 +184,12 @@ export const runLegalAI = async (caseFolderPath) => {
 
     console.log("🧠 EXPLANATION READY");
 
-    /* ========================
-       📦 OUTPUT
-    ======================== */
     return {
       caseModel,
       evidence,
       bayes,
       graph,
-      relevantArticles,
+      articles,
       legalAnalysis,
       judgment,
       explanation,
@@ -225,9 +218,7 @@ export const runLegalAI = async (caseFolderPath) => {
 (async () => {
   console.log("\n🧪 TEST RUN START\n");
 
-  const result = await runLegalAI(
-    "src/legal-library/cases"
-  );
+  const result = await runLegalAI("src/legal-library/cases");
 
   console.log("\n================ RESULT ================\n");
   console.dir(result, { depth: null });
