@@ -1,0 +1,17 @@
+src/modules/cases/ai/forensics/advancedForensics.js
+src/modules/cases/ai/engine/judgeEngine.js
+src/modules/cases/ai/legalEngine.js
+src/modules/cases/ai/pdfReader.js
+src/modules/cases/ai/client.js
+src/modules/cases/ai/nlp/advancedCaseAnalyzer.js
+src/modules/cases/ai/nlp/caseParser.js
+src/modules/cases/ai/runLegalAI.js
+src/modules/cases/ai/rag/search.js
+src/modules/cases/ai/rag/lawSearch.js
+src/modules/cases/ai/rag/articleExtractor.js
+src/modules/cases/ai/rag/buildIndex.js
+src/modules/cases/ai/rag/lawLoader.js
+src/modules/cases/ai/rag/lawDB.js
+src/modules/cases/ai/rag/embeddings.js
+src/modules/cases/ai/rag/vectorStore.js
+src/modules/cases/ai/tests/test-ai.js

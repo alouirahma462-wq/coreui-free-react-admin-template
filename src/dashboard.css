@@ -1,0 +1,133 @@
+/* =====================================================
+   🏛️ DASHBOARD FINAL COREUI STABLE FIX
+===================================================== */
+
+/* ================= ROOT DASHBOARD ================= */
+
+.dashboard {
+  font-family: var(--cui-font-sans-serif);
+  line-height: 1.5;
+
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
+/* ================= HEADER ================= */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background: #0f172a;
+  color: white;
+}
+
+/* ================= LAYOUT ================= */
+
+.layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar {
+  width: 220px;
+  background: #111827;
+  color: white;
+  padding: 10px;
+}
+
+/* ================= MAIN ================= */
+
+.main {
+  flex: 1;
+  padding: 10px;
+  background: #f3f4f6;
+
+  line-height: 1.5;
+
+  min-width: 0;
+  overflow-y: auto;
+}
+
+/* ================= RIGHT PANEL ================= */
+
+.rightPanel {
+  width: 220px;
+  background: #111827;
+  color: white;
+  padding: 10px;
+}
+
+/* ================= COURT CARD ================= */
+
+.courtCard {
+  background: #1f2937;
+  margin: 8px 0;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+/* ================= CARDS ================= */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.card {
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+/* ================= PRIORITY COLORS ================= */
+
+.high { color: #ef4444; }
+.medium { color: #f59e0b; }
+.low { color: #22c55e; }
+
+/* ================= MODAL ================= */
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 90%;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar,
+  .rightPanel {
+    width: 100%;
+  }
+
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+

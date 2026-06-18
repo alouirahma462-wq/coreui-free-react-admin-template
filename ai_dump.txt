@@ -1,0 +1,1143 @@
+==============================
+FILE: src/modules/cases/ai/forensics/advancedForensics.js
+==============================
+export const advancedForensics = (text) => {
+
+  const sentences = text.split(/\n|\.|،/g).filter(s => s.trim())
+
+  const actors = new Set()
+  const events = []
+  const evidence = []
+  const contradictions = []
+
+  let lastMention = null
+
+  for (const s of sentences) {
+
+    // 👥 actors
+    if (s.includes("قال") || s.includes("صرّح")) {
+      actors.add("شاهد")
+    }
+
+    // 🔎 evidence
+    if (s.includes("تم العثور") || s.includes("سلاح") || s.includes("دليل")) {
+      evidence.push(s.trim())
+    }
+
+    // ⏱ timeline
+    if (s.includes("في") || s.includes("يوم") || s.includes("سنة")) {
+      events.push(s.trim())
+    }
+
+    // ⚠️ simple contradiction detection
+    if (lastMention && s.includes("لكن") || s.includes("غير")) {
+      contradictions.push({
+        from: lastMention,
+        to: s.trim()
+      })
+    }
+
+    lastMention = s
+  }
+
+  return {
+    actors: Array.from(actors),
+    events,
+    evidence,
+    contradictions,
+    credibilityScore: evidence.length - contradictions.length
+  }
+}
+
+
+
+==============================
+FILE: src/modules/cases/ai/engine/judgeEngine.js
+==============================
+import { ai } from "../client.js"
+
+export const judgeEngine = async (caseText, analysis) => {
+  try {
+
+    console.log("⚖️ JUDGE ENGINE START (LEXIS v7 UPGRADED STYLE)")
+
+    const prompt = `
+You are an advanced European + Tunisian Supreme Criminal Court Judge AI (LexisNexis v7 Judicial System).
+
+You do NOT summarize.
+You DO NOT re-analyze evidence.
+You ONLY perform FINAL judicial decision synthesis based on provided legal analysis.
+
+────────────────────────────
+ROLE DEFINITION
+────────────────────────────
+- Supreme Criminal Court Judge (EU + Tunisian hybrid system)
+- Final decision authority engine
+- Legal reasoning validator
+- Evidence-based verdict synthesizer
+- Bayesian decision confirmer (not recalculator)
+
+────────────────────────────
+INPUTS
+────────────────────────────
+
+🧾 CASE:
+${caseText}
+
+📊 LEGAL ANALYSIS (DO NOT REINTERPRET):
+${analysis}
+
+────────────────────────────
+STRICT RULES (NON-NEGOTIABLE)
+────────────────────────────
+1. Do NOT add new facts.
+2. Do NOT re-evaluate evidence.
+3. Only use what exists in analysis.
+4. If analysis is weak → downgrade confidence.
+5. Never hallucinate laws or articles.
+6. Follow EU + Tunisian criminal law principles.
+7. Maintain strict judicial neutrality.
+8. Decision must be logically consistent with analysis ONLY.
+
+────────────────────────────
+JUDICIAL DECISION LAYER (LEXIS v7)
+────────────────────────────
+
+You act as FINAL COURT FILTER:
+
+- Validate evidence coherence
+- Validate Bayesian probability (if present)
+- Validate witness credibility consistency
+- Validate legal classification correctness
+- Detect contradictions between reasoning steps
+
+────────────────────────────
+OUTPUT FORMAT (MANDATORY)
+────────────────────────────
+
+1. FINAL CASE SYNTHESIS
+(One paragraph judicial summary ONLY based on analysis)
+
+2. VALIDATION OF LEGAL ANALYSIS
+- Strength: LOW / MEDIUM / HIGH
+- Consistency score (0–100)
+- Logical coherence check
+
+3. FINAL FACTUAL CONFIRMATION
+- Confirmed facts from analysis only
+
+4. FINAL LEGAL QUALIFICATION
+- EU / Tunisian classification confirmation
+- Severity: low / medium / high / critical
+
+5. FINAL VERDICT (ONLY ONE)
+- GUILTY
+- NOT_GUILTY
+- PROBABLE_GUILT
+- INSUFFICIENT_PROOF
+
+6. BAYESIAN CONFIRMATION SCORE
+- Final probability (0.00 - 1.00)
+- Adjusted confidence after judicial review
+
+7. SENTENCING SUMMARY
+- 2–4 lines judicial ruling explanation
+
+8. KEY DECISION FACTORS
+- strongest supporting evidence
+- weakest points
+- contradictions impact
+
+9. DOUBT ASSESSMENT
+- legal uncertainty level
+- missing critical elements
+
+10. FINAL CONFIDENCE SCORE (0–100)
+
+────────────────────────────
+LEXISNEXIS v7 JUDICIAL LAYER
+────────────────────────────
+This engine acts as:
+
+⚖️ Judicial Consistency Validator
+🧠 Bayesian Output Checker (not generator)
+🔍 Evidence coherence auditor
+📊 Decision reliability scorer
+📁 Legal reasoning compliance filter
+
+────────────────────────────
+STYLE REQUIREMENTS
+────────────────────────────
+- Formal Supreme Court tone
+- No repetition
+- No emotional language
+- Extremely precise judicial reasoning
+- Minimal but powerful output
+`
+
+    console.log("📡 CALLING AI v7 JUDGE...")
+
+    const res = await ai(prompt)
+
+    console.log("📡 AI RESPONSE RECEIVED")
+
+    if (!res || res.length < 20) {
+      return {
+        success: false,
+        error: "EMPTY_JUDGMENT"
+      }
+    }
+
+    return {
+      success: true,
+      verdict_raw: res,
+      meta: {
+        engine: "LEXISNEXIS-JUDGE-V7",
+        mode: "EU+TUNISIAN_SUPREME_FILTER_LAYER"
+      }
+    }
+
+  } catch (err) {
+    console.error("❌ judgeEngine v7 error:", err.message)
+
+    return {
+      success: false,
+      error: err.message
+    }
+  }
+}
+
+
+
+==============================
+FILE: src/modules/cases/ai/legalEngine.js
+==============================
+import { ai } from "./client.js";
+
+export const legalEngine = async (caseText, articles = [], forensics = null) => {
+  try {
+
+    console.log("📌 LEGAL ENGINE START (TUNISIAN PRO MAX REAL RAG v5)");
+
+    // 🧠 Build legal context from PDF extraction (RAG INPUT)
+    const context = (articles || [])
+      .filter(a => a?.text)
+      .map(a => `📜 ${a.text.trim()}`)
+      .join("\n\n--------------------\n\n");
+
+    const safeContext =
+      context && context.length > 0
+        ? context
+        : "⚠️ RAG EMPTY - NO PDF LEGAL TEXT LOADED (code-penal.pdf / ProcedurepenaleArabe.pdf / manuel_proced_trib_1instance.pdf)";
+
+    // 🧠 Forensics block
+    const forensicBlock = forensics
+      ? `
+════════ FORENSIC ANALYSIS ════════
+
+👥 الأطراف:
+${forensics.actors?.join(", ") || "غير محدد"}
+
+⏱️ الأحداث:
+${(forensics.events || []).join("\n")}
+
+🔎 الأدلة:
+${(forensics.evidence || []).join("\n")}
+
+⚠️ التناقضات:
+${JSON.stringify(forensics.contradictions || [], null, 2)}
+
+📊 مصداقية الملف:
+${forensics.credibilityScore ?? "غير محسوب"}
+
+══════════════════════════════
+`
+      : "لا يوجد تحليل جنائي متقدم";
+
+    // ⚖️ PRO MAX REAL RAG LEGAL PROMPT (100% SYSTEM)
+    const prompt = `
+You are a Tunisian Criminal Court Judge AI (PRO MAX REAL RAG 100% SYSTEM).
+
+────────────────────────────────────────
+📚 REAL RAG LEGAL ARCHITECTURE (ACTIVE)
+────────────────────────────────────────
+You operate using a REAL retrieval system built on:
+
+- code-penal.pdf (Tunisian Penal Code)
+- ProcedurepenaleArabe.pdf (Criminal Procedure Code)
+- manuel_proced_trib_1instance.pdf (Court Procedures)
+
+SYSTEM COMPONENTS (LOGICAL ONLY):
+✔ PDF parsing engine (text extraction)
+✔ Vector database (FAISS / cosine similarity)
+✔ Semantic search (legal paragraph retrieval)
+✔ Case precedent memory (historical matching)
+
+IMPORTANT:
+- You MUST assume retrieval happened BEFORE you answer
+- You only see FINAL retrieved text (not raw system)
+
+────────────────────────────────────────
+⚖️ STRICT LEGAL RULES (NON NEGOTIABLE)
+────────────────────────────────────────
+1. ONLY Tunisian law is allowed
+2. NEVER use EU / foreign law
+3. NEVER invent legal article numbers
+4. If article missing:
+   → "المادة غير متوفرة في قاعدة البيانات القانونية"
+5. NEVER hallucinate legal databases
+6. NEVER fabricate FAISS / embeddings / graphs outputs
+7. If asked:
+   → "المحاكاة غير متوفرة في نظام RAG"
+
+────────────────────────────────────────
+🧠 REAL CRIME → LEGAL MAPPING ENGINE
+────────────────────────────────────────
+Use ONLY if supported by retrieved text:
+
+- السرقة → theft under Tunisian Penal Code principles
+- الاعتداء → violence / assault
+- التحيل → fraud
+- التهديد → threat
+
+If no match → "تصنيف جنائي عام وفق المبادئ التونسية"
+
+────────────────────────────────────────
+📊 REAL SCORING ENGINE
+────────────────────────────────────────
+Evidence scoring:
+
+- LOW (0–40) → weak / indirect evidence
+- MEDIUM (41–70) → partial proof
+- HIGH (71–100) → strong direct proof
+
+Guilt probability:
+→ MUST be computed ONLY from evidence strength
+
+────────────────────────────────────────
+🧠 CASE INPUT
+────────────────────────────────────────
+${caseText}
+
+────────────────────────────────────────
+📚 RAG RETRIEVED LEGAL CONTEXT
+────────────────────────────────────────
+${safeContext}
+
+${forensicBlock}
+
+────────────────────────────────────────
+🚨 OUTPUT MODE (DUAL SYSTEM)
+────────────────────────────────────────
+
+You MUST return:
+
+1) ARABIC COURT REPORT (STRICT 16 SECTIONS)
+2) JSON STRUCTURED OUTPUT (FOR REACT DASHBOARD)
+
+────────────────────────────────────────
+📄 COURT REPORT (MUST KEEP ORDER)
+────────────────────────────────────────
+1. ملخص القضية
+2. الوقائع
+3. التحليل القانوني
+4. الأطراف
+5. التسلسل الزمني
+6. تقييم الأدلة
+7. التحليل الجنائي
+8. التكييف القانوني التونسي (بدون أرقام مواد إلا إذا موجودة في النص)
+9. التعليل القضائي
+10. احتمال الإدانة
+11. مخطط القضية
+12. قرار الاتهام
+13. مطابقة السوابق القانونية
+14. لوحة القضية
+15. الحكم النهائي
+16. نسبة الثقة
+
+────────────────────────────────────────
+📊 JSON OUTPUT SCHEMA (STRICT)
+────────────────────────────────────────
+Return EXACT JSON:
+
+{
+  "case_type": "",
+  "crime_category": "",
+  "actors": [],
+  "timeline": [],
+  "evidence": {
+    "scores": [],
+    "summary": ""
+  },
+  "legal_mapping": "",
+  "tunisian_code_reference": "ONLY IF FOUND IN RAG TEXT",
+  "guilt_probability": 0,
+  "confidence_score": 0,
+  "verdict": "",
+  "risk_level": "LOW | MEDIUM | HIGH",
+  "rag_mode": "REAL_VECTOR_RAG_ACTIVE"
+}
+
+────────────────────────────────────────
+🚨 FINAL SYSTEM LOCK
+────────────────────────────────────────
+- NO English in court report
+- NO invented legal articles
+- NO hallucinated databases
+- NO EU law
+- ONLY Tunisian Penal Code reasoning
+- ONLY based on RAG retrieval
+- If missing → "غير متوفر في قاعدة البيانات القانونية"
+`;
+
+    console.log("📡 CALLING AI (PRO MAX REAL RAG v5)...");
+
+    const response = await ai(prompt, {
+      temperature: 0.05
+    });
+
+    console.log("📡 AI RESPONSE RECEIVED");
+
+    if (!response || response.length < 20) {
+      return {
+        success: false,
+        error: "EMPTY_AI_RESPONSE"
+      };
+    }
+
+    return {
+      success: true,
+      analysis: response,
+      meta: {
+        engine: "TUNISIAN-LEGAL-PRO-MAX-RAG-v5",
+        mode: "REAL_VECTOR_PDF_RAG_TUNISIAN_SYSTEM",
+        features: [
+          "PDF_RAG",
+          "VECTOR_SEARCH",
+          "CASE_MEMORY",
+          "NO_ARTICLE_HALLUCINATION",
+          "DUAL_OUTPUT_JSON"
+        ]
+      }
+    };
+
+  } catch (err) {
+    console.error("❌ legalEngine error:", err.message);
+
+    return {
+      success: false,
+      error: err.message
+    };
+  }
+};
+
+
+
+==============================
+FILE: src/modules/cases/ai/pdfReader.js
+==============================
+import fs from "fs"
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs"
+
+//
+// 🧠 LEGAL PDF READER (LexisNexis Ready)
+// stable + safe + no crashes
+//
+
+export const readLegalPDF = async (filePath) => {
+  try {
+
+    if (!fs.existsSync(filePath)) {
+      throw new Error("PDF file not found: " + filePath)
+    }
+
+    const buffer = fs.readFileSync(filePath)
+
+    if (!buffer || buffer.length === 0) {
+      throw new Error("PDF is empty (0 bytes)")
+    }
+
+    const data = new Uint8Array(buffer)
+
+    const pdf = await pdfjsLib.getDocument({
+      data,
+      disableWorker: true // 🔥 مهم جداً في Node / Codespaces
+    }).promise
+
+    let pages = []
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+
+      const page = await pdf.getPage(i)
+      const content = await page.getTextContent()
+
+      const text = content.items
+        .map(item => item.str)
+        .join(" ")
+        .replace(/\s+/g, " ")
+        .trim()
+
+      // 🔥 تجاهل الصفحات الفارغة
+      if (!text || text.length < 5) continue
+
+      pages.push({
+        pageNumber: i,
+        text
+      })
+    }
+
+    return pages
+
+  } catch (err) {
+    console.error("❌ readLegalPDF ERROR:", err.message)
+    return []
+  }
+}
+
+//
+// ✂️ SMART CHUNKING (Legal optimized)
+//
+
+export const chunkText = (text, size = 1200) => {
+  try {
+
+    if (!text) return []
+
+    const chunks = []
+
+    const sentences = text
+      .replace(/\n/g, " ")
+      .split(/[.؟!]/g) // 🔥 أفضل للقانون العربي
+
+    let current = ""
+
+    for (const sentence of sentences) {
+
+      const clean = sentence.trim()
+      if (!clean) continue
+
+      if ((current + clean).length > size) {
+        chunks.push(current.trim())
+        current = clean + ". "
+      } else {
+        current += clean + ". "
+      }
+    }
+
+    if (current.trim()) {
+      chunks.push(current.trim())
+    }
+
+    return chunks
+
+  } catch (err) {
+    console.error("❌ chunkText error:", err.message)
+    return []
+  }
+}
+
+//
+// 📚 BUILD LEGAL CHUNKS (RAG READY)
+//
+
+export const buildLegalChunks = async (filePath) => {
+  try {
+
+    const pages = await readLegalPDF(filePath)
+
+    if (!pages.length) return []
+
+    const chunks = []
+
+    for (const page of pages) {
+
+      const pageChunks = chunkText(page.text)
+
+      for (let i = 0; i < pageChunks.length; i++) {
+
+        chunks.push({
+          page: page.pageNumber,
+          chunkIndex: i,
+          text: pageChunks[i]
+        })
+      }
+    }
+
+    return chunks
+
+  } catch (err) {
+    console.error("❌ buildLegalChunks ERROR:", err.message)
+    return []
+  }
+}
+
+
+
+==============================
+FILE: src/modules/cases/ai/client.js
+==============================
+import dotenv from "dotenv";
+dotenv.config();
+
+const API_KEY = process.env.GROQ_API_KEY;
+
+if (!API_KEY) {
+  throw new Error("Missing GROQ_API_KEY in .env");
+}
+
+// ⏱️ timeout helper
+const timeout = (ms) =>
+  new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("TIMEOUT")), ms)
+  );
+
+export const ai = async (prompt) => {
+  try {
+    const res = await Promise.race([
+      fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "llama-3.1-8b-instant",
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a precise legal reasoning AI. Always respond in structured, complete analysis.",
+            },
+            { role: "user", content: prompt },
+          ],
+          temperature: 0.2,
+          max_tokens: 4096,
+        }),
+      }),
+      timeout(30000),
+    ]);
+
+    const data = await res.json();
+
+    // ❌ HTTP error handling
+    if (!res.ok) {
+      console.error("GROQ ERROR RESPONSE:", data);
+      throw new Error(data.error?.message || "API ERROR");
+    }
+
+    const content = data?.choices?.[0]?.message?.content;
+
+    // ❌ empty response guard
+    if (!content || content.trim().length < 10) {
+      throw new Error("EMPTY_AI_RESPONSE");
+    }
+
+    return content;
+  } catch (err) {
+    console.error("AI ERROR:", err.message);
+
+    return JSON.stringify({
+      success: false,
+      error: err.message,
+      type: "AI_FAILURE",
+    });
+  }
+};
+
+
+
+==============================
+FILE: src/modules/cases/ai/nlp/advancedCaseAnalyzer.js
+==============================
+export const advancedCaseAnalyzer = (text) => {
+  const lines = text.split(/\n|\./g).filter(l => l.trim())
+
+  const witnesses = []
+  const evidence = []
+  const timeline = []
+
+  for (const line of lines) {
+
+    // شهود
+    if (line.includes("قال") || line.includes("شهد")) {
+      witnesses.push(line.trim())
+    }
+
+    // أدلة
+    if (line.includes("تم العثور") || line.includes("دليل") || line.includes("سلاح")) {
+      evidence.push(line.trim())
+    }
+
+    // أحداث زمنية (بسيط)
+    if (line.includes("في") || line.includes("سنة") || line.includes("يوم")) {
+      timeline.push(line.trim())
+    }
+  }
+
+  return {
+    witnesses,
+    evidence,
+    timeline,
+    riskLevel: evidence.length > 2 ? "HIGH" : "MEDIUM"
+  }
+}
+
+
+
+==============================
+FILE: src/modules/cases/ai/nlp/caseParser.js
+==============================
+export const parseCase = (text) => {
+  return {
+    facts: text,
+    actors: {
+      victim: text.includes("شخص") ? "موجود" : "غير محدد",
+      accused: "غير محدد"
+    }
+  }
+}
+
+
+
+==============================
+FILE: src/modules/cases/ai/runLegalAI.js
+==============================
+import dotenv from "dotenv";
+dotenv.config();
+
+console.log("🔥 ENTRY FILE REACHED");
+
+import { parseCase } from "./nlp/caseParser.js";
+import { advancedCaseAnalyzer } from "./nlp/advancedCaseAnalyzer.js";
+import { advancedForensics } from "./forensics/advancedForensics.js";
+
+import { legalEngine } from "./legalEngine.js";
+import { judgeEngine } from "./engine/judgeEngine.js";
+
+import { loadAllLaws } from "./rag/lawLoader.js";
+import { loadLawsIntoVectorDB, lawDB } from "./rag/lawDB.js";
+import { embedText } from "./rag/embeddings.js";
+
+/* ================================
+   ⚖️ MAIN ENGINE
+================================ */
+export const runLegalAI = async (caseText) => {
+  try {
+    console.log("🚀 START LEGAL AI v4");
+
+    if (!caseText?.trim()) {
+      throw new Error("caseText empty");
+    }
+
+    /* ========================
+       🧠 NLP PROCESSING
+    ======================== */
+    const parsedCase = parseCase(caseText);
+    const analysisV2 = advancedCaseAnalyzer?.(caseText) || {};
+    const forensics = advancedForensics?.(caseText) || {};
+
+    console.log("🧠 NLP + FORENSICS DONE");
+
+    /* ========================
+       📚 LOAD LAWS (RAG)
+    ======================== */
+    const lawChunksRaw = await loadAllLaws();
+
+    if (!Array.isArray(lawChunksRaw) || lawChunksRaw.length === 0) {
+      throw new Error("No law chunks loaded");
+    }
+
+    const lawChunks = lawChunksRaw.filter(
+      (t) => t?.text && t.text.length > 10
+    );
+
+    if (!lawDB?.data || lawDB.data.length === 0) {
+      console.log("📚 indexing law DB...");
+      await loadLawsIntoVectorDB(lawChunks);
+    }
+
+    const queryVector = await embedText(caseText);
+    const relevantArticles = lawDB.search(queryVector, 5);
+
+    console.log("🔎 RAG DONE");
+
+    /* ========================
+       ⚖️ LEGAL ENGINE
+    ======================== */
+    const legalAnalysis = await legalEngine(
+      caseText,
+      relevantArticles,
+      forensics
+    );
+
+    console.log("⚖️ LEGAL ENGINE DONE");
+
+    if (!legalAnalysis?.success) {
+      throw new Error(legalAnalysis?.error || "Legal engine failed");
+    }
+
+    /* ========================
+       ⚖️ JUDGE ENGINE
+    ======================== */
+    const judgment = await judgeEngine(
+      caseText,
+      legalAnalysis.analysis
+    );
+
+    console.log("⚖️ JUDGE DONE");
+
+    return {
+      input: caseText,
+      parsedCase,
+      analysisV2,
+      forensics,
+      articlesUsed: relevantArticles,
+      legalAnalysis,
+      judgment,
+      meta: {
+        version: "LEXISNEXIS-AI-v4-FIXED",
+        status: "SUCCESS"
+      }
+    };
+
+  } catch (err) {
+    console.error("❌ runLegalAI ERROR:", err);
+
+    return {
+      status: "ERROR",
+      message: err.message,
+      meta: {
+        version: "LEXISNEXIS-AI-v4-FIXED",
+        failed: true
+      }
+    };
+  }
+};
+
+/* ================================
+   🚀 AUTO TEST
+================================ */
+(async () => {
+  console.log("\n🧪 RUN TEST START\n");
+
+  const result = await runLegalAI(
+    "تم سرقة هاتف محمول من شخص في الطريق العام مع وجود شاهد"
+  );
+
+  console.log("\n================ RESULT ================\n");
+  console.dir(result, { depth: null });
+
+  console.log("\n🧪 TEST DONE\n");
+})();
+
+
+
+==============================
+FILE: src/modules/cases/ai/rag/search.js
+==============================
+import { embedText } from "./embeddings.js"
+import { lawDB } from "./lawDB.js"
+
+export const searchRelevantArticles = async (caseText, k = 5) => {
+  console.log("🔎 Searching vector DB...")
+
+  const queryVector = await embedText(caseText)
+
+  const db = lawDB.instance
+
+  if (!db || db.vectors.length === 0) {
+    console.log("⚠️ Vector DB EMPTY")
+    return []
+  }
+
+  return db.search(queryVector, k)
+}
+
+
+
+==============================
+FILE: src/modules/cases/ai/rag/lawSearch.js
+==============================
+export const searchRelevantArticles = (articles, caseText) => {
+  const keywords = caseText.split(" ")
+
+  return articles
+    .map(article => {
+      let score = 0
+
+      for (const word of keywords) {
+        if (article.text.includes(word)) score++
+      }
+
+      return { ...article, score }
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+}
+
+
+
+==============================
+FILE: src/modules/cases/ai/rag/articleExtractor.js
+==============================
+export const extractArticles = (text) => {
+  const articles = text.split(/(?=الفصل|المادة)/g)
+
+  return articles.map((a, i) => ({
+    id: i,
+    text: a.trim()
+  }))
+}
+
+
+
+==============================
+FILE: src/modules/cases/ai/rag/buildIndex.js
+==============================
+import { loadAllLaws } from "./lawLoader.js"
+import { lawDB } from "./lawDB.js"
+
+export const buildIndex = async () => {
+  console.log("📚 Loading Tunisian law PDFs...")
+
+  const chunks = await loadAllLaws()
+
+  console.log("🧠 Creating embeddings + indexing...")
+
+  await lawDB.addArticles(chunks)
+
+  console.log("✅ LEGAL INDEX READY")
+}
+
+
+
+==============================
+FILE: src/modules/cases/ai/rag/lawLoader.js
+==============================
+import { buildLegalChunks } from "../pdfReader.js"
+import path from "path"
+import fs from "fs"
+
+const LAW_PATH = path.resolve("src/legal-library/pdf")
+
+export const loadAllLaws = async () => {
+  try {
+
+    console.log("📚 Loading laws from:", LAW_PATH)
+
+    const files = fs.readdirSync(LAW_PATH)
+      .filter(file => file.endsWith(".pdf"))
+
+    let allChunks = []
+
+    for (const file of files) {
+
+      const filePath = path.join(LAW_PATH, file)
+
+      console.log("📄 Processing PDF:", file)
+
+      const chunks = await buildLegalChunks(filePath)
+
+      if (Array.isArray(chunks)) {
+        allChunks.push(...chunks)
+      } else {
+        console.warn("⚠️ No chunks returned from:", file)
+      }
+    }
+
+    console.log("✅ Total chunks loaded:", allChunks.length)
+
+    return allChunks
+
+  } catch (err) {
+    console.error("❌ loadAllLaws error:", err)
+    return []
+  }
+}
+
+
+
+==============================
+FILE: src/modules/cases/ai/rag/lawDB.js
+==============================
+import { VectorStore } from "./vectorStore.js"
+import { embedText } from "./embeddings.js"
+
+class LawDatabase {
+  constructor() {
+    if (!global.__LAW_DB__) {
+      global.__LAW_DB__ = new VectorStore(384)
+    }
+
+    this.db = global.__LAW_DB__
+  }
+
+  get instance() {
+    return this.db
+  }
+
+  async addArticles(articles) {
+    console.log("⚙️ LAW DB INDEXING START...")
+
+    const items = []
+
+    for (let i = 0; i < articles.length; i++) {
+      const article = articles[i]
+      if (!article?.text) continue
+
+      const vector = await embedText(article.text)
+
+      if (!Array.isArray(vector)) continue
+      if (vector.length !== 384) continue
+
+      items.push({
+        vector,
+        metadata: {
+          id: article.id ?? i,
+          text: article.text
+        }
+      })
+
+      if (i % 50 === 0) {
+        console.log(`📌 Embedding ${i}/${articles.length}`)
+      }
+    }
+
+    this.db.add(items)
+
+    console.log("✅ LAW DB READY:", items.length)
+  }
+}
+
+export const lawDB = new LawDatabase()
+
+
+
+==============================
+FILE: src/modules/cases/ai/rag/embeddings.js
+==============================
+import { pipeline } from "@xenova/transformers";
+
+let embedder = null;
+
+export const getEmbedder = async () => {
+  if (!embedder) {
+    embedder = await pipeline(
+      "feature-extraction",
+      "Xenova/all-MiniLM-L6-v2"
+    );
+  }
+  return embedder;
+};
+
+export const embedText = async (text) => {
+  const model = await getEmbedder();
+
+  const output = await model(text, {
+    pooling: "mean",
+    normalize: true
+  });
+
+  let vector = Array.from(output.data);
+
+  vector = vector.map(Number).filter(v => Number.isFinite(v));
+
+  if (vector.length !== 384) {
+    throw new Error("Invalid embedding size");
+  }
+
+  return vector;
+};
+
+
+
+==============================
+FILE: src/modules/cases/ai/rag/vectorStore.js
+==============================
+export class VectorStore {
+  constructor(dim = 384) {
+    this.dim = dim
+    this.vectors = []
+    this.data = []
+  }
+
+  add(items) {
+    if (!Array.isArray(items)) {
+      throw new Error("items must be array")
+    }
+
+    let added = 0
+
+    for (const item of items) {
+      if (!item?.vector || !item?.metadata) continue
+
+      const vec = Array.from(item.vector).map(Number)
+
+      if (vec.length !== this.dim) continue
+      if (vec.some(v => !Number.isFinite(v))) continue
+
+      this.vectors.push(vec)
+      this.data.push(item.metadata)
+
+      added++
+    }
+
+    console.log(`✅ Indexed: ${added}`)
+  }
+
+  cosineSimilarity(a, b) {
+    let dot = 0
+    let magA = 0
+    let magB = 0
+
+    for (let i = 0; i < a.length; i++) {
+      dot += a[i] * b[i]
+      magA += a[i] * a[i]
+      magB += b[i] * b[i]
+    }
+
+    return dot / (Math.sqrt(magA) * Math.sqrt(magB))
+  }
+
+  search(vector, k = 5) {
+    if (!Array.isArray(vector)) {
+      throw new Error("vector must be array")
+    }
+
+    const query = Array.from(vector).map(Number)
+
+    const scores = []
+
+    for (let i = 0; i < this.vectors.length; i++) {
+      const score = this.cosineSimilarity(query, this.vectors[i])
+
+      scores.push({
+        score,
+        data: this.data[i]
+      })
+    }
+
+    return scores
+      .sort((a, b) => b.score - a.score)
+      .slice(0, k)
+      .map(x => x.data)
+  }
+}
+
+
+
+==============================
+FILE: src/modules/cases/ai/tests/test-ai.js
+==============================
+import { ai } from "../client.js";
+
+const run = async () => {
+  const res = await ai("تم سرقة هاتف في الشارع");
+  console.log("AI RESULT:");
+  console.log(res);
+};
+
+run();
+
+
+

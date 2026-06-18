@@ -1,0 +1,60 @@
+import React from "react";
+import { useSelector } from "react-redux";
+import courtNav from "../navigation/courtNav";
+import inspectionNav from "../navigation/inspectionNav";
+import AppSidebarNav from "./AppSidebarNav";
+
+const AppSidebar = ({ type }) => {
+  const sidebarShow = useSelector(
+    (state) => state.sidebarShow ?? true
+  );
+
+  // 🔥 FIX: fallback مهم جدًا
+  const navigation =
+    type === "court"
+      ? courtNav
+      : type === "inspection"
+      ? inspectionNav
+      : courtNav; // 👈 الافتراضي بدل []
+
+  return (
+    <aside
+      style={{
+        width: sidebarShow ? "260px" : "0px",
+        minWidth: sidebarShow ? "260px" : "0px",
+        transition: "all 0.3s ease",
+        overflow: "hidden",
+        background: "#0f172a",
+        color: "white",
+        minHeight: "100vh",
+        flexShrink: 0,
+        position: "relative",
+        zIndex: 10,
+      }}
+    >
+      <div
+        style={{
+          opacity: sidebarShow ? 1 : 0,
+          transition: "opacity 0.2s ease",
+        }}
+      >
+        <AppSidebarNav items={navigation} />
+      </div>
+    </aside>
+  );
+};
+
+export default AppSidebar;
+
+
+
+
+
+
+
+
+
+
+
+
+

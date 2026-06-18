@@ -1,0 +1,431 @@
+/* =====================================================
+   🏛️ COREUI FINAL FIX (SAFE + NO BREAKS)
+===================================================== */
+
+/* 🔹 Base Reset */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* =====================================================
+   🎨 GLOBAL BODY (FIXED FONT ISSUE)
+===================================================== */
+
+body {
+  font-family: var(--cui-font-sans-serif) !important;
+  font-size: 1rem !important; /* 🔥 يمنع تكبير الخط */
+  line-height: 1.5;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  background: #f3f1ef;
+}
+
+/* 🔥 منع أي عنصر يكبر الخط */
+#root * {
+  font-size: inherit;
+}
+
+/* =====================================================
+   📦 DASHBOARD LAYOUT
+===================================================== */
+
+.wrapper {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  height: 100vh;
+  background: #111827;
+  color: white;
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.header {
+  flex-shrink: 0;
+  background: #0f172a;
+  color: white;
+}
+
+/* =====================================================
+   ⚖️ MAIN CENTER FIX
+===================================================== */
+
+.main {
+  flex: 1;
+  padding: 20px;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+  background: #f3f4f6;
+}
+
+/* =====================================================
+   🧾 FORM CONTAINER
+===================================================== */
+
+.form-container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* =====================================================
+   🧊 CARD
+===================================================== */
+
+.glass-card {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 12px 35px rgba(0,0,0,0.10);
+  padding: 25px;
+}
+
+/* =====================================================
+   🎀 FORM BACKGROUND
+===================================================== */
+
+.form-bg {
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px;
+
+  background: linear-gradient(
+    135deg,
+    #f6efe9 0%,
+    #f3e6e0 40%,
+    #f8f1ec 100%
+  );
+}
+
+/* =====================================================
+   🧾 SECTIONS
+===================================================== */
+
+.filter-box,
+.person-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 15px;
+
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+}
+
+/* =====================================================
+   🏷 FORM HEADER (FIXED + PROFESSIONAL DASHBOARD STYLE)
+===================================================== */
+
+.form-header {
+  text-align: right;
+  margin-bottom: 15px;
+
+  padding: 14px 18px;
+
+  /* ✨ بدل الأبيض المسطح */
+  background: linear-gradient(135deg, #ffffff 0%, #faf7f5 100%);
+
+  border-right: 4px solid #8b6f5c;
+  border-radius: 12px;
+
+  /* ✨ عمق بسيط */
+  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* العنوان الرئيسي */
+.form-header h4 {
+  font-size: 17px;
+  margin: 0;
+  color: #2c2c2c;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+/* النص الثانوي */
+.form-header span {
+  font-size: 13px;
+  color: #777;
+}
+
+/* ✨ تحسين عند المرور (optional لكن يعطي حياة للواجهة) */
+.form-header:hover {
+  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+  transition: 0.2s ease;
+}
+
+
+/* =====================================================
+   ✨ INPUTS (COREUI SAFE FIX)
+===================================================== */
+
+.form-control,
+.form-select,
+textarea,
+input {
+  border-radius: 10px !important;
+  border: 1px solid rgba(0,0,0,0.12) !important;
+  background: #fff !important;
+  padding: 8px 12px !important;
+  font-size: 0.9rem !important;
+}
+
+/* focus */
+.form-control:focus,
+.form-select:focus,
+textarea:focus {
+  border-color: #c59d7d !important;
+  box-shadow: 0 0 0 0.15rem rgba(197,157,125,0.25) !important;
+}
+
+/* =====================================================
+   🚨 VALIDATION FIX (IMPORTANT)
+===================================================== */
+
+/* 🔥 هذا أهم سطر - يجبر CoreUI يبين الخطأ */
+.was-validated .form-control:invalid,
+.form-control.is-invalid,
+.form-select.is-invalid,
+textarea.is-invalid {
+  border: 2px solid #dc3545 !important;
+  box-shadow: 0 0 0 0.15rem rgba(220,53,69,0.25) !important;
+}
+
+/* error message */
+.invalid-feedback {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* =====================================================
+   🏷 LABELS
+===================================================== */
+
+label {
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+/* =====================================================
+   🔘 BUTTONS
+===================================================== */
+
+.btn {
+  border-radius: 10px;
+  padding: 7px 14px;
+  font-size: 0.9rem;
+}
+
+.btn-primary {
+  background: #8b6f5c;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #6f5647;
+}
+
+.btn-success {
+  background: #2e7d32;
+}
+
+.btn-secondary {
+  background: #6c757d;
+}
+
+/* =====================================================
+   📊 STEPPER
+===================================================== */
+
+.custom-stepper {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.stepper-line {
+  position: absolute;
+  top: 18px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ddd;
+}
+
+.step-item {
+  text-align: center;
+  flex: 1;
+  z-index: 1;
+}
+
+.step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #eee;
+  margin: 0 auto 5px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.step-circle.active {
+  background: #8b6f5c;
+  color: white;
+}
+
+.step-circle.done {
+  background: #2e7d32;
+  color: white;
+}
+
+/* =====================================================
+   📱 RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+  .wrapper {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+  }
+
+  .main {
+    padding: 10px;
+  }
+}
+
+/* =====================================================
+   🔘 REMEMBER ME FIX (ULTRA SAFE)
+===================================================== */
+
+/* ❌ لا نلمس أي label عالمي */
+label {
+  color: inherit !important;
+}
+
+/* فقط "تذكرني" داخل login */
+.login-page .form-check-label {
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+
+/* checkbox layout فقط */
+.login-page .form-check {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+/* =========================
+✨ STEP TRANSITION SAFE
+========================= */
+
+.filter-box,
+.person-card {
+  transition: all 0.25s ease;
+  animation: stepFade 0.35s ease;
+}
+
+@keyframes stepFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.filter-box:hover,
+.person-card:hover {
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+}
+
+.btn {
+  transition: all 0.2s ease !important;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.step-indicator {
+  font-size: 13px;
+  color: #777;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus,
+textarea:focus {
+  transition: all 0.2s ease;
+}
+.form-header {
+  animation: headerIn 0.3s ease;
+}
+
+@keyframes headerIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.filter-box:hover,
+.person-card:hover,
+.form-header:hover {
+  font-size: inherit !important;
+}
+
+
+
+
+
+
+
+
+
+
