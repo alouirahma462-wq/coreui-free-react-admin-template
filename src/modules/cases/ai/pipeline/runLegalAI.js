@@ -3,7 +3,7 @@ dotenv.config();
 
 console.log("🔥 LEGAL AI SYSTEM BOOTING (v2 - FULL INTELLIGENCE CORE)");
 
-import { parseCase } from "../nlp/caseParser.js";
+import { extractCaseFromFolder } from "../ingestion/nlpExtractor.js";
 import { advancedCaseAnalyzer } from "../nlp/advancedCaseAnalyzer.js";
 import { advancedForensics } from "../forensics/advancedForensics.js";
 
