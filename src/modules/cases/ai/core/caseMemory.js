@@ -1,30 +1,34 @@
-class CaseMemory {
-  constructor() {
-    this.cases = [];
-  }
+// 🧠 Case Memory Learning Engine
+// النظام يتعلم من القضايا السابقة
 
-  addCase(caseData) {
-    this.cases.push({
-      ...caseData,
-      timestamp: Date.now(),
-    });
-  }
+const caseMemoryDB = [];
 
-  searchSimilar(caseText) {
-    return this.cases
-      .map((c) => ({
-        ...c,
-        similarity: this.simpleMatch(c.text, caseText),
-      }))
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, 5);
-  }
-
-  simpleMatch(a, b) {
-    const aWords = a.split(" ");
-    const bWords = b.split(" ");
-    return aWords.filter((w) => bWords.includes(w)).length;
-  }
+export function storeCaseOutcome(caseInput, legalDecision) {
+  caseMemoryDB.push({
+    pattern: extractPattern(caseInput),
+    outcome: legalDecision.verdict,
+    confidence: legalDecision.probability,
+    timestamp: Date.now(),
+  });
 }
 
-export const caseMemory = new CaseMemory();
+// 🔥 استخراج نمط القضية
+function extractPattern(caseInput) {
+  return {
+    crimeTypes: caseInput.crime_type || [],
+    actorCount: caseInput.actors?.length || 0,
+    evidenceCount: caseInput.evidence?.length || 0,
+  };
+}
+
+// 🔥 استرجاع حالات مشابهة
+export function getSimilarCases(caseInput) {
+  const current = extractPattern(caseInput);
+
+  return caseMemoryDB.filter(c => {
+    return (
+      c.pattern.actorCount === current.actorCount &&
+      c.pattern.crimeTypes?.length === current.crimeTypes?.length
+    );
+  });
+}
