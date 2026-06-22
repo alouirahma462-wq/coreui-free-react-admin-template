@@ -2,7 +2,7 @@ import fs from "fs";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
 /**
- * 📚 READ PDF (stable + clean)
+ * 📚 READ PDF (GOD MODE LOADER v5)
  */
 export const readLegalPDF = async (filePath) => {
   try {
@@ -35,15 +35,39 @@ export const readLegalPDF = async (filePath) => {
         .replace(/\s+/g, " ")
         .trim();
 
-      // 🧠 CLEANING RULES (important for Tunisian OCR PDFs)
       text = cleanText(text);
 
-      // ignore empty or garbage pages
       if (!text || text.length < 20) continue;
+
+      // 🧠 PAGE INTELLIGENCE (NEW)
+      const legalDensity =
+        /الفصل|المادة|قانون|محكمة|جريمة|عقوبة|Article|law|court/i.test(text)
+          ? 0.8
+          : 0.3;
+
+      const embeddingSeed =
+        (text
+          .slice(0, 120)
+          .split("")
+          .reduce((a, c) => a + c.charCodeAt(0), 0) % 1000) / 1000;
+
+      const riskSignal =
+        /سجن|إعدام|غرامة|penalty|imprison|punishable/i.test(text)
+          ? 0.3
+          : 0;
 
       pages.push({
         pageNumber: i,
-        text
+        text,
+
+        // 🧠 NEW META LAYER (GOD MODE READY)
+        meta: {
+          legal_density: legalDensity,
+          embedding_seed: embeddingSeed,
+          risk_signal: riskSignal,
+          graph_ready: true,
+          rag_ready: true
+        }
       });
     }
 
@@ -55,27 +79,19 @@ export const readLegalPDF = async (filePath) => {
 };
 
 /**
- * 🧹 STRONG LEGAL CLEANING
+ * 🧹 STRONG LEGAL CLEANING (ENHANCED)
  */
 const cleanText = (text) => {
   return text
-    // remove weird OCR symbols
     .replace(/[^\u0600-\u06FF0-9a-zA-Z\s\.\,\;\:\(\)\-\n]/g, " ")
-
-    // fix spacing
     .replace(/\s+/g, " ")
-
-    // fix broken numbers (OCR issue)
     .replace(/(\d)\s+(\d)/g, "$1$2")
-
-    // remove repeated headers (common in Tunisian PDFs)
     .replace(/Imprimerie Officielle de la République Tunisienne/g, "")
-
     .trim();
 };
 
 /**
- * ✂️ SMART LEGAL CHUNKING
+ * ✂️ SMART LEGAL CHUNKING (GOD MODE v5)
  */
 export const chunkText = (text, size = 1200) => {
   if (!text) return [];
@@ -90,7 +106,7 @@ export const chunkText = (text, size = 1200) => {
     if (!clean) continue;
 
     if ((current + clean).length > size) {
-      chunks.push(current.trim());
+      chunks.push(enrichChunk(current));
       current = clean + ". ";
     } else {
       current += clean + ". ";
@@ -98,15 +114,53 @@ export const chunkText = (text, size = 1200) => {
   }
 
   if (current.trim()) {
-    chunks.push(current.trim());
+    chunks.push(enrichChunk(current));
   }
 
   return chunks;
 };
 
 /**
- * 📚 BUILD FINAL RAG INPUT
- * (THIS is what your AI uses)
+ * 🧠 CHUNK INTELLIGENCE LAYER (NEW)
+ */
+function enrichChunk(text) {
+  const articleMatch =
+    text.match(/(?:الفصل|المادة|Article)\s*(\d+)/i)?.[1] || null;
+
+  const importance =
+    Math.min(1, text.length / 1500) +
+    (articleMatch ? 0.25 : 0) +
+    (/قانون|محكمة|جريمة|عقوبة|law|court|crime/i.test(text) ? 0.3 : 0);
+
+  const contradiction_hint =
+    /ممنوع|غير مسموح|لا يجوز|prohibited|not allowed/i.test(text) ? 0.2 : 0;
+
+  const embedding_seed =
+    (text
+      .slice(0, 80)
+      .split("")
+      .reduce((a, c) => a + c.charCodeAt(0), 0) % 1000) / 1000;
+
+  return {
+    text,
+    articleNumber: articleMatch,
+
+    importance: Number(importance.toFixed(3)),
+    contradiction_hint,
+    embedding_seed,
+
+    graph_ready: true,
+    rag_ready: true,
+    memory_ready: true,
+
+    meta: {
+      confidence: articleMatch ? 0.93 : 0.7
+    }
+  };
+}
+
+/**
+ * 📚 FINAL RAG BUILDER (GOD PIPELINE)
  */
 export const buildLegalChunks = async (filePath) => {
   try {
@@ -122,12 +176,12 @@ export const buildLegalChunks = async (filePath) => {
           id: `${filePath}-p${page.pageNumber}-c${i}`,
           page: page.pageNumber,
           chunkIndex: i,
-          text: pageChunks[i]
+          ...pageChunks[i]
         });
       }
     }
 
-    console.log(`📦 Built ${chunks.length} chunks from ${filePath}`);
+    console.log(`📦 GOD MODE LOADED: ${chunks.length} chunks`);
 
     return chunks;
   } catch (err) {
