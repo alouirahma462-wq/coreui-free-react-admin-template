@@ -1,4 +1,4 @@
-import { embedText } from "../embeddings.js";
+import { embedText } from "../storage/embeddings.js";
 import { lawDB } from "../storage/vectorStore.js";
 
 /**
