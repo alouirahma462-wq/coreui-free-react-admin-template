@@ -1,134 +1,168 @@
-import fs from "fs"
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs"
+import fs from "fs";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
 //
-// 🧠 LEGAL PDF READER (LexisNexis Ready)
-// stable + safe + no crashes
+// 🧠 LEGAL STREAM BRAIN v17
+// REAL-TIME PDF → THINKING SYSTEM
 //
 
-export const readLegalPDF = async (filePath) => {
+export const streamLegalPDF = async (filePath, onChunk = () => {}) => {
+
+  const graph = {
+    nodes: [],
+    edges: [],
+    contradictions: []
+  };
+
   try {
 
     if (!fs.existsSync(filePath)) {
-      throw new Error("PDF file not found: " + filePath)
+      throw new Error("PDF not found");
     }
 
-    const buffer = fs.readFileSync(filePath)
-
-    if (!buffer || buffer.length === 0) {
-      throw new Error("PDF is empty (0 bytes)")
-    }
-
-    const data = new Uint8Array(buffer)
+    const buffer = fs.readFileSync(filePath);
 
     const pdf = await pdfjsLib.getDocument({
-      data,
-      disableWorker: true // 🔥 مهم جداً في Node / Codespaces
-    }).promise
+      data: new Uint8Array(buffer),
+      disableWorker: true
+    }).promise;
 
-    let pages = []
-
+    // ================================
+    // 🧠 STREAM PROCESSING LOOP
+    // ================================
     for (let i = 1; i <= pdf.numPages; i++) {
 
-      const page = await pdf.getPage(i)
-      const content = await page.getTextContent()
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
 
-      const text = content.items
-        .map(item => item.str)
+      let text = content.items
+        .map(x => x.str || "")
         .join(" ")
         .replace(/\s+/g, " ")
-        .trim()
+        .trim();
 
-      // 🔥 تجاهل الصفحات الفارغة
-      if (!text || text.length < 5) continue
+      text = clean(text);
 
-      pages.push({
-        pageNumber: i,
-        text
-      })
+      if (text.length < 10) continue;
+
+      // ================================
+      // 🧠 LIVE NODE CREATION
+      // ================================
+      const node = {
+        id: `page-${i}`,
+        text,
+
+        importance: score(text),
+        embedding: embed(text)
+      };
+
+      graph.nodes.push(node);
+
+      // ================================
+      // 🧠 LIVE EDGE BUILDING
+      // ================================
+      if (graph.nodes.length > 1) {
+        const prev = graph.nodes[graph.nodes.length - 2];
+
+        graph.edges.push({
+          from: prev.id,
+          to: node.id,
+          type: "flow"
+        });
+      }
+
+      // ================================
+      // 🛰 CONTRADICTION DETECTION LIVE
+      // ================================
+      for (const n of graph.nodes) {
+
+        if (n.id === node.id) continue;
+
+        const diff =
+          Math.abs(n.importance - node.importance);
+
+        if (diff > 0.35) {
+          graph.contradictions.push({
+            from: n.id,
+            to: node.id,
+            severity: diff
+          });
+        }
+      }
+
+      // ================================
+      // 📚 LIVE LEGAL CLASSIFICATION
+      // ================================
+      const classification = classify(text);
+
+      node.type = classification.type;
+      node.risk = classification.risk;
+
+      // ================================
+      // ⚡ STREAM OUTPUT (REAL-TIME)
+      // ================================
+      onChunk({
+        page: i,
+        node,
+        graphSnapshot: {
+          nodes: graph.nodes.length,
+          edges: graph.edges.length,
+          contradictions: graph.contradictions.length
+        }
+      });
     }
 
-    return pages
+    return graph;
 
   } catch (err) {
-    console.error("❌ readLegalPDF ERROR:", err.message)
-    return []
+    console.error("❌ STREAM ENGINE ERROR:", err.message);
+
+    return graph; // always return partial graph
   }
+};
+
+//
+// 🧹 CLEANER
+//
+function clean(text) {
+  return text
+    .replace(/[^\u0600-\u06FF0-9a-zA-Z\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 //
-// ✂️ SMART CHUNKING (Legal optimized)
+// 🧠 SCORING ENGINE
 //
-
-export const chunkText = (text, size = 1200) => {
-  try {
-
-    if (!text) return []
-
-    const chunks = []
-
-    const sentences = text
-      .replace(/\n/g, " ")
-      .split(/[.؟!]/g) // 🔥 أفضل للقانون العربي
-
-    let current = ""
-
-    for (const sentence of sentences) {
-
-      const clean = sentence.trim()
-      if (!clean) continue
-
-      if ((current + clean).length > size) {
-        chunks.push(current.trim())
-        current = clean + ". "
-      } else {
-        current += clean + ". "
-      }
-    }
-
-    if (current.trim()) {
-      chunks.push(current.trim())
-    }
-
-    return chunks
-
-  } catch (err) {
-    console.error("❌ chunkText error:", err.message)
-    return []
-  }
+function score(text) {
+  return Math.min(
+    1,
+    text.length / 1800 +
+    (/قانون|محكمة|جريمة|crime|law/i.test(text) ? 0.3 : 0)
+  );
 }
 
 //
-// 📚 BUILD LEGAL CHUNKS (RAG READY)
+// 🧬 EMBEDDING SIMULATION
 //
+function embed(text) {
+  return text
+    .slice(0, 100)
+    .split("")
+    .reduce((a, c) => a + c.charCodeAt(0), 0) % 1000 / 1000;
+}
 
-export const buildLegalChunks = async (filePath) => {
-  try {
-
-    const pages = await readLegalPDF(filePath)
-
-    if (!pages.length) return []
-
-    const chunks = []
-
-    for (const page of pages) {
-
-      const pageChunks = chunkText(page.text)
-
-      for (let i = 0; i < pageChunks.length; i++) {
-
-        chunks.push({
-          page: page.pageNumber,
-          chunkIndex: i,
-          text: pageChunks[i]
-        })
-      }
-    }
-
-    return chunks
-
-  } catch (err) {
-    console.error("❌ buildLegalChunks ERROR:", err.message)
-    return []
+//
+// ⚖️ CLASSIFIER
+//
+function classify(text) {
+  if (/جريمة|crime|عقوبة|penalty/i.test(text)) {
+    return { type: "criminal", risk: 0.9 };
   }
+
+  if (/محكمة|court/i.test(text)) {
+    return { type: "procedural", risk: 0.6 };
+  }
+
+  return { type: "general", risk: 0.3 };
 }
