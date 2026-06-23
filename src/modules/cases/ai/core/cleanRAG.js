@@ -1,7 +1,7 @@
 import { loadPDF } from "./pdfLoader.js";
 import { chunkLaw } from "./chunker.js";
 import { embedText } from "./embeddings.js";
-import { VectorStore } from "../retrieval/vectorStore.js";
+import { lawDB } from "../storage/vectorStore.js";
 
 /**
  * ⚖️ CLEAN RAG v5 — GOD MODE LEGAL RETRIEVAL ENGINE
