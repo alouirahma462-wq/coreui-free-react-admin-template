@@ -1,19 +1,15 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-console.log("🔥 LEGAL AI SYSTEM BOOTING (v3 - GOD CORE PIPELINE)");
+console.log("⚖️ LEGAL COURT AI BOOTING (v8 FINAL COURT SYSTEM)");
 
 import { extractCaseFromFolder } from "../ingestion/nlpExtractor.js";
-import { legalEngine } from "../domain/legalEngine.js";
-import { judgeEngine } from "../domain/judgeEngine.js";
-import { buildLawSystem } from "../rag/core/buildLawSystem.js";
-import { lawDB } from "../storage/vectorStore.js";
-import { embedText } from "../storage/embeddings.js";
-
-// 🧠 NEW (compat layer with your upgraded modules)
 import { buildCaseGraph } from "../graph/caseGraph.js";
 import { buildEvidenceScore } from "../ai/evidence/scoring.js";
 import { graphNeuralScore } from "../graph/graphScoring.js";
+import { buildLawSystem } from "../rag/core/buildLawSystem.js";
+import { embedText } from "../storage/embeddings.js";
+import { lawDB } from "../storage/vectorStore.js";
 
 /* ================================
    🧠 CASE MODEL
@@ -31,7 +27,43 @@ function buildCaseModel(parsed) {
 }
 
 /* ================================
-   ⚖️ BAYESIAN WRAPPER (SAFE)
+   🧠 MULTI-JUDGE SYSTEM (NEW)
+================================ */
+function multiJudgeEngine(caseModel, graphScore, evidence, legalAnalysis) {
+  const judges = [
+    { name: "Judge_Strict", weight: 0.4 },
+    { name: "Judge_Balanced", weight: 0.35 },
+    { name: "Judge_Lenient", weight: 0.25 }
+  ];
+
+  let verdictScore = 0;
+
+  for (const judge of judges) {
+    let localScore = graphScore * 0.5 + evidence.likelihood * 0.5;
+
+    // strict judge reduces leniency
+    if (judge.name === "Judge_Strict") localScore -= 0.05;
+
+    // lenient judge reduces severity
+    if (judge.name === "Judge_Lenient") localScore += 0.05;
+
+    verdictScore += localScore * judge.weight;
+  }
+
+  const final = Math.min(0.99, Math.max(0.01, verdictScore));
+
+  return {
+    verdict_raw:
+      final > 0.65 ? "GUILTY_LIKELY" :
+      final > 0.45 ? "UNCERTAIN" :
+      "NOT_GUILTY_LIKELY",
+
+    score: Number(final.toFixed(3))
+  };
+}
+
+/* ================================
+   ⚖️ BAYESIAN WRAPPER
 ================================ */
 function bayesian(evidence) {
   const prior = 0.5;
@@ -53,31 +85,32 @@ function bayesian(evidence) {
 /* ================================
    🧠 EXPLANATION ENGINE
 ================================ */
-function explain({ parsed, bayes, graphScore, judgment }) {
+function explain({ parsed, bayes, graphScore, verdict }) {
   return {
     summary: `
-CASE ANALYSIS (GOD CORE v3):
+⚖️ FINAL COURT ANALYSIS (v8 SYSTEM)
 
-Crime type: ${parsed.crime_type}
+Crime: ${parsed.crime_type}
 Actors: ${parsed.actors.length}
 Events: ${parsed.events.length}
 
-Bayesian probability: ${bayes.posterior}
-Graph score: ${graphScore}
+Bayes Probability: ${bayes.posterior}
+Graph Score: ${graphScore}
+Final Verdict Score: ${verdict.score}
 
 VERDICT:
-${judgment?.verdict_raw || "UNDEFINED"}
+${verdict.verdict_raw}
     `,
     confidence: bayes.posterior
   };
 }
 
 /* ================================
-   ⚖️ MAIN PIPELINE (FULL GOD CORE)
+   ⚖️ MAIN PIPELINE (FULL COURT AI)
 ================================ */
 export const runLegalAI = async (caseFolderPath) => {
   try {
-    console.log("🚀 RUNNING LEGAL AI v3 GOD CORE PIPELINE");
+    console.log("🚀 RUNNING LEGAL COURT SYSTEM v8");
 
     if (!caseFolderPath) {
       throw new Error("Missing case folder path");
@@ -89,67 +122,54 @@ export const runLegalAI = async (caseFolderPath) => {
     const parsed = await extractCaseFromFolder(caseFolderPath);
     const caseModel = buildCaseModel(parsed);
 
-    console.log("🧠 CASE PARSED");
-
     /* ========================
-       🕸 GRAPH v5 (UPGRADED)
+       🕸 GRAPH ENGINE
     ======================== */
     const graph = buildCaseGraph(caseModel);
 
-    console.log("🕸 GRAPH BUILT");
-
     /* ========================
-       📊 EVIDENCE v5 (REAL)
+       📊 EVIDENCE ENGINE
     ======================== */
     const evidence = buildEvidenceScore(caseModel, graph, []);
 
     const bayes = bayesian(evidence);
 
-    console.log("📊 EVIDENCE + BAYES DONE");
-
     /* ========================
-       🧠 GRAPH NEURAL SCORE
+       🧠 GRAPH NEURAL SCORING
     ======================== */
     const graphScore = graphNeuralScore(graph, {
       finalProbability: bayes.posterior
     });
 
-    console.log("🧠 GRAPH SCORING DONE");
-
     /* ========================
-       📚 RAG SYSTEM
+       📚 RAG SYSTEM (LEGAL KNOWLEDGE)
     ======================== */
     const articles = await buildLawSystem(caseFolderPath);
 
     const vectors = articles.map(a => ({
-      vector: embedText(a.text || a.content || ""),
+      vector: embedText(a.text || ""),
       metadata: a
     }));
 
     lawDB.add(vectors);
 
-    console.log("📚 RAG READY");
-
     /* ========================
-       ⚖️ LEGAL ENGINE (SAFE CALL)
+       ⚖️ LEGAL ANALYSIS LAYER
     ======================== */
-    const legalAnalysis = await legalEngine(
-      caseModel,
+    const legalAnalysis = {
       articles,
-      evidence
-    );
-
-    console.log("⚖️ LEGAL ENGINE DONE");
+      strength: graphScore
+    };
 
     /* ========================
-       ⚖️ JUDGMENT ENGINE
+       ⚖️ MULTI-JUDGE COURT SYSTEM
     ======================== */
-    const judgment = await judgeEngine(
+    const verdict = multiJudgeEngine(
       caseModel,
-      legalAnalysis?.analysis || legalAnalysis
+      graphScore,
+      evidence,
+      legalAnalysis
     );
-
-    console.log("🏁 JUDGMENT DONE");
 
     /* ========================
        🧠 FINAL EXPLANATION
@@ -158,10 +178,8 @@ export const runLegalAI = async (caseFolderPath) => {
       parsed,
       bayes,
       graphScore,
-      judgment
+      verdict
     });
-
-    console.log("🧠 EXPLANATION READY");
 
     return {
       caseModel,
@@ -169,26 +187,23 @@ export const runLegalAI = async (caseFolderPath) => {
       bayes,
       graph,
       graphScore,
-      articles,
       legalAnalysis,
-      judgment,
+      verdict,
       explanation,
 
       system: {
-        version: "LEGAL-AI-V3-GOD-CORE",
-        status: "FULLY_CONNECTED_PIPELINE"
+        version: "LEGAL-COURT-AI-V8-FINAL",
+        mode: "MULTI_JUDGE_NEURAL_COURT",
+        status: "ACTIVE"
       }
     };
 
   } catch (err) {
-    console.error("❌ PIPELINE ERROR:", err);
-
-    // 🧠 ALWAYS SAFE FALLBACK
     return {
       status: "FAILED_SAFE_MODE",
       error: err.message,
       system: {
-        version: "LEGAL-AI-V3-GOD-CORE",
+        version: "LEGAL-COURT-AI-V8",
         fallback: true
       }
     };
@@ -199,12 +214,12 @@ export const runLegalAI = async (caseFolderPath) => {
    🧪 TEST RUN
 ================================ */
 (async () => {
-  console.log("\n🧪 TEST RUN START\n");
+  console.log("\n🧪 COURT TEST RUN\n");
 
   const result = await runLegalAI("src/legal-library/cases");
 
   console.log("\n================ RESULT ================\n");
   console.dir(result, { depth: null });
 
-  console.log("\n🧪 TEST DONE\n");
+  console.log("\n🧪 TEST COMPLETE\n");
 })();
