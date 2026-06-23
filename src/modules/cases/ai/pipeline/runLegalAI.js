@@ -5,7 +5,7 @@ console.log("⚖️ LEGAL COURT AI BOOTING (v8 FINAL COURT SYSTEM)");
 
 import { extractCaseFromFolder } from "../ingestion/nlpExtractor.js";
 import { buildCaseGraph } from "../graph/caseGraph.js";
-import { buildEvidenceScore } from "../ai/evidence/scoring.js";
+import { buildEvidenceScore } from "../evidence/scoring.js";
 import { graphNeuralScore } from "../graph/graphScoring.js";
 import { buildLawSystem } from "../rag/core/buildLawSystem.js";
 import { embedText } from "../storage/embeddings.js";
@@ -27,9 +27,9 @@ function buildCaseModel(parsed) {
 }
 
 /* ================================
-   🧠 MULTI-JUDGE SYSTEM (NEW)
+   🧠 MULTI-JUDGE SYSTEM
 ================================ */
-function multiJudgeEngine(caseModel, graphScore, evidence, legalAnalysis) {
+function multiJudgeEngine(caseModel, graphScore, evidence) {
   const judges = [
     { name: "Judge_Strict", weight: 0.4 },
     { name: "Judge_Balanced", weight: 0.35 },
@@ -39,12 +39,9 @@ function multiJudgeEngine(caseModel, graphScore, evidence, legalAnalysis) {
   let verdictScore = 0;
 
   for (const judge of judges) {
-    let localScore = graphScore * 0.5 + evidence.likelihood * 0.5;
+    let localScore = (graphScore + evidence.likelihood) / 2;
 
-    // strict judge reduces leniency
     if (judge.name === "Judge_Strict") localScore -= 0.05;
-
-    // lenient judge reduces severity
     if (judge.name === "Judge_Lenient") localScore += 0.05;
 
     verdictScore += localScore * judge.weight;
@@ -54,16 +51,18 @@ function multiJudgeEngine(caseModel, graphScore, evidence, legalAnalysis) {
 
   return {
     verdict_raw:
-      final > 0.65 ? "GUILTY_LIKELY" :
-      final > 0.45 ? "UNCERTAIN" :
-      "NOT_GUILTY_LIKELY",
+      final > 0.65
+        ? "GUILTY_LIKELY"
+        : final > 0.45
+        ? "UNCERTAIN"
+        : "NOT_GUILTY_LIKELY",
 
     score: Number(final.toFixed(3))
   };
 }
 
 /* ================================
-   ⚖️ BAYESIAN WRAPPER
+   ⚖️ BAYESIAN MODEL
 ================================ */
 function bayesian(evidence) {
   const prior = 0.5;
@@ -73,7 +72,9 @@ function bayesian(evidence) {
 
   const posterior =
     (likelihood * prior) /
-    ((likelihood * prior) + ((1 - likelihood) * (1 - prior)) + 1e-9);
+    ((likelihood * prior) +
+      ((1 - likelihood) * (1 - prior)) +
+      1e-9);
 
   return {
     prior,
@@ -106,7 +107,7 @@ ${verdict.verdict_raw}
 }
 
 /* ================================
-   ⚖️ MAIN PIPELINE (FULL COURT AI)
+   ⚖️ MAIN PIPELINE
 ================================ */
 export const runLegalAI = async (caseFolderPath) => {
   try {
@@ -116,64 +117,47 @@ export const runLegalAI = async (caseFolderPath) => {
       throw new Error("Missing case folder path");
     }
 
-    /* ========================
-       🧠 CASE PARSING
-    ======================== */
+    // 1. Parse case
     const parsed = await extractCaseFromFolder(caseFolderPath);
     const caseModel = buildCaseModel(parsed);
 
-    /* ========================
-       🕸 GRAPH ENGINE
-    ======================== */
+    // 2. Graph
     const graph = buildCaseGraph(caseModel);
 
-    /* ========================
-       📊 EVIDENCE ENGINE
-    ======================== */
+    // 3. Evidence
     const evidence = buildEvidenceScore(caseModel, graph, []);
 
     const bayes = bayesian(evidence);
 
-    /* ========================
-       🧠 GRAPH NEURAL SCORING
-    ======================== */
+    // 4. Neural score
     const graphScore = graphNeuralScore(graph, {
       finalProbability: bayes.posterior
     });
 
-    /* ========================
-       📚 RAG SYSTEM (LEGAL KNOWLEDGE)
-    ======================== */
+    // 5. Law system
     const articles = await buildLawSystem(caseFolderPath);
 
-    const vectors = articles.map(a => ({
+    const vectors = articles.map((a) => ({
       vector: embedText(a.text || ""),
       metadata: a
     }));
 
     lawDB.add(vectors);
 
-    /* ========================
-       ⚖️ LEGAL ANALYSIS LAYER
-    ======================== */
+    // 6. Legal analysis
     const legalAnalysis = {
       articles,
       strength: graphScore
     };
 
-    /* ========================
-       ⚖️ MULTI-JUDGE COURT SYSTEM
-    ======================== */
+    // 7. Verdict
     const verdict = multiJudgeEngine(
       caseModel,
       graphScore,
-      evidence,
-      legalAnalysis
+      evidence
     );
 
-    /* ========================
-       🧠 FINAL EXPLANATION
-    ======================== */
+    // 8. Explain
     const explanation = explain({
       parsed,
       bayes,
@@ -190,7 +174,6 @@ export const runLegalAI = async (caseFolderPath) => {
       legalAnalysis,
       verdict,
       explanation,
-
       system: {
         version: "LEGAL-COURT-AI-V8-FINAL",
         mode: "MULTI_JUDGE_NEURAL_COURT",
