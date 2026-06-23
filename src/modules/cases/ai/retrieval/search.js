@@ -1,5 +1,5 @@
-import { embedText } from "../embeddings.js";
 import { lawDB } from "../storage/vectorStore.js";
+import { embedText } from "../storage/embeddings.js";
 
 /**
  * 🧠 LEGAL RETRIEVAL ENGINE (GOD CORE v4)
