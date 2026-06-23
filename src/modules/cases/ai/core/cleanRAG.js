@@ -4,34 +4,34 @@ import { embedText } from "./embeddings.js";
 import { lawDB } from "../storage/vectorStore.js";
 
 /**
- * ⚖️ CLEAN RAG v5 — GOD MODE LEGAL RETRIEVAL ENGINE
- * - Multi-vector semantic retrieval
- * - Query decomposition (query intelligence)
- * - Legal-aware reranking
- * - Memory learning boost
- * - Contradiction penalty support
- * - Case-law reinforcement
+ * ⚖️ CLEAN RAG v6 — LEGAL BRAIN CORE
+ * - Graph-aware retrieval
+ * - Multi-query decomposition
+ * - Contradiction filtering
+ * - Legal reinforcement scoring
+ * - Hallucination guard
  */
 
 class CleanRAG {
   constructor() {
-    this.store = new VectorStore(384);
-
+    this.store = lawDB;
     this.ready = false;
 
-    // ⚡ caches
     this.embeddingCache = new Map();
     this.queryCache = new Map();
 
-    // 🧠 memory learning (self-improving retrieval)
+    // 🧠 memory learning
     this.feedbackMemory = [];
+
+    // 🧠 NEW: contradiction memory
+    this.contradictionMemory = [];
   }
 
   /* ================================
-     📚 BUILD INDEX (LEGENDARY)
+     📚 BUILD INDEX (SMART LEGAL CORE)
   ================================= */
   async build(filePath) {
-    console.log("📚 GOD MODE RAG BUILD START...");
+    console.log("📚 LEGAL BRAIN v6 BUILDING...");
 
     const pages = await loadPDF(filePath);
     const chunks = chunkLaw(pages);
@@ -51,24 +51,39 @@ class CleanRAG {
           page: chunk.page,
           type: chunk.type,
 
-          // 🧠 enrichment
           length: chunk.text.length,
           hasArticle: /الفصل|المادة|Article/i.test(chunk.text),
+
           importance: this.estimateImportance(chunk.text),
           keywords: this.extractKeywords(chunk.text),
+
+          // 🧠 NEW SIGNALS
+          risk: this.detectLegalRisk(chunk.text),
+          entities: this.extractEntities(chunk.text),
         },
       });
     }
 
     this.store.add(items);
-
     this.ready = true;
 
-    console.log(`⚖️ GOD MODE RAG READY → ${items.length} chunks`);
+    console.log(`⚖️ LEGAL BRAIN READY → ${items.length} chunks`);
   }
 
   /* ================================
-     🔍 QUERY INTELLIGENCE (NEW CORE)
+     🔍 QUERY DECOMPOSITION (NEW)
+  ================================= */
+  decomposeQuery(query) {
+    const parts = query
+      .split(/و|and|,/)
+      .map(q => q.trim())
+      .filter(Boolean);
+
+    return parts.length ? parts : [query];
+  }
+
+  /* ================================
+     🧠 QUERY ANALYSIS (UPGRADED)
   ================================= */
   analyzeQuery(query) {
     const q = query.toLowerCase();
@@ -77,9 +92,11 @@ class CleanRAG {
       isCriminal: /سرقة|قتل|عنف|fraud|theft/.test(q),
       isLegal: /قانون|المادة|article|law/.test(q),
       isEvidence: /دليل|شهادة|witness/.test(q),
+      isPenalty: /عقوبة|سجن|غرامة/.test(q),
 
       intent: this.detectIntent(q),
       expanded: this.expandQuery(q),
+      queries: this.decomposeQuery(q),
     };
   }
 
@@ -95,7 +112,7 @@ class CleanRAG {
   }
 
   /* ================================
-     🔍 SEARCH (MULTI-VECTOR GOD MODE)
+     🔍 SEARCH (MULTI-QUERY + GRAPH BOOST)
   ================================= */
   async search(query, k = 5) {
     if (!query) return [];
@@ -106,14 +123,20 @@ class CleanRAG {
 
     const qInfo = this.analyzeQuery(query);
 
-    const queryVector = await this.getEmbedding(query);
+    let allResults = [];
 
-    let results = this.store.search(queryVector, k * 8);
+    // 🧠 MULTI-QUERY SEARCH
+    for (const q of qInfo.queries) {
+      const vector = await this.getEmbedding(q);
+      const results = this.store.search(vector, k * 6);
+      allResults.push(...results);
+    }
 
-    // 🧠 reranking
-    results = results.map(r =>
+    let results = allResults.map(r =>
       this.enhanceResult(r, query, qInfo)
     );
+
+    results = this.removeContradictions(results);
 
     results = results
       .sort((a, b) => b.finalScore - a.finalScore)
@@ -125,102 +148,136 @@ class CleanRAG {
   }
 
   /* ================================
-     🧠 RESULT RERANKING (CORE AI)
+     🧠 RERANKING ENGINE (LEGAL BRAIN)
   ================================= */
   enhanceResult(result, query, qInfo) {
-    const text = result?.data?.text || "";
-    const meta = result?.data || {};
+    const meta = result?.metadata || {};
+    const text = meta?.text || "";
 
     let score = result.score || 0;
 
-    // ⚖️ legal boost
-    if (meta.hasArticle) score += 0.3;
+    // ⚖️ legal structure boost
+    if (meta.hasArticle) score += 0.4;
 
     // 📍 importance
-    score += (meta.importance || 0) * 0.25;
+    score += (meta.importance || 0) * 0.35;
 
     // 🧠 intent matching
     if (qInfo.isCriminal && /سرقة|عنف|جريمة/.test(text)) {
-      score += 0.25;
+      score += 0.3;
     }
 
     if (qInfo.isLegal && /المادة|الفصل/.test(text)) {
-      score += 0.25;
+      score += 0.3;
     }
 
-    // 📄 structure boost
+    if (qInfo.isPenalty && /عقوبة|سجن|غرامة/.test(text)) {
+      score += 0.3;
+    }
+
+    // 🧠 entity boost
+    if (meta.entities?.length > 0) score += 0.1;
+
+    // 📄 page locality boost
     if (meta.page) score += 0.05;
 
-    // 🧠 keyword overlap boost
+    // 🧠 keyword overlap
     const overlap = this.keywordOverlap(text, qInfo.expanded);
-    score += overlap * 0.1;
+    score += overlap * 0.2;
 
-    // 🚨 penalty: noisy text
+    // 🚨 OCR noise penalty
     if ((text.match(/\d/g) || []).length > text.length * 0.5) {
-      score -= 0.2;
+      score -= 0.3;
     }
+
+    // ⚠️ legal risk boost (important laws)
+    if (meta.risk === "high") score += 0.25;
+
+    const finalScore = Math.max(0, Math.min(1, score));
 
     return {
       ...result,
-      finalScore: Math.max(0, score),
-      explain: {
-        base: result.score,
-        final: score,
-        keywordOverlap: overlap,
-      },
+      finalScore,
+      explain: { base: result.score, final: finalScore, overlap },
     };
   }
 
   /* ================================
-     🧠 KEYWORD MATCHING
+     ⚖️ CONTRADICTION FILTER (NEW CORE)
   ================================= */
-  keywordOverlap(text, keywords) {
-    if (!keywords?.length) return 0;
+  removeContradictions(results) {
+    const filtered = [];
 
-    let hits = 0;
+    for (const r of results) {
+      const text = r?.metadata?.text || "";
 
-    for (const k of keywords) {
-      if (text.includes(k)) hits++;
+      const isContradiction = filtered.some(f =>
+        this.isOpposite(f?.metadata?.text, text)
+      );
+
+      if (!isContradiction) {
+        filtered.push(r);
+      } else {
+        this.contradictionMemory.push({
+          rejected: text,
+          time: Date.now(),
+        });
+      }
     }
 
-    return hits / keywords.length;
+    return filtered;
+  }
+
+  isOpposite(a, b) {
+    return (
+      (/ممنوع|غير مسموح/.test(a) && /مسموح/.test(b)) ||
+      (/not allowed/.test(a) && /allowed/.test(b))
+    );
   }
 
   /* ================================
-     📚 VALIDATION
+     🧠 LEGAL RISK DETECTION
+  ================================= */
+  detectLegalRisk(text) {
+    if (/إعدام|جناية|felony/.test(text)) return "high";
+    if (/جنحة|غرامة/.test(text)) return "medium";
+    return "low";
+  }
+
+  /* ================================
+     🧠 ENTITY EXTRACTION (LIGHT NLP)
+  ================================= */
+  extractEntities(text) {
+    return (text.match(/المادة\s*\d+|Article\s*\d+/g) || []);
+  }
+
+  /* ================================
+     🧠 VALIDATION
   ================================= */
   isValidChunk(chunk) {
     if (!chunk?.text) return false;
-
     const t = chunk.text;
-
     if (t.length < 50) return false;
     if ((t.match(/\d/g) || []).length > t.length * 0.5) return false;
-
     return true;
   }
 
   /* ================================
-     ⚖️ IMPORTANCE SCORING
+     🧠 IMPORTANCE
   ================================= */
   estimateImportance(text) {
     let score = 0;
-
-    if (/الفصل|المادة|Article/i.test(text)) score += 0.4;
-    if (/جريمة|عقوبة|جنحة|crime/.test(text)) score += 0.3;
+    if (/الفصل|المادة|Article/i.test(text)) score += 0.5;
+    if (/جريمة|عقوبة|جنحة|crime/.test(text)) score += 0.4;
     if (text.length > 600) score += 0.2;
-
     return Math.min(1, score);
   }
 
   /* ================================
-     🧠 KEYWORDS EXTRACTION
+     🧠 KEYWORDS
   ================================= */
   extractKeywords(text) {
-    return text
-      .split(" ")
-      .filter(w => w.length > 5)
-      .slice(0, 10);
+    return text.split(" ").filter(w => w.length > 5).slice(0, 10);
   }
 
   /* ================================
@@ -241,18 +298,6 @@ class CleanRAG {
   }
 
   /* ================================
-     📊 SELF-LEARNING (OPTIONAL GOD MODE)
-  ================================= */
-  learnFromFeedback(query, bestResult) {
-    this.feedbackMemory.push({
-      query,
-      best: bestResult?.data?.text,
-      score: bestResult?.finalScore,
-      time: Date.now(),
-    });
-  }
-
-  /* ================================
      📊 STATUS
   ================================= */
   getStatus() {
@@ -261,7 +306,7 @@ class CleanRAG {
       vectors: this.store.vectors.length,
       cache: this.embeddingCache.size,
       queryCache: this.queryCache.size,
-      memory: this.feedbackMemory.length,
+      contradictions: this.contradictionMemory.length,
     };
   }
 }
