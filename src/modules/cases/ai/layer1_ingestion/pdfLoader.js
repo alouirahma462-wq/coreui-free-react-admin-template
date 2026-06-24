@@ -3,9 +3,9 @@ import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
 /**
  * =========================
- * 🧠 LAYER 1: CLEAN LEGAL INGESTION
+ * 🧠 LAYER 1: CLEAN LEGAL INGESTION (ROBUST)
  * =========================
- * فقط: قراءة + تنظيف + صفحات + chunks بسيطة
+ * فقط: استخراج + تنظيف + صفحات منظمة
  */
 
 export const readLegalPDF = async (filePath) => {
@@ -21,23 +21,32 @@ export const readLegalPDF = async (filePath) => {
   }).promise;
 
   const pages = [];
+  const seenPages = new Set();
 
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
 
-    let text = content.items.map(t => t.str).join(" ");
+    const rawText = (content.items || [])
+      .map(t => t.str || "")
+      .join(" ");
 
-    text = cleanText(text);
+    const text = cleanText(rawText);
 
-    if (text.length < 20) continue;
+    if (!text || text.length < 20) continue;
+
+    // منع تكرار صفحات (PDFs فيها duplication أحيانًا)
+    const hash = text.slice(0, 80);
+    if (seenPages.has(hash)) continue;
+    seenPages.add(hash);
 
     pages.push({
       pageNumber: i,
       text,
       meta: {
         layer: "L1",
-        readyFor: "L2_CHUNKING"
+        type: "raw_page",
+        readyFor: ["L2_CHUNKING"]
       }
     });
   }
@@ -47,88 +56,15 @@ export const readLegalPDF = async (filePath) => {
 
 /**
  * =========================
- * 🧹 CLEAN ONLY
+ * 🧹 CLEAN ONLY (NO SEMANTIC INTELLIGENCE)
  * =========================
  */
 function cleanText(text) {
+  if (!text) return "";
+
   return text
+    .replace(/\r/g, " ")
     .replace(/[^\u0600-\u06FF0-9a-zA-Z\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
-
-/**
- * =========================
- * ✂️ SIMPLE CHUNKING (NO AI)
- * =========================
- */
-export const chunkText = (text, size = 1000) => {
-  if (!text) return [];
-
-  const sentences = text.split(/[.؟!\n]/g);
-
-  const chunks = [];
-  let current = "";
-
-  for (const s of sentences) {
-    const clean = s.trim();
-    if (!clean) continue;
-
-    if ((current + clean).length > size) {
-      chunks.push({
-        text: current.trim(),
-        length: current.length,
-        meta: {
-          layer: "L1_CHUNK"
-        }
-      });
-
-      current = clean + ". ";
-    } else {
-      current += clean + ". ";
-    }
-  }
-
-  if (current.trim()) {
-    chunks.push({
-      text: current.trim(),
-      length: current.length,
-      meta: {
-        layer: "L1_CHUNK"
-      }
-    });
-  }
-
-  return chunks;
-};
-
-/**
- * =========================
- * 📚 PIPELINE BUILDER (L1 ONLY)
- * =========================
- */
-export const buildLegalChunks = async (filePath) => {
-  const pages = await readLegalPDF(filePath);
-
-  let chunks = [];
-
-  for (const page of pages) {
-    const pageChunks = chunkText(page.text);
-
-    for (let i = 0; i < pageChunks.length; i++) {
-      chunks.push({
-        id: `${filePath}-p${page.pageNumber}-c${i}`,
-        page: page.pageNumber,
-        ...pageChunks[i]
-      });
-    }
-  }
-
-  return {
-    chunks,
-    meta: {
-      layer: "L1_COMPLETE",
-      next: "L2_NLP_PROCESSING"
-    }
-  };
-};
