@@ -3,12 +3,9 @@ import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
 /**
  * =========================
- * 🧠 LAYER 1: EVIDENCE INGESTION ENGINE
+ * 🧠 LAYER 1: SMART INGESTION (NO LEGAL AI)
  * =========================
- * - PDF reading
- * - text cleaning
- * - page chunking
- * - basic legal signals extraction
+ * فقط: PDF → Pages → Clean Text → Structure
  */
 
 export const loadEvidencePDF = async (filePath) => {
@@ -29,13 +26,20 @@ export const loadEvidencePDF = async (filePath) => {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
 
-    let text = content.items.map(t => t.str).join(" ");
+    let text = content.items.map(t => t.str || "").join(" ");
+    text = cleanText(text);
 
-    text = clean(text);
+    if (!text || text.length < 20) continue;
 
-    if (text.length < 20) continue;
-
-    pages.push(buildEvidencePage(text, i));
+    pages.push({
+      pageNumber: i,
+      text,
+      meta: {
+        layer: "L1",
+        type: "raw_legal_page",
+        readyFor: ["L2_NLP", "L2_CHUNKING"]
+      }
+    });
   }
 
   return pages;
@@ -43,85 +47,12 @@ export const loadEvidencePDF = async (filePath) => {
 
 /**
  * =========================
- * 🧹 CLEANING (Layer 1 only)
+ * 🧹 CLEAN ONLY (NO SEMANTICS)
  * =========================
  */
-function clean(text) {
+function cleanText(text) {
   return text
     .replace(/[^\u0600-\u06FF0-9a-zA-Z\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-/**
- * =========================
- * 📦 BUILD EVIDENCE OBJECT
- * =========================
- */
-function buildEvidencePage(text, pageNumber) {
-  return {
-    pageNumber,
-    rawText: text,
-
-    // =========================
-    // 🧠 BASIC SEGMENTATION
-    // =========================
-    sentences: splitSentences(text),
-
-    // =========================
-    // ⚖️ SIMPLE LEGAL SIGNALS
-    // =========================
-    signals: extractSignals(text),
-
-    // =========================
-    // 📊 BASIC SCORE ONLY (NOT AI JUDGMENT)
-    // =========================
-    relevanceScore: computeRelevance(text),
-
-    meta: {
-      layer: "L1_EVIDENCE_INGESTION",
-      readyFor: ["chunking", "nlp", "lawMapping"]
-    }
-  };
-}
-
-/**
- * =========================
- * ✂️ SENTENCE SPLIT
- * =========================
- */
-function splitSentences(text) {
-  return text
-    .split(/[\.،\n]/)
-    .map(s => s.trim())
-    .filter(s => s.length > 10);
-}
-
-/**
- * =========================
- * ⚖️ SIGNAL EXTRACTION (VERY LIGHT)
- * =========================
- */
-function extractSignals(text) {
-  return {
-    hasCrime: /جريمة|سرقة|قتل|اعتداء|theft|crime/i.test(text),
-    hasContract: /عقد|التزام|اتفاق|contract/i.test(text),
-    hasCourt: /محكمة|قاضي|court/i.test(text),
-    hasPenalty: /عقوبة|سجن|غرامة|penalty/i.test(text)
-  };
-}
-
-/**
- * =========================
- * 📊 SIMPLE RELEVANCE (NO AI)
- * =========================
- */
-function computeRelevance(text) {
-  let score = 0;
-
-  if (/قانون|محكمة|جريمة|عقد/i.test(text)) score += 0.5;
-  if (text.length > 300) score += 0.3;
-  if (/[0-9]/.test(text)) score += 0.2;
-
-  return Math.min(1, score);
-}
+};
