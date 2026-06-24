@@ -3,12 +3,12 @@ import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
 /**
  * =========================
- * 🧠 LAYER 1: EVIDENCE INGESTION (CLEAN + SMART)
+ * 🧠 LAYER 1: CLEAN LEGAL INGESTION
  * =========================
- * فقط: استخراج + تنظيف + تقسيم + إشارات أولية
+ * فقط: قراءة + تنظيف + صفحات + chunks بسيطة
  */
 
-export const loadPDF = async (filePath) => {
+export const readLegalPDF = async (filePath) => {
   if (!fs.existsSync(filePath)) {
     throw new Error("PDF not found: " + filePath);
   }
@@ -26,13 +26,20 @@ export const loadPDF = async (filePath) => {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
 
-    let text = content.items.map(x => x.str).join(" ");
+    let text = content.items.map(t => t.str).join(" ");
 
-    text = clean(text);
+    text = cleanText(text);
 
     if (text.length < 20) continue;
 
-    pages.push(buildEvidence(text, i));
+    pages.push({
+      pageNumber: i,
+      text,
+      meta: {
+        layer: "L1",
+        readyFor: "L2_CHUNKING"
+      }
+    });
   }
 
   return pages;
@@ -40,10 +47,10 @@ export const loadPDF = async (filePath) => {
 
 /**
  * =========================
- * 🧹 CLEAN TEXT
+ * 🧹 CLEAN ONLY
  * =========================
  */
-function clean(text) {
+function cleanText(text) {
   return text
     .replace(/[^\u0600-\u06FF0-9a-zA-Z\s]/g, " ")
     .replace(/\s+/g, " ")
@@ -52,75 +59,76 @@ function clean(text) {
 
 /**
  * =========================
- * 📦 EVIDENCE OBJECT (Layer 1)
+ * ✂️ SIMPLE CHUNKING (NO AI)
  * =========================
  */
-function buildEvidence(text, pageNumber) {
+export const chunkText = (text, size = 1000) => {
+  if (!text) return [];
+
+  const sentences = text.split(/[.؟!\n]/g);
+
+  const chunks = [];
+  let current = "";
+
+  for (const s of sentences) {
+    const clean = s.trim();
+    if (!clean) continue;
+
+    if ((current + clean).length > size) {
+      chunks.push({
+        text: current.trim(),
+        length: current.length,
+        meta: {
+          layer: "L1_CHUNK"
+        }
+      });
+
+      current = clean + ". ";
+    } else {
+      current += clean + ". ";
+    }
+  }
+
+  if (current.trim()) {
+    chunks.push({
+      text: current.trim(),
+      length: current.length,
+      meta: {
+        layer: "L1_CHUNK"
+      }
+    });
+  }
+
+  return chunks;
+};
+
+/**
+ * =========================
+ * 📚 PIPELINE BUILDER (L1 ONLY)
+ * =========================
+ */
+export const buildLegalChunks = async (filePath) => {
+  const pages = await readLegalPDF(filePath);
+
+  let chunks = [];
+
+  for (const page of pages) {
+    const pageChunks = chunkText(page.text);
+
+    for (let i = 0; i < pageChunks.length; i++) {
+      chunks.push({
+        id: `${filePath}-p${page.pageNumber}-c${i}`,
+        page: page.pageNumber,
+        ...pageChunks[i]
+      });
+    }
+  }
+
   return {
-    id: `page_${pageNumber}`,
-    pageNumber,
-    text,
-
-    // =========================
-    // ✂️ BASIC SEGMENTS
-    // =========================
-    sentences: splitSentences(text),
-
-    // =========================
-    // ⚖️ LIGHT LEGAL SIGNALS ONLY
-    // =========================
-    signals: extractSignals(text),
-
-    // =========================
-    // 📊 SIMPLE RELEVANCE SCORE
-    // =========================
-    relevance: score(text),
-
+    chunks,
     meta: {
-      layer: "L1_EVIDENCE_INGESTION",
-      readyFor: "L2_NLP_CHUNKING"
+      layer: "L1_COMPLETE",
+      next: "L2_NLP_PROCESSING"
     }
   };
-}
-
-/**
- * =========================
- * ✂️ SENTENCE SPLIT
- * =========================
- */
-function splitSentences(text) {
-  return text
-    .split(/[\.،\n]/)
-    .map(s => s.trim())
-    .filter(s => s.length > 10);
-}
-
-/**
- * =========================
- * ⚖️ SIMPLE SIGNALS (NO AI)
- * =========================
- */
-function extractSignals(text) {
-  return {
-    crime: /جريمة|سرقة|قتل|اعتداء|fraud|theft/i.test(text),
-    contract: /عقد|اتفاق|التزام|contract/i.test(text),
-    court: /محكمة|قاضي|court/i.test(text),
-    penalty: /عقوبة|سجن|غرامة|penalty/i.test(text),
-    law: /قانون|law/i.test(text)
-  };
-}
-
-/**
- * =========================
- * 📊 SIMPLE SCORE (NOT AI)
- * =========================
- */
-function score(text) {
-  let s = 0;
-
-  if (/قانون|محكمة|جريمة|عقد/i.test(text)) s += 0.5;
-  if (text.length > 300) s += 0.3;
-  if (/[0-9]/.test(text)) s += 0.2;
-
-  return Math.min(1, s);
-}
+};
