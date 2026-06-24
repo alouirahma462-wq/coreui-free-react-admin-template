@@ -3,9 +3,9 @@ import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
 /**
  * =========================
- * 🧠 LAYER 1: LEGAL EVIDENCE INGESTION
+ * 🧠 LAYER 1: SMART LEGAL INGESTION (NO AI UNDERSTANDING)
  * =========================
- * ONLY: PDF → TEXT → CLEAN → PAGES → RAW CHUNKS
+ * PDF → Pages → Clean → STRUCTURED RAW TEXT
  */
 
 export const readLegalPDF = async (filePath) => {
@@ -26,18 +26,27 @@ export const readLegalPDF = async (filePath) => {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
 
-    let text = content.items.map(i => i.str).join(" ");
+    const rawText = (content.items || [])
+      .map(i => i.str || "")
+      .join(" ");
 
-    text = cleanText(text);
+    const text = cleanText(rawText);
 
-    if (text.length < 20) continue;
+    if (!text || text.length < 20) continue;
 
     pages.push({
       pageNumber: i,
+
+      // 🧠 RAW TEXT ONLY
       text,
+
+      // 🧠 STRUCTURE (NOT INTELLIGENCE)
+      structure: detectStructure(text),
+
       meta: {
         layer: "L1",
-        type: "raw_page"
+        type: "legal_raw_page",
+        readyFor: ["L2_NLP"]
       }
     });
   }
@@ -47,86 +56,30 @@ export const readLegalPDF = async (filePath) => {
 
 /**
  * =========================
- * 🧹 CLEAN ONLY (NO INTELLIGENCE)
+ * 🧹 CLEAN ONLY
  * =========================
  */
 function cleanText(text) {
   return text
-    .replace(/[^\u0600-\u06FF0-9a-zA-Z\s]/g, " ")
+    .replace(/[^\u0600-\u06FF0-9a-zA-Z\s\.\:\-\(\)]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
 /**
  * =========================
- * ✂️ SIMPLE CHUNKING ONLY
+ * 🧱 STRUCTURE DETECTION (NOT LEGAL UNDERSTANDING)
  * =========================
+ * فقط شكل النص (ليس معنى)
  */
-export const chunkText = (text, size = 1200) => {
-  if (!text) return [];
-
-  const sentences = text.split(/[.؟!\n]/g);
-
-  const chunks = [];
-  let current = "";
-
-  for (const s of sentences) {
-    const clean = s.trim();
-    if (!clean) continue;
-
-    if ((current + clean).length > size) {
-      chunks.push({
-        text: current.trim(),
-        meta: {
-          layer: "L1_CHUNK"
-        }
-      });
-
-      current = clean + ". ";
-    } else {
-      current += clean + ". ";
-    }
-  }
-
-  if (current.trim()) {
-    chunks.push({
-      text: current.trim(),
-      meta: {
-        layer: "L1_CHUNK"
-      }
-    });
-  }
-
-  return chunks;
-};
-
-/**
- * =========================
- * 📦 PIPELINE BUILDER (L1 ONLY)
- * =========================
- */
-export const buildLegalChunks = async (filePath) => {
-  const pages = await readLegalPDF(filePath);
-
-  let chunks = [];
-
-  for (const page of pages) {
-    const pageChunks = chunkText(page.text);
-
-    for (let i = 0; i < pageChunks.length; i++) {
-      chunks.push({
-        id: `${filePath}-p${page.pageNumber}-c${i}`,
-        page: page.pageNumber,
-        ...pageChunks[i]
-      });
-    }
-  }
-
+function detectStructure(text) {
   return {
-    chunks,
-    meta: {
-      layer: "L1_COMPLETE",
-      next: "L2_NLP_PROCESSING"
-    }
+    hasArticle: /الفصل|المادة|Article|Art\./i.test(text),
+    hasNumbers: /[0-9]+/.test(text),
+    isLongText: text.length > 800,
+    isShortText: text.length < 200,
+
+    // فقط segmentation hint
+    splitHint: text.includes("\n") ? "multi_block" : "single_block"
   };
-};
+}
