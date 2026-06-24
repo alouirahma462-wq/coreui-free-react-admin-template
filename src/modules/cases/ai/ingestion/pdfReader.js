@@ -2,8 +2,7 @@ import fs from "fs";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
 //
-// 🧠 LEGAL STREAM BRAIN v17
-// REAL-TIME PDF → THINKING SYSTEM
+// 🧠 LEGAL STREAM BRAIN + AI ENGINE
 //
 
 export const streamLegalPDF = async (filePath, onChunk = () => {}) => {
@@ -11,118 +10,109 @@ export const streamLegalPDF = async (filePath, onChunk = () => {}) => {
   const graph = {
     nodes: [],
     edges: [],
-    contradictions: []
+    contradictions: [],
+    judgments: []
   };
 
-  try {
+  if (!fs.existsSync(filePath)) {
+    throw new Error("PDF not found");
+  }
 
-    if (!fs.existsSync(filePath)) {
-      throw new Error("PDF not found");
-    }
+  const buffer = fs.readFileSync(filePath);
 
-    const buffer = fs.readFileSync(filePath);
+  const pdf = await pdfjsLib.getDocument({
+    data: new Uint8Array(buffer),
+    disableWorker: true
+  }).promise;
 
-    const pdf = await pdfjsLib.getDocument({
-      data: new Uint8Array(buffer),
-      disableWorker: true
-    }).promise;
+  for (let i = 1; i <= pdf.numPages; i++) {
 
-    // ================================
-    // 🧠 STREAM PROCESSING LOOP
-    // ================================
-    for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
 
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
+    let text = content.items
+      .map(x => x.str || "")
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim();
 
-      let text = content.items
-        .map(x => x.str || "")
-        .join(" ")
-        .replace(/\s+/g, " ")
-        .trim();
+    text = clean(text);
 
-      text = clean(text);
+    if (text.length < 10) continue;
 
-      if (text.length < 10) continue;
+    // =========================
+    // 🧠 AI BRAIN (NEW)
+    // =========================
+    const brain = analyze(text);
+    const facts = extractFacts(text);
+    const judgment = judge(brain, facts);
 
-      // ================================
-      // 🧠 LIVE NODE CREATION
-      // ================================
-      const node = {
-        id: `page-${i}`,
-        text,
+    const node = {
+      id: `page-${i}`,
+      text,
 
-        importance: score(text),
-        embedding: embed(text)
-      };
+      // PDF engine
+      importance: score(text),
+      embedding: embed(text),
 
-      graph.nodes.push(node);
+      // 🧠 AI ENGINE
+      type: brain.type,
+      risk: brain.risk,
+      facts,
+      judgment
+    };
 
-      // ================================
-      // 🧠 LIVE EDGE BUILDING
-      // ================================
-      if (graph.nodes.length > 1) {
-        const prev = graph.nodes[graph.nodes.length - 2];
+    graph.nodes.push(node);
 
-        graph.edges.push({
-          from: prev.id,
-          to: node.id,
-          type: "flow"
-        });
-      }
+    // =========================
+    // 🔗 GRAPH LINKS
+    // =========================
+    if (graph.nodes.length > 1) {
+      const prev = graph.nodes[graph.nodes.length - 2];
 
-      // ================================
-      // 🛰 CONTRADICTION DETECTION LIVE
-      // ================================
-      for (const n of graph.nodes) {
-
-        if (n.id === node.id) continue;
-
-        const diff =
-          Math.abs(n.importance - node.importance);
-
-        if (diff > 0.35) {
-          graph.contradictions.push({
-            from: n.id,
-            to: node.id,
-            severity: diff
-          });
-        }
-      }
-
-      // ================================
-      // 📚 LIVE LEGAL CLASSIFICATION
-      // ================================
-      const classification = classify(text);
-
-      node.type = classification.type;
-      node.risk = classification.risk;
-
-      // ================================
-      // ⚡ STREAM OUTPUT (REAL-TIME)
-      // ================================
-      onChunk({
-        page: i,
-        node,
-        graphSnapshot: {
-          nodes: graph.nodes.length,
-          edges: graph.edges.length,
-          contradictions: graph.contradictions.length
-        }
+      graph.edges.push({
+        from: prev.id,
+        to: node.id,
+        type: "flow"
       });
     }
 
-    return graph;
+    // =========================
+    // ⚠️ CONTRADICTIONS
+    // =========================
+    for (const n of graph.nodes) {
+      if (n.id === node.id) continue;
 
-  } catch (err) {
-    console.error("❌ STREAM ENGINE ERROR:", err.message);
+      const diff = Math.abs(n.importance - node.importance);
 
-    return graph; // always return partial graph
+      if (diff > 0.35) {
+        graph.contradictions.push({
+          from: n.id,
+          to: node.id,
+          severity: diff
+        });
+      }
+    }
+
+    // =========================
+    // ⚡ STREAM OUTPUT
+    // =========================
+    onChunk({
+      page: i,
+      node,
+      snapshot: {
+        nodes: graph.nodes.length,
+        edges: graph.edges.length,
+        contradictions: graph.contradictions.length
+      }
+    });
   }
+
+  return graph;
 };
 
 //
-// 🧹 CLEANER
+// 🧹 CLEAN TEXT
 //
 function clean(text) {
   return text
@@ -132,37 +122,77 @@ function clean(text) {
 }
 
 //
-// 🧠 SCORING ENGINE
+// 🧠 SCORING ENGINE (PDF logic)
 //
 function score(text) {
   return Math.min(
     1,
     text.length / 1800 +
-    (/قانون|محكمة|جريمة|crime|law/i.test(text) ? 0.3 : 0)
+    (/قانون|محكمة|جريمة|عقد|court|law/i.test(text) ? 0.4 : 0)
   );
 }
 
 //
-// 🧬 EMBEDDING SIMULATION
+// 🧬 EMBEDDING (light)
 //
 function embed(text) {
   return text
-    .slice(0, 100)
+    .slice(0, 120)
     .split("")
     .reduce((a, c) => a + c.charCodeAt(0), 0) % 1000 / 1000;
 }
 
 //
-// ⚖️ CLASSIFIER
+// 🧠 FACT EXTRACTION (NEW AI LAYER)
 //
-function classify(text) {
-  if (/جريمة|crime|عقوبة|penalty/i.test(text)) {
+function extractFacts(text) {
+  return text
+    .split(/[\.،\n]/)
+    .map(s => s.trim())
+    .filter(s => s.length > 10)
+    .slice(0, 8);
+}
+
+//
+// ⚖️ AI ENGINE (THE BRAIN)
+//
+function analyze(text) {
+
+  if (/جريمة|سجن|عقوبة|crime|penalty/i.test(text)) {
     return { type: "criminal", risk: 0.9 };
   }
 
-  if (/محكمة|court/i.test(text)) {
-    return { type: "procedural", risk: 0.6 };
+  if (/عقد|التزام|ملكية|contract/i.test(text)) {
+    return { type: "civil", risk: 0.6 };
+  }
+
+  if (/محكمة|قاضي|court/i.test(text)) {
+    return { type: "procedural", risk: 0.5 };
   }
 
   return { type: "general", risk: 0.3 };
+}
+
+//
+// ⚖️ JUDGMENT ENGINE (AI OUTPUT)
+//
+function judge(brain, facts) {
+
+  const strength =
+    facts.length > 8 ? "قوية 🟢" :
+    facts.length > 4 ? "متوسطة 🟡" :
+    "ضعيفة 🔴";
+
+  return {
+    caseType: brain.type,
+    risk: brain.risk,
+    strength,
+
+    prediction:
+      brain.type === "criminal"
+        ? "إدانة محتملة"
+        : brain.type === "civil"
+        ? "تعويض أو رفض"
+        : "تحليل إضافي مطلوب"
+  };
 }
